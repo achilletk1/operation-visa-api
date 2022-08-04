@@ -1,0 +1,55 @@
+{
+    "env": "production",
+    "ip": "127.0.0.1",
+    "port": 3000,
+    "host": "api",
+    "db": {
+        "host": "127.0.0.1:27017",
+        "name": "banking-bci",
+        "auth": {
+            "user": "",
+            "password": ""
+        }
+    },
+    "dbOracle": {
+        "host": "",
+        "name": "",
+        "auth": {
+            "user": "",
+            "password": ""
+        }
+    },
+    "cookieSalt": "3RKuQbJ73U",
+    "cookieTTL": 900000,
+    "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
+    "oauthTTL": 930,
+    "saltRounds": 10,
+    "exportSalt": "D@^wkTVOtx77cg7MALT^VNW2gEo9mu5a#yoVpFTOxtpv79uJ65",
+    "exportTTL": 900,
+    "postmarkToken": "9544980c-2e81-4625-9102-9b5774b31a2d",
+    "emailTokenSalt": "dPpjRo8O!1%HOD4uOB6D",
+    "emailTokenTTL": 900,
+    "baseUrl": "https://bcionline.bcicongo.com",
+    "basePath": "/api/v1/trade-finance",
+    "smsBaseUrl": "http://10.100.23.21/bicec/admin/json.php",
+    "emailBaseUrl": "http://plateformesvp.intra.bicec/bicec/admin/json.php",
+    
+    "bankEmail": "",
+    "cbsApiUrl": "https://cbs:3000",
+    "londoGateway": {
+        "url": "https://alert01.intra.bci/api/v1",
+        "timeout": 180000
+    },
+    "pdfApiUrl": "http://pdf:5000",
+    "timeout": 110000,
+    "bcinet": {
+        "apiUrl": "https://10.100.21.33",
+        "login": "LNDBCINETADMIN",
+        "password": "LNDp@ssw0rd"
+    },
+    "cron": {
+        "visaTransactionForNotCustomers": "0 0 1 * *"
+    },
+    "visaTransactionFilePendingValue": 3
+
+}
