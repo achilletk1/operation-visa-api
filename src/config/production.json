@@ -11,14 +11,6 @@
             "password": ""
         }
     },
-    "dbOracle": {
-        "host": "",
-        "name": "",
-        "auth": {
-            "user": "",
-            "password": ""
-        }
-    },
     "cookieSalt": "3RKuQbJ73U",
     "cookieTTL": 900000,
     "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
@@ -33,23 +25,10 @@
     "basePath": "/api/v1/trade-finance",
     "smsBaseUrl": "http://10.100.23.21/bicec/admin/json.php",
     "emailBaseUrl": "http://plateformesvp.intra.bicec/bicec/admin/json.php",
-    
-    "bankEmail": "",
-    "cbsApiUrl": "https://cbs:3000",
     "londoGateway": {
         "url": "https://alert01.intra.bci/api/v1",
         "timeout": 180000
     },
     "pdfApiUrl": "http://pdf:5000",
-    "timeout": 110000,
-    "bcinet": {
-        "apiUrl": "https://10.100.21.33",
-        "login": "LNDBCINETADMIN",
-        "password": "LNDp@ssw0rd"
-    },
-    "cron": {
-        "visaTransactionForNotCustomers": "0 0 1 * *"
-    },
-    "visaTransactionFilePendingValue": 3
-
+    "timeout": 110000
 }

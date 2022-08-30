@@ -10,6 +10,12 @@ import * as httpContext from 'express-http-context';
 
 // import { oauthVerification } from './middlewares/auth.middleware';
 import * as http from 'http';
+import { authController } from './controllers/auth.controller';
+import { usersController } from './controllers/users.controller';
+import { oauthVerification } from './middlewares/auth.middleware';
+import { visaTransactionsController } from './controllers/visa-transactions.controller';
+import { visaTransactionsFilesController } from './controllers/visa-transactions-files.controller';
+import { downloadsController } from './controllers/download.controller';
 
 
 const app = express();
@@ -34,8 +40,16 @@ app.use(morgan(format, morganOption));
 
 // Apply middlewares
 app.use(httpContext.middleware);
+app.use(oauthVerification);
 
 // Init controllers
+visaTransactionsFilesController.init(app);
+visaTransactionsController.init(app);
+downloadsController.init(app);
+usersController.init(app);
+authController.init(app);
+
+
 const main = express().use(config.get('basePath') || '', app);
 
 

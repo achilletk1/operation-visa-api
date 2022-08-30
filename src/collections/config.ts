@@ -1,5 +1,5 @@
-import { config } from '../config';
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
+import { config } from '../config';
 
 
 let database: Db = null;

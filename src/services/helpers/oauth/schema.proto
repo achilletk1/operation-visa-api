@@ -1,0 +1,14 @@
+message AccessToken {
+  optional string _id = 2;
+  optional string email = 3;
+  required string userCode = 4;
+  optional string fname = 5;
+  optional string lname = 6;
+  optional string tel = 7;
+  optional uint32 category = 8;
+  optional uint32 validationLevel = 9;
+  optional string companyId = 10;
+  optional uint32 companyCategory = 11;
+  optional uint32 issued = 12;
+  optional uint32 ttl = 13;
+}

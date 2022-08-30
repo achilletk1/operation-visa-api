@@ -26,35 +26,6 @@ export const config = convict({
         format: '*',
         default: 'localhost',
     },
-    dbOracle: {
-        host: {
-            doc: 'Database host string',
-            format: String,
-            default: 'localhost:1521',
-            env: 'DB_ORACLE_HOST'
-        },
-        name: {
-            doc: 'Database name',
-            format: String,
-            default: '',
-            env: 'DB_ORACLE_NAME'
-        },
-        auth: {
-            user: {
-                doc: 'Database user name',
-                format: String,
-                default: 'database',
-                env: 'DB_ORACLE_USERNAME'
-            },
-            password: {
-                doc: 'Database user password',
-                format: String,
-                default: 'oracle',
-                env: 'DB_ORACLE_PASSWORD'
-            },
-        }
-
-    },
     db: {
         host: {
             doc: 'Database host name/IP',
@@ -158,18 +129,6 @@ export const config = convict({
         format: String,
         default: ''
     },
-    bankEmail: {
-        doc: 'Email use for claim.',
-        format: String,
-        default: '',
-        env: 'EMAIL_CLAIM'
-    },
-    cbsApiUrl: {
-        doc: 'CBS API base url.',
-        format: String,
-        default: '',
-        env: 'CBS_API_URL'
-    },
     pdfApiUrl: {
         doc: 'PDF API base url.',
         format: String,
@@ -182,60 +141,32 @@ export const config = convict({
         default: 60000,
         env: 'TIMEOUT_HTTP_REQUEST'
     },
-    bcinet: {
-        apiUrl: {
-            doc: 'BCIET API base url.',
+    londoGateway: {
+        url: {
+            doc: 'LONDO Gateway URL.',
             format: String,
             default: '',
-            env: 'BCINET_URL'
+            env: 'LONDO_GATEWAY_URL'
         },
-        login: {
-            doc: 'BCIET API Login.',
+        username: {
+            doc: 'username for Gateway authentication',
             format: String,
             default: '',
-            env: 'BCINET_LOGIN'
+            env: 'LONDO_GATEWAY_USERNAME'
         },
         password: {
-            doc: 'BCIET API password.',
+            doc: 'password for Gateway authentication',
             format: String,
             default: '',
-            env: 'BCINET_PASSWORD'
+            env: 'LONDO_GATEWAY_PASSWORD'
         },
-    },
-    ceilingIncreaseEmail: {
-        doc: 'mail requesting a ceiling increase.',
-        format: String,
-        default: '',
-        env: 'EMAIL_REQUESTING_CEILING_INCREASE',
-        arg: 'email-requesting-ceiling-increase'
-    },
-    cron: {
-        visaTransactionForNotCustomers: {
-            doc: 'Cron expression for verify visa transaction for not customers ',
-            format: String,
+        timeout: {
+            doc: 'timeout request to Londo Gateway',
+            format: Number,
             default: '',
-            env: 'DELETE_VISA_TRANSACTION_FOR_NOT_CUSTOMERS_CRON'
+            env: 'LONDO_GATEWAY_TIMEOUT'
         },
-
-    cronCeilindgExpression: {
-        doc: 'this cron is used to send emails for unprocessed cap requests',
-        format: String,
-        default: '',
-        env: 'CRON_CEILING_EXPRESSION'
     },
-    cronRemindCeilindayExpression: {
-        doc: 'day of verification of the request for an increase in the ceiling not processed',
-        format: Number,
-        default: '',
-        env: 'CRON_CEILING_REMIND_DAY_LIMIT'
-    },
-    },
-    visaTransactionFilePendingValue: {
-        doc: 'lifetime of a visa transaction file in pending status in minutes',
-        format: Number,
-        default: '',
-        env: 'VISA_TRANSACTION_FILE_PENDING_VALUE'
-    }
 });
 
 // Load environment dependent configuration

@@ -11,15 +11,6 @@
             "password": ""
         }
     },
-    "dbOracle": {
-        "host": "",
-        "name": "",
-        "auth": {
-            "user": "",
-            "password": ""
-        }
-    },
-
     "cookieSalt": "HZt6wi7GSLD",
     "cookieTTL": 3600000,
     "oauthSalt": "4tG9!!HZt6wi",
@@ -30,25 +21,11 @@
     "emailTokenSalt": "5L9#8N*L&&qcX53",
     "emailTokenTTL": 9000,
     "baseUrl": "http://localhost:3000",
-    "basePath": "/api/v1/trade-finance",
-    "bankEmail": "said.essiakou@londo.io",
-    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
-    "cbsApiUrl": "http://localhost:4000",
-    "cronCeilindgExpression": "* * 1 * *",
-    "cronRemindCeilindayExpression": 15,
+    "basePath": "/api/v1",
     "londoGateway": {
         "url": "https://gateway.londo-tech.com",
         "timeout": 180000
     },
     "pdfApiUrl": "http://localhost:5000",
-    "timeout": 100000,
-    "bcinet": {
-        "apiUrl": "http://localhost:9000",
-        "login": "LNDBCINETADMIN",
-        "password": "LNDp@ssw0rd"
-    },
-    "cron": {
-        "visaTransactionForNotCustomers": "0 0 1 * *"
-    },
-    "visaTransactionFilePendingValue": 3
+    "timeout": 100000
 }
