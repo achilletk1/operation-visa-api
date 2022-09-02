@@ -16,6 +16,8 @@ import { oauthVerification } from './middlewares/auth.middleware';
 import { visaTransactionsController } from './controllers/visa-transactions.controller';
 import { visaTransactionsFilesController } from './controllers/visa-transactions-files.controller';
 import { downloadsController } from './controllers/download.controller';
+import { travelController } from './controllers/travel.controller';
+import { onlinePaymentsController } from './controllers/online-payment.controller';
 
 
 const app = express();
@@ -49,6 +51,9 @@ downloadsController.init(app);
 usersController.init(app);
 authController.init(app);
 
+
+travelController.init(app);
+onlinePaymentsController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 

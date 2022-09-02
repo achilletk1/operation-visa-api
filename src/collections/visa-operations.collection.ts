@@ -1,5 +1,4 @@
 import * as helper from './../services/helpers/visa-operations.service.helper';
-import { VisaOperations } from './../models/visa-operations';
 import { getDatabase } from './config';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';
@@ -99,7 +98,7 @@ export const visaOperationsCollection = {
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
     },
 
-    updateVisaOperationStatus: async (id: any, operation: VisaOperations) => {
+    updateVisaOperationStatus: async (id: any, operation: any) => {
         const database = await getDatabase();
         const query = { $set: operation };
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);

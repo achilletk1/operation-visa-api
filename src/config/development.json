@@ -27,5 +27,7 @@
         "timeout": 180000
     },
     "pdfApiUrl": "http://localhost:5000",
-    "timeout": 100000
+    "timeout": 100000,
+    "fileStoragePath": "./filesrec"
+
 }

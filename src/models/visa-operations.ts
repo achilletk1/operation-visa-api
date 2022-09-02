@@ -78,7 +78,7 @@ export interface VisaCeiling {
 }
 
 export interface Travel {
-    _id?: string;
+    _id?: any;
     fullName?: string;
     clientCode?: string;
     userId?: string;
@@ -95,7 +95,7 @@ export interface Travel {
         continent: string;
         currency?: string;
     }[];
-    status: OperationStatus;
+    status?: OperationStatus;
     comment?: string;
     signature?: string;
     travelReason?: {
@@ -117,14 +117,14 @@ export interface Travel {
 
 
 export interface OnlinePayment {
-    _id?: string;
+    _id?: any;
     clientCode?: string;
     userId?: string;
     dates?: {
         created: number;
         updated?: number;
     };
-    status: OperationStatus;
+    status?: OperationStatus;
     currentMonth?: number;
     transactions?: VisaTransaction[];
     statements?: OnlinePaymentStatement[];

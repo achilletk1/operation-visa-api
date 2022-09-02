@@ -1,6 +1,5 @@
 import { visaOperationsCollection } from '../../collections/visa-operations.collection';
 import { settingsFilesCollection } from '../../collections/settings-files.collection';
-import { VisaOperations } from './../../models/visa-operations';
 import moment = require('moment');
 
 export const getTransactionType = (type: string) => {
@@ -13,7 +12,7 @@ export const getTransactionType = (type: string) => {
 
 }
 
-export const updateOperationStatus = async (operation: VisaOperations) => {
+export const updateOperationStatus = async (operation: any) => {
     if (!operation.attachements || operation.attachements.length === 0) {
         operation.status = 100;
         return
@@ -184,7 +183,7 @@ export const getContentTypeByExtension = (extension: string) => {
 export const generateOperationData = async (clientCode: string): Promise<void> => {
     const operations = await visaOperationsCollection.getVisaOperationsBy({ clientCode });
     const currentMonth = moment().subtract(1, 'M').startOf('M').valueOf();
-    let operation: VisaOperations
+    let operation: any
     if (operations) {
         operation = operations.find(e => {
             return e.currentMonth === currentMonth;

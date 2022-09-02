@@ -167,6 +167,12 @@ export const config = convict({
             env: 'LONDO_GATEWAY_TIMEOUT'
         },
     },
+    fileStoragePath: {
+        doc: 'the path of the directory where the files are stored',
+        format: String,
+        default: '',
+        env: 'FILE_STORAGE_PATH',
+    },
 });
 
 // Load environment dependent configuration

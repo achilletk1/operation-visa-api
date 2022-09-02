@@ -2,7 +2,7 @@ import { visaTransactionsCeillingsCollection } from '../collections/visa-transac
 import { visaTransactionsFilesCollection } from '../collections/visa-transactions-files.collections';
 import { visaTransactionsCollection } from '../collections/visa-transactions.collections';
 import { visaOperationsCollection } from '../collections/visa-operations.collection';
-import { OperationType, VisaOperations } from './../models/visa-operations';
+import { OperationType } from './../models/visa-operations';
 import { usersCollection } from './../collections/users.collections';
 import * as helper from './helpers/visa-operations.service.helper';
 import { filesCollection } from '../collections/files.collection';
@@ -149,8 +149,8 @@ export const visaTransactionsService = {
             const otherAccounts = [];
             const ceillings = await visaTransactionsCeillingsCollection.getVisaTransactionsCeillingsBy({});
             const ceilling = { onp: 0, tpew: 0 };
-            ceilling.onp = ceillings.find(e => e.type === OperationType.ONP)?.value;
-            ceilling.tpew = ceillings.find(e => e.type === OperationType.TPE)?.value;
+            ceilling.onp = ceillings.find(e => e.type === 100)?.value;
+            ceilling.tpew = ceillings.find(e => e.type === 200)?.value;
             for (const account of accounts) {
                 const user = await usersCollection.getUserBy({ clientCode: account.split('-')[2] });
                 if (!user) {
@@ -216,8 +216,8 @@ export const visaTransactionsService = {
             const otherAccounts = [];
             const ceillings = await visaTransactionsCeillingsCollection.getVisaTransactionsCeillingsBy({});
             const ceilling = { onp: 0, tpew: 0 };
-            ceilling.onp = ceillings.find(e => e.type === OperationType.ONP).value;
-            ceilling.tpew = ceillings.find(e => e.type === OperationType.TPE).value;
+            ceilling.onp = ceillings.find(e => e.type === 100).value;
+            ceilling.tpew = ceillings.find(e => e.type === 200).value;
             for (const account of accounts) {
                 const user = await usersCollection.getUserBy({ clientCode: account.split('-')[2] });
                 if (!user) {
@@ -361,9 +361,9 @@ const calculateOverruns = async (account: any, transactions: any, month: any, ce
     // verifier si il y'a dépassement de plafond
     if (sumPaymentOnline > ceilling.onp || sumElectornicPaymentTerminalsAndDAB > ceilling.tpew) {
         const operationTypes = [];
-        if (sumElectornicPaymentTerminalsAndDAB > ceilling.tpew) { operationTypes.push(OperationType.TPE); }
+        if (sumElectornicPaymentTerminalsAndDAB > ceilling.tpew) { operationTypes.push(200); }
 
-        if (sumPaymentOnline > ceilling.onp) { operationTypes.push(OperationType.ONP); }
+        if (sumPaymentOnline > ceilling.onp) { operationTypes.push(100); }
 
         const transactionsBycards = cards.map((element: any) => {
             const tpewByCard = transactonByNcp.filter((elt: any) => {
@@ -386,7 +386,7 @@ const calculateOverruns = async (account: any, transactions: any, month: any, ce
 
 
         });
-        let operation: VisaOperations;
+        let operation: any;
         operation = await visaOperationsCollection.getVisaOperationBy({ clientCode: account.split('-')[2], ncp: account.split('-')[1], currentMonth: parseInt(month) });
         if (operation) {
             operation.nbrTransactions = {
