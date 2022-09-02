@@ -58,7 +58,9 @@ export interface VisaTransaction {
     };
     country?: string;
     category?: string;
+    currency?: string;
     currentMonth?: number;
+    statementRef?: string;
 }
 export interface VisaCeiling {
     _id: string;
@@ -80,6 +82,7 @@ export interface Travel {
     fullName?: string;
     clientCode?: string;
     userId?: string;
+    travelRef?: string;
     dates?: {
         start: number;
         end?: number;
