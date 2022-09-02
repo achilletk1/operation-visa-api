@@ -133,7 +133,8 @@ export interface OnlinePaymentStatement {
     account?: {
         ncp: number;
         age: number;
-    }
+    },
+    statementRef?: string,
     comment?: string;
     signature?: string;
     attachments?: Attachement[];
