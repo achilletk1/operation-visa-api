@@ -1,4 +1,3 @@
-import { Attachement, OperationStatus, Travel } from './../models/visa-operations';
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as helper from './helpers/visa-operations.service.helper';
 import { commonService } from './common.service';
@@ -8,6 +7,8 @@ import * as generateId from 'generate-unique-id';
 import moment = require('moment');
 import { travelsCollection } from '../collections/travel.collection';
 import { filesService } from './files.service';
+import { Travel, TravelAttachement } from '../models/travel';
+import { OpeVisaStatus } from '../models/visa-operations';
 
 
 export const travelService = {
@@ -17,13 +18,13 @@ export const travelService = {
         try {
 
             // Set request status to created
-            travel.status = OperationStatus.PENDING;
+            travel.status = OpeVisaStatus.PENDING;
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
-            travel.travelAttachments = await Promise.all(travel.travelAttachments.map(async (e) => {
+            travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
                 return await travelService.postAttachement(travel._id.toString(), e);
             }));
             const result = await travelsCollection.insertTravel(travel);
@@ -86,7 +87,7 @@ export const travelService = {
 
         if (!travel) { return new Error('TravelDataNotFound') }
 
-        const attachement = travel.travelAttachments.find((elt) => elt.path === path);
+        const attachement = travel.proofTravel.proofTravelAttachs.find((elt) => elt.path === path);
 
         if (!attachement) { return new Error('AttachementNotFound') }
 
@@ -144,7 +145,7 @@ export const travelService = {
         }
 
     },
-    postAttachement: async (id: string, attachement: Attachement) => {
+    postAttachement: async (id: string, attachement: TravelAttachement) => {
         try {
             const { content, label, contentType } = attachement;
             delete attachement.content

@@ -1,6 +1,6 @@
-import { Travel } from './../models/visa-operations';
 import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
+import { Travel } from "../models/travel";
 import { getDatabase } from "./config";
 
 const collectionName = 'visa_operations_travels';

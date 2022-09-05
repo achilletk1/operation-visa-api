@@ -1,5 +1,4 @@
 import * as notificationHelper from './helpers/notification.service.helper';
-import { Transaction } from './../models/transaction';
 import * as http from 'request-promise';
 import { get, isEmpty } from 'lodash';
 import { User } from "../models/user";
@@ -346,60 +345,6 @@ export const notificationService = {
             return error;
         }
     },
-
-    sendEmailTransactionConfirmation: async (transaction: Transaction, email: string, sens?: string) => {
-        const HtmlBody = notificationHelper.generateMailContentTransactionConfirm(transaction, sens);
-        const subject = `Opération du ${moment(transaction.dates.paid).format('DD/MM/YYYY, h:mm:ss')}.`;
-        const receiver = `${email}`;
-
-        try {
-            return sendEmail(receiver, subject, HtmlBody);
-        } catch (error) {
-            logger.error(`Error during  email transactionConfirmation to ${receiver}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendEmailPermanentTransferRejected: async (transaction: Transaction, total: number, email: string, motif?: string) => {
-        const HtmlBody = notificationHelper.generateRejectedTransferMail(transaction, total, motif);
-        const subject = `Echec opération du ${moment().format('DD/MM/YYYY, h:mm:ss')}.`;
-        const receiver = `${email}`;
-
-        try {
-            return sendEmail(receiver, subject, HtmlBody);
-        } catch (error) {
-            logger.error(`Error during send email PermanentTransferRejected to ${receiver}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendEmailGimacTransactionConfirmation: async (transaction: Transaction, email: string, sens: string) => {
-        const HtmlBody = notificationHelper.generateMailContentGimacTransactionConfirm(transaction, sens);
-        const subject = `Opération du ${moment(transaction.dates.paid).format('DD/MM/YYYY, h:mm:ss')}.`;
-        const receiver = `${email}`;
-
-        try {
-            return sendEmail(receiver, subject, HtmlBody);
-        } catch (error) {
-            logger.error(`Error during send email TransactionConfirmation to ${receiver}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendEmailGimacTransactionFailed: async (transaction: Transaction, email: string) => {
-        // TODO create template en generate data for template
-        const HtmlBody = notificationHelper.generateMailContentGimacTransactionConfirm(transaction);
-        const subject = `Echec Opération du ${moment(transaction.dates.paid).format('DD/MM/YYYY, h:mm:ss')}.`;
-        const receiver = `${email}`;
-
-        try {
-            return sendEmail(receiver, subject, HtmlBody);
-        } catch (error) {
-            logger.error(`Error during send email GimacTransactionFailed to ${receiver}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
     sendEmailChangeStatus: async (request: any) => {
         const HtmlBody = notificationHelper.generateMailContentstatus(request);
         const subject = `Traitement de votre demande.`;
@@ -551,7 +496,7 @@ export const notificationService = {
 
         const HtmlBody = notificationHelper.generateMailVisaDepassment(data);
         const subject = `Justification des opérations hors zone CEMAC.`;
-        const receiver = config.get('env') === 'staging-bci' ? `HONGOUO@bcicongo.com`  :  `${email}`;
+        const receiver = config.get('env') === 'staging-bci' ? `HONGOUO@bcicongo.com` : `${email}`;
         try {
             return sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
@@ -649,7 +594,7 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
     if (config.get('env') !== 'staging-bci' && config.get('env') !== 'production') {
         let Attachments: any[] = null;
         if (pdfString && !(pdfString instanceof Error)) {
-            Attachments ??=  [];
+            Attachments ??= [];
             Attachments.push({
                 Name: `Opération-du-${moment().valueOf()}.pdf`,
                 Content: pdfString,

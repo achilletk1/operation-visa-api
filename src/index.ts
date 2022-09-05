@@ -1,3 +1,5 @@
+import { propertyAndServicesTypesController } from './controllers/property-and-services-types.controller';
+import { voucherController } from './controllers/voucher.controller';
 import * as express from 'express';
 import { json, urlencoded } from 'body-parser';
 import { config } from './config';
@@ -18,6 +20,7 @@ import { visaTransactionsFilesController } from './controllers/visa-transactions
 import { downloadsController } from './controllers/download.controller';
 import { travelController } from './controllers/travel.controller';
 import { onlinePaymentsController } from './controllers/online-payment.controller';
+import { longTravelTypesController } from './controllers/long-travel-types.controller';
 
 
 const app = express();
@@ -52,9 +55,11 @@ usersController.init(app);
 authController.init(app);
 
 
+voucherController.init(app);
 travelController.init(app);
 onlinePaymentsController.init(app);
-
+longTravelTypesController.init(app);
+propertyAndServicesTypesController.init(app);
 const main = express().use(config.get('basePath') || '', app);
 
 

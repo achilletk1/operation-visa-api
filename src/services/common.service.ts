@@ -1,5 +1,4 @@
 import replaceSpecialCharacters = require('replace-special-characters');
-import { Transaction } from '../models/transaction';
 import { isString, isNumber } from 'lodash';
 import { logger } from '../winston';
 import { config } from '../config';
@@ -121,18 +120,6 @@ export const commonService = {
         strNumber = strNumber.replace(/ /g, '');
         strNumber = strNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         return strNumber;
-    },
-
-    generateConfirmTransactionSMSData: (transaction: Transaction, solde?: number) => {
-        const data: any = {};
-        data.ncp = `*****${transaction.originator.ncp.slice(5, 10)}`;
-        data.type = ([4, 7].includes(transaction.type)) ? 'Credit' : 'Debit';
-        data.amount = commonService.formatNumber(`${transaction.amounts.amount}`);
-        data.date = `${moment(transaction.dates.paid).format('DD.MM.YYYY')}`;
-        data.time = `${moment(transaction.dates.paid).add(1, 'hours').format('HH:mm')}`;
-        data.solde = commonService.formatNumber(`${solde - transaction.amounts.amount}`);
-        data.description = `${transaction.label}`;
-        return data;
     },
 
     toFixedNumber(num: number, digits: number) {

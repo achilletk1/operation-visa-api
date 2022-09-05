@@ -2,7 +2,6 @@ import { Request, NextFunction } from 'express';
 import * as httpContext from 'express-http-context';
 import { logger } from '../winston';
 import * as jwt from 'jsonwebtoken';
-import { encode } from 'js-base64';
 import { config } from '../config';
 
 export const whiteList: { path: string, method?: string }[] = [
@@ -22,11 +21,6 @@ export const whiteList: { path: string, method?: string }[] = [
 export async function oauthVerification(req: Request, res: any, next: NextFunction) {
     const index = whiteList.findIndex(elt => req.path.includes(elt.path) && req.method === elt.method);
     if (index >= 0) { return next(); }
-
-    if (req.path.includes('/visa-operations/not-customer')) {
-        const token = `Basic ${encode('LNDBCINETADMIN:LNDp@ssw0rd')}`;
-        if (token === req.headers.authorization) { return next(); }
-    }
 
     const authorization = req.headers.authorization;
 
@@ -51,7 +45,6 @@ export async function oauthVerification(req: Request, res: any, next: NextFuncti
         }
         logger.error(`\nInvalid token.`, error);
         res.status(401).json({ message: 'invalid token.' });
-        // return res.status(500).json({message: 'Erreur interne'})
     }
 
 };

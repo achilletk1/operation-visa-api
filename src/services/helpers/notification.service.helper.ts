@@ -1,4 +1,3 @@
-import { GimacBody, Transaction } from '../../models/transaction';
 import * as readFilePromise from 'fs-readfile-promise';
 import { commonService } from '../common.service';
 import * as handlebars from 'handlebars';
@@ -330,45 +329,6 @@ export const generateMailContentTransactionConfirm = (transaction: any, sens: st
         const template = handlebars.compile(templateTransaction);
 
         const html = template(data);
-        return html;
-
-    } catch (error) {
-        logger.error(
-            'html transaction mail generation failed.',
-            'services.helper.transaction.generateMailContentTransactionConfirm()',
-            error
-        );
-        return error;
-    }
-
-}
-
-export const generateMailContentGimacTransactionConfirm = (transaction: Transaction, sens?: string) => {
-    const { type } = transaction;
-    try {
-
-        const data = {
-            grettings: 'Bonjour',
-            account: `${get(transaction, 'originator.ncp', '')}`,
-            age: `${get(transaction, 'originator.age', '')}`,
-            paymentDate: type === 206 ? moment(get(transaction, 'dates.created', 0)).format('DD/MM/YYYY') : moment(get(transaction, 'dates.paid', 0)).format('DD/MM/YYYY'),
-            paymentHour: type === 206 ? moment(get(transaction, 'dates.created', 0)).format('HH:mm') : moment(get(transaction, 'dates.paid', 0)).format('HH:mm'),
-            originator: `${get(transaction, 'beneficiary.walletRecipient.providerName', '') || get(transaction, 'originator.walletRecipient.providerName', '')}`,
-            total: `${getNumberWithSpaces(get(transaction, 'amounts.amount', 0))} XAF`,
-            actionUrl
-        };
-        if (sens === 'incoming') {
-            data.account = `${get(transaction, 'beneficiary.ncp', '')}`;
-            data.age = `${get(transaction, 'beneficiary.age.code', '')}`
-        };
-        if (sens === 'outcoming') {
-            data.account = `${get(transaction, 'originator.ncp', '')}`;
-            data.age = `${get(transaction, 'originator.age', '')}`
-        };
-        const template = handlebars.compile(templateGimacTransaction);
-
-        const html = template(data);
-
         return html;
 
     } catch (error) {
@@ -989,39 +949,6 @@ export const generateMailTransferActivation = (transfer: any) => {
 }
 
 // ************************* gimac claims *************************************************//
-export const generateGimacClaimMail = (transfer: GimacBody, acquire: string, reason: string) => {
-
-    try {
-
-        const walletsource = (['inc_wal_remit', 'cardless_withdrawal'].includes(transfer?.intent)) ? get(transfer, 'sendermobile', 'N/A') : get(transfer, 'walletsource', 'N/A');
-        const walletdestination = (['cardless_withdrawal'].includes(transfer?.intent)) ? get(transfer, 'receivermobile', 'N/A') : get(transfer, 'walletdestination', 'N/A');
-        const data = {
-            greetings: `Bonjour,`,
-            acquire: (acquire) ? acquire : 'Non renseigné',
-            reason: (reason) ? reason : 'Non renseigné',
-            issuertrxref: `${get(transfer, 'issuertrxref', 'N/A')}`,
-            acquirertrxref: `${get(transfer, 'acquirertrxref', '')}` || false,
-            vouchercode: `${get(transfer, 'response.vouchercode', 'N/A')}`,
-            amount: `${getNumberWithSpaces(get(transfer, 'amount', 0))}`,
-            walletsource,
-            walletdestination,
-            tomember: `${get(transfer, 'tomember', '')}` || false,
-            state: `${get(transfer, 'response.state', 'N/A')}`,
-            createtime: `${moment(get(transfer, 'createtime', 0)).format('DD-MM-YYYY HH:mm:ss')}`,
-        }
-
-        const template = handlebars.compile(templateGimacClaim);
-
-        const html = template(data);
-
-        return html;
-
-    } catch (error) {
-        logger.error(`html gimac claim mail generation failed.${error}`);
-        return error;
-    }
-};
-
 export const generateMailContentCeilingRequestBank = (ceiling: any) => {
 
     try {
