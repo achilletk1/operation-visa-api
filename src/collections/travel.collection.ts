@@ -58,7 +58,7 @@ export const travelsCollection = {
     insertTravel: async (data: Travel): Promise<any> => {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
-        return insertedId.toString();
+        return insertedId;
     },
 
 }

@@ -20,15 +20,19 @@ export const travelService = {
 
             // Set request status to created
             travel.status = OpeVisaStatus.PENDING;
+
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
+
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
+            
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
-                    return await travelService.postAttachement(travel._id.toString(), e);
+                    return await travelService.postAttachement(travel.travelRef.toString(), e);
                 }));
             }
+
             const result = await travelsCollection.insertTravel(travel);
 
             //TODO send notification
@@ -147,16 +151,17 @@ export const travelService = {
         }
 
     },
-    postAttachement: async (id: string, attachement: TravelAttachement) => {
+    postAttachement: async (ref: string, attachement: TravelAttachement) => {
         try {
             const { content, label, contentType } = attachement;
             delete attachement.content
             const date = moment().format('MM-YY');
-            const path = `${date}/${id}`;
+            const path = `${date}/${ref}`;
             const extension = helper.getExtensionByContentType(contentType);
-            const filename = `${date}_${id}_${label}${extension}`;
+            const filename = `${date}_${ref}_${label}${extension}`;
             filesService.writeFile(content, path, filename);
             attachement.path = `${path}/${filename}`;
+            attachement.name = filename;
             return attachement;
         } catch (error) {
             logger.error(`\nError post attachement \n${error.message}\n${error.stack}\n`);

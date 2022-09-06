@@ -127,9 +127,9 @@ export interface Validator {
 
 }
 export enum OpeVisaStatus {
-  WAITING = 100, //  upload complet , en cours
-  PENDING = 400, // accepté 
-  ACCEPTED = 200, // au moins un upload,
+  WAITING = 100,
+  PENDING = 400,
+  ACCEPTED = 200,
   REJECTED = 300,
 }
 
