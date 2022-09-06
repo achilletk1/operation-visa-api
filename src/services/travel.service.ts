@@ -29,7 +29,7 @@ export const travelService = {
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
-                    return await travelService.postAttachement(travel.travelRef.toString(), e);
+                    return await saveAttachement(travel.travelRef.toString(), e, travel.dates.created);
                 }));
             }
 
@@ -77,25 +77,217 @@ export const travelService = {
             return error;
         }
     },
-    updateTravelsById: async (id: string, data: any) => {
+    updateTravelById: async (id: string, travel: Travel) => {
         try {
-            return await travelsCollection.updateTravelsById(id, data);
+            // delete proof step's status and attachment
+            delete travel.proofTravel.status;
+            delete travel.proofTravel.proofTravelAttachs;
+
+            // delete expense step's status and attachment
+            delete travel.expenseAttachements.status;
+            delete travel.expenseAttachements.attachments;
+
+            // delete others step's status and attachment
+            delete travel.othersAttachements.status;
+            delete travel.othersAttachements.attachments;
+            return await travelsCollection.updateTravelsById(id, travel);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
+
+    updateTravelStatusById: async (id: string, data: any) => {
+        try {
+            const { status } = data;
+            const travel = await travelsCollection.getTravelById(id);
+
+            if (!travel) { return new Error('TravelNotFound') }
+
+            //TODO send notifications for status update
+            return await travelsCollection.updateTravelsById(id, { status });
+
+        } catch (error) {
+            logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+
+    updateTravelStepStatusById: async (id: string, data: any) => {
+        try {
+            const { status, step, rejectReason, validator, expenseDetailRef } = data;
+
+            if (!step || !['proofTravel', 'expenseDetails', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
+
+            const travel = await travelsCollection.getTravelById(id);
+
+            if (!travel) { return new Error('TravelNotFound') }
+
+            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { return new Error('CannotRejectWithoutReason') }
+
+            let updateData, tobeUpdated: any;
+
+            updateData = { status };
+
+            if (status === OpeVisaStatus.REJECTED) { updateData = { ...updateData, rejectReason } }
+
+            if (step === 'proofTravel') {
+                let { proofTravel } = travel;
+                proofTravel.validators.push(validator);
+                proofTravel = { ...proofTravel, ...updateData }
+                tobeUpdated = { proofTravel };
+            }
+
+
+            if (step === 'expenseAttachements') {
+                let { expenseAttachements } = travel;
+                expenseAttachements.validators.push(validator);
+                expenseAttachements = { ...expenseAttachements, ...updateData }
+                tobeUpdated = { expenseAttachements };
+            }
+
+            if (step === 'expenseDetails') {
+                if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
+
+                const { expenseDetails } = travel;
+
+                const expenseDetailIndex = expenseDetails.findIndex((elt) => elt.ref === expenseDetailRef);
+
+                if (expenseDetailIndex < 0) { return new Error('BadReference') }
+
+                expenseDetails[expenseDetailIndex].validators.push(validator);
+
+                expenseDetails[expenseDetailIndex] = { ...expenseDetails[expenseDetailIndex], ...updateData }
+
+                tobeUpdated = { expenseDetails };
+            }
+
+            if (step === 'othersAttachements') {
+                let { othersAttachements } = travel;
+                othersAttachements.validators.push(validator);
+                othersAttachements = { ...othersAttachements, ...updateData }
+                tobeUpdated = othersAttachements;
+            }
+
+            //TODO send notifications for status update
+            return await travelsCollection.updateTravelsById(id, tobeUpdated);
+        } catch (error) {
+            logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+
+    postAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
+
+        const { step } = data;
+
+        if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
+
+        const travel = await travelsCollection.getTravelById(id);
+
+        if (!travel) { return new Error('TravelNotFound') }
+
+        const { travelRef } = travel;
+
+        const updatedAttachment = await saveAttachement(travelRef, attachement, travel.dates.created);
+
+        if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
+
+        let tobeUpdated: any;
+
+        if (step === 'proofTravel') {
+            let { proofTravel } = travel;
+            proofTravel.proofTravelAttachs.push(updatedAttachment);
+            tobeUpdated = { proofTravel };
+        }
+
+
+        if (step === 'expenseAttachements') {
+            const { expenseAttachements } = travel;
+            expenseAttachements.attachments.push(updatedAttachment);
+            tobeUpdated = { expenseAttachements };
+        }
+
+
+        if (step === 'othersAttachements') {
+            const { othersAttachements } = travel;
+            othersAttachements.attachments.push(updatedAttachment);
+            tobeUpdated = { othersAttachements };
+        }
+
+        return await travelsCollection.updateTravelsById(id, tobeUpdated);
+
+
+    },
+
+    updateAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
+
+        const { step, path } = data;
+
+        if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
+
+        const travel = await travelsCollection.getTravelById(id);
+
+        if (!travel) { return new Error('TravelNotFound') }
+
+        const { travelRef } = travel;
+
+        filesService.deleteFile(path);
+
+        const updatedAttachment = await saveAttachement(travelRef, attachement, travel.dates.created);
+
+        if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
+
+        let tobeUpdated: any;
+
+        if (step === 'proofTravel') {
+            let { proofTravel } = travel;
+
+            const index = proofTravel.proofTravelAttachs.findIndex((elt) => elt.path === path);
+
+            if (index < 0) { return new Error('BadPath') }
+
+            proofTravel.proofTravelAttachs[index] = updatedAttachment;
+            tobeUpdated = { proofTravel };
+        }
+
+
+        if (step === 'expenseAttachements') {
+            const { expenseAttachements } = travel;
+
+            const index = expenseAttachements.attachments.findIndex((elt) => elt.path === path);
+
+            if (index < 0) { return new Error('BadPath') }
+
+            expenseAttachements.attachments[index] = updatedAttachment;
+            tobeUpdated = { expenseAttachements };
+        }
+
+
+        if (step === 'othersAttachements') {
+            const { othersAttachements } = travel;
+
+            const index = othersAttachements.attachments.findIndex((elt) => elt.path === path);
+
+            if (index < 0) { return new Error('BadPath') }
+
+            othersAttachements.attachments[index] = updatedAttachment;
+            tobeUpdated = { othersAttachements };
+        }
+
+        return await travelsCollection.updateTravelsById(id, tobeUpdated);
+
+
+    },
+
     generateExportLinks: async (id: string, data: any) => {
 
-        const { path, label, contentType } = data;
+        const { path, name, contentType } = data;
 
         const travel = await travelsCollection.getTravelById(id);
 
         if (!travel) { return new Error('TravelDataNotFound') }
 
-        const attachement = travel.proofTravel.proofTravelAttachs.find((elt) => elt.path === path);
-
-        if (!attachement) { return new Error('AttachementNotFound') }
 
         const file = filesService.readFile(path);
 
@@ -103,7 +295,7 @@ export const travelService = {
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
-        const options = { path, ttl, id, label, contentType };
+        const options = { path, ttl, id, name, contentType };
 
         const code = encode(options);
 
@@ -123,7 +315,7 @@ export const travelService = {
             return new Error('BadExportCode');
         }
 
-        const { ttl, path, label, contentType } = options;
+        const { ttl, path, name, contentType } = options;
 
         if ((new Date()).getTime() >= ttl) {
             return new Error('ExportLinkExpired');
@@ -131,7 +323,7 @@ export const travelService = {
         const data = filesService.readFile(path);
         const buffer = Buffer.from(data, 'base64');
 
-        const fileName = `export_${new Date().getTime()}-${path}`
+        const fileName = `export_${new Date().getTime()}-${name}`
 
         return { contentType, fileContent: buffer, fileName };
 
@@ -151,21 +343,23 @@ export const travelService = {
         }
 
     },
-    postAttachement: async (ref: string, attachement: TravelAttachement) => {
-        try {
-            const { content, label, contentType } = attachement;
-            delete attachement.content
-            const date = moment().format('MM-YY');
-            const path = `${date}/${ref}`;
-            const extension = helper.getExtensionByContentType(contentType);
-            const filename = `${date}_${ref}_${label}${extension}`;
-            filesService.writeFile(content, path, filename);
-            attachement.path = `${path}/${filename}`;
-            attachement.name = filename;
-            return attachement;
-        } catch (error) {
-            logger.error(`\nError post attachement \n${error.message}\n${error.stack}\n`);
-            return error;
-        }
-    },
+
 };
+
+const saveAttachement = async (ref: string, attachement: TravelAttachement, created: number) => {
+    try {
+        const { content, label, contentType } = attachement;
+        delete attachement.content
+        const date = moment(created).format('MM-YY');
+        const path = `${date}/${ref}`;
+        const extension = helper.getExtensionByContentType(contentType);
+        const filename = `${date}_${ref}_${label}${extension}`;
+        filesService.writeFile(content, path, filename);
+        attachement.path = `${path}/${filename}`;
+        attachement.name = filename;
+        return attachement;
+    } catch (error) {
+        logger.error(`\nError saving attachement \n${error.message}\n${error.stack}\n`);
+        return error;
+    }
+}
