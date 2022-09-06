@@ -44,8 +44,8 @@ const format = ':remote-addr - ":method :url HTTP/:http-version" :status :respon
 app.use(morgan(format, morganOption));
 
 // Apply middlewares
-app.use(httpContext.middleware);
-app.use(oauthVerification);
+// app.use(httpContext.middleware);
+// app.use(oauthVerification);
 
 // Init controllers
 visaTransactionsFilesController.init(app);
