@@ -19,14 +19,14 @@ export const travelService = {
         try {
 
             // Set request status to created
-            travel.status = OpeVisaStatus.PENDING;
+            travel.status = OpeVisaStatus.WAITING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
 
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
-            
+
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
                     return await travelService.postAttachement(travel.travelRef.toString(), e);
