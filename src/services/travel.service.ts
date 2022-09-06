@@ -23,10 +23,11 @@ export const travelService = {
             travel.dates = { ...travel.dates, created: moment().valueOf() };
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
-
-            travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
-                return await travelService.postAttachement(travel._id.toString(), e);
-            }));
+            if (travel.proofTravel) {
+                travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
+                    return await travelService.postAttachement(travel._id.toString(), e);
+                }));
+            }
             const result = await travelsCollection.insertTravel(travel);
 
             //TODO send notification
