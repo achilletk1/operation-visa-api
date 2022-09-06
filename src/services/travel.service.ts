@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as helper from './helpers/visa-operations.service.helper';
 import { commonService } from './common.service';
@@ -23,7 +24,7 @@ export const travelService = {
             travel.dates = { ...travel.dates, created: moment().valueOf() };
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
-            if (travel.proofTravel) {
+            if (!isEmpty(travel.proofTravel)) {
                 travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
                     return await travelService.postAttachement(travel._id.toString(), e);
                 }));
