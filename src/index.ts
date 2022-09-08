@@ -1,3 +1,4 @@
+import { exportController } from './controllers/export.controller';
 import { propertyAndServicesTypesController } from './controllers/property-and-services-types.controller';
 import { voucherController } from './controllers/voucher.controller';
 import * as express from 'express';
@@ -21,6 +22,8 @@ import { downloadsController } from './controllers/download.controller';
 import { travelController } from './controllers/travel.controller';
 import { onlinePaymentsController } from './controllers/online-payment.controller';
 import { longTravelTypesController } from './controllers/long-travel-types.controller';
+import { reportingService } from './services/reporting.service';
+import { reportingController } from './controllers/reporting.controller';
 
 
 const app = express();
@@ -60,6 +63,9 @@ travelController.init(app);
 onlinePaymentsController.init(app);
 longTravelTypesController.init(app);
 propertyAndServicesTypesController.init(app);
+exportController.init(app);
+reportingController.init(app);
+
 const main = express().use(config.get('basePath') || '', app);
 
 

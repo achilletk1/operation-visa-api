@@ -56,201 +56,7 @@ export const notificationService = {
         }
     },
 
-    sendPermananetTransferRejectedSMS: async (data: any, total: number, phone: any, motif?: string) => {
-        const { type, originator, beneficiary, dates } = data;
-        if (!type || !phone || !originator || !total || !dates) { return; }
-        const truncateNcp = beneficiary?.ncp.slice(8);
-        const origiNcp = originator.ncp.slice(8);
-
-        const body = `Virement permanent du ${moment().format('DD/MM/YYYY')}, d'un montant de ${total}FCFA, vers ********${truncateNcp}(${data?.beneficiary?.label}) a ete rejete en raison de: ${motif} ********${origiNcp}.\n Merci de nous faire confiance`;
-        logger.debug('body', body);
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send email PermananetTransferRejectedSMS to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
     // END permanent transfer sms section //
-
-    // START wallet MTN sms section //
-
-    sendMTNLinkageSMS: async (phone: string, ncp: string, type: 'pending' | 'linking' | 'failed' | 'delinking') => {
-        if (!phone || !ncp) { return; }
-
-        let body: string;
-        const bodyDelinking = `Cher Client BCI, la liaison de votre portefeuille Mobile Money ${phone} a votre compte ${ncp} a bien ete resiliee.\nBCI SANGO`;
-        const bodyPending = `Cher Client BCI, le processus de liaison de votre portefeuille Mobile Money ${phone} a votre compte ${ncp} est en cours de traitement.\nBCI SANGO`;
-        const bodyLinking = `Cher Client BCI, votre portefeuille Mobile Money ${phone} a bien ete lie a votre compte ${ncp}.\nBCI SANGO`;
-        const bodyFailed = `Cher Client BCI, la liaison de votre portefeuille Mobile Money ${phone} a votre compte ${ncp} n'a pas pu s'effectuee.\nBCI SANGO`;
-        if (type === 'delinking') { body = bodyDelinking };
-        if (type === 'pending') { body = bodyPending };
-        if (type === 'linking') { body = bodyLinking };
-        if (type === 'failed') { body = bodyFailed };
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send SMS sendMTNPendingLinkage to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendAIRTELLinkageSMS: async (phone: string, ncp: string, type: 'linking' | 'failed' | 'delinking') => {
-        if (!phone || !ncp) { return; }
-
-        let body: string;
-        const bodyDelinking = `Cher Client BCI, la liaison de votre wallet airtel ${phone} (portefeuille electronique) a votre compte ${ncp} a ete resiliee.\nBCI SANGO`;
-        const bodyLinking = `Cher Client BCI, votre wallet airtel ${phone} (portefeuille electronique) a bien ete lie a votre compte ${ncp}.\nBCI SANGO`;
-        const bodyFailed = `Cher Client BCI, la liaison de votre wallet airtel ${phone} (portefeuille electronique) a votre compte ${ncp} n'a pas pu s'effectuee.\nBCI SANGO`;
-        if (type === 'delinking') { body = bodyDelinking };
-        if (type === 'linking') { body = bodyLinking };
-        if (type === 'failed') { body = bodyFailed };
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send SMS sendMTNPendingLinkage to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendEmailDailyReportTransaction: async (data: any, receiver: any, cc: string, excelData: any) => {
-        const day = `${data?.date || moment().subtract(2, 'h').format('DD/MM/YYYY')}`;
-        const HtmlBody = notificationHelper.generateMailDailyReportTransaction(data);
-        const subject = `Daily Report MTN PUSH/PULL transactions ${day}`;
-
-        try {
-            return sendEmail(receiver, subject, HtmlBody, null, cc, excelData);
-        } catch (error) {
-            logger.error(`Error during send email TransactionActivation to ${receiver}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-    // END wallet MTN sms section //
-
-    sendAppointmentCreatedClientSMS: async (token, phone) => {
-        if (!token || !phone) { return; }
-
-        const body = `Votre demande de rendez-vous a bien ete prise en compte.`;
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send email AppointmentCreatedClientSMS to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendWelcomeSMS: async (user: User, password: string, phone: string) => {
-        if (!user || !phone) { return; }
-
-        const body = `Bienvenue sur l'application BCIONLINE de la BCI.\nVotre compte a bien ete cree. Veuillez utiliser les informations de connexion suivantes pour acceder a la plateforme. login ${user.userCode}; mot de passe : ${password}.`;
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send email WelcomeSMS to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendPwdResetedSMS: async (user: User, password: any) => {
-
-        if (!user || !get(user, 'tel', '')) { return; }
-
-        const phone = get(user, 'tel', '');
-        const body = `Votre mot de passe a bien ete reinitialise sur BCIONLINE, utiliser le mot de passe temporaire ci-dessous pour vous connecter. Vos identifiants de connexion sont: login: ${get(user, 'userCode', '******')} mot de passe : ${password || ''}.`;
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send sms sendPwdReseted to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendTransactionConfirmationSMS: async (data: any, phone: any) => {
-        const { type, ncp, amount, description, date, time, solde } = data;
-        if (!type || !phone || !ncp || !amount || !date) { return; }
-
-        const body = `Bonjour, ${type} de ${amount} XAF sur votre compte ${ncp} le ${date || ''} a ${time || ''}, solde actuel ${solde || 'N/A'} XAF.\BCIONLINE`;
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send email TransactionConfirmationSMS to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendTransactionRejectedationSMS: async (data: any, phone: any) => {
-        const { type, ncp, amount, description, date, time, solde } = data;
-        if (!type || !phone || !ncp || !amount || !date) { return; }
-
-        const body = `La transaction ${description} de ${amount} du ${date || ''} à ${time || ''} n'a pas ete accepte par le destinataire.`;
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send email TransactionRejectedationSMS to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendWalletSMS: async (data: any, phone: any, sold?: any) => {
-        if (isEmpty(data) || !phone) { return; }
-
-        const { amountFormatted, datePaid, timePaid, beneficiary, type, originator } = data;
-        if (!phone || !datePaid || !timePaid || !amountFormatted) { return; }
-        const originatorTruncateNcp = originator.ncp.slice(8);
-        const beneficiaryTruncateNcp = beneficiary.ncp.slice(8);
-
-        let body: string;
-        if ([101, 102, 103].includes(type)) {
-            body = `XAF${getNumberWithSpaces(amountFormatted)} debit du compte ********${originatorTruncateNcp} Virement le ${datePaid} a ${timePaid}, Cout de la transaction 0.00 FCFA. Votre nouveau solde est ${sold} FCFA.\n Merci de nous faire confiance`;
-        };
-        if (type === 301 || type === 303) {
-            body = `XAF${getNumberWithSpaces(amountFormatted)} debit du compte ********${originatorTruncateNcp} le ${datePaid} a ${timePaid} pour transfert wallet, Cout de la transaction 0.00 FCFA. Votre nouveau solde est ${sold} FCFA.\n Merci de nous faire confiance`
-        } else if (type === 302) { body = `XAF${getNumberWithSpaces(amountFormatted)} credit sur compte ********${beneficiaryTruncateNcp}  le ${datePaid} a ${timePaid} pour transfert wallet, Cout de la transaction 0.00 FCFA. Votre nouveau solde est ${sold} FCFA.\n Merci de nous faire confiance`; }
-
-        logger.debug('body SMS', body);
-
-        try {
-            return sendSMSFromBCIServer(phone, body);
-        } catch (error) {
-            logger.error(`Error during send sms  to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    sendMTNWalletSMS: async (data: any, phone: any, status: 'SUCCESSFUL' | 'FAILED', sold?: any, isSOld?: boolean) => {
-
-        if (isEmpty(data) || !phone) { return; }
-
-        const { amountNotFormatted, dateCreated, timeCreated, datePaid, timePaid, beneficiary, transactionId, type, originator, commission } = data;
-        if (!phone || !datePaid || !timePaid || !amountNotFormatted) { return; }
-        const ncp = type === 302 ? beneficiary?.ncp.slice(6) : originator?.ncp.slice(6);
-        const walletNumber = beneficiary?.walletRecipient?.walletNumber || originator?.walletRecipient?.walletNumber;
-        let body: any;
-        const sens = type === 302 ? `${walletNumber} vers ******${ncp}` : `******${ncp} vers ${walletNumber}`;
-        const bodySuccess = `Transfert wallet MTN Mobile Money de ${sens} du ${dateCreated} a ${timeCreated} de ${amountNotFormatted} XAF reussi. Frais ${commission} XAF${(isSOld) ? ` nouveau solde ${sold} XAF` : ''}. BCI SANGO`
-        const bodyRejected = `Transfert wallet MTN Mobile Money de ${sens} du ${dateCreated} a ${timeCreated} de ${amountNotFormatted} XAF est non abouti.${(isSOld) ? ` Solde ${sold} XAF.` : ''} BCI SANGO`;
-
-        if (status === 'SUCCESSFUL') { body = bodySuccess; }
-
-        if (status === 'FAILED') { body = bodyRejected; }
-
-        logger.debug(`MTN SMS body ${status}, ${JSON.stringify(body)}`);
-        try {
-            return sendSMSFromBCIServer(phone, body);
-
-        } catch (error) {
-            logger.error(`Error during send sms  to ${phone}. \n ${error.message} \n${error.stack}`);
-            return error;
-        }
-    },
 
     /***************** Email *****************/
 
@@ -553,9 +359,89 @@ export const notificationService = {
         }
     },
 
+    sendEmailVisaDepassment: async (data: any, email: string) => {
+
+        data = {
+            civility: 'MR',
+            name: `ACHILLE KAMGA`,
+            start: `08/09/2022`,
+            ceilling: `5 000 000 XAF`,
+            total: `6 000 000 XAF`,
+            created: `08/09/2022`,
+            link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
+        }
+
+        const HtmlBody = notificationHelper.generateMailVisaDepassment(data);
+
+        const subject = `Dépassement de plafond sur les transactions hors zone CEMAC`;
+
+        const receiver = `${email}`;
+
+        try {
+            return sendEmail(receiver, subject, HtmlBody);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailVisaDepassment to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEmailDetectTravel: async (data: any, email: string) => {
+
+        data = {
+            civility: 'MR',
+            name: `ACHILLE KAMGA`,
+            start: `08/09/2022`,
+            card: `445411******7134`,
+            created: `08/09/2022`,
+            link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
+        }
+
+        const HtmlBody = notificationHelper.generateMailTravelDetect(data);
+
+        const subject = `Voyage hors de la zone CEMAC détecté`;
+
+        const receiver = `${email}`;
+
+        try {
+            return sendEmail(receiver, subject, HtmlBody);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailDetectTravel to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEamailRejectStep: async (data: any, email: string) => {
+
+        data = {
+            civility: 'MR',
+            name: `ACHILLE KAMGA`,
+            start: `08/09/2022`,
+            step: `la preuve de voyage`,
+            reason: `Pièces justificatives non conforme`,
+            link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
+        }
+
+        const HtmlBody = notificationHelper.generateMailRejectStep(data);
+
+        const subject = `Mise à jour du statut de la preuve de voyage`;
+
+        const receiver = `${email}`;
+
+        try {
+            return sendEmail(receiver, subject, HtmlBody);
+        } catch (error) {
+            logger.error(
+                `Error during sendEamailRejectStep to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
 };
-
-
 
 // END Visa operations mails //
 

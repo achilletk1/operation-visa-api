@@ -83,9 +83,9 @@ export const travelService = {
             delete travel.proofTravel.status;
             delete travel.proofTravel.proofTravelAttachs;
 
-            // delete expense step's status and attachment
-            delete travel.expenseAttachements.status;
-            delete travel.expenseAttachements.attachments;
+            /*   // delete expense step's status and attachment
+              delete travel.expenseAttachements.status;
+              delete travel.expenseAttachements.attachments; */
 
             // delete others step's status and attachment
             delete travel.othersAttachements.status;
@@ -141,8 +141,17 @@ export const travelService = {
 
             if (step === 'expenseAttachements') {
                 let { expenseAttachements } = travel;
-                expenseAttachements.validators.push(validator);
-                expenseAttachements = { ...expenseAttachements, ...updateData }
+
+                if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
+
+                const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
+
+                if (expenseAttachementIndex < 0) { return new Error('BadReference') }
+
+                expenseAttachements[expenseAttachementIndex].validators.push(validator);
+
+                expenseAttachements[expenseAttachementIndex] = { ...expenseAttachements[expenseAttachementIndex], ...updateData }
+
                 tobeUpdated = { expenseAttachements };
             }
 
@@ -166,10 +175,11 @@ export const travelService = {
                 let { othersAttachements } = travel;
                 othersAttachements.validators.push(validator);
                 othersAttachements = { ...othersAttachements, ...updateData }
-                tobeUpdated = othersAttachements;
+                tobeUpdated = { othersAttachements };
             }
 
             //TODO send notifications for status update
+
             return await travelsCollection.updateTravelsById(id, tobeUpdated);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
@@ -179,7 +189,7 @@ export const travelService = {
 
     postAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
 
-        const { step } = data;
+        const { step, expenseDetailRef } = data;
 
         if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
 
@@ -204,7 +214,16 @@ export const travelService = {
 
         if (step === 'expenseAttachements') {
             const { expenseAttachements } = travel;
-            expenseAttachements.attachments.push(updatedAttachment);
+
+            if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
+
+            const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
+
+            if (expenseAttachementIndex < 0) { return new Error('BadReference') }
+
+            expenseAttachements[expenseAttachementIndex].attachments.push(updatedAttachment);
+
+
             tobeUpdated = { expenseAttachements };
         }
 
@@ -222,7 +241,7 @@ export const travelService = {
 
     updateAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
 
-        const { step, path } = data;
+        const { step, path, expenseDetailRef } = data;
 
         if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
 
@@ -254,12 +273,18 @@ export const travelService = {
 
         if (step === 'expenseAttachements') {
             const { expenseAttachements } = travel;
+            if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
 
-            const index = expenseAttachements.attachments.findIndex((elt) => elt.path === path);
+            const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
+
+            if (expenseAttachementIndex < 0) { return new Error('BadReference') }
+
+
+            const index = expenseAttachements[expenseAttachementIndex].attachments.findIndex((elt) => elt.path === path);
 
             if (index < 0) { return new Error('BadPath') }
 
-            expenseAttachements.attachments[index] = updatedAttachment;
+            expenseAttachements[expenseAttachementIndex].attachments[index] = updatedAttachment;
             tobeUpdated = { expenseAttachements };
         }
 
@@ -328,6 +353,8 @@ export const travelService = {
         return { contentType, fileContent: buffer, fileName };
 
     },
+
+    
     generateExportView: async (id: string, path: any) => {
         try {
 

@@ -114,7 +114,7 @@ export const usersService = {
             const result = await usersCollection.insertUser(user);
 
             Promise.all([
-                await notificationService.sendWelcomeSMS(user, password, user?.tel),
+                // await notificationService.sendWelcomeSMS(user, password, user?.tel),
                 await notificationService.sendEmailWelcome(user, password),
             ]);
 
@@ -160,7 +160,7 @@ export const usersService = {
             await usersCollection.updateUser(userId, { password }, { pwdReseted: false });
             await Promise.all([
                 notificationService.sendEmailPwdReseted(user, passwordClear),
-                notificationService.sendPwdResetedSMS(user, passwordClear)
+                // notificationService.sendPwdResetedSMS(user, passwordClear)
             ]);
             return {};
         } catch (error) {

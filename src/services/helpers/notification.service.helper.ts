@@ -41,13 +41,15 @@ let templateCeilingNotificationAssign: any;
 let templateCaeAssigned: any;
 
 let templateErrorPostTransactionFile: any;
-let templateVisaDepassment: any;
 let templateRejectAttachement: any;
 
 let templateMailAddCompany: any;
 let templateWelcomeAdminValidate: any;
 let templateDailyReportPUSHPULL: any;
 
+let templateVisaDepassment: any;
+let templateDetectTravel: any;
+let templateRejectStep: any;
 
 
 (async () => {
@@ -85,10 +87,12 @@ let templateDailyReportPUSHPULL: any;
     // templateCaeAssigned = await readFilePromise(__dirname + '/templates/cae-assigned.template.html', 'utf8');
     // templateErrorPostTransactionFile = await readFilePromise(__dirname + '/templates/error-post-transaction-file-mail.template.html', 'utf8');
     // templateRejectAttachement = await readFilePromise(__dirname + "/templates/reject-attachement-mail.template.html", "utf8");
-    // templateVisaDepassment = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
     // templateWelcomeAdminValidate = await readFilePromise(__dirname + '/templates/welcom-email-validate.template.html', 'utf8');
     // templateMailAddCompany = await readFilePromise(__dirname + '/templates/welcom-mail-add-company.template.html', 'utf8');
     // templateDailyReportPUSHPULL = await readFilePromise(__dirname + '/templates/mtn/daily-report-transaction-mail.template.html', 'utf8');
+    templateVisaDepassment = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
+    templateDetectTravel = await readFilePromise(__dirname + '/templates/travel-detect-mail.template.html', 'utf8');
+    templateRejectStep = await readFilePromise(__dirname + '/templates/travel-reject-step.template.html', 'utf8');
 
 })();
 
@@ -1247,15 +1251,15 @@ export const generateErrorPostingTransactionFile = (info: any) => {
 export const generateMailVisaDepassment = (info: any) => {
 
     try {
-        const str = get(info, 'currentMonth').toString();
-        const months = { '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril', '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août', '09': 'Septembre', 10: 'Octobre', 11: 'Novembre', 12: 'Décembre' };
-        const month = str.slice(str.length - 2);
-        const year = str.slice(0, str.length - 2);
-        const currentMonth = `${months[month]} ${year}`;
 
         const data = {
+            civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            currentMonth,
+            start: `${get(info, `start`)}`,
+            total: `${get(info, `total`)}`,
+            ceilling: `${get(info, `ceilling`)}`,
+            created: `${get(info, 'created')}`,
+            link: `${get(info, 'link')}`,
             actionUrl
         }
 
@@ -1266,7 +1270,62 @@ export const generateMailVisaDepassment = (info: any) => {
         return html;
 
     } catch (error) {
-        logger.error(`html reject attachement mail generation failed. \n${error.name}\n${error.stack}`);
+        logger.error(`html visa depassement mail generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+
+};
+
+export const generateMailTravelDetect = (info: any) => {
+
+    try {
+
+        const data = {
+            civility: `${get(info, 'civility')}`,
+            name: `${get(info, 'name')}`,
+            start: `${get(info, `start`)}`,
+            card: `${get(info, `card`)}`,
+            created: `${get(info, 'created')}`,
+            link: `${get(info, 'link')}`,
+            actionUrl
+        }
+
+        const template = handlebars.compile(templateDetectTravel);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`html travel detected mail generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+
+};
+
+
+export const generateMailRejectStep = (info: any) => {
+
+    try {
+
+        const data = {
+            civility: `${get(info, 'civility')}`,
+            name: `${get(info, 'name')}`,
+            start: `${get(info, `start`)}`,
+            step: `${get(info, `step`)}`,
+            reason: `${get(info, 'reason')}`,
+            link: `${get(info, 'link')}`,
+            actionUrl
+        }
+
+        const template = handlebars.compile(templateRejectStep);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`html visa depassement mail generation failed. \n${error.name}\n${error.stack}`);
         return error;
     }
 

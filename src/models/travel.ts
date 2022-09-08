@@ -90,7 +90,7 @@ export interface Travel {
         rejectReason?: string;
         attachments: TravelAttachement[];
         validators?: Validator[]
-    };
+    }[];
 
     othersAttachements?: {
         type?: OperationType;
