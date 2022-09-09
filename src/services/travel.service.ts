@@ -83,9 +83,12 @@ export const travelService = {
             delete travel.proofTravel.status;
             delete travel.proofTravel.proofTravelAttachs;
 
-            /*   // delete expense step's status and attachment
-              delete travel.expenseAttachements.status;
-              delete travel.expenseAttachements.attachments; */
+            // delete expense step's status and attachment
+            travel.expenseAttachements = travel.expenseAttachements.map((elt) => {
+                delete elt.attachments;
+                delete elt.status;
+                return elt;
+            });
 
             // delete others step's status and attachment
             delete travel.othersAttachements.status;
@@ -354,7 +357,7 @@ export const travelService = {
 
     },
 
-    
+
     generateExportView: async (id: string, path: any) => {
         try {
 
