@@ -18,6 +18,11 @@ export const onlinePaymentsCollection = {
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
     },
 
+    getOnlinePaymentBy: async (fields: any): Promise<any> => {
+        const database = await getDatabase();
+        return await database.collection(collectionName).findOne(fields);
+    },
+
     updateOnlinePaymentsById: async (id: string, set: OnlinePayment) => {
         const database = await getDatabase();
         delete set._id;

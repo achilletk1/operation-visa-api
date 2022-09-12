@@ -25,12 +25,13 @@ export interface VisaOperations {
 }
 
 export interface Attachment {
-  code?: string; // Redis Id
+  name?: string;
   status?: AttachementStatus;
   label?: string;
-  type?: number; // 100:retrait GAB, 200: paiement tpe, 300:paiement en ligne
   contentType?: string;
-  date?: {
+  path?: string; // file's path in the volume
+  content?: string;
+  voucherId?: string; date?: {
     created?: number;
     updated?: number;
   };
@@ -48,8 +49,8 @@ export enum AttachementStatus {
 }
 
 export enum OperationType {
-  ONP= 100,
-  TPE= 200,
+  ONP = 100,
+  TPE = 200,
   ELECTRONIC_PAYMENT_TERMINAL = 300,
   ATN_WITHDRAWAL = 400,
 }
@@ -143,7 +144,7 @@ export interface OnlinePayment {
   };
   amounts?: number;
   status?: OperationStatus;
-  currentMonth?: number;
+  currentMonth?: string;
   statements?: OnlinePaymentStatement[];
   transactions?: VisaTransaction[];
 }

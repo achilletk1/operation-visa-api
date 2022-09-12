@@ -1,29 +1,60 @@
+import { get, isEmpty } from 'lodash';
+import { usersCollection } from './../collections/users.collections';
 import { onlinePaymentsCollection } from './../collections/online-payment.collection';
-import { OperationStatus, OnlinePayment } from '../models/visa-operations';
-import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
-import * as helper from './helpers/visa-operations.service.helper';
+import { OperationStatus, OnlinePayment, OnlinePaymentStatement } from '../models/visa-operations';
 import { commonService } from './common.service';
 import { logger } from '../winston';
-import { config } from '../config';
 import * as generateId from 'generate-unique-id';
 import moment = require('moment');
-import { filesService } from './files.service';
 
 
 export const onlinePaymentsService = {
 
 
-    insertOnlinePayment: async (onlinepayment: OnlinePayment): Promise<any> => {
+    insertOnlinePaymentStatement: async (userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> => {
         try {
 
-            // Set request status to created
-            onlinepayment.status = OperationStatus.PENDING;
-            // Set travel creation date
-            onlinepayment.dates = { ...onlinepayment.dates, created: moment().valueOf() };
+            const user = usersCollection.getUserById(userId);
+
+            if (user) { return new Error('UserNotFound'); }
+
+            const currentMonth = moment(onlinepaymentStatement.date).format('YYYYMM');
+
+            let onlinePayment: OnlinePayment;
+            let result: any;
+
+            onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
+
+            if (!isEmpty(onlinepaymentStatement.attachments)) {
+                onlinepaymentStatement.attachments = onlinepaymentStatement.attachments.map((attachment) => {
+                    attachment = commonService.saveAttachement(onlinepaymentStatement.statementRef, attachment, onlinepaymentStatement.date);
+                    return attachment;
+                });
+
+            }
 
 
-            // insert permanent transfers
-            const result = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinepayment);
+            onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth });
+
+            if (!onlinePayment) {
+                onlinePayment = {
+                    clientCode: get(user, 'clientCode'),
+                    userId,
+                    dates: {
+                        created: moment().valueOf(),
+                    },
+                    amounts: 0,
+                    status: OperationStatus.PENDING,
+                    currentMonth: '',
+                    statements: [onlinepaymentStatement],
+                    transactions: [],
+                }
+                result = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinePayment);
+            } else {
+                onlinePayment.dates.updated = moment().valueOf();
+                onlinePayment.statements.push(onlinepaymentStatement);
+                result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
+            }
 
             //TODO send notification
 

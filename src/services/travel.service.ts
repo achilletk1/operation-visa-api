@@ -28,9 +28,11 @@ export const travelService = {
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
+
                 travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
-                    return await saveAttachement(travel.travelRef.toString(), e, travel.dates.created);
+                    return await commonService.saveAttachement(travel.travelRef.toString(), e, travel.dates.created);
                 }));
+                
             }
 
             const result = await travelsCollection.insertTravel(travel);
@@ -202,7 +204,7 @@ export const travelService = {
 
         const { travelRef } = travel;
 
-        const updatedAttachment = await saveAttachement(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachement(travelRef, attachement, travel.dates.created);
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -256,7 +258,7 @@ export const travelService = {
 
         filesService.deleteFile(path);
 
-        const updatedAttachment = await saveAttachement(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachement(travelRef, attachement, travel.dates.created);
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -376,20 +378,3 @@ export const travelService = {
 
 };
 
-const saveAttachement = async (ref: string, attachement: TravelAttachement, created: number) => {
-    try {
-        const { content, label, contentType } = attachement;
-        delete attachement.content
-        const date = moment(created).format('MM-YY');
-        const path = `${date}/${ref}`;
-        const extension = helper.getExtensionByContentType(contentType);
-        const filename = `${date}_${ref}_${label}${extension}`;
-        filesService.writeFile(content, path, filename);
-        attachement.path = `${path}/${filename}`;
-        attachement.name = filename;
-        return attachement;
-    } catch (error) {
-        logger.error(`\nError saving attachement \n${error.message}\n${error.stack}\n`);
-        return error;
-    }
-}

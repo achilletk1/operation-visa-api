@@ -4,6 +4,10 @@ import { logger } from '../winston';
 import { config } from '../config';
 import * as moment from 'moment';
 import XLSX = require('xlsx');
+import { filesService } from './files.service';
+import * as visaHelper from './helpers/visa-operations.service.helper';
+import { Attachment } from './../models/visa-operations';
+
 
 export const commonService = {
 
@@ -152,6 +156,25 @@ export const commonService = {
 
         return XLSX.utils.sheet_to_json(wb.Sheets[sheetNames[0]], { raw: true });
     },
+
+
+    saveAttachement: (ref: string, attachement: Attachment, created: number) => {
+        try {
+            const { content, label, contentType } = attachement;
+            delete attachement.content
+            const date = moment(created).format('MM-YY');
+            const path = `${date}/${ref}`;
+            const extension = visaHelper.getExtensionByContentType(contentType);
+            const filename = `${date}_${ref}_${label}${extension}`;
+            filesService.writeFile(content, path, filename);
+            attachement.path = `${path}/${filename}`;
+            attachement.name = filename;
+            return attachement;
+        } catch (error) {
+            logger.error(`\nError saving attachement \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    }
 
 }
 
