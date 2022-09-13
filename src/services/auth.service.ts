@@ -1,4 +1,4 @@
-import { usersCollection } from '../collections/users.collections';
+import { usersCollection } from '../collections/users.collection';
 import * as oauthHelper from './helpers/oauth/oauth.service.helper'
 import { notificationService } from './notification.service';
 import { commonService } from './common.service';

@@ -1,4 +1,4 @@
-import { usersCollection } from '../collections/users.collections';
+import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
 import * as httpContext from 'express-http-context';
 import { commonService } from './common.service';

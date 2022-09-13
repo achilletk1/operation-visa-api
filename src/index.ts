@@ -1,3 +1,4 @@
+import { templatesController } from './controllers/templates.controller';
 import { exportController } from './controllers/export.controller';
 import { propertyAndServicesTypesController } from './controllers/property-and-services-types.controller';
 import { voucherController } from './controllers/voucher.controller';
@@ -65,6 +66,7 @@ longTravelTypesController.init(app);
 propertyAndServicesTypesController.init(app);
 exportController.init(app);
 reportingController.init(app);
+templatesController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 

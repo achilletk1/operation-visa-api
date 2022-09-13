@@ -1,9 +1,9 @@
 import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
 import { visaTransactionsFilesCollection } from '../collections/visa-transactions-files.collections';
-import { visaTransactionsCollection } from '../collections/visa-transactions.collections';
+import { visaTransactionsCollection } from '../collections/visa-transactions.collection';
 import { visaOperationsCollection } from '../collections/visa-operations.collection';
 import { OperationType } from './../models/visa-operations';
-import { usersCollection } from './../collections/users.collections';
+import { usersCollection } from '../collections/users.collection';
 import * as helper from './helpers/visa-operations.service.helper';
 import { filesCollection } from '../collections/files.collection';
 import { notificationService } from './notification.service';

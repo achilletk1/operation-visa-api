@@ -6,9 +6,9 @@ import { onlinePaymentsService } from '../services/online-payment.service';
 export const onlinePaymentsController = {
 
     init: (app: any): void => {
-        app.post('/online-payments', async (req: Request, res: Response) => {
+        app.put('/online-payments/:id', async (req: Request, res: Response) => {
 
-            const data = await onlinePaymentsService.insertOnlinePayment(req.body);
+            const data = await onlinePaymentsService.insertOnlinePaymentStatement(req.params.id, req.body);
 
             if (data instanceof Error && data.message === 'Forbidden') {
                 const message = `Vous n'êtes pas autorisé a effectuer cette opération`;

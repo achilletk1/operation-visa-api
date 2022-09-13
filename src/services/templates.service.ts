@@ -1,68 +1,65 @@
-import { voucherCollection } from '../collections/voucher.collection';
-import { Voucher } from '../models/visa-operations';
+import { TemplateForm } from './../models/templates';
+import { templatesCollection } from '../collections/templates.collection';
 import { logger } from '../winston';
 import { commonService } from './common.service';
 
 
-export const voucherService = {
+export const templatesService = {
 
-    getVouchers: async (filters: any) => {
+    getTemplates: async (filters: any) => {
         try {
             commonService.parseNumberFields(filters);
             const { offset, limit } = filters;
             delete filters.offset;
             delete filters.limit;
-            return await voucherCollection.getVouchers(filters || {}, offset || 1, limit || 40);
+            return await templatesCollection.getTemplates(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
 
-    getVoucherById: async (id: string) => {
+    getTemplateById: async (id: string) => {
         try {
-            return await voucherCollection.getVoucherById(id);
+            return await templatesCollection.getTemplateById(id);
         } catch (error) {
             logger.error(`\nError getting vis transactions \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
 
-    getVoucherBy: async (data: any) => {
+    getTemplateBy: async (data: any) => {
         try {
-            return await voucherCollection.getVoucherBy(data);
+            return await templatesCollection.getTemplateBy(data);
         } catch (error) {
             logger.error(`\nError getting visa trnsactions by queries \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
-    updateVoucherById: async (id: string, data: any) => {
+    updateTemplateById: async (id: string, data: any) => {
         try {
-            const vourchers = await voucherCollection.getVoucherBy({});
+            const vourchers = await templatesCollection.getTemplateBy({});
             const foundIndex = vourchers.findIndex((e) => e.label === data.label && e._id.toString() !== id);
             if (foundIndex > -1) { return new Error('VourcherAlreadyExist') }
-            return await voucherCollection.updateVoucherById(id, data);
+            return await templatesCollection.updateTemplateById(id, data);
         } catch (error) {
             logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
 
-    deleteVoucher: async (id: string) => {
+    deleteTemplate: async (id: string) => {
         try {
-            return await voucherCollection.deleteVoucher(id);
+            return await templatesCollection.deleteTemplate(id);
         } catch (error) {
             logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
 
-    insertVoucher: async (data: Voucher) => {
+    insertTemplate: async (data: TemplateForm) => {
         try {
-            const vourchers = await voucherCollection.getVoucherBy({});
-            const foundIndex = vourchers.findIndex((e) => e.label === data.label);
-            if (foundIndex > -1) { return new Error('VourcherAlreadyExist') }
-            return await voucherCollection.insertVoucher(data);
+            return await templatesCollection.insertTemplate(data);
         } catch (error) {
             logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
             return error;

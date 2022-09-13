@@ -1,4 +1,4 @@
-import { VisaTransaction } from './../models/visa-operations';
+import { VisaTransaction } from '../models/visa-operations';
 import { getDatabase } from './config';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';

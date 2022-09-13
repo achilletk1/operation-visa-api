@@ -1,6 +1,6 @@
 import { get, isEmpty } from 'lodash';
-import { usersCollection } from './../collections/users.collections';
-import { onlinePaymentsCollection } from './../collections/online-payment.collection';
+import { usersCollection } from '../collections/users.collection';
+import { onlinePaymentsCollection } from '../collections/online-payments.collection';
 import { OperationStatus, OnlinePayment, OnlinePaymentStatement } from '../models/visa-operations';
 import { commonService } from './common.service';
 import { logger } from '../winston';
