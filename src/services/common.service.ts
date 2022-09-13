@@ -6,7 +6,7 @@ import * as moment from 'moment';
 import XLSX = require('xlsx');
 import { filesService } from './files.service';
 import * as visaHelper from './helpers/visa-operations.service.helper';
-import { Attachment } from './../models/visa-operations';
+import { AttachementStatus, Attachment } from './../models/visa-operations';
 
 
 export const commonService = {
@@ -167,6 +167,7 @@ export const commonService = {
             const extension = visaHelper.getExtensionByContentType(contentType);
             const filename = `${date}_${ref}_${label}${extension}`;
             filesService.writeFile(content, path, filename);
+            attachement.status = AttachementStatus.PENDING;
             attachement.path = `${path}/${filename}`;
             attachement.name = filename;
             return attachement;

@@ -52,7 +52,7 @@ app.use(morgan(format, morganOption));
 // app.use(oauthVerification);
 
 // Init controllers
-visaTransactionsFilesController.init(app);
+// visaTransactionsFilesController.init(app);
 visaTransactionsController.init(app);
 downloadsController.init(app);
 usersController.init(app);

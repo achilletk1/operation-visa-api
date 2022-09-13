@@ -211,5 +211,25 @@ export const travelController = {
 
             res.status(200).json({ message: 'travel data updated succesfully.' });
         });
+
+
+        app.post('/travels/:id/attachements/view', async (req: Request, res: Response) => {
+
+            if (req.query.action !== 'generate_link') {
+                const message = 'no action provided.';
+                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
+                return res.status(400).json(errResp);
+            }
+
+            const data = await travelService.generateExportView(req.params.id, req.body);
+
+            if (data instanceof Error) {
+                const message = 'internal server error.';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            return res.status(200).json(data);
+        });
     }
 };

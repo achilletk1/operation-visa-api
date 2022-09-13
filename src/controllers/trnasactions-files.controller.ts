@@ -1,4 +1,4 @@
-import { transactionsFIlesService } from '../services/transactions-files.service';
+/* import { visaTransactionsFilesService } from '../services/transactions-files.service';
 import { commonService } from '../services/common.service';
 import { Request, Response } from 'express';
 
@@ -8,7 +8,7 @@ export const transactionsFilesController = {
     init: (app: any): void => {
 
         app.get('/visa-transactions', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.getVisaTransactions(req.query);
+            const data = await visaTransactionsFilesService.getVisaTransactions(req.query);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to get data';
@@ -26,7 +26,7 @@ export const transactionsFilesController = {
         });
     
         app.post('/visa-transactions/import/verify', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.verifyTransactionFiles(req.body);
+            const data = await visaTransactionsFilesService.verifyTransactionFiles(req.body);
 
             if ((data instanceof Error || data.index) && ['Forbbiden', 'IncorrectFileName', 'FileAlreadyExist', 'FileIsEmpty', 'IncorrectFileColumn', 'IncorrectFileMonth', 'IncorrectFileType'].includes(data.message)) {
                 const { message } = data; let details, title;
@@ -44,7 +44,7 @@ export const transactionsFilesController = {
         });
 
         app.put('/visa-transactions/import/confirm/:id', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.confirmTransactionFiles(req.params.id);
+            const data = await visaTransactionsFilesService.confirmTransactionFiles(req.params.id);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to post data';
@@ -59,15 +59,15 @@ export const transactionsFilesController = {
             }
 
             res.status(200).json(data);
-            const traitment = await transactionsFIlesService.startTraitment(req.params.id);
+            const traitment = await visaTransactionsFilesService.startTraitment(req.params.id);
 
             if (traitment instanceof Error) {
-                await transactionsFIlesService.sendPostTransactionFileThreadError(req.params.id);
+                await visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
             }
         });
 
         app.put('/visa-transactions/import/restart/:id', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.restartConfirmTransactionFiles(req.params.id);
+            const data = await visaTransactionsFilesService.restartConfirmTransactionFiles(req.params.id);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to post data';
@@ -80,14 +80,14 @@ export const transactionsFilesController = {
                 return res.status(500).json(errResp);
             }
             res.status(200).json(data);
-            const traitment = await transactionsFIlesService.restartTraitment(req.params.id);
+            const traitment = await visaTransactionsFilesService.restartTraitment(req.params.id);
             if (traitment instanceof Error) {
-                await transactionsFIlesService.sendPostTransactionFileThreadError(req.params.id);
+                await visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
             }
         });
 
         app.delete('/visa-transactions/import/abort/:id', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.abortTransactionFiles(req.params.id);
+            const data = await visaTransactionsFilesService.abortTransactionFiles(req.params.id);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to post data';
@@ -96,7 +96,7 @@ export const transactionsFilesController = {
             }
 
             if (data instanceof Error) {
-                await transactionsFIlesService.sendPostTransactionFileThreadError(req.params.id);
+                await visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
                 const message = 'unable to post transaction file';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
@@ -106,7 +106,7 @@ export const transactionsFilesController = {
         });
 
         app.get('/visa-transactions/import/array/:id', async (req: Request, res: Response) => {
-            const data = await transactionsFIlesService.getTransactionFilesDataArray(req.params.id);
+            const data = await visaTransactionsFilesService.getTransactionFilesDataArray(req.params.id);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to post data';
@@ -124,4 +124,4 @@ export const transactionsFilesController = {
         });
 
     }
-};
+}; */

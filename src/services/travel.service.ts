@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash';
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as helper from './helpers/visa-operations.service.helper';
 import { commonService } from './common.service';
@@ -26,14 +25,6 @@ export const travelService = {
 
             // insert permanent transfers
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
-
-            if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
-
-                travel.proofTravel.proofTravelAttachs = await Promise.all(travel.proofTravel.proofTravelAttachs.map(async (e) => {
-                    return await commonService.saveAttachement(travel.travelRef.toString(), e, travel.dates.created);
-                }));
-                
-            }
 
             const result = await travelsCollection.insertTravel(travel);
 
@@ -120,7 +111,7 @@ export const travelService = {
 
     updateTravelStepStatusById: async (id: string, data: any) => {
         try {
-            const { status, step, rejectReason, validator, expenseDetailRef } = data;
+            const { status, step, rejectReason, validator, expenseDetailRef: expenseDetailRefs } = data;
 
             if (!step || !['proofTravel', 'expenseDetails', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
 
@@ -147,9 +138,9 @@ export const travelService = {
             if (step === 'expenseAttachements') {
                 let { expenseAttachements } = travel;
 
-                if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
+                if (!expenseDetailRefs) { return new Error('ReferenceNotProvided'); }
 
-                const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
+                const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRefs);
 
                 if (expenseAttachementIndex < 0) { return new Error('BadReference') }
 
@@ -161,17 +152,21 @@ export const travelService = {
             }
 
             if (step === 'expenseDetails') {
-                if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
+                if (!expenseDetailRefs) { return new Error('ReferenceNotProvided'); }
 
                 const { expenseDetails } = travel;
 
-                const expenseDetailIndex = expenseDetails.findIndex((elt) => elt.ref === expenseDetailRef);
+                for (const expenseDetailRef of expenseDetailRefs) {
 
-                if (expenseDetailIndex < 0) { return new Error('BadReference') }
+                    const expenseDetailIndex = expenseDetails.findIndex((elt) => elt.ref === expenseDetailRef);
 
-                expenseDetails[expenseDetailIndex].validators.push(validator);
+                    if (expenseDetailIndex < 0) { return new Error('BadReference') }
 
-                expenseDetails[expenseDetailIndex] = { ...expenseDetails[expenseDetailIndex], ...updateData }
+                    expenseDetails[expenseDetailIndex].validators.push(validator);
+
+                    expenseDetails[expenseDetailIndex] = { ...expenseDetails[expenseDetailIndex], ...updateData }
+
+                }
 
                 tobeUpdated = { expenseDetails };
             }

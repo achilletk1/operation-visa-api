@@ -94,5 +94,101 @@ export const onlinePaymentsController = {
 
             res.status(200).json({ message: 'online payment data updated succesfully.' });
         });
+
+
+        app.put('/online-payments/:id/status', async (req: Request, res: Response) => {
+            const { id } = req.params;
+
+            const data = await onlinePaymentsService.updateAttachmentStatus(id, req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'update travel failed';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'travel data updated succesfully.' });
+        });
+
+        app.get('/online-payments/:id/attachements/export/:code', async (req: Request, res: Response) => {
+            const id = req.params.id;
+            const code = req.params.code;
+
+            const data = await onlinePaymentsService.generateExportData(id, code);
+
+            if (data instanceof Error) {
+                const message = 'unable to export file';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+            res.setHeader('Content-Type', data.contentType);
+            res.setHeader('Content-Disposition', `attachment; filename= ${data.fileName}`);
+            return res.send(data.fileContent);
+        });
+
+        app.post('/online-payments/:id/attachements/export', async (req: Request, res: Response) => {
+
+            if (req.query.action !== 'generate_link') {
+                const message = 'no action provided.';
+                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
+                return res.status(400).json(errResp);
+            }
+
+            const data = await onlinePaymentsService.generateExportLinks(req.params.id, req.body);
+
+            if (data instanceof Error) {
+                const message = 'internal server error.';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            return res.status(200).json(data);
+        });
+
+
+        app.post('/online-payments/:id/attachements/view', async (req: Request, res: Response) => {
+
+            if (req.query.action !== 'generate_link') {
+                const message = 'no action provided.';
+                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
+                return res.status(400).json(errResp);
+            }
+
+            const data = await onlinePaymentsService.generateExportView(req.params.id, req.body);
+
+            if (data instanceof Error) {
+                const message = 'internal server error.';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            return res.status(200).json(data);
+        });
+
+        app.put('/travels/:id/attachements/insert', async (req: Request, res: Response) => {
+            const { id } = req.params;
+
+            const data = await onlinePaymentsService.postAttachment(id, req.query, req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'update travel failed';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'travel data updated succesfully.' });
+        });
     }
 };
