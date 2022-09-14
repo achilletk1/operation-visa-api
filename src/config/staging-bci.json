@@ -40,5 +40,6 @@
     },
     "pdfApiUrl": "http://pdf:5000",
     "accountId": 6,
-    "timeout": 110000
+    "timeout": 110000,
+    "cbsApiUrl": "https://cbs:3000"
 }

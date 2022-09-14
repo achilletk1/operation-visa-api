@@ -173,6 +173,12 @@ export const config = convict({
         default: '',
         env: 'FILE_STORAGE_PATH',
     },
+    cbsApiUrl: {
+        doc: 'CBS API base url.',
+        format: String,
+        default: '',
+        env: 'CBS_API_URL'
+    },
 });
 
 // Load environment dependent configuration

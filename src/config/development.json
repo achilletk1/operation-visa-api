@@ -28,6 +28,8 @@
     },
     "pdfApiUrl": "http://localhost:5000",
     "timeout": 100000,
-    "fileStoragePath": "./filesrec"
+    "fileStoragePath": "./filesrec",
+    "cbsApiUrl": "http://localhost:4000"
+
 
 }
