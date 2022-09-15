@@ -31,6 +31,10 @@
     },
     "pdfApiUrl": "http://pdf:5000",
     "timeout": 110000,
-    "cbsApiUrl": "https://cbs:3000"
+    "cbsApiUrl": "https://cbs:3000",
+    "template": {
+        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
+        "color": "#DC752A"
+    }
 
 }

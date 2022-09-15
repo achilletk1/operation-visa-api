@@ -3,6 +3,7 @@ import { Letter } from '../models/letter';
 import { lettersCollection } from '../collections/letters.collection';
 import { logger } from '../winston';
 import { commonService } from './common.service';
+import * as exportsHelper from './helpers/exports.helper'
 
 
 export const lettersService = {
@@ -79,6 +80,26 @@ export const lettersService = {
             logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
             return error;
         }
+    },
+
+
+
+    generateExportView: async ( data: any) => {
+        try {
+            const { letter } = data;
+
+            if (!letter) { return new Error('LetterNotFound') }
+
+            const pdfString = await exportsHelper.generateFormalNoticeLetter(letter, {}, true);
+
+            if (pdfString instanceof Error) { return pdfString; }
+
+            return pdfString;
+        } catch (error) {
+            logger.error(`\nError generateExportView \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+
     },
 
 };

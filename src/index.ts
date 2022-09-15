@@ -25,6 +25,7 @@ import { onlinePaymentsController } from './controllers/online-payment.controlle
 import { longTravelTypesController } from './controllers/long-travel-types.controller';
 import { reportingService } from './services/reporting.service';
 import { reportingController } from './controllers/reporting.controller';
+import { lettersController } from './controllers/letters.controller';
 
 
 const app = express();
@@ -67,6 +68,7 @@ propertyAndServicesTypesController.init(app);
 exportController.init(app);
 reportingController.init(app);
 templatesController.init(app);
+lettersController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 

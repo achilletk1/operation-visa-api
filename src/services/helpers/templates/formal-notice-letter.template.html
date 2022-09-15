@@ -36,7 +36,7 @@
                                                                         data-saferedirecturl="https://www.google.com/url?q=https://mandrillapp.com/track/click/30191028/ui8.net?p%3DeyJzIjoiQ2lPYVNhLTJsQWhZSVlBZ2o4b2ZtN0p6VURVIiwidiI6MSwicCI6IntcInVcIjozMDE5MTAyOCxcInZcIjoxLFwidXJsXCI6XCJodHRwczpcXFwvXFxcL3VpOC5uZXRcIixcImlkXCI6XCJkNmZhZTI5Y2FiZTE0MzY0OGQwOTlkYmM1NTNkOGY5ZVwiLFwidXJsX2lkc1wiOltcImQ2YWRjMzEwYTQ0NGIyM2ZmYzlkNTFiYTc4YzM5MWUwMjc5YzVlYzdcIl19In0&amp;source=gmail&amp;ust=1586697714629000&amp;usg=AFQjCNGzvPYuzJ4UGfmp6-93rUg8tJtJPg">
 
 
-                                                                        <img src="https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-bicec-small.png?alt=media&token=ef0bd699-f1c2-4b12-bddf-939e0a9b78d9"
+                                                                        <img src="https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd"
                                                                             width="100px" height="40px"
                                                                             class="CToWUd"></a>
                                                                 </td>
@@ -56,33 +56,46 @@
                                                                     style="padding:0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:12px;font-weight:100;color:#333;">
 
                                                                     <div class="sender-infos-container">
-                                                                        <div class="sender-info-elmt bold">BICEC</div>
-                                                                        <div class="sender-info-elmt">(+237) 233 43 60
-                                                                            00</div>
-                                                                        <div class="sender-info-elmt">bicec.com</div>
+                                                                        <div class="sender-info-elmt bold">
+                                                                            {{headLeftText}}
+                                                                        </div>
+                                                                        <!-- <div class="sender-info-elmt">(+237) 233 43 60 -->
+                                                                    </div>
+                                                                    <!-- <div class="sender-info-elmt">bicec.com</div> -->
                                                                     </div>
 
                                                                     <div class="receiver-infos-container">
                                                                         <div class="receiver-info-elmt bold">
-                                                                            {{client_name}}
+                                                                            {{headRightText}}
                                                                         </div>
-                                                                        <div class="receiver-info-elmt">{{client_phone}}
+                                                                        <!--  <div class="receiver-info-elmt">{{client_phone}}
                                                                         </div>
                                                                         <div class="receiver-info-elmt">{{client_email}}
-                                                                        </div>
+                                                                        </div> -->
                                                                     </div>
-
+                                                                    <div class="object">
+                                                                        <span class="object"
+                                                                            style="text-decoration: underline;">{{letterRef}}</span>
+                                                                    </div>
                                                                     <div class="object">
                                                                         <span class="object bold">Objet :
-                                                                            {{objet}}</span>
+                                                                            {{objectText}}</span>
                                                                     </div>
 
-                                                                    <p class="mail-content">{{{message}}}</p>
+                                                                    <p class="mail-content">{{salutationText}},</p>
+
+                                                                    <p class="mail-content">{{introductionTexT}}</p>
+
+
+                                                                    <p class="mail-content"> {{bodyText}}</p>
+
+                                                                    <p class="mail-content">{{conclusionText}}</p>
+
 
                                                                     <div class="signature-container">
-                                                                        <div>La Direction</div>
-                                                                        <img src="https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/signature.png?alt=media&token=9b30c396-18c4-43ab-850c-4424432fb85d"
-                                                                            class="CToWUd" width="200px" height="100px">
+                                                                        <div>{{signatureText}}</div>
+                                                                        <img src="{{signature}}" class="CToWUd"
+                                                                            width="200px" height="100px">
                                                                     </div>
 
                                                                 </td>
@@ -92,10 +105,7 @@
                                                                 <td>
                                                                     <div class="preview-footer"
                                                                         style="padding-bottom: 42px;">
-                                                                        <p>Pièce jointe mail de relance crédit n°
-                                                                            {{num_dossier}} du {{letter_date}}</p>
-                                                                        <p>BANQUE INTERNATIONALE DU CAMEROUN POUR
-                                                                            L’EPARGNE ET LE CREDIT bicec.com</p>
+                                                                        <p>{{footerText}}</p>
                                                                     </div>
                                                                 </td>
                                                             </tr>

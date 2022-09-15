@@ -1,5 +1,4 @@
 import { commonService } from './common.service';
-import { notificationService } from './notification.service';
 import moment = require("moment");
 import { config } from "../config";
 import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
@@ -48,13 +47,4 @@ export const exportService = {
         return { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer, fileName };
 
     },
-
-    sendNotifications: async (data: any) => {
-        const { emails } = data;
-        for (const email of emails) {
-            await notificationService.sendEmailDetectTravel({}, email);
-            await notificationService.sendEmailVisaDepassment({}, email);
-            await notificationService.sendEamailRejectStep({}, email);
-        }
-    }
 }

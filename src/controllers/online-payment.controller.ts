@@ -154,12 +154,6 @@ export const onlinePaymentsController = {
 
         app.post('/online-payments/:id/attachements/view', async (req: Request, res: Response) => {
 
-            if (req.query.action !== 'generate_link') {
-                const message = 'no action provided.';
-                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
-                return res.status(400).json(errResp);
-            }
-
             const data = await onlinePaymentsService.generateExportView(req.params.id, req.body);
 
             if (data instanceof Error) {

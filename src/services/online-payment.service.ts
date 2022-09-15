@@ -107,40 +107,41 @@ export const onlinePaymentsService = {
         }
     },
 
-    postAttachment: async (id: string, data: any, attachement: Attachment) => {
+        postAttachment: async (id: string, data: any, attachement: Attachment) => {
 
-        const { statementRef } = data;
-
-
-        const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
-
-        if (!onlinePayment) { return new Error('OnlinePaymentNotFound') }
-
-        const { statements } = onlinePayment;
-
-        const statementIndex = statements.findIndex((elt) => elt.statementRef === statementRef);
-
-        if (statementIndex < 0) { return new Error('OnlinePaymentStatementNotFound') }
-
-        attachement = commonService.saveAttachement(id, attachement, onlinePayment.dates.created);
-
-        if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
-
-        const { path } = attachement;
-
-        const pathIndex = statements[statementIndex].attachments.findIndex((elt) => elt.path === path);
+            const { statementRef } = data;
 
 
-        if (pathIndex < 0) {
-            statements[statementIndex].attachments.push(attachement);
-        } else {
-            statements[statementIndex].attachments[pathIndex] = attachement;
-        }
+            const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
-        return await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statements });
+            if (!onlinePayment) { return new Error('OnlinePaymentNotFound') }
+
+            const { statements } = onlinePayment;
+
+            const statementIndex = statements.findIndex((elt) => elt.statementRef === statementRef);
+
+            if (statementIndex < 0) { return new Error('OnlinePaymentStatementNotFound') }
+            
+            const { path } = attachement;
+
+            attachement = commonService.saveAttachement(id, attachement, onlinePayment.dates.created);
+
+            if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
 
-    },
+            const pathIndex = statements[statementIndex].attachments.findIndex((elt) => elt.path === path);
+
+
+            if (pathIndex < 0) {
+                statements[statementIndex].attachments.push(attachement);
+            } else {
+                statements[statementIndex].attachments[pathIndex] = attachement;
+            }
+
+            return await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statements });
+
+
+        },
 
     updateAttachmentStatus: async (id: string, data: any) => {
 

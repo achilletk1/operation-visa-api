@@ -179,6 +179,22 @@ export const config = convict({
         default: '',
         env: 'CBS_API_URL'
     },
+    template: {
+        image: {
+            doc: 'image that must be used as a logo on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_IMAGE',
+            arg: 'template-image'
+        },
+        color: {
+            doc: 'color that must be used as a logo on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_COLOR',
+            arg: 'template-color'
+        },
+    },
 });
 
 // Load environment dependent configuration

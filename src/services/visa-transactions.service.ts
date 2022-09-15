@@ -258,7 +258,7 @@ export const visaTransactionsService = {
             }
             const { email, label } = transactionsFile;
             const response = await visaTransactionsFilesCollection.updateVisaTransactionsFilesById(id, { status: 300 });
-            await notificationService.sendPostTransactionFileThreadError({ fullName: `${get(authUser, 'fname')} ${get(authUser, 'lname')}`, label }, email)
+            // await notificationService.sendPostTransactionFileThreadError({ fullName: `${get(authUser, 'fname')} ${get(authUser, 'lname')}`, label }, email)
             return response;
         } catch (error) {
             logger.error(`\nError sendPostTransactionFileThreadError \n${error.message}\n${error.stack}\n`);
@@ -429,10 +429,10 @@ const calculateOverruns = async (account: any, transactions: any, month: any, ce
         await visaTransactionsCollection.insertTransactions(transactonByNcp);
         const email = config.get('env') === 'development' ? 'dimitri.signe@londo.io' : get(user, 'email');
         // eslint-disable-next-line no-undef
-        await Promise.all([
+     /*    await Promise.all([
             notificationService.sendEmailToVisaDepassementClient(email, { currentMonth: parseInt(month), name: `${get(user, 'fname')} ${get(user, 'lname')}`, ncp: account.split('-')[1] }),
             notificationService.sendSMSToVisaDepassementClient(get(user, 'tel'), { currentMonth: parseInt(month), name: get(user, 'name'), ncp: account.split('-')[1] })
-        ]);
+        ]); */
     }
 }
 

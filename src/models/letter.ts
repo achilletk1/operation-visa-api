@@ -4,9 +4,9 @@ export interface Letter {
     dates?: {
         created?: number;
         updated?: number;
-    },
-    letterRef?: string;
+    };
     pdf?: {
+        letterRef?: string;
         headLeftText?: string;
         headRightText?: string;
         introductionTexT?: string;
@@ -17,6 +17,6 @@ export interface Letter {
         footerText?: string;
         signatureText?: string;
         signature?: string;
-    }
+    };
     emailText?: string;
 }

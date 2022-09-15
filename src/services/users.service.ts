@@ -5,9 +5,7 @@ import { commonService } from './common.service';
 import { User } from './../models/user';
 import { isEmpty, get } from 'lodash';
 import { logger } from '../winston';
-import { config } from '../config';
 import * as moment from 'moment';
-import { hash } from 'bcrypt';
 
 export const usersService = {
 
@@ -68,106 +66,6 @@ export const usersService = {
         }
     },
 
-    insertUser: async (user: User): Promise<any> => {
-        try {
-            commonService.parseNumberFields(user);
-            const authUser = httpContext.get('user');
-
-            const isAdmin = [500, 600, 601, 602, 603].includes(user?.category);
-
-            if (![500, 600,602,604].includes(authUser?.category)) { return new Error('Forbidden'); }
-
-            if ([500, 600].includes(user?.category) && authUser?.category !== 600) { return new Error('Forbidden'); }
-
-            let userCode: string;
-            let _user: any;
-            delete user._id;
-            if (isAdmin) {
-                const existUserCode = await usersCollection.getUserBy({ userCode: user?.userCode });
-                if (!isEmpty(existUserCode)) { return new Error('UserCodeAllreadyUsed'); }
-            }
-
-            if (![500, 600, 601, 602, 603, 604, 200].includes(user?.category)) {
-                do {
-                    userCode = `30013${commonService.getRandomString(6, false)}`
-                    _user = await usersCollection.getUserBy({ userCode });
-                } while (!isEmpty(_user));
-
-                user.userCode = userCode;
-
-                if (user.walletGIMAC) { user.walletGIMAC.tel = user?.userCode; }
-
-                // if (![200].includes(user.category)) {
-                //     const existUser = await usersCollection.getUserBy({ clientCode: user?.clientCode });
-                //     if (!isEmpty(existUser)) { return new Error('UserAllreadyCreated'); }
-                // } 
-
-            }
-
-            const existUserCode = await usersCollection.getUserBy({ userCode: user?.userCode });
-            if (!isEmpty(existUserCode)) { return new Error('UserCodeAllreadyUsed'); }
-
-            const password = commonService.getRandomString(6);
-
-            user.password = await hash(password, config.get('saltRounds'));
-
-            const result = await usersCollection.insertUser(user);
-
-            Promise.all([
-                // await notificationService.sendWelcomeSMS(user, password, user?.tel),
-                await notificationService.sendEmailWelcome(user, password),
-            ]);
-
-
-            const data = { _id: result?.insertedId };
-
-            return data;
-
-        } catch (error) {
-            logger.error(`user creation failed \n${error?.name} \n${error?.stack}`);
-            return error;
-        }
-    },
-
-    updateUser: async (id: string, user: User, query?: any): Promise<any> => {
-
-        try {
-            const authUser = httpContext.get('user');
-            if (![500, 600].includes(authUser?.category)) { return new Error('Forbidden'); }
-
-            if ([500, 600].includes(user?.category) && authUser?.category !== 600) { return new Error('Forbidden'); }
-
-            delete user?.password;
-            delete user?.otp;
-
-            await usersCollection.updateUser(id, user);
-        } catch (error) {
-            logger.error(`update user failed \n${error.name} \n${error.stack}`);
-            return error;
-        }
-    },
-
-    ResetPwrd: async (userId: string, fileds?: any): Promise<any> => {
-
-        const AuthUser = httpContext.get('user');
-        if (AuthUser?.category !== 600) { return new Error('Forbidden'); }
-
-        try {
-            const user = await usersCollection.getUserById(userId);
-            if (!user) { return new Error('UserNotFound') }
-            const passwordClear = commonService.getRandomString(6);
-            const password = await hash(passwordClear, config.get('saltRounds'));
-            await usersCollection.updateUser(userId, { password }, { pwdReseted: false });
-            await Promise.all([
-                notificationService.sendEmailPwdReseted(user, passwordClear),
-                // notificationService.sendPwdResetedSMS(user, passwordClear)
-            ]);
-            return {};
-        } catch (error) {
-            logger.error(`reset user password failed \n${error.name} \n${error.stack}`);
-            return error;
-        }
-    },
 
     getUserById: async (id: string): Promise<User> => {
         const user = await usersCollection.getUserById(id);

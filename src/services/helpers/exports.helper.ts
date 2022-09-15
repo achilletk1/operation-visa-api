@@ -14,19 +14,17 @@ let templateFormalNoticeLetter: any;
 let templateExportTransactionPDF: any;
 
 (async () => {
-    templateRIBExportPDF = await readFilePromise(__dirname + '/templates/rib-export-pdf.template.html', 'utf8');
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
-    templateExportTransactionPDF = await readFilePromise(__dirname + '/templates/export-transaction.pdf.template.html', 'utf8');
 })();
 
-export const generateFormalNoticeLetter = async (letter: Letter, userData: any) => {
+export const generateFormalNoticeLetter = async (letter: Letter, userData: any, isTest?: boolean) => {
     try {
         const values = {
             ...userData,
             'SYSTEM_LONG_DATE': moment().locale('fr'),
             'SYSTEM_SHORT_DATE': moment().format('dd/MM/YYYY'),
         }
-        const data = replaceVariables(letter.pdf, values);
+        const data = replaceVariables(letter.pdf, values, isTest);
 
         const temlateData = generateTemplateFormalNoticeLetter(data);
 
@@ -48,21 +46,28 @@ export const generateFormalNoticeLetter = async (letter: Letter, userData: any) 
     }
 };
 
-const replaceVariables = (content: any, values: any) => {
+const replaceVariables = (content: any, values: any, isTest?: boolean) => {
     const obj = {};
     for (const key in content) {
         if (!content.hasOwnProperty(key)) { break; }
-        obj[key] = formatContent(content, values);
+        obj[key] = formatContent(content, values, isTest);
     }
     return obj;
 }
 
-const formatContent = (str: string, values: any[]) => {
+export const formatContent = (str: string, values: any, isTest?: boolean) => {
+    if (isTest) {
+        str = str.split(`{{`).join(`[`);
+        str = str.split(`}}`).join(`]`);
+        return str;
+    }
     for (const key of values) {
         if (str.includes(`{{${key}}}`)) {
-            str.split(`{{${key}}}`).join(`${values[key]}`);
+            str = str.split(`{{${key}}}`).join(`${values[key]}`);
         }
     }
+
+    return str;
 }
 
 const generateTemplateFormalNoticeLetter = (letter: Letter) => {

@@ -46,10 +46,7 @@ export const authService = {
 
             if (['development', 'staging'].includes(config.get('env'))) { return otp }
             logger.info(`sends authentication Token by email and SMS to user`);
-            await Promise.all([
-                notificationService.sendAuthTokenmail(user, otp),
-                notificationService.sendTokenSMS(get(otp, 'value'), get(user, 'tel'))
-            ]);
+    
             if (['staging-bci'].includes(config.get('env'))) { return otp; }
         } catch (error) {
             logger.error(`\nError during credentials verification \n${error.message}\n${error.stack}\n`);

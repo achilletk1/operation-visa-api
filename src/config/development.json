@@ -29,7 +29,11 @@
     "pdfApiUrl": "http://localhost:5000",
     "timeout": 100000,
     "fileStoragePath": "./filesrec",
-    "cbsApiUrl": "http://localhost:4000"
+    "cbsApiUrl": "http://localhost:4000",
+    "template": {
+        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
+        "color": "#DC752A"
+    }
 
 
 }
