@@ -12,8 +12,8 @@ export const lettersService = {
         try {
             const variables = await cbsService.getCbsUserVariables();
             variables.push(...[
-                'SYSTEM_LONG_DATE',
-                'SYSTEM_SHORT_DATE',
+                'SYSTEM_TODAY_LONG',
+                'SYSTEM_TODAY_SHORT',
             ]);
 
             return variables;
@@ -54,9 +54,6 @@ export const lettersService = {
     },
     updateLetterById: async (id: string, data: any) => {
         try {
-            const vourchers = await lettersCollection.getLetterBy({});
-            const foundIndex = vourchers.findIndex((e) => e.label === data.label && e._id.toString() !== id);
-            if (foundIndex > -1) { return new Error('VourcherAlreadyExist') }
             return await lettersCollection.updateLetterById(id, data);
         } catch (error) {
             logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
@@ -84,17 +81,20 @@ export const lettersService = {
 
 
 
-    generateExportView: async ( data: any) => {
+    generateExportView: async (letter: Letter) => {
         try {
-            const { letter } = data;
 
             if (!letter) { return new Error('LetterNotFound') }
 
-            const pdfString = await exportsHelper.generateFormalNoticeLetter(letter, {}, true);
+            const pdfStringEn = await exportsHelper.generateFormalNoticeLetter(letter.pdf.en, {}, letter.pdf.signature, true);
 
-            if (pdfString instanceof Error) { return pdfString; }
+            if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            return pdfString;
+            const pdfStringFr = await exportsHelper.generateFormalNoticeLetter(letter.pdf.fr, {},letter.pdf.signature, true);
+
+            if (pdfStringFr instanceof Error) { return pdfStringFr; }
+
+            return { en: pdfStringEn, fr: pdfStringFr };
         } catch (error) {
             logger.error(`\nError generateExportView \n${error.message}\n${error.stack}\n`);
             return error;

@@ -31,7 +31,7 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td align="left"
-                                                                    style="padding:0 0 42px 0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;line-height:24px;font-weight:400;display:flex;justify-content: flex-end;">
+                                                                    style="padding:0 0 10px 0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;line-height:24px;font-weight:400;display:flex;justify-content: flex-end;">
                                                                     <a href="" target="_blank"
                                                                         data-saferedirecturl="https://www.google.com/url?q=https://mandrillapp.com/track/click/30191028/ui8.net?p%3DeyJzIjoiQ2lPYVNhLTJsQWhZSVlBZ2o4b2ZtN0p6VURVIiwidiI6MSwicCI6IntcInVcIjozMDE5MTAyOCxcInZcIjoxLFwidXJsXCI6XCJodHRwczpcXFwvXFxcL3VpOC5uZXRcIixcImlkXCI6XCJkNmZhZTI5Y2FiZTE0MzY0OGQwOTlkYmM1NTNkOGY5ZVwiLFwidXJsX2lkc1wiOltcImQ2YWRjMzEwYTQ0NGIyM2ZmYzlkNTFiYTc4YzM5MWUwMjc5YzVlYzdcIl19In0&amp;source=gmail&amp;ust=1586697714629000&amp;usg=AFQjCNGzvPYuzJ4UGfmp6-93rUg8tJtJPg">
 
@@ -56,43 +56,51 @@
                                                                     style="padding:0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:12px;font-weight:100;color:#333;">
 
                                                                     <div class="sender-infos-container">
+                                                                        {{#each headLeftText }}
                                                                         <div class="sender-info-elmt bold">
-                                                                            {{headLeftText}}
+                                                                            {{this}}
                                                                         </div>
+                                                                        <br>
+                                                                        {{/each}}
                                                                         <!-- <div class="sender-info-elmt">(+237) 233 43 60 -->
                                                                     </div>
                                                                     <!-- <div class="sender-info-elmt">bicec.com</div> -->
                                                                     </div>
 
                                                                     <div class="receiver-infos-container">
+                                                                        {{#each headRightText}}
                                                                         <div class="receiver-info-elmt bold">
-                                                                            {{headRightText}}
+                                                                            {{this}}
                                                                         </div>
-                                                                        <!--  <div class="receiver-info-elmt">{{client_phone}}
-                                                                        </div>
-                                                                        <div class="receiver-info-elmt">{{client_email}}
-                                                                        </div> -->
+                                                                        <br>
+                                                                        {{/each}}
+
                                                                     </div>
                                                                     <div class="object">
                                                                         <span class="object"
-                                                                            style="text-decoration: underline;">{{letterRef}}</span>
+                                                                            style="text-decoration: underline; margin-bottom: 5px;">{{letterRef}}</span>
                                                                     </div>
+                                                                    <br><br>
                                                                     <div class="object">
                                                                         <span class="object bold">Objet :
                                                                             {{objectText}}</span>
                                                                     </div>
 
-                                                                    <p class="mail-content">{{salutationText}},</p>
+                                                                    {{#each salutationText}} <p class="mail-content">
+                                                                        {{this}},</p> <br>{{/each}}
 
-                                                                    <p class="mail-content">{{introductionTexT}}</p>
-
-
-                                                                    <p class="mail-content"> {{bodyText}}</p>
-
-                                                                    <p class="mail-content">{{conclusionText}}</p>
+                                                                    {{#each introductionTexT}} <p class="mail-content">
+                                                                        {{this}}</p> <br>{{/each}}
 
 
-                                                                    <div class="signature-container">
+                                                                    {{#each bodyText}} <p class="mail-content">
+                                                                        {{this}}</p> <br> {{/each}}
+
+                                                                    {{#each conclusionText}} <p class="mail-content">
+                                                                        {{this}}</p> <br> {{/each}}
+
+                                                            
+                                                                    <div class="signature-container" style="margin-top: 5px ;">
                                                                         <div>{{signatureText}}</div>
                                                                         <img src="{{signature}}" class="CToWUd"
                                                                             width="200px" height="100px">
@@ -103,9 +111,9 @@
                                                             </tr>
                                                             <tr>
                                                                 <td>
-                                                                    <div class="preview-footer"
-                                                                        style="padding-bottom: 42px;">
-                                                                        <p>{{footerText}}</p>
+                                                                    <div class="preview-footer">
+                                                                        {{#each footerText}} <p>{{this}}</p> <br>
+                                                                        {{/each}}
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -133,7 +141,6 @@
         }
 
         .sender-infos-container .sender-info-elmt {
-            margin: 5px 0;
             font-size: 16px;
             line-height: 22px;
         }
@@ -146,25 +153,24 @@
         }
 
         .receiver-infos-container .receiver-info-elmt {
-            margin: 5px 0;
             font-size: 16px;
             line-height: 22px;
         }
 
         .object {
             font-size: 19px;
-            margin: 30px 0;
+            /* margin: 30px 0; */
         }
 
         .mail-content {
-            margin: 45px 0;
+            /* margin: 45px 0; */
         }
 
         .preview-footer {
-            padding: 5px 0;
+            /* padding: 5px 0; */
             font-size: .9rem;
             /* position: absolute; */
-            margin-top: 100px;
+            /* margin-top: 100px; */
             width: 100%;
             color: rgba(128, 128, 128, 0.97);
             border-top: 1px solid rgba(151, 151, 151, 0.69);

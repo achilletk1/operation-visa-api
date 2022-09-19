@@ -6,17 +6,35 @@ export interface Letter {
         updated?: number;
     };
     pdf?: {
-        letterRef?: string;
-        headLeftText?: string;
-        headRightText?: string;
-        introductionTexT?: string;
-        salutationText?: string;
-        objectText?: string;
-        bodyText?: string;
-        conclusionText?: string;
-        footerText?: string;
-        signatureText?: string;
+        en?: {
+            letterRef?: string;
+            headLeftText?: string;
+            headRightText?: string;
+            introductionText?: string;
+            salutationText?: string;
+            objectText?: string;
+            bodyText?: string;
+            conclusionText?: string;
+            footerText?: string;
+            signatureText?: string;
+        },
+        fr?: {
+            letterRef?: string;
+            headLeftText?: string;
+            headRightText?: string;
+            introductionText?: string;
+            salutationText?: string;
+            objectText?: string;
+            bodyText?: string;
+            conclusionText?: string;
+            footerText?: string;
+            signatureText?: string;
+        },
         signature?: string;
     };
-    emailText?: string;
+    emailText?: {
+        fr?: string;
+        en?: string;
+    };
+    period?: number;
 }

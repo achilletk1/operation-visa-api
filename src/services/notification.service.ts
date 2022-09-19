@@ -67,9 +67,9 @@ export const notificationService = {
         }
     },
 
-    sendEmailFormalNotice: async (letter: Letter, userData: any, user: any, email: string) => {
+    sendEmailFormalNotice: async (letter: Letter, userData: any, user: any, email: string, lang: string) => {
 
-        const text = exportHelper.formatContent(letter.emailText, userData);
+        const text = exportHelper.formatContent(letter.emailText[lang], userData);
 
         const data = {
             name: `${get(user, 'fname', '')} ${get(user, 'lname', '')}`,
@@ -82,7 +82,7 @@ export const notificationService = {
 
         const receiver = `${email}`;
 
-        const pdfString = await exportHelper.generateFormalNoticeLetter(letter, userData);
+        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData);
 
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);

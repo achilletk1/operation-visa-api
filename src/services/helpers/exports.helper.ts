@@ -17,16 +17,16 @@ let templateExportTransactionPDF: any;
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
 })();
 
-export const generateFormalNoticeLetter = async (letter: Letter, userData: any, isTest?: boolean) => {
+export const generateFormalNoticeLetter = async (content: any, userData: any, signature: string, isTest?: boolean) => {
     try {
         const values = {
             ...userData,
-            'SYSTEM_LONG_DATE': moment().locale('fr'),
-            'SYSTEM_SHORT_DATE': moment().format('dd/MM/YYYY'),
+            'SYSTEM_TODAY_LONG': moment().locale('fr'),
+            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
         }
-        const data = replaceVariables(letter.pdf, values, isTest);
+        const data = replaceVariables(content, values, isTest);
 
-        const temlateData = generateTemplateFormalNoticeLetter(data);
+        const temlateData = generateTemplateFormalNoticeLetter(data, signature);
 
         const template = handlebars.compile(templateFormalNoticeLetter);
 
@@ -50,12 +50,14 @@ const replaceVariables = (content: any, values: any, isTest?: boolean) => {
     const obj = {};
     for (const key in content) {
         if (!content.hasOwnProperty(key)) { break; }
-        obj[key] = formatContent(content, values, isTest);
+        obj[key] = formatContent(content[key], values, isTest);
     }
     return obj;
 }
 
 export const formatContent = (str: string, values: any, isTest?: boolean) => {
+    if (!str) { return '' }
+
     if (isTest) {
         str = str.split(`{{`).join(`[`);
         str = str.split(`}}`).join(`]`);
@@ -70,7 +72,7 @@ export const formatContent = (str: string, values: any, isTest?: boolean) => {
     return str;
 }
 
-const generateTemplateFormalNoticeLetter = (letter: Letter) => {
+const generateTemplateFormalNoticeLetter = (letter: Letter, signature: string) => {
 
     const reg = '//'
 
@@ -85,7 +87,7 @@ const generateTemplateFormalNoticeLetter = (letter: Letter) => {
         conclusionText: goToTheLine(`${get(letter, 'conclusionText', '')}`, reg),
         footerText: goToTheLine(`${get(letter, 'footerText', '')}`, reg),
         signatureText: get(letter, 'signatureText', ''),
-        signature: get(letter, 'signature', '')
+        signature
     }
 
     return data;
@@ -93,7 +95,7 @@ const generateTemplateFormalNoticeLetter = (letter: Letter) => {
 
 
 const goToTheLine = (str: string, reg: string) => {
-    return str.replace(reg, '<br>');
+    return str.split(reg);
 }
 
 export const generateTransactionExportXlsx = (transactions) => {

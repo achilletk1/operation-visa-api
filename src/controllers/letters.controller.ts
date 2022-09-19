@@ -136,7 +136,7 @@ export const lettersController = {
         });
 
 
-        app.post('/letters/attachements/view', async (req: Request, res: Response) => {
+        app.post('/letters/view', async (req: Request, res: Response) => {
 
             const data = await lettersService.generateExportView(req.body);
 
