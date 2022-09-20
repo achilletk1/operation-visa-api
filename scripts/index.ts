@@ -1,11 +1,11 @@
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
-import { inserDefaultTransfertTypes } from './helpers/insert-default-transfert-types';
 import * as Confirm from 'prompt-confirm';
 import { config } from './config-env';
+import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-   await inserDefaultTransfertTypes();
+//    await inserDefaultLongTravelsTypes();
    await inserDefaultVouchers();
 }
 

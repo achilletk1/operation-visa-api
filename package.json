@@ -10,8 +10,7 @@
     "start:staging": "cross-env NODE_ENV=staging node dist/index.js",
     "start:staging-bci": "cross-env NODE_ENV=staging-bci node dist/index.js",
     "start:prod": "cross-env NODE_ENV=production node  dist/index.js",
-    "scripts": "node -r ts-node/register/transpile-only scripts/index.ts",
-    "visa-operations": "node -r ts-node/register/transpile-only scripts/visa-operations"
+    "scripts": "node -r ts-node/register/transpile-only scripts/index.ts"
   },
   "author": "Londo Technology",
   "license": "ISC",

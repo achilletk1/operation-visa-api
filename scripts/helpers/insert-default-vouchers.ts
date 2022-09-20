@@ -1,28 +1,38 @@
 import * as  moment from 'moment'
 import { getDatabase } from '../config';
 
-export const inserDefaultVouchers= async () => {
+export const inserDefaultVouchers = async () => {
 
     console.log('----------------------------------------');
     console.log('INSERT DEFAULTS VOUCHERS');
     console.log('----------------------------------------');
 
     const db = await getDatabase();
-    const vouchers= [
+    const vouchers = [
         {
-            label: 'Carte d\'identité',
-            description:'',
+            label: `Carte d'identité`,
+            description: `Carte d'identité de l'utilisateur`,
             date: { created: moment().valueOf() }
         },
         {
-            label: 'Passeport',
-            description: '',
+            label: `Passeport`,
+            description: `Passeport de l'utilisateur`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Ordre de mission`,
+            description: `Ordre de mission`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Contrat de travail`,
+            description: `Contrat de travail`,
             date: { created: moment().valueOf() }
         }
     ]
 
     console.log('insert default vouchersinto vouchers collection');
-    const response = await db.collection('vouchers').insertMany(vouchers);
+    const response = await db.collection('visa_operations_vouchers').insertMany(vouchers);
     console.log(response.insertedIds);
     console.log('');
 
