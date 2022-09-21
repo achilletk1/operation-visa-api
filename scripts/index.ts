@@ -5,7 +5,7 @@ import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-trav
 
 const runScripts = async () => {
     // SCRIPTS to execute
-//    await inserDefaultLongTravelsTypes();
+   await inserDefaultLongTravelsTypes();
    await inserDefaultVouchers();
 }
 
