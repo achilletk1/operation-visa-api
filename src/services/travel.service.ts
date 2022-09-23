@@ -23,7 +23,7 @@ export const travelService = {
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
 
-            // insert permanent transfers
+            // insert travel reference
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
             const result = await travelsCollection.insertTravel(travel);
