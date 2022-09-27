@@ -72,20 +72,6 @@ export const travelService = {
     },
     updateTravelById: async (id: string, travel: Travel) => {
         try {
-            // delete proof step's status and attachment
-            delete travel.proofTravel.status;
-            delete travel.proofTravel.proofTravelAttachs;
-
-            // delete expense step's status and attachment
-            travel.expenseAttachements = travel.expenseAttachements.map((elt) => {
-                delete elt.attachments;
-                delete elt.status;
-                return elt;
-            });
-
-            // delete others step's status and attachment
-            delete travel.othersAttachements.status;
-            delete travel.othersAttachements.attachments;
             return await travelsCollection.updateTravelsById(id, travel);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
