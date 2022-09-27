@@ -18,7 +18,7 @@ export const travelService = {
         try {
 
             // Set request status to created
-            travel.status = OpeVisaStatus.WAITING;
+            travel.status = OpeVisaStatus.PENDING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
