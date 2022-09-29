@@ -9,6 +9,8 @@ import * as exportHelper from './helpers/exports.helper';
 import { get } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
+import { Notification } from '../models/notification';
+import { options } from '../collections/cbs-dao';
 
 export const notificationService = {
 
@@ -84,7 +86,7 @@ export const notificationService = {
 
         const receiver = `${email}`;
 
-        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang],userData,letter.pdf.signature);
+        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData, letter.pdf.signature);
 
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);
@@ -123,29 +125,29 @@ export const notificationService = {
         }
     },
 
-    
+
     getNotifications: async (filters: any) => {
         try {
             commonService.parseNumberFields(filters);
-            const { offset, limit ,start , end } = filters;
+            const { offset, limit, start, end } = filters;
             delete filters.offset;
             delete filters.limit;
 
-            const range = (start && end) ? { start: moment(start,'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end,'DD-MM-YYYY').endOf('day').valueOf() } :
-            undefined;
+            const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
+                undefined;
 
             return await notificationsCollection.getNotifications(filters || {}, offset || 1, limit || 40, range);
         } catch (error) {
             logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
             return error;
         }
-    },
+    }
 
 };
 
 // END Visa operations mails //
 
-const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: any, attachments?: any, cc?: any) => {
+const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: any, attachments?: any, cc?: any, insert?: boolean) => {
     try {
 
         if (!receiver || !body || !subject) {
@@ -167,6 +169,7 @@ const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: an
         if (cc) { options.Cc = cc; }
 
         if (attachments) { options.Attachments = attachments; }
+        if (insert) { await insertNotification(options) }
 
         return await client.sendEmail(options);
     } catch (error) {
@@ -175,7 +178,7 @@ const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: an
     }
 };
 
-const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: any, cc?: any, excelData?: any) => {
+const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: any, cc?: any, excelData?: any, insert?: boolean) => {
 
     if (config.get('env') !== 'staging-bci' && config.get('env') !== 'production') {
         let Attachments: any[] = null;
@@ -196,7 +199,7 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
             });
         }
 
-        return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
+        return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null, insert);
     }
 };
 
@@ -229,6 +232,27 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
     }
 };
 
+const insertNotification = async (data: any, format?: number) => {
+    const notification: Notification = {
+        object: data?.object,
+        dates: {
+            createdAt: moment().valueOf(),
+        },
+        format,
+        status:100,
+        isAttachement: data?.attachments? true :false,
+        message:data?.body,
+        email:data?.message ?data?.message : '',
+        telephone: data?.tel? data.tel: '',
+        id :data.id,
+    }
+    try {
+        return await notificationsCollection.insertNotifications(notification);
+    } catch (error) {
+        logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
+        return error;
+    }
+};
 const getNumberWithSpaces = (x: { toString: () => string; }) => {
     if (!x) { return '0' }
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
