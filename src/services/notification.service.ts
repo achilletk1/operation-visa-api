@@ -7,6 +7,8 @@ import * as moment from 'moment';
 import { Letter } from '../models/letter';
 import * as exportHelper from './helpers/exports.helper';
 import { get } from 'lodash';
+import { commonService } from './common.service';
+import { notificationsCollection } from '../collections/notifications.collection';
 
 export const notificationService = {
 
@@ -121,6 +123,24 @@ export const notificationService = {
         }
     },
 
+    
+    getNotifications: async (filters: any) => {
+        try {
+            commonService.parseNumberFields(filters);
+            const { offset, limit ,start , end } = filters;
+            delete filters.offset;
+            delete filters.limit;
+
+            const range = (start && end) ? { start: moment(start,'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end,'DD-MM-YYYY').endOf('day').valueOf() } :
+            undefined;
+
+            return await notificationsCollection.getNotifications(filters || {}, offset || 1, limit || 40, range);
+        } catch (error) {
+            logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+
 };
 
 // END Visa operations mails //
@@ -179,6 +199,7 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
         return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
     }
 };
+
 
 const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 
