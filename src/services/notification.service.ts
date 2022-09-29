@@ -82,7 +82,7 @@ export const notificationService = {
 
         const receiver = `${email}`;
 
-        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData);
+        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang],userData,letter.pdf.signature);
 
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);
