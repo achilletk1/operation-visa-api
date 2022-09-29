@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { usersCollection } from '../collections/users.collection';
 import { onlinePaymentsCollection } from '../collections/online-payments.collection';
-import { OperationStatus, OnlinePayment, OnlinePaymentStatement, Attachment, AttachementStatus } from '../models/visa-operations';
+import { OperationStatus, OnlinePayment, OnlinePaymentStatement, Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import * as generateId from 'generate-unique-id';
@@ -18,16 +18,17 @@ export const onlinePaymentsService = {
     insertOnlinePaymentStatement: async (userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> => {
         try {
 
-            const user = usersCollection.getUserById(userId);
+            const user = await usersCollection.getUserById(userId);
 
-            if (user) { return new Error('UserNotFound'); }
+            if (!user) { return new Error('UserNotFound'); }
 
-            const currentMonth = moment(onlinepaymentStatement.date).format('YYYYMM');
+            const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
 
             let onlinePayment: OnlinePayment;
             let result: any;
 
             onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
+            onlinepaymentStatement.status = OpeVisaStatus.PENDING;
 
             onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth });
 
@@ -38,9 +39,10 @@ export const onlinePaymentsService = {
                     dates: {
                         created: moment().valueOf(),
                     },
+                    ceiling:200000,
                     amounts: 0,
-                    status: OperationStatus.PENDING,
-                    currentMonth: '',
+                    status: OpeVisaStatus.PENDING,
+                    currentMonth,
                     statements: [onlinepaymentStatement],
                     transactions: [],
                 }

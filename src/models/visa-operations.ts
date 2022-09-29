@@ -138,29 +138,32 @@ export interface OnlinePayment {
   _id?: any;
   clientCode?: string;
   userId?: string;
+  currentMonth?: number;
+  status?: OpeVisaStatus;
   dates?: {
-    created: number;
+    created?: number;
     updated?: number;
   };
-  amounts?: number;
-  status?: OperationStatus;
-  currentMonth?: string;
+  amounts?:number;
+  ceiling?: number;
   statements?: OnlinePaymentStatement[];
   transactions?: VisaTransaction[];
+  othersAttachements?: any[];
 }
 
 export interface OnlinePaymentStatement {
   fullName?: string;
+  label?: string;
   date?: number;
-  amount: string;
-  account?: {
-    ncp: number;
-    age: number;
-  };
+  amount: number;
+  nature?: any;
   statementRef?: string;
   comment?: string;
-  signature?: string;
   attachments?: Attachment[];
+  transactionRef?: string;
+  validators?: Validator[];
+  status?: OpeVisaStatus;
+  expenseCategory?: any;
   transactions?: VisaTransaction[];
 }
 

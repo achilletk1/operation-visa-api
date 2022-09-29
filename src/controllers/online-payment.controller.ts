@@ -15,7 +15,13 @@ export const onlinePaymentsController = {
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(401).json(errResp);
             }
-            res.status(200).json({ message: 'New online payment inserted.' });
+
+            if (data instanceof Error) {
+                const message = 'unable to post online payment Statement';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+            res.status(200).json(data);
         });
 
 

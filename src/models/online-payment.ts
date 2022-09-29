@@ -1,32 +1,34 @@
-import { Attachment, OpeVisaStatus, VisaTransaction } from "./visa-operations";
+import { Attachment, OpeVisaStatus, Validator, VisaTransaction } from "./visa-operations";
 
 export interface OnlinePayment {
-    _id?: string;
-    clientCode?: string;
-    userId?: string;
-    currentMonth?: number;
-    status: OpeVisaStatus;
-    dates?: {
-      created: number;
-      updated?: number;
-    };
-    amounts?: number;
-    statements?: OnlinePaymentStatement[];
-    transactions?: VisaTransaction[];
-  }
+  _id?: string;
+  clientCode?: string;
+  userId?: string;
+  currentMonth?: number;
+  status?: OpeVisaStatus;
+  dates?: {
+    created?: number;
+    updated?: number;
+  };
+  ceiling?: number;
+  statements?: OnlinePaymentStatement[];
+  transactions?: VisaTransaction[];
+  othersAttachements?: any[];
   
-  export interface OnlinePaymentStatement {
-    fullName?: string;
-    date?: number;
-    amount: string;
-    account?: {
-      ncp: number;
-      age: number;
-    };
-    statementRef?: string;
-    comment?: string;
-    signature?: string;
-    attachments?: Attachment[];
-    transactions?: VisaTransaction[];
-  }
-  
+}
+
+export interface OnlinePaymentStatement {
+  fullName?: string;
+  label?: string;
+  date?: number;
+  amount: number;
+  nature?: any;
+  statementRef?: string;
+  comment?: string;
+  attachments?: Attachment[];
+  transactionRef?: string;
+  validators?: Validator[];
+  status?: OpeVisaStatus;
+  expenseCategory?: any;
+  transactions?: VisaTransaction[];
+}
