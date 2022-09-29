@@ -26,6 +26,8 @@ import { longTravelTypesController } from './controllers/long-travel-types.contr
 import { reportingService } from './services/reporting.service';
 import { reportingController } from './controllers/reporting.controller';
 import { lettersController } from './controllers/letters.controller';
+import { notificationsController } from './controllers/notifications.controller';
+
 
 
 const app = express();
@@ -69,6 +71,7 @@ exportController.init(app);
 reportingController.init(app);
 templatesController.init(app);
 lettersController.init(app);
+notificationsController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 
