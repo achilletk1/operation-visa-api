@@ -24,6 +24,12 @@ export const notificationsCollection = {
         if (filters?._id) { filters._id = new ObjectId(filters?._id) }
         return database.collection(collectionName).findOne({ ...filters });
     },
+    
+    insertNotifications: async (data: any) => {
+        const database = await getDatabase();
+        const { insertedId } = await database.collection(collectionName).insertOne(data);
+        return { insertedId };
+    },
 
 
 }
