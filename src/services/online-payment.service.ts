@@ -99,7 +99,6 @@ export const onlinePaymentsService = {
         try {
 
             data.statements = data.statements.map(element => {
-                delete element.attachments;
                 return element;
             });
             return await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);

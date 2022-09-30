@@ -81,7 +81,7 @@ export const onlinePaymentsController = {
             res.status(200).json(data);
         });
 
-        app.put('/online-payments/:id', async (req: Request, res: Response) => {
+        app.put('/online-payments/update/:id', async (req: Request, res: Response) => {
             const { id } = req.params;
 
             const data = await onlinePaymentsService.updateOnlinePaymentsById(id, req.body);
