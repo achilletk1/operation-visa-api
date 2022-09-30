@@ -9,7 +9,7 @@ import * as exportHelper from './helpers/exports.helper';
 import { get } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
-import { Notification } from '../models/notification';
+import { Notification, NotificationFormat } from '../models/notification';
 import { options } from '../collections/cbs-dao';
 
 export const notificationService = {
@@ -19,6 +19,7 @@ export const notificationService = {
     sendEmailVisaDepassment: async (data: any, email: string) => {
 
         data = {
+            _id:data._id,
             civility: 'MR',
             name: `ACHILLE KAMGA`,
             start: `08/09/2022`,
@@ -28,14 +29,23 @@ export const notificationService = {
             link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
         }
 
-        const HtmlBody = notificationHelper.generateMailVisaDepassment(data);
+        const HtmlBody: string = notificationHelper.generateMailVisaDepassment(data);
 
         const subject = `Dépassement de plafond sur les transactions hors zone CEMAC`;
 
         const receiver = `${email}`;
 
         try {
-            return sendEmail(receiver, subject, HtmlBody);
+            sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message:HtmlBody    ,
+                email:receiver,
+                id :data?._id.toString(),
+            }
+             await insertNotification(notification) 
+
         } catch (error) {
             logger.error(
                 `Error during sendEmailVisaDepassment to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -147,7 +157,7 @@ export const notificationService = {
 
 // END Visa operations mails //
 
-const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: any, attachments?: any, cc?: any, insert?: boolean) => {
+const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: any, attachments?: any, cc?: any) => {
     try {
 
         if (!receiver || !body || !subject) {
@@ -169,7 +179,6 @@ const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: an
         if (cc) { options.Cc = cc; }
 
         if (attachments) { options.Attachments = attachments; }
-        if (insert) { await insertNotification(options) }
 
         return await client.sendEmail(options);
     } catch (error) {
@@ -178,7 +187,7 @@ const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: an
     }
 };
 
-const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: any, cc?: any, excelData?: any, insert?: boolean) => {
+const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: any, cc?: any, excelData?: any) => {
 
     if (config.get('env') !== 'staging-bci' && config.get('env') !== 'production') {
         let Attachments: any[] = null;
@@ -199,7 +208,7 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
             });
         }
 
-        return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null, insert);
+        return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
     }
 };
 
@@ -232,20 +241,10 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
     }
 };
 
-const insertNotification = async (data: any, format?: number) => {
-    const notification: Notification = {
-        object: data?.object,
-        dates: {
-            createdAt: moment().valueOf(),
-        },
-        format,
-        status:100,
-        isAttachement: data?.attachments? true :false,
-        message:data?.body,
-        email:data?.message ?data?.message : '',
-        telephone: data?.tel? data.tel: '',
-        id :data.id,
-    }
+const insertNotification = async (notification: any) => {
+     notification.dates =  {createdAt: moment().valueOf()},    
+     notification.status =  100;    
+
     try {
         return await notificationsCollection.insertNotifications(notification);
     } catch (error) {
