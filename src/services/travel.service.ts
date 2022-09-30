@@ -9,6 +9,7 @@ import { travelsCollection } from '../collections/travels.collection';
 import { filesService } from './files.service';
 import { Travel, TravelAttachement } from '../models/travel';
 import { OpeVisaStatus } from '../models/visa-operations';
+import { notificationService } from './notification.service';
 
 
 export const travelService = {
@@ -31,6 +32,10 @@ export const travelService = {
             //TODO send notification
 
             const data = { _id: result };
+
+            Promise.all([
+                await notificationService.sendEmailVisaDepassment(data, 'samory.takougne@londo-tech.com')
+            ]);
 
             return data;
 
