@@ -72,6 +72,14 @@ export const usersCollection = {
         return await database.collection(collectionName).find({ ...filters }).sort({ 'userCode': -1 }).toArray();
     },
 
+    getUsersByIds: async (usersId: any[]): Promise<any> => {
+        const database = await getDatabase();
+        usersId = usersId.map((elt) => { return new ObjectId(elt._id) });
+        return await database.collection(collectionName).find({ _id: { $in: usersId } }).project({
+            _id: 1, category: 1, clientCode: 1, dates: 1, email: 1, fname: 1, lname: 1, tel: 1, userCode: 1, enabled: 1
+        }).sort({ 'userCode': -1 }).toArray();
+    },
+
     getUserByCode: async (userCode: any): Promise<User | any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ userCode });

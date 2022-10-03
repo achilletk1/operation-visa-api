@@ -1,11 +1,14 @@
+import { ObjectId } from 'mongodb';
+import { onlinePaymentsCollection } from './../collections/online-payments.collection';
+import { travelsCollection } from './../collections/travels.collection';
 import { usersCollection } from '../collections/users.collection';
-import { notificationService } from './notification.service';
 import * as httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { User } from './../models/user';
 import { isEmpty, get } from 'lodash';
 import { logger } from '../winston';
 import * as moment from 'moment';
+import { TravelType } from '../models/travel';
 
 export const usersService = {
 
@@ -124,5 +127,20 @@ export const usersService = {
             return error;
         }
     },
+
+    getUserByOperations: async (type: string): Promise<any> => {
+        try {
+            let usersId: any[];
+
+            if (type === 'long-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.LONG_TERM_TRAVEL) }
+            if (type === 'short-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.SHORT_TERM_TRAVEL) }
+            if (type === 'online-payment') {usersId =  await onlinePaymentsCollection.getUsersOnlinepaymentId() }
+            return usersCollection.getUsersByIds(usersId);
+
+        } catch (error) {
+            logger.error(`get user by ${type} failed \n${error.name} \n${error.stack}`);
+            return error;
+        }
+    }
 
 }

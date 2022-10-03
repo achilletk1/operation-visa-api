@@ -43,7 +43,6 @@ export const onlinePaymentsController = {
             res.status(200).json(data);
         });
 
-
         app.get('/online-payments/all', async (req: Request, res: Response) => {
             const data = await onlinePaymentsService.getOnlinePaymentsBy(req.query);
 

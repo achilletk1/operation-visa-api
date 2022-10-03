@@ -19,7 +19,7 @@ export const usersController = {
 
             res.status(200).json(data);
         });
-    
+
         app.get('/user', async (req: Request, res: Response) => {
             const data = await usersService.getUserBy(req.query);
 
@@ -34,6 +34,16 @@ export const usersController = {
 
         app.get('/users', async (req: Request, res: Response) => {
             const data = await usersService.getUsers(req.query);
+            if (data instanceof Error && (data.message === 'Forbidden')) {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(403).json(errResp);
+            }
+            res.status(200).json(data);
+        });
+
+        app.get('/users/visa-operations/:type', async (req: Request, res: Response) => {
+            const data = await usersService.getUserByOperations(req.params.type);
             if (data instanceof Error && (data.message === 'Forbidden')) {
                 const message = 'forbidden operation';
                 const errResp = commonService.generateErrResponse(message, data);

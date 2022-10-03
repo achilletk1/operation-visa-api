@@ -3,7 +3,7 @@ import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 import { getDatabase } from "./config";
 
-const collectionName = 'visa_operations_oline_payments';
+const collectionName = 'visa_operations_online_payments';
 
 export const onlinePaymentsCollection = {
 
@@ -64,6 +64,11 @@ export const onlinePaymentsCollection = {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return insertedId.toString();
+    },
+
+    getUsersOnlinepaymentId: async (): Promise<any> => {
+        const database = await getDatabase();
+        return await database.collection(collectionName).aggregate([{ $group: { _id: '$userId' } }]).toArray();
     },
 
 }
