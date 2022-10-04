@@ -1,6 +1,6 @@
 import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
-import { Travel } from "../models/travel";
+import { Travel, TravelType } from "../models/travel";
 import { getDatabase } from "./config";
 
 const collectionName = 'visa_operations_travels';
@@ -59,6 +59,11 @@ export const travelsCollection = {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return insertedId;
+    },
+
+    getUsersTravelId: async (travelType: TravelType): Promise<any> => {
+        const database = await getDatabase();       
+        return await database.collection(collectionName).aggregate([{ $match: { travelType } }, { $group: { _id: '$userId' } }]).toArray();
     },
 
 }
