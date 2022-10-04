@@ -6,12 +6,12 @@ const collectionName = 'notifications';
 
 export const notificationsCollection = {
 
-    getNotifications: async (params: any, offset: any, limit: any,range) => {
+    getNotifications: async (params: any, offset: any, limit: any,range: any) => {
         const database = await getDatabase();
         let query = {...params};
         const startIndex = (offset - 1) * limit;
-        if (range) { query['dates.created'] = { $gte: range?.start, $lte: range?.end }; }
-               
+        if (range) { query['dates.createdAt'] = { $gte: range?.start, $lte: range?.end }; }
+
         const total = await database.collection(collectionName).find(query).count();
         const data = await database.collection(collectionName).find(query).skip(startIndex).limit(limit).toArray();
         return { data, total };

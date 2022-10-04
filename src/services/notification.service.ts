@@ -142,6 +142,8 @@ export const notificationService = {
             const { offset, limit, start, end } = filters;
             delete filters.offset;
             delete filters.limit;
+            delete filters.start;
+            delete filters.end;
 
             const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
                 undefined;
