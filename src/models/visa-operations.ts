@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface VisaOperations {
   _id?: string;
   clientCode?: string;
@@ -136,8 +138,7 @@ export enum OpeVisaStatus {
 
 export interface OnlinePayment {
   _id?: any;
-  clientCode?: string;
-  userId?: string;
+  user?: User;
   currentMonth?: number;
   status?: OpeVisaStatus;
   dates?: {

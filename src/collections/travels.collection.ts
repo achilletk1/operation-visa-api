@@ -49,6 +49,8 @@ export const travelsCollection = {
         const startIndex = (offset - 1) * limit;
 
         query = { ...query, ...params }
+        console.log(query);
+        
         const total = await database.collection(collectionName).find(query).count();
         const data = await database.collection(collectionName).find(query).sort({ currentMonth: 1 }).skip(startIndex).limit(limit).toArray();
         return { data, total };
@@ -63,7 +65,7 @@ export const travelsCollection = {
 
     getUsersTravelId: async (travelType: TravelType): Promise<any> => {
         const database = await getDatabase();       
-        return await database.collection(collectionName).aggregate([{ $match: { travelType } }, { $group: { _id: '$userId' } }]).toArray();
+        return await database.collection(collectionName).aggregate([{ $match: { travelType } }, { $group: { _id: '$user' } }]).toArray();
     },
 
 }

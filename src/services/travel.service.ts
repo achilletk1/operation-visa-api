@@ -7,7 +7,7 @@ import * as generateId from 'generate-unique-id';
 import moment = require('moment');
 import { travelsCollection } from '../collections/travels.collection';
 import { filesService } from './files.service';
-import { Travel, TravelAttachement } from '../models/travel';
+import { Travel, TravelAttachment } from '../models/travel';
 import { OpeVisaStatus } from '../models/visa-operations';
 import { notificationService } from './notification.service';
 
@@ -51,6 +51,19 @@ export const travelService = {
             const { offset, limit } = filters;
             delete filters.offset;
             delete filters.limit;
+
+            const { userId, name } = filters;
+
+            if (userId) {
+                delete filters.userId;
+                filters['user._id'] = userId;
+            }
+
+            if (name) {
+                delete filters.name;
+                filters['user.fullName'] = name;
+            }
+            
             return await travelsCollection.getTravels(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
@@ -69,6 +82,12 @@ export const travelService = {
 
     getTravelsBy: async (data: any) => {
         try {
+            const { userId } = data;
+
+            if (userId) {
+                delete data.userId;
+                data['user._id'] = userId;
+            }
             return await travelsCollection.getTravelsBy(data);
         } catch (error) {
             logger.error(`\nError getting travel data by queries \n${error.message}\n${error.stack}\n`);
@@ -162,12 +181,12 @@ export const travelService = {
                 tobeUpdated = { expenseDetails };
             }
 
-            if (step === 'othersAttachements') {
+         /*    if (step === 'othersAttachements') {
                 let { othersAttachements } = travel;
                 othersAttachements.validators.push(validator);
                 othersAttachements = { ...othersAttachements, ...updateData }
                 tobeUpdated = { othersAttachements };
-            }
+            } */
 
             //TODO send notifications for status update
 
@@ -178,7 +197,7 @@ export const travelService = {
         }
     },
 
-    postAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
+    postAttachment: async (id: string, data: any, attachement: TravelAttachment) => {
 
         const { step, expenseDetailRef } = data;
 
@@ -219,18 +238,18 @@ export const travelService = {
         }
 
 
-        if (step === 'othersAttachements') {
+       /*  if (step === 'othersAttachements') {
             const { othersAttachements } = travel;
             othersAttachements.attachments.push(updatedAttachment);
             tobeUpdated = { othersAttachements };
         }
-
+ */
         return await travelsCollection.updateTravelsById(id, tobeUpdated);
 
 
     },
 
-    updateAttachment: async (id: string, data: any, attachement: TravelAttachement) => {
+    updateAttachment: async (id: string, data: any, attachement: TravelAttachment) => {
 
         const { step, path, expenseDetailRef } = data;
 
@@ -280,7 +299,7 @@ export const travelService = {
         }
 
 
-        if (step === 'othersAttachements') {
+       /*  if (step === 'othersAttachements') {
             const { othersAttachements } = travel;
 
             const index = othersAttachements.attachments.findIndex((elt) => elt.path === path);
@@ -289,7 +308,7 @@ export const travelService = {
 
             othersAttachements.attachments[index] = updatedAttachment;
             tobeUpdated = { othersAttachements };
-        }
+        } */
 
         return await travelsCollection.updateTravelsById(id, tobeUpdated);
 

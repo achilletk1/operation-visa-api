@@ -1,9 +1,9 @@
+import { User } from "./user";
 import { Attachment, OpeVisaStatus, Validator, VisaTransaction } from "./visa-operations";
 
 export interface OnlinePayment {
   _id?: string;
-  clientCode?: string;
-  userId?: string;
+  user?: User;
   currentMonth?: number;
   status?: OpeVisaStatus;
   dates?: {
@@ -14,7 +14,7 @@ export interface OnlinePayment {
   statements?: OnlinePaymentStatement[];
   transactions?: VisaTransaction[];
   othersAttachements?: any[];
-  
+
 }
 
 export interface OnlinePaymentStatement {

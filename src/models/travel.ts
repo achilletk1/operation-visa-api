@@ -1,7 +1,8 @@
 import { ChatMessage } from "./chat-message";
+import { User } from "./user";
 import { OperationType, OpeVisaStatus, VisaTransaction } from "./visa-operations";
 
-export interface TravelAttachement {
+export interface TravelAttachment {
     code?: string; // files collection Id
     label?: string; // setting file name in backoffice
     fileName?: string; // name of the file at the upload
@@ -36,8 +37,7 @@ export enum TravelType {
 export interface Travel {
     _id?: any;
     status?: OpeVisaStatus;
-    clientCode?: string;
-    userId?: string;
+    user?: User;
     travelRef?: string;
     fullName?: string;
     travelType?: TravelType;
@@ -59,52 +59,61 @@ export interface Travel {
         };
         comment?: string;
         travelReason?: {
-            code: number;
+            _id: string;
             label: string;
+            code?: number;
             otherLabel?: string;
-            vouchersList?: string[];
         };
         isTransportTicket?: boolean;
-        isVisa?: Boolean;
-        proofTravelAttachs?: TravelAttachement[];
+        isVisa?: boolean;
+        isPassOut?: boolean;
+        isPassIn?: boolean;
+        proofTravelAttachs?: TravelAttachment[];
         status?: OpeVisaStatus;
         rejectReason?: string;
-        validators?: Validator[]
-    }
-
-    expenseDetails?: {
-        ref?: string;
-        type?: OperationType;
-        date?: number;
-        currency?: any;
-        amount?: number;
-        object?: string;
-        status?: OpeVisaStatus;
-        rejectReason?: string;
-        validators?: Validator[]
-    }[];
-
-    expenseAttachements?: {
-        expenseRef?: string;
-        status?: OpeVisaStatus;
-        rejectReason?: string;
-        attachments: TravelAttachement[];
-        validators?: Validator[]
-    }[];
-
-    othersAttachements?: {
-        type?: OperationType;
-        date?: number;
-        currency?: any;
-        amount?: number;
-        object?: string;
-        status?: OpeVisaStatus;
-        rejectReason?: string;
-        attachments: TravelAttachement[];
         validators?: Validator[]
     };
-
-    chat?: ChatMessage[];
-
+    expenseDetails?: ExpenseDetail[];
+    expenseAttachements?: ExpenseAttachement[];
+    othersAttachements?: OthersAttachment[];
     transactions?: VisaTransaction[];
+}
+
+
+export interface ExpenseDetail {
+    ref?: string;
+    type?: OperationType;
+    date?: number;
+    currency?: any;
+    amount?: number;
+    object?: string;
+    status?: OpeVisaStatus;
+    rejectReason?: string;
+    expenceCategory?: ExpenseCategory;
+    validators?: Validator[];
+}
+
+export interface ExpenseAttachement {
+    expenseRef?: string;
+    status?: OpeVisaStatus;
+    rejectReason?: string;
+    attachments: TravelAttachment[];
+    validators?: Validator[];
+}
+
+export interface OthersAttachment {
+    type?: OperationType;
+    date?: number;
+    currency?: any;
+    amount?: number;
+    object?: string;
+    status?: OpeVisaStatus;
+    rejectReason?: string;
+    attachments: TravelAttachment[];
+    validators?: Validator[];
+}
+
+export enum ExpenseCategory {
+    IMPORT_OF_GOODS = 100,
+    IMPORT_OF_SERVICES = 200,
 }

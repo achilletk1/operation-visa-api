@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { onlinePaymentsCollection } from './../collections/online-payments.collection';
 import { travelsCollection } from './../collections/travels.collection';
 import { usersCollection } from '../collections/users.collection';
@@ -128,17 +127,18 @@ export const usersService = {
         }
     },
 
-    getUserByOperations: async (type: string): Promise<any> => {
+    getUserByOperations: async (fields: any): Promise<any> => {
         try {
+            const { type } = fields
             let usersId: any[];
-
+            if (!type) { return await usersCollection.getUsersBy({ category: 100 }) }
             if (type === 'long-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.LONG_TERM_TRAVEL) }
             if (type === 'short-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.SHORT_TERM_TRAVEL) }
-            if (type === 'online-payment') {usersId =  await onlinePaymentsCollection.getUsersOnlinepaymentId() }
+            if (type === 'online-payment') { usersId = await onlinePaymentsCollection.getUsersOnlinepaymentId() }
             return usersCollection.getUsersByIds(usersId);
 
         } catch (error) {
-            logger.error(`get user by ${type} failed \n${error.name} \n${error.stack}`);
+            logger.error(`get user by type failed \n${error.name} \n${error.stack}`);
             return error;
         }
     }

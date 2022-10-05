@@ -54,6 +54,8 @@ export const onlinePaymentsCollection = {
         const startIndex = (offset - 1) * limit;
 
         query = { ...query, ...params }
+        console.log(query);
+        
         const total = await database.collection(collectionName).find(query).count();
         const data = await database.collection(collectionName).find(query).sort({ currentMonth: 1 }).skip(startIndex).limit(limit).toArray();
         return { data, total };

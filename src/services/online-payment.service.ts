@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { usersCollection } from '../collections/users.collection';
 import { onlinePaymentsCollection } from '../collections/online-payments.collection';
-import { OperationStatus, OnlinePayment, OnlinePaymentStatement, Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
+import { OnlinePayment, OnlinePaymentStatement, Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import * as generateId from 'generate-unique-id';
@@ -30,16 +30,19 @@ export const onlinePaymentsService = {
             onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
             onlinepaymentStatement.status = OpeVisaStatus.PENDING;
 
-            onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth });
+            onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth, 'user._id': userId });
 
             if (!onlinePayment) {
                 onlinePayment = {
-                    clientCode: get(user, 'clientCode'),
-                    userId,
+                    user: {
+                        _id: get(user, '_id').toString(),
+                        clientCode: get(user, 'clientCode'),
+                        fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
+                    },
                     dates: {
                         created: moment().valueOf(),
                     },
-                    ceiling:200000,
+                    ceiling: 200000,
                     amounts: 0,
                     status: OpeVisaStatus.PENDING,
                     currentMonth,
@@ -71,6 +74,15 @@ export const onlinePaymentsService = {
             const { offset, limit } = filters;
             delete filters.offset;
             delete filters.limit;
+
+            const { userId } = filters;
+
+            if (userId) {
+                delete filters.userId;
+                filters['user._id'] = userId;
+            }
+
+
             return await onlinePaymentsCollection.getOnlinePayments(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
@@ -89,6 +101,13 @@ export const onlinePaymentsService = {
 
     getOnlinePaymentsBy: async (data: any) => {
         try {
+            const { userId } = data;
+
+            if (userId) {
+                delete data.userId;
+                data['user._id'] = userId;
+            }
+
             return await onlinePaymentsCollection.getOnlinePaymentsBy(data);
         } catch (error) {
             logger.error(`\nError getting travel data by queries \n${error.message}\n${error.stack}\n`);
@@ -108,41 +127,41 @@ export const onlinePaymentsService = {
         }
     },
 
-        postAttachment: async (id: string, data: any, attachement: Attachment) => {
+    postAttachment: async (id: string, data: any, attachement: Attachment) => {
 
-            const { statementRef } = data;
-
-
-            const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
-
-            if (!onlinePayment) { return new Error('OnlinePaymentNotFound') }
-
-            const { statements } = onlinePayment;
-
-            const statementIndex = statements.findIndex((elt) => elt.statementRef === statementRef);
-
-            if (statementIndex < 0) { return new Error('OnlinePaymentStatementNotFound') }
-            
-            const { path } = attachement;
-
-            attachement = commonService.saveAttachement(id, attachement, onlinePayment.dates.created);
-
-            if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
+        const { statementRef } = data;
 
 
-            const pathIndex = statements[statementIndex].attachments.findIndex((elt) => elt.path === path);
+        const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
+
+        if (!onlinePayment) { return new Error('OnlinePaymentNotFound') }
+
+        const { statements } = onlinePayment;
+
+        const statementIndex = statements.findIndex((elt) => elt.statementRef === statementRef);
+
+        if (statementIndex < 0) { return new Error('OnlinePaymentStatementNotFound') }
+
+        const { path } = attachement;
+
+        attachement = commonService.saveAttachement(id, attachement, onlinePayment.dates.created);
+
+        if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
 
-            if (pathIndex < 0) {
-                statements[statementIndex].attachments.push(attachement);
-            } else {
-                statements[statementIndex].attachments[pathIndex] = attachement;
-            }
-
-            return await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statements });
+        const pathIndex = statements[statementIndex].attachments.findIndex((elt) => elt.path === path);
 
 
-        },
+        if (pathIndex < 0) {
+            statements[statementIndex].attachments.push(attachement);
+        } else {
+            statements[statementIndex].attachments[pathIndex] = attachement;
+        }
+
+        return await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statements });
+
+
+    },
 
     updateAttachmentStatus: async (id: string, data: any) => {
 

@@ -42,8 +42,8 @@ export const usersController = {
             res.status(200).json(data);
         });
 
-        app.get('/users/visa-operations/:type', async (req: Request, res: Response) => {
-            const data = await usersService.getUserByOperations(req.params.type);
+        app.get('/users/visa-operations/all', async (req: Request, res: Response) => {
+            const data = await usersService.getUserByOperations(req.query);
             if (data instanceof Error && (data.message === 'Forbidden')) {
                 const message = 'forbidden operation';
                 const errResp = commonService.generateErrResponse(message, data);
