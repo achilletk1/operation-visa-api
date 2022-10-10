@@ -15,6 +15,8 @@ export const whiteList: { path: string, method?: string }[] = [
     { path: '/export', method: 'GET' },
     { path: '/captcha', method: 'GET' },
     { path: '/images', method: 'GET' },
+    { path: '/visa-operations/not-customer', method: 'GET' },
+    { path: '/visa-operations/not-customer', method: 'POST' },
 ];
 
 
