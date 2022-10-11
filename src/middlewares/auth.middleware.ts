@@ -3,6 +3,7 @@ import * as httpContext from 'express-http-context';
 import { logger } from '../winston';
 import * as jwt from 'jsonwebtoken';
 import { config } from '../config';
+import { encode } from 'js-base64';
 
 export const whiteList: { path: string, method?: string }[] = [
     { path: '/auth', method: 'POST' },
@@ -15,14 +16,21 @@ export const whiteList: { path: string, method?: string }[] = [
     { path: '/export', method: 'GET' },
     { path: '/captcha', method: 'GET' },
     { path: '/images', method: 'GET' },
-    { path: '/visa-operations/not-customer', method: 'GET' },
-    { path: '/visa-operations/not-customer', method: 'POST' },
 ];
 
 
+
 export async function oauthVerification(req: Request, res: any, next: NextFunction) {
+
     const index = whiteList.findIndex(elt => req.path.includes(elt.path) && req.method === elt.method);
     if (index >= 0) { return next(); }
+
+    if (req.path.includes('/visa-operations/not-customer')) {
+        const token = `Basic ${encode('LNDBCINETADMIN:LNDp@ssw0rd')}`;
+        if (token === req.headers.authorization) {
+            return next();
+        }
+    }
 
     const authorization = req.headers.authorization;
 

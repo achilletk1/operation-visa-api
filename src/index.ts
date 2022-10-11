@@ -27,6 +27,7 @@ import { reportingService } from './services/reporting.service';
 import { reportingController } from './controllers/reporting.controller';
 import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
+import { visaOpeNotSubscribeController } from './controllers/visa-ope-not-subscribe.controller';
 
 
 
@@ -51,8 +52,8 @@ const format = ':remote-addr - ":method :url HTTP/:http-version" :status :respon
 app.use(morgan(format, morganOption));
 
 // Apply middlewares
-// app.use(httpContext.middleware);
-// app.use(oauthVerification);
+app.use(httpContext.middleware);
+app.use(oauthVerification);
 
 // Init controllers
 // visaTransactionsFilesController.init(app);
@@ -72,6 +73,7 @@ reportingController.init(app);
 templatesController.init(app);
 lettersController.init(app);
 notificationsController.init(app);
+visaOpeNotSubscribeController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 

@@ -6,6 +6,7 @@ import { onlinePaymentsService } from '../services/online-payment.service';
 export const onlinePaymentsController = {
 
     init: (app: any): void => {
+        
         app.put('/online-payments/:id', async (req: Request, res: Response) => {
 
             const data = await onlinePaymentsService.insertOnlinePaymentStatement(req.params.id, req.body);

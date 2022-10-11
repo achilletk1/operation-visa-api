@@ -18,9 +18,9 @@ export const onlinePaymentsService = {
     insertOnlinePaymentStatement: async (userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> => {
         try {
 
-            const user = await usersCollection.getUserById(userId);
+           // const user = await usersCollection.getUserById(userId);
 
-            if (!user) { return new Error('UserNotFound'); }
+           // if (!user) { return new Error('UserNotFound'); }
 
             const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
 
@@ -34,10 +34,10 @@ export const onlinePaymentsService = {
 
             if (!onlinePayment) {
                 onlinePayment = {
-                    user: {
-                        _id: get(user, '_id').toString(),
-                        clientCode: get(user, 'clientCode'),
-                        fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
+                   user: {
+                       // _id: get(user, '_id').toString(),
+                        //clientCode: get(user, 'clientCode'),
+                        //fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
                     },
                     dates: {
                         created: moment().valueOf(),
