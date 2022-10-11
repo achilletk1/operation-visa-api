@@ -26,6 +26,7 @@ import { longTravelTypesController } from './controllers/long-travel-types.contr
 import { reportingController } from './controllers/reporting.controller';
 import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
+import { oauthVerification } from './middlewares/auth.middleware';
 
 
 
@@ -50,8 +51,8 @@ const format = ':remote-addr - ":method :url HTTP/:http-version" :status :respon
 app.use(morgan(format, morganOption));
 
 // Apply middlewares
-// app.use(httpContext.middleware);
-// app.use(oauthVerification);
+app.use(httpContext.middleware);
+app.use(oauthVerification);
 
 // Init controllers
 // visaTransactionsFilesController.init(app);
