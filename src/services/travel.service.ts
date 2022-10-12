@@ -7,9 +7,10 @@ import * as generateId from 'generate-unique-id';
 import moment = require('moment');
 import { travelsCollection } from '../collections/travels.collection';
 import { filesService } from './files.service';
-import { Travel, TravelAttachment } from '../models/travel';
-import { OpeVisaStatus } from '../models/visa-operations';
+import { Travel } from '../models/travel';
+import { Attachment, OpeVisaStatus } from '../models/visa-operations';
 import { notificationService } from './notification.service';
+import { isEmpty } from 'lodash';
 
 
 export const travelService = {
@@ -17,7 +18,9 @@ export const travelService = {
 
     insertTravel: async (travel: Travel): Promise<any> => {
         try {
+            const existingTravels = travelsCollection.getTravelsBy({ $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
 
+            if (isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
             // Set request status to created
             travel.status = OpeVisaStatus.PENDING;
 
@@ -27,17 +30,33 @@ export const travelService = {
             // insert travel reference
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
-            const result = await travelsCollection.insertTravel(travel);
+            const insertedId = await travelsCollection.insertTravel(travel);
 
+
+            for (const attachment of travel.proofTravel.proofTravelAttachs) {
+                if (!attachment.temporaryFile) { continue; }
+
+                const content = filesService.readFile(attachment.temporaryFile.path);
+
+                if (!content) { continue; }
+
+                attachment.content = content;
+                
+                attachment.path = commonService.saveAttachment(insertedId, attachment, travel.dates?.created);
+                
+                filesService.deleteFile(attachment.temporaryFile.path);
+                delete attachment.temporaryFile;
+            }
+
+            await travelsCollection.updateTravelsById(insertedId, travel);
+/* 
+        
             //TODO send notification
-
-            const data = { _id: result };
-
             Promise.all([
                 await notificationService.sendEmailVisaDepassment(data, 'samory.takougne@londo-tech.com')
             ]);
 
-            return data;
+            return data; */
 
         } catch (error) {
             logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
@@ -63,7 +82,7 @@ export const travelService = {
                 delete filters.name;
                 filters['user.fullName'] = name;
             }
-            
+
             return await travelsCollection.getTravels(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
@@ -144,23 +163,6 @@ export const travelService = {
                 tobeUpdated = { proofTravel };
             }
 
-
-            if (step === 'expenseAttachements') {
-                let { expenseAttachements } = travel;
-
-                if (!expenseDetailRefs) { return new Error('ReferenceNotProvided'); }
-
-                const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRefs);
-
-                if (expenseAttachementIndex < 0) { return new Error('BadReference') }
-
-                expenseAttachements[expenseAttachementIndex].validators.push(validator);
-
-                expenseAttachements[expenseAttachementIndex] = { ...expenseAttachements[expenseAttachementIndex], ...updateData }
-
-                tobeUpdated = { expenseAttachements };
-            }
-
             if (step === 'expenseDetails') {
                 if (!expenseDetailRefs) { return new Error('ReferenceNotProvided'); }
 
@@ -181,12 +183,12 @@ export const travelService = {
                 tobeUpdated = { expenseDetails };
             }
 
-         /*    if (step === 'othersAttachements') {
-                let { othersAttachements } = travel;
-                othersAttachements.validators.push(validator);
-                othersAttachements = { ...othersAttachements, ...updateData }
-                tobeUpdated = { othersAttachements };
-            } */
+            /*    if (step === 'othersAttachements') {
+                   let { othersAttachements } = travel;
+                   othersAttachements.validators.push(validator);
+                   othersAttachements = { ...othersAttachements, ...updateData }
+                   tobeUpdated = { othersAttachements };
+               } */
 
             //TODO send notifications for status update
 
@@ -197,7 +199,7 @@ export const travelService = {
         }
     },
 
-    postAttachment: async (id: string, data: any, attachement: TravelAttachment) => {
+    postAttachment: async (id: string, data: any, attachement: Attachment) => {
 
         const { step, expenseDetailRef } = data;
 
@@ -209,7 +211,7 @@ export const travelService = {
 
         const { travelRef } = travel;
 
-        const updatedAttachment = await commonService.saveAttachement(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created);
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -222,34 +224,18 @@ export const travelService = {
         }
 
 
-        if (step === 'expenseAttachements') {
-            const { expenseAttachements } = travel;
-
-            if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
-
-            const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
-
-            if (expenseAttachementIndex < 0) { return new Error('BadReference') }
-
-            expenseAttachements[expenseAttachementIndex].attachments.push(updatedAttachment);
-
-
-            tobeUpdated = { expenseAttachements };
-        }
-
-
-       /*  if (step === 'othersAttachements') {
-            const { othersAttachements } = travel;
-            othersAttachements.attachments.push(updatedAttachment);
-            tobeUpdated = { othersAttachements };
-        }
- */
+        /*  if (step === 'othersAttachements') {
+             const { othersAttachements } = travel;
+             othersAttachements.attachments.push(updatedAttachment);
+             tobeUpdated = { othersAttachements };
+         }
+  */
         return await travelsCollection.updateTravelsById(id, tobeUpdated);
 
 
     },
 
-    updateAttachment: async (id: string, data: any, attachement: TravelAttachment) => {
+    updateAttachment: async (id: string, data: any, attachement: Attachment) => {
 
         const { step, path, expenseDetailRef } = data;
 
@@ -263,7 +249,7 @@ export const travelService = {
 
         filesService.deleteFile(path);
 
-        const updatedAttachment = await commonService.saveAttachement(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created);
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -281,34 +267,16 @@ export const travelService = {
         }
 
 
-        if (step === 'expenseAttachements') {
-            const { expenseAttachements } = travel;
-            if (!expenseDetailRef) { return new Error('ReferenceNotProvided'); }
-
-            const expenseAttachementIndex = expenseAttachements.findIndex((elt) => elt.expenseRef === expenseDetailRef);
-
-            if (expenseAttachementIndex < 0) { return new Error('BadReference') }
-
-
-            const index = expenseAttachements[expenseAttachementIndex].attachments.findIndex((elt) => elt.path === path);
-
-            if (index < 0) { return new Error('BadPath') }
-
-            expenseAttachements[expenseAttachementIndex].attachments[index] = updatedAttachment;
-            tobeUpdated = { expenseAttachements };
-        }
-
-
-       /*  if (step === 'othersAttachements') {
-            const { othersAttachements } = travel;
-
-            const index = othersAttachements.attachments.findIndex((elt) => elt.path === path);
-
-            if (index < 0) { return new Error('BadPath') }
-
-            othersAttachements.attachments[index] = updatedAttachment;
-            tobeUpdated = { othersAttachements };
-        } */
+        /*  if (step === 'othersAttachements') {
+             const { othersAttachements } = travel;
+ 
+             const index = othersAttachements.attachments.findIndex((elt) => elt.path === path);
+ 
+             if (index < 0) { return new Error('BadPath') }
+ 
+             othersAttachements.attachments[index] = updatedAttachment;
+             tobeUpdated = { othersAttachements };
+         } */
 
         return await travelsCollection.updateTravelsById(id, tobeUpdated);
 

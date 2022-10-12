@@ -1,8 +1,8 @@
-import { User } from "./user";
-import { Attachment, OpeVisaStatus, Validator, VisaTransaction } from "./visa-operations";
+import { User } from './user';
+import { Attachment, ExpenseCategory, OpeVisaStatus, Validator, VisaTransaction } from './visa-operations';
 
-export interface OnlinePayment {
-  _id?: string;
+export interface OnlinePaymentMonth {
+  _id?: any;
   user?: User;
   currentMonth?: number;
   status?: OpeVisaStatus;
@@ -10,11 +10,11 @@ export interface OnlinePayment {
     created?: number;
     updated?: number;
   };
+  amounts?: number;
   ceiling?: number;
   statements?: OnlinePaymentStatement[];
   transactions?: VisaTransaction[];
   othersAttachements?: any[];
-
 }
 
 export interface OnlinePaymentStatement {
@@ -29,6 +29,6 @@ export interface OnlinePaymentStatement {
   transactionRef?: string;
   validators?: Validator[];
   status?: OpeVisaStatus;
-  expenseCategory?: any;
-  transactions?: VisaTransaction[];
+  expenseCategory?: ExpenseCategory;
 }
+

@@ -2,7 +2,7 @@ import { logger } from '../winston';
 import { commonService } from './common.service';
 import moment = require('moment');
 import { longTravelTypesCollection } from '../collections/long-travel-types.collection';
-import { LongTravelType } from '../models/visa-operations';
+import { LongTravelType } from '../models/settings';
 
 
 export const longTravelTypesService = {

@@ -1,8 +1,8 @@
 import { logger } from '../winston';
 import { commonService } from './common.service';
 import moment = require('moment');
-import { PropertyAndServicesType } from '../models/visa-operations';
 import { propertyAndServicesTypesCollection } from '../collections/property-and-services-types.collection';
+import { PropertyAndServicesType } from '../models/settings';
 
 
 export const propertyAndServicesTypesService = {

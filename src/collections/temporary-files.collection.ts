@@ -1,36 +1,17 @@
 import { getDatabase } from './config';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';
-import { Voucher } from '../models/settings';
+import { TemporaryFile } from '../models/settings';
 
-const collectionName = 'visa_operations_vouchers';
-export const voucherCollection = {
-    getVouchers: async (params: any, offset: any, limit: any) => {
-        const database = await getDatabase();
-        let { end, start } = params;
-        let query = {};
-        const startIndex = (offset - 1) * limit;
+const collectionName = 'visa_operations_tempory_files';
+export const temporaryFilesCollection = {
 
-        if (end && start) {
-            end = parseInt(end);
-            start = parseInt(start);
-            delete params.end;
-            delete params.start;
-        }
-
-        query = { ...params }
-        const total = await database.collection(collectionName).find(query).count();
-        const data = await database.collection(collectionName).find(query).sort({ userCode: 1 }).skip(startIndex).limit(limit).toArray();
-        return { data, total };
-
-    },
-
-    insertVoucher: async (data: any) => {
+    insertTemporaryFile: async (data: any) => {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return { insertedId };
     },
-    getVoucherById: async (id: string): Promise<any> => {
+    getTemporaryFileById: async (id: string): Promise<any> => {
         const database = await getDatabase();
         try {
             return await database.collection(collectionName)
@@ -39,7 +20,7 @@ export const voucherCollection = {
             return null;
         }
     },
-    updateVoucherById: async (id: any, set: Voucher, unset?: Voucher) => {
+    updateTemporaryFileById: async (id: any, set: TemporaryFile, unset?: TemporaryFile) => {
         const database = await getDatabase();
         delete set._id;
         let query: any;
@@ -50,20 +31,20 @@ export const voucherCollection = {
 
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
     },
-    getVoucherBy: async (params: any) => {
+    getTemporaryFilesBy: async (params: any) => {
         const database = await getDatabase();
 
         const result = await database.collection(collectionName).find(params).toArray();
         return result
     },
 
-    deleteVoucher: async (id: string) => {
+    deleteTemporaryFile: async (id: string) => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
         return result
     },
 
-    deleteVoucherMany: async (field: any) => {
+    deleteTemporaryFileMany: async (field: any) => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).deleteMany(field);
         return result

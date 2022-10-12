@@ -1,7 +1,7 @@
 import { getDatabase } from './config';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';
-import { LongTravelType } from '../models/visa-operations';
+import { LongTravelType } from '../models/settings';
 
 const collectionName = 'visa_operations_long_travel_types';
 export const longTravelTypesCollection = {

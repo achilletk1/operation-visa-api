@@ -1,5 +1,5 @@
 import { voucherCollection } from '../collections/voucher.collection';
-import { Voucher } from '../models/visa-operations';
+import { Voucher } from '../models/settings';
 import { logger } from '../winston';
 import { commonService } from './common.service';
 

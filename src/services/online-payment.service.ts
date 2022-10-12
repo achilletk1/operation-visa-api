@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { usersCollection } from '../collections/users.collection';
 import { onlinePaymentsCollection } from '../collections/online-payments.collection';
-import { OnlinePayment, OnlinePaymentStatement, Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
+import { Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import * as generateId from 'generate-unique-id';
@@ -10,6 +10,7 @@ import { filesService } from './files.service';
 import { config } from '../config';
 import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as helper from './helpers/visa-operations.service.helper'
+import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
 
 
 export const onlinePaymentsService = {
@@ -24,7 +25,7 @@ export const onlinePaymentsService = {
 
             const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
 
-            let onlinePayment: OnlinePayment;
+            let onlinePayment: OnlinePaymentMonth;
             let result: any;
 
             onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
@@ -114,7 +115,7 @@ export const onlinePaymentsService = {
             return error;
         }
     },
-    updateOnlinePaymentsById: async (id: string, data: OnlinePayment) => {
+    updateOnlinePaymentsById: async (id: string, data: OnlinePaymentMonth) => {
         try {
 
             data.statements = data.statements.map(element => {
@@ -144,7 +145,7 @@ export const onlinePaymentsService = {
 
         const { path } = attachement;
 
-        attachement = commonService.saveAttachement(id, attachement, onlinePayment.dates.created);
+        attachement = commonService.saveAttachment(id, attachement, onlinePayment.dates.created);
 
         if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -187,10 +188,6 @@ export const onlinePaymentsService = {
 
 
         if (pathIndex < 0) { return new Error('AttachementNotFound') }
-
-        statements[statementIndex].attachments[pathIndex].status === status;
-
-        if (status === AttachementStatus.REJECTED) { statements[statementIndex].attachments[pathIndex].rejectReason = rejectReason }
 
         //TODO send notifications
 

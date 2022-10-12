@@ -1,14 +1,14 @@
-import { mkdirSync, writeFileSync, unlinkSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, unlinkSync, readFileSync} from 'fs';
 import { config } from '../config';
 import { logger } from '../winston';
 export const filesService = {
-
 
     writeFile:  (content: any, path: string, filename: string) => {
         try {
             const filePath = `${path}/${filename}`;
             mkdirSync(`${config.get('fileStoragePath')}/${path}`, { recursive: true });
             writeFileSync(`${config.get('fileStoragePath')}/${removeSpace(filePath)}`, content, 'base64');
+            return filePath;
         } catch (error) {
             logger.error(`\n writeFile ${filename} error : ${error}`);
         }

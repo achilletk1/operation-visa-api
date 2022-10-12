@@ -1,7 +1,7 @@
 import { getDatabase } from './config';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';
-import { PropertyAndServicesType } from '../models/visa-operations';
+import { PropertyAndServicesType } from '../models/settings';
 
 const collectionName = 'visa_operations_property_and_services_types';
 export const propertyAndServicesTypesCollection = {

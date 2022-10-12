@@ -158,19 +158,18 @@ export const commonService = {
     },
 
 
-    saveAttachement: (ref: string, attachement: Attachment, created: number) => {
+    saveAttachment: (ref: string, attachment: Attachment, created: number) => {
         try {
-            const { content, label, contentType } = attachement;
-            delete attachement.content
+            const { content, label, contentType } = attachment;
+            delete attachment.content
             const date = moment(created).format('MM-YY');
             const path = `${date}/${ref}`;
             const extension = visaHelper.getExtensionByContentType(contentType);
             const filename = `${date}_${ref}_${label}${extension}`;
             filesService.writeFile(content, path, filename);
-            attachement.status = AttachementStatus.PENDING;
-            attachement.path = `${path}/${filename}`;
-            attachement.name = filename;
-            return attachement;
+            attachment.path = `${path}/${filename}`;
+            attachment.name = filename;
+            return attachment;
         } catch (error) {
             logger.error(`\nError saving attachement \n${error.message}\n${error.stack}\n`);
             return error;

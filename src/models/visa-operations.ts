@@ -1,45 +1,33 @@
-import { User } from "./user";
+import { TemporaryFile } from './settings';
 
-export interface VisaOperations {
-  _id?: string;
-  clientCode?: string;
-  userId?: string;
-  currentMonth?: number;
-  ncp?: string;
-  nbrTransactions?: {
-    tpew?: number; // Retrait et paiement tpe
-    onp?: number; // paiement en ligne
-  };
-  amounts?: {
-    tpew?: number; // Retrait et paiement tpe
-    onp?: number; // paiement en ligne
-    exceedingTpew?: number; // paiement en ligne
-  };
-  cards?: any[];
-  date?: {
+export enum ExpenseCategory {
+  IMPORT_OF_GOODS = 100,
+  IMPORT_OF_SERVICES = 200,
+}
+export interface Attachment {
+  label?: string; // setting file name in backoffice
+  fileName?: string; // name of the file at the upload
+  name?: string; // internal name to identify the file in the server
+  contentType?: string;
+  content?: any;
+  path?: string;
+  voucherId?: string;
+  dates?: {
     created?: number;
     updated?: number;
   };
-  operationTypes?: OperationType[];
-  attachements?: Attachment[];
-  status?: OperationStatus; // 100: aucun upload, 101: au moins un upload, 200: upload complet, en cours, 201: accepté, 202: refusé
-  rejectReason?: string;
+  isRequired?: boolean;
+  extension?: string;
+  temporaryFile?: TemporaryFile;
 }
 
-export interface Attachment {
-  name?: string;
-  status?: AttachementStatus;
-  label?: string;
-  contentType?: string;
-  path?: string; // file's path in the volume
-  content?: string;
-  voucherId?: string; date?: {
-    created?: number;
-    updated?: number;
-  };
-  rejectReason?: string;
-  isRequired?: boolean;
-  extensions?: string;
+export interface Validator {
+  _id?: string;
+  fullName?: string;
+  clientCode?: string; // is only for admin with clientCode
+  signature?: string;
+  date?: number;
+
 }
 
 export enum AttachementStatus {
@@ -50,36 +38,12 @@ export enum AttachementStatus {
 
 }
 
-export enum OperationType {
-  ONP = 100,
-  TPE = 200,
-  ELECTRONIC_PAYMENT_TERMINAL = 300,
-  ATN_WITHDRAWAL = 400,
-}
-
 export enum OperationStatus {
   UNAVAILABLE = 100, // aucun upload,
   AVAILABLE = 101, // au moins un upload,
   PENDING = 200, //  upload complet , en cours
   ACCEPTED = 201, // accepté
   REJECTED = 202, //  refusé
-}
-
-export interface FileAttachement {
-  label?: string;
-  extensions?: string;
-  isRequired?: boolean;
-}
-
-export interface SettingFile {
-  _id?: string;
-  label?: string; // type d'opération(retrait GAB & paiement ou paiement en ligne)
-  type?: number; // 100:retrait GAB & paiement tpe, 200:paiement en ligne
-  date?: {
-    created?: number;
-    updated?: number;
-  };
-  files?: FileAttachement[];
 }
 
 export interface VisaTransaction {
@@ -98,8 +62,9 @@ export interface VisaTransaction {
   };
   country?: string;
   category?: string;
+  reference?: string;
   currentMonth?: number;
-  statementRef?: string
+  statementRef?: string;
 }
 
 export interface VisaCeiling {
@@ -126,7 +91,7 @@ export interface Validator {
   fullName?: string;
   clientCode?: string; // is only for admin with clientCode
   signature?: string;
-  date?: number
+  date?: number;
 
 }
 export enum OpeVisaStatus {
@@ -134,38 +99,6 @@ export enum OpeVisaStatus {
   PENDING = 400,
   ACCEPTED = 200,
   REJECTED = 300,
-}
-
-export interface OnlinePayment {
-  _id?: any;
-  user?: User;
-  currentMonth?: number;
-  status?: OpeVisaStatus;
-  dates?: {
-    created?: number;
-    updated?: number;
-  };
-  amounts?:number;
-  ceiling?: number;
-  statements?: OnlinePaymentStatement[];
-  transactions?: VisaTransaction[];
-  othersAttachements?: any[];
-}
-
-export interface OnlinePaymentStatement {
-  fullName?: string;
-  label?: string;
-  date?: number;
-  amount: number;
-  nature?: any;
-  statementRef?: string;
-  comment?: string;
-  attachments?: Attachment[];
-  transactionRef?: string;
-  validators?: Validator[];
-  status?: OpeVisaStatus;
-  expenseCategory?: any;
-  transactions?: VisaTransaction[];
 }
 
 export interface Chat {
@@ -186,31 +119,8 @@ export interface ChatMessage {
   avatar?: string;
 }
 
-
-export interface Voucher {
-  _id?: string;
-  label?: string;
-  extension?: string;
-  description?: string;
-  isRequired?: boolean;
-}
-
-export interface LongTravelType {
-  _id?: string;
-  label?: string;
-  vouchers?: Voucher[];
-  dates?: {
-    created?: number;
-    updated?: number;
-  };
-}
-
-export interface PropertyAndServicesType {
-  _id?: string;
-  label?: string;
-  vouchers?: Voucher[];
-  dates?: {
-    created?: number;
-    updated?: number;
-  };
+export enum OperationType {
+  ELECTRONIC_PAYMENT_TERMINAL = 100,
+  ATN_WITHDRAWAL = 200,
+  ONLINE_PAYMENT = 300
 }

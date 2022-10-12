@@ -1,19 +1,19 @@
-import { OnlinePayment } from '../models/visa-operations';
 import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
+import { OnlinePaymentMonth } from "../models/online-payment";
 import { getDatabase } from "./config";
 
 const collectionName = 'visa_operations_online_payments';
 
 export const onlinePaymentsCollection = {
 
-    getOnlinePaymentsBy: async (filters: any): Promise<OnlinePayment[]> => {
+    getOnlinePaymentsBy: async (filters: any): Promise<OnlinePaymentMonth[]> => {
         const database = await getDatabase();
         const query = { ...filters };
         return await database.collection(collectionName).find(query).toArray();
     },
 
-    getOnlinePaymentById: async (id: any): Promise<OnlinePayment> => {
+    getOnlinePaymentById: async (id: any): Promise<OnlinePaymentMonth> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
     },
@@ -23,7 +23,7 @@ export const onlinePaymentsCollection = {
         return await database.collection(collectionName).findOne(fields);
     },
 
-    updateOnlinePaymentsById: async (id: string, set: OnlinePayment) => {
+    updateOnlinePaymentsById: async (id: string, set: OnlinePaymentMonth) => {
         const database = await getDatabase();
         delete set._id;
         const query = { $set: {} };
@@ -62,7 +62,7 @@ export const onlinePaymentsCollection = {
 
     },
 
-    insertVisaOnlinePayment: async (data: OnlinePayment): Promise<any> => {
+    insertVisaOnlinePayment: async (data: OnlinePaymentMonth): Promise<any> => {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return insertedId.toString();

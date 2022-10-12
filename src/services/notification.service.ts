@@ -10,7 +10,6 @@ import { get } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
 import { Notification, NotificationFormat } from '../models/notification';
-import { options } from '../collections/cbs-dao';
 
 export const notificationService = {
 
