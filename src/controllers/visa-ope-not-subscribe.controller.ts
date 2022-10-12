@@ -238,6 +238,26 @@ export const visaOpeNotSubscribeController = {
 
             return res.status(200).json(data);
         });
+            
+        app.put('/visa-operations/not-customer/travels/:id/attachements/insert', async (req: Request, res: Response) => {
+            const { id } = req.params;
+
+            const data = await onlinePaymentsService.postAttachment(id, req.query, req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'update travel failed';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'travel data updated succesfully.' });
+        });
 
         // VOUCHER ENDPOINTS
 
@@ -481,6 +501,7 @@ export const visaOpeNotSubscribeController = {
 
             res.status(200).json(data);
         });
+    
 
            //ONLINE PAYMENT ENDPOINTS
 
@@ -648,25 +669,6 @@ export const visaOpeNotSubscribeController = {
             return res.status(200).json(data);
         });
 
-        app.put('/visa-operations/not-customer/travels/:id/attachements/insert', async (req: Request, res: Response) => {
-            const { id } = req.params;
-
-            const data = await onlinePaymentsService.postAttachment(id, req.query, req.body);
-
-            if (data instanceof Error && data.message === 'Forbidden') {
-                const message = 'forbidden operation';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(401).json(errResp);
-            }
-
-            if (data instanceof Error) {
-                const message = 'update travel failed';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            res.status(200).json({ message: 'travel data updated succesfully.' });
-        });
 
         //PROPERTY AND SERVICE ENDPOINTS
 
