@@ -57,9 +57,9 @@ const getTemplateNotificationPdfData = (user: User,  notifications: any, start: 
         const dataStatus = { 100: 'CRÉÉE',200: 'ENVOYÉE', 300: 'REÇU',400:'LU'};
         const dataFormat = { 100: 'SMS',200: 'MAIL'};
             return {
-                notification_send_date:elt.sentAt,
-                notification_received_date :elt.receivedAt,
-                notification_read_at:elt.readAt,
+                notification_send_date:elt.sentAt ? elt.sentAt : 'N/A',
+                notification_received_date :elt.receivedAt ?elt.receivedAt : 'N/A',
+                notification_read_at:elt.readAt ? elt.readAt : 'N/A'  ,
                 notification_status :dataStatus[elt.status],
                 notification_format :dataFormat[elt.format],
                 notification_contact:elt.format ==100 ? elt.tel : elt.email
