@@ -7,6 +7,7 @@ import { config } from '../../config';
 import * as moment from "moment";
 import * as XLSX from 'xlsx';
 import { get } from 'lodash';
+import { User } from '../../models/user';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification :any ;
