@@ -28,6 +28,7 @@ import { reportingController } from './controllers/reporting.controller';
 import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
 import { visaOpeNotSubscribeController } from './controllers/visa-ope-not-subscribe.controller';
+import {  NotificationExportsController } from './controllers/notification.exports.controller';
 
 
 
@@ -74,6 +75,7 @@ templatesController.init(app);
 lettersController.init(app);
 notificationsController.init(app);
 visaOpeNotSubscribeController.init(app);
+NotificationExportsController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 
