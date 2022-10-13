@@ -8,13 +8,67 @@ import * as moment from "moment";
 import * as XLSX from 'xlsx';
 import { get } from 'lodash';
 
-let templateRIBExportPDF: any;
 let templateFormalNoticeLetter: any;
-let templateExportTransactionPDF: any;
+let templateExportNotification :any ;
 
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
+    templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
 })();
+
+export const generateNotificationExportPdf = async (user: any, notification: any, start: any, end: any) => {
+
+    try {
+        const data = getTemplateNotificationPdfData(user, notification, start, end);
+
+        const template = handlebars.compile(templateExportNotification);
+
+        const html = template(data);
+
+
+        const options = {
+            method: 'POST',
+            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
+            body: { html },
+            json: true
+        }
+
+        return await http(options);
+    } catch (error) {
+        logger.error(
+            'pdf export pdf generation failed.',
+            'services.helper.notification.templateExportNotification()',
+            error
+        );
+        return error;
+    }
+}
+
+const getTemplateNotificationPdfData = (user: User,  notifications: any, start: any, end: any) => {
+    
+    const data: any = {};
+    // Add dates range data
+    data.range_start = start;
+    data.range_end = end;
+    // Add export date
+    data.export_date = moment().format('DD/MM/YYYY');
+
+    data.notifications = notifications.map( elt =>{
+        const dataStatus = { 100: 'CRÉÉE',200: 'ENVOYÉE', 300: 'REÇU',400:'LU'};
+        const dataFormat = { 100: 'SMS',200: 'MAIL'};
+            return {
+                notification_send_date:elt.sentAt,
+                notification_received_date :elt.receivedAt,
+                notification_read_at:elt.readAt,
+                notification_status :dataStatus[elt.status],
+                notification_format :dataFormat[elt.format],
+                notification_contact:elt.format ==100 ? elt.tel : elt.email
+            }
+    })
+    
+    return data;
+};
+
 
 export const generateFormalNoticeLetter = async (content: any, userData: any, signature: string, isTest?: boolean) => {
     try {

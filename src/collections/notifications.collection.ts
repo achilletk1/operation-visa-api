@@ -7,8 +7,10 @@ const collectionName = 'notifications';
 export const notificationsCollection = {
 
     getNotifications: async (params: any, offset: any, limit: any,range: any) => {
+        
         const database = await getDatabase();
         let query = {...params};
+ 
         const startIndex = (offset - 1) * limit;
         if (range) { query['dates.createdAt'] = { $gte: range?.start, $lte: range?.end }; }
 
