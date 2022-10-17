@@ -1,13 +1,12 @@
 import { Letter } from './../../models/letter';
 import * as readFilePromise from 'fs-readfile-promise';
 import * as handlebars from 'handlebars';
-import { User } from "../../models/user";
 import * as http from 'request-promise';
 import { logger } from "../../winston";
 import { config } from '../../config';
 import * as moment from "moment";
 import * as XLSX from 'xlsx';
-import { get, values } from 'lodash';
+import { get } from 'lodash';
 
 let templateRIBExportPDF: any;
 let templateFormalNoticeLetter: any;

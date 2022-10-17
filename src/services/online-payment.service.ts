@@ -47,16 +47,33 @@ export const onlinePaymentsService = {
                     amounts: 0,
                     status: OpeVisaStatus.PENDING,
                     currentMonth,
-                    statements: [onlinepaymentStatement],
+                    statements: [],
                     transactions: [],
                 }
                 result = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinePayment);
-            } else {
-                onlinePayment.dates.updated = moment().valueOf();
-                onlinePayment.statements.push(onlinepaymentStatement);
-                result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
+                onlinePayment._id = result;
             }
 
+            for (let attachment of onlinepaymentStatement.attachments) {
+                if (!attachment.temporaryFile) { continue; }
+
+                const content = filesService.readFile(attachment.temporaryFile.path);
+
+                if (!content) { continue; }
+
+                attachment.content = content;
+
+                attachment = commonService.saveAttachment(onlinePayment._id, attachment, onlinePayment.dates?.created, 'onlinePayment', moment(onlinepaymentStatement.date).format('DD-MM-YY'));
+
+                filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
+                delete attachment.temporaryFile;
+            }
+
+
+            onlinePayment.dates.updated = moment().valueOf();
+            onlinePayment.statements.push(onlinepaymentStatement);
+
+            result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
             //TODO send notification
 
             const data = { _id: result };
@@ -145,7 +162,7 @@ export const onlinePaymentsService = {
 
         const { path } = attachement;
 
-        attachement = commonService.saveAttachment(id, attachement, onlinePayment.dates.created);
+        attachement = commonService.saveAttachment(id, attachement, onlinePayment.dates.created, 'onlinePayment');
 
         if (!attachement || attachement instanceof Error) { return new Error('ErrorSavingAttachment'); }
 

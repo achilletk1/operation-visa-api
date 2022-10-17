@@ -18,18 +18,16 @@ export const travelsCollection = {
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
     },
 
-    updateTravelsById: async (id: string, set: Travel) => {
+    updateTravelsById: async (id: string, set: Travel, unset?: Travel): Promise<any> => {
         const database = await getDatabase();
+        const query: any = {};
         delete set._id;
-        const query = { $set: {} };
-        delete set._id;
-        if (!isEmpty(set)) {
-            query.$set = { ...set };
-        }
+        if (!isEmpty(set)) { query.$set = { ...set } }
 
-        return await database
-            .collection(collectionName)
-            .updateOne({ _id: new ObjectId(id.toString()) }, query);
+        if (!isEmpty(unset)) { query.$unset = { ...unset } }
+
+        const result = await database.collection(collectionName).updateOne({ _id: new ObjectId(id) }, query);
+        return result;
     },
 
 
@@ -50,7 +48,7 @@ export const travelsCollection = {
 
         query = { ...query, ...params }
         console.log(query);
-        
+
         const total = await database.collection(collectionName).find(query).count();
         const data = await database.collection(collectionName).find(query).sort({ currentMonth: 1 }).skip(startIndex).limit(limit).toArray();
         return { data, total };
@@ -60,11 +58,11 @@ export const travelsCollection = {
     insertTravel: async (data: Travel): Promise<any> => {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
-        return insertedId;
+        return insertedId.toString();
     },
 
     getUsersTravelId: async (travelType: TravelType): Promise<any> => {
-        const database = await getDatabase();       
+        const database = await getDatabase();
         return await database.collection(collectionName).aggregate([{ $match: { travelType } }, { $group: { _id: '$user' } }]).toArray();
     },
 

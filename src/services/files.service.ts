@@ -1,9 +1,9 @@
-import { mkdirSync, writeFileSync, unlinkSync, readFileSync} from 'fs';
+import { mkdirSync, writeFileSync, unlinkSync, readFileSync, rmSync } from 'fs';
 import { config } from '../config';
 import { logger } from '../winston';
 export const filesService = {
 
-    writeFile:  (content: any, path: string, filename: string) => {
+    writeFile: (content: any, path: string, filename: string) => {
         try {
             const filePath = `${path}/${filename}`;
             mkdirSync(`${config.get('fileStoragePath')}/${path}`, { recursive: true });
@@ -31,9 +31,17 @@ export const filesService = {
             logger.error(`\n readFile ${path} error : ${error}`);
         }
     },
-    deleteFile:  (path: string) => {
+    deleteFile: (path: string) => {
         try {
             unlinkSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`);
+        } catch (error) {
+            logger.error(`\n readFile ${path} error : ${error}`);
+        }
+    },
+
+    deleteDirectory: (path: string) => {
+        try {
+            rmSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`, { recursive: true, force: true });
         } catch (error) {
             logger.error(`\n readFile ${path} error : ${error}`);
         }

@@ -1,3 +1,4 @@
+import { temporaryFilesController } from './controllers/temporary-files-controller';
 import { templatesController } from './controllers/templates.controller';
 import { exportController } from './controllers/export.controller';
 import { propertyAndServicesTypesController } from './controllers/property-and-services-types.controller';
@@ -16,14 +17,11 @@ import * as httpContext from 'express-http-context';
 import * as http from 'http';
 import { authController } from './controllers/auth.controller';
 import { usersController } from './controllers/users.controller';
-import { oauthVerification } from './middlewares/auth.middleware';
 import { visaTransactionsController } from './controllers/visa-transactions.controller';
-import { visaTransactionsFilesController } from './controllers/visa-transactions-files.controller';
 import { downloadsController } from './controllers/download.controller';
 import { travelController } from './controllers/travel.controller';
 import { onlinePaymentsController } from './controllers/online-payment.controller';
 import { longTravelTypesController } from './controllers/long-travel-types.controller';
-import { reportingService } from './services/reporting.service';
 import { reportingController } from './controllers/reporting.controller';
 import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
@@ -72,6 +70,7 @@ reportingController.init(app);
 templatesController.init(app);
 lettersController.init(app);
 notificationsController.init(app);
+temporaryFilesController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 

@@ -15,6 +15,14 @@ export const travelController = {
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(401).json(errResp);
             }
+
+            if (data instanceof Error) {
+                const message = 'unable to post travel';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+
             res.status(200).json({ message: 'New travel inserted.' });
         });
 

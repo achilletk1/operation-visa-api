@@ -79,7 +79,9 @@ export const temporaryFilesService = {
 
             await temporaryFilesCollection.updateTemporaryFileById(insertedId, temporaryFile);
 
-            return temporaryFile;
+            const updatedData = await temporaryFilesCollection.getTemporaryFileById(insertedId.toString());
+            
+            return updatedData;
         } catch (error) {
             logger.error(`\nError inserting visa temporary files  \n${error.message}\n${error.stack}\n`);
             return error;

@@ -10,7 +10,7 @@ import { filesService } from './files.service';
 import { Travel } from '../models/travel';
 import { Attachment, OpeVisaStatus } from '../models/visa-operations';
 import { notificationService } from './notification.service';
-import { isEmpty } from 'lodash';
+import { isEmpty, get } from 'lodash';
 
 
 export const travelService = {
@@ -18,14 +18,16 @@ export const travelService = {
 
     insertTravel: async (travel: Travel): Promise<any> => {
         try {
-            const existingTravels = travelsCollection.getTravelsBy({ $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
+            const existingTravels = await travelsCollection.getTravelsBy({ $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
 
-            if (isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
+            if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
             // Set request status to created
             travel.status = OpeVisaStatus.PENDING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
+
+            travel.ceiling = travel.proofTravel?.travelReason?.code === 300 ? 2000000 : 5000000;
 
             // insert travel reference
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
@@ -33,7 +35,7 @@ export const travelService = {
             const insertedId = await travelsCollection.insertTravel(travel);
 
 
-            for (const attachment of travel.proofTravel.proofTravelAttachs) {
+            for (let attachment of travel?.proofTravel?.proofTravelAttachs) {
                 if (!attachment.temporaryFile) { continue; }
 
                 const content = filesService.readFile(attachment.temporaryFile.path);
@@ -41,22 +43,22 @@ export const travelService = {
                 if (!content) { continue; }
 
                 attachment.content = content;
-                
-                attachment.path = commonService.saveAttachment(insertedId, attachment, travel.dates?.created);
-                
-                filesService.deleteFile(attachment.temporaryFile.path);
+
+                attachment = commonService.saveAttachment(insertedId, attachment, travel.dates?.created, 'travel');
+
+                filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                 delete attachment.temporaryFile;
             }
 
-            await travelsCollection.updateTravelsById(insertedId, travel);
-/* 
-        
+            await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
+
+
             //TODO send notification
             Promise.all([
-                await notificationService.sendEmailVisaDepassment(data, 'samory.takougne@londo-tech.com')
+                await notificationService.sendEmailTravelDeclaration(travel, get(travel, 'user.email'))
             ]);
 
-            return data; */
+            return insertedId;
 
         } catch (error) {
             logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
@@ -211,7 +213,7 @@ export const travelService = {
 
         const { travelRef } = travel;
 
-        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created, 'travel');
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 
@@ -249,7 +251,7 @@ export const travelService = {
 
         filesService.deleteFile(path);
 
-        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created);
+        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created, 'travel');
 
         if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
 

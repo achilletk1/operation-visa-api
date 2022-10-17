@@ -1,3 +1,4 @@
+import { Travel } from './../models/travel';
 import * as notificationHelper from './helpers/notification.service.helper';
 import * as http from 'request-promise';
 import * as postmark from 'postmark';
@@ -18,7 +19,7 @@ export const notificationService = {
     sendEmailVisaDepassment: async (data: any, email: string) => {
 
         data = {
-            _id:data._id,
+            _id: data._id,
             civility: 'MR',
             name: `ACHILLE KAMGA`,
             start: `08/09/2022`,
@@ -39,11 +40,11 @@ export const notificationService = {
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody    ,
-                email:receiver,
-                id :data?._id.toString(),
+                message: HtmlBody,
+                email: receiver,
+                id: data?._id.toString(),
             }
-             await insertNotification(notification) 
+            await insertNotification(notification)
 
         } catch (error) {
             logger.error(
@@ -75,6 +76,33 @@ export const notificationService = {
         } catch (error) {
             logger.error(
                 `Error during sendEmailDetectTravel to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEmailTravelDeclaration: async (travel: Travel, email: string) => {
+
+        const data = {
+            civility: 'Mr/Mme',
+            name: `${get(travel.user, 'fullName')}`,
+            start: `${get(travel, 'proofTravel.dates.start')}`,
+            end: `${get(travel, 'proofTravel.dates.end')}`,
+            created: `${get(travel, 'dates.created')}`,
+            ceiling: `${get(travel, 'ceiling')}`,
+        }
+
+        const HtmlBody = notificationHelper.generateMailTravelDetect(data);
+
+        const subject = `Déclaration de voyage`;
+
+        const receiver = `${email}`;
+
+        try {
+            return sendEmail(receiver, subject, HtmlBody);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailTravelDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
             );
             return error;
         }
@@ -243,8 +271,8 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 };
 
 const insertNotification = async (notification: any) => {
-     notification.dates =  {createdAt: moment().valueOf()},    
-     notification.status =  100;    
+    notification.dates = { createdAt: moment().valueOf() },
+        notification.status = 100;
 
     try {
         return await notificationsCollection.insertNotifications(notification);
