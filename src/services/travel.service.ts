@@ -35,20 +35,7 @@ export const travelService = {
             const insertedId = await travelsCollection.insertTravel(travel);
 
 
-            for (let attachment of travel?.proofTravel?.proofTravelAttachs) {
-                if (!attachment.temporaryFile) { continue; }
-
-                const content = filesService.readFile(attachment.temporaryFile.path);
-
-                if (!content) { continue; }
-
-                attachment.content = content;
-
-                attachment = commonService.saveAttachment(insertedId, attachment, travel.dates?.created, 'travel');
-
-                filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
-                delete attachment.temporaryFile;
-            }
+            travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
 
             await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
 
@@ -115,8 +102,32 @@ export const travelService = {
             return error;
         }
     },
+
     updateTravelById: async (id: string, travel: Travel) => {
         try {
+
+            const actualTravel = await travelsCollection.getTravelById(id);
+
+            if (actualTravel) { return new Error('TravelNotFound'); }
+
+
+
+            if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
+                travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
+            }
+
+            if (!isEmpty(travel.expenseDetails)) {
+                for (let expenseDetail of travel.expenseDetails) {
+                    expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travel.dates.created);
+                }
+            }
+
+            if (!isEmpty(travel.othersAttachements)) {
+                for (let othersAttachement of travel.othersAttachements) {
+                    othersAttachement.attachments = saveAttachment(othersAttachement.attachments, id, travel.dates.created);
+                }
+            }
+
             return await travelsCollection.updateTravelsById(id, travel);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
@@ -201,155 +212,24 @@ export const travelService = {
         }
     },
 
-    postAttachment: async (id: string, data: any, attachement: Attachment) => {
-
-        const { step, expenseDetailRef } = data;
-
-        if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
-
-        const travel = await travelsCollection.getTravelById(id);
-
-        if (!travel) { return new Error('TravelNotFound') }
-
-        const { travelRef } = travel;
-
-        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created, 'travel');
-
-        if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
-
-        let tobeUpdated: any;
-
-        if (step === 'proofTravel') {
-            let { proofTravel } = travel;
-            proofTravel.proofTravelAttachs.push(updatedAttachment);
-            tobeUpdated = { proofTravel };
-        }
-
-
-        /*  if (step === 'othersAttachements') {
-             const { othersAttachements } = travel;
-             othersAttachements.attachments.push(updatedAttachment);
-             tobeUpdated = { othersAttachements };
-         }
-  */
-        return await travelsCollection.updateTravelsById(id, tobeUpdated);
-
-
-    },
-
-    updateAttachment: async (id: string, data: any, attachement: Attachment) => {
-
-        const { step, path, expenseDetailRef } = data;
-
-        if (!step || !['proofTravel', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
-
-        const travel = await travelsCollection.getTravelById(id);
-
-        if (!travel) { return new Error('TravelNotFound') }
-
-        const { travelRef } = travel;
-
-        filesService.deleteFile(path);
-
-        const updatedAttachment = await commonService.saveAttachment(travelRef, attachement, travel.dates.created, 'travel');
-
-        if (!updatedAttachment || updatedAttachment instanceof Error) { return new Error('ErrorSavingAttachment'); }
-
-        let tobeUpdated: any;
-
-        if (step === 'proofTravel') {
-            let { proofTravel } = travel;
-
-            const index = proofTravel.proofTravelAttachs.findIndex((elt) => elt.path === path);
-
-            if (index < 0) { return new Error('BadPath') }
-
-            proofTravel.proofTravelAttachs[index] = updatedAttachment;
-            tobeUpdated = { proofTravel };
-        }
-
-
-        /*  if (step === 'othersAttachements') {
-             const { othersAttachements } = travel;
- 
-             const index = othersAttachements.attachments.findIndex((elt) => elt.path === path);
- 
-             if (index < 0) { return new Error('BadPath') }
- 
-             othersAttachements.attachments[index] = updatedAttachment;
-             tobeUpdated = { othersAttachements };
-         } */
-
-        return await travelsCollection.updateTravelsById(id, tobeUpdated);
-
-
-    },
-
-    generateExportLinks: async (id: string, data: any) => {
-
-        const { path, name, contentType } = data;
-
-        const travel = await travelsCollection.getTravelById(id);
-
-        if (!travel) { return new Error('TravelDataNotFound') }
-
-
-        const file = filesService.readFile(path);
-
-        if (!file) { return new Error('Forbbiden'); }
-
-        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
-
-        const options = { path, ttl, id, name, contentType };
-
-        const code = encode(options);
-
-        const basePath = `${config.get('basePath')}/travels/${id}/attachements/export`
-
-        return {
-            link: `${config.get('baseUrl')}${basePath}/${code}`
-        }
-    },
-
-    generateExportData: async (id: string, code: string) => {
-        let options: any;
-
-        try {
-            options = decode(code);
-        } catch (error) {
-            return new Error('BadExportCode');
-        }
-
-        const { ttl, path, name, contentType } = options;
-
-        if ((new Date()).getTime() >= ttl) {
-            return new Error('ExportLinkExpired');
-        }
-        const data = filesService.readFile(path);
-        const buffer = Buffer.from(data, 'base64');
-
-        const fileName = `export_${new Date().getTime()}-${name}`
-
-        return { contentType, fileContent: buffer, fileName };
-
-    },
-
-
-    generateExportView: async (id: string, path: any) => {
-        try {
-
-            const request = await travelsCollection.getTravelById(id);
-            if (!request) { return new Error('OperatonNotFound') }
-            const fileContent = filesService.readFile(path);
-            const contentType = helper.getContentTypeByExtension(path.split('.')[1]);
-            const fileName = `export_${new Date().getTime()}-${path}`
-            return { contentType, fileContent, fileName };
-        } catch (error) {
-            logger.error(`\nError generateExportView \n${error.message}\n${error.stack}\n`);
-            return error;
-        }
-
-    },
-
 };
+
+const saveAttachment = (attachements: Attachment[], id: string, date: number) => {
+    for (let attachment of attachements) {
+        if (!attachment.temporaryFile) { continue; }
+
+        const content = filesService.readFile(attachment.temporaryFile.path);
+
+        if (!content) { continue; }
+
+        attachment.content = content;
+
+        attachment = commonService.saveAttachment(id, attachment, date, 'travel');
+
+        filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
+        delete attachment.temporaryFile;
+    }
+
+    return attachements;
+}
 

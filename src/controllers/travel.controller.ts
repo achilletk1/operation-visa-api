@@ -103,102 +103,6 @@ export const travelController = {
             res.status(200).json({ message: 'travel data updated succesfully.' });
         });
 
-        app.put('/travels/:id/status', async (req: Request, res: Response) => {
-            const { id } = req.params;
-
-            const data = await travelService.updateTravelStatusById(id, req.body);
-
-            if (data instanceof Error && data.message === 'Forbidden') {
-                const message = 'forbidden operation';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(401).json(errResp);
-            }
-
-            if (data instanceof Error) {
-                const message = 'update travel failed';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            res.status(200).json({ message: 'travel data updated succesfully.' });
-        });
-
-        app.get('/travels/:id/attachements/export/:code', async (req: Request, res: Response) => {
-            const id = req.params.id;
-            const code = req.params.code;
-
-            const data = await travelService.generateExportData(id, code);
-
-            if (data instanceof Error) {
-                const message = 'unable to export file';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-            res.setHeader('Content-Type', data.contentType);
-            res.setHeader('Content-Disposition', `attachment; filename= ${data.fileName}`);
-            return res.send(data.fileContent);
-        });
-
-        app.post('/travels/:id/attachements/export', async (req: Request, res: Response) => {
-
-            if (req.query.action !== 'generate_link') {
-                const message = 'no action provided.';
-                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
-                return res.status(400).json(errResp);
-            }
-
-            const data = await travelService.generateExportLinks(req.params.id, req.body);
-
-            if (data instanceof Error) {
-                const message = 'internal server error.';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            return res.status(200).json(data);
-        });
-
-        app.put('/travels/:id/attachements/insert', async (req: Request, res: Response) => {
-            const { id } = req.params;
-
-            const data = await travelService.postAttachment(id, req.query, req.body);
-
-            if (data instanceof Error && data.message === 'Forbidden') {
-                const message = 'forbidden operation';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(401).json(errResp);
-            }
-
-            if (data instanceof Error) {
-                const message = 'update travel failed';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            res.status(200).json({ message: 'travel data updated succesfully.' });
-        });
-
-
-        app.put('/travels/:id/attachements/update', async (req: Request, res: Response) => {
-            const { id } = req.params;
-
-            const data = await travelService.updateAttachment(id, req.query, req.body);
-
-            if (data instanceof Error && data.message === 'Forbidden') {
-                const message = 'forbidden operation';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(401).json(errResp);
-            }
-
-            if (data instanceof Error) {
-                const message = 'update travel failed';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            res.status(200).json({ message: 'travel data updated succesfully.' });
-        });
-
 
         app.put('/travels/:id/steps/status', async (req: Request, res: Response) => {
             const { id } = req.params;
@@ -218,26 +122,6 @@ export const travelController = {
             }
 
             res.status(200).json({ message: 'travel data updated succesfully.' });
-        });
-
-
-        app.post('/travels/:id/attachements/view', async (req: Request, res: Response) => {
-
-            if (req.query.action !== 'generate_link') {
-                const message = 'no action provided.';
-                const errResp = commonService.generateErrResponse(message, new Error('NoActionProvided'));
-                return res.status(400).json(errResp);
-            }
-
-            const data = await travelService.generateExportView(req.params.id, req.body);
-
-            if (data instanceof Error) {
-                const message = 'internal server error.';
-                const errResp = commonService.generateErrResponse(message, data);
-                return res.status(500).json(errResp);
-            }
-
-            return res.status(200).json(data);
         });
     }
 };
