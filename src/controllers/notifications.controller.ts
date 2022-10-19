@@ -87,7 +87,7 @@ export const notificationsController = {
             }
 
             if (data instanceof Error) {
-                const message = 'unable to get transaction file';
+                const message = 'U++nable to get transaction file';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
             }
