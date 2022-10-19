@@ -28,6 +28,7 @@ import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
 import { oauthVerification } from './middlewares/auth.middleware';
 import {  NotificationExportsController } from './controllers/notification.exports.controller';
+import { SettingController } from './controllers/setting.controller';
 
 
 
@@ -76,6 +77,7 @@ notificationsController.init(app);
 temporaryFilesController.init(app);
 travelMonthsController.init(app);
 NotificationExportsController.init(app);
+SettingController.init(app)
 
 const main = express().use(config.get('basePath') || '', app);
 
