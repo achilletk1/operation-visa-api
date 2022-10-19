@@ -29,6 +29,7 @@ import { lettersController } from './controllers/letters.controller';
 import { notificationsController } from './controllers/notifications.controller';
 import { visaOpeNotSubscribeController } from './controllers/visa-ope-not-subscribe.controller';
 import {  NotificationExportsController } from './controllers/notification.exports.controller';
+import { SettingController } from './controllers/setting.controller';
 
 
 
@@ -76,6 +77,7 @@ lettersController.init(app);
 notificationsController.init(app);
 visaOpeNotSubscribeController.init(app);
 NotificationExportsController.init(app);
+SettingController.init(app)
 
 const main = express().use(config.get('basePath') || '', app);
 
