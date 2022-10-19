@@ -2,11 +2,13 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import * as Confirm from 'prompt-confirm';
 import { config } from './config-env';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
+import { inserDefaultSetting } from './helpers/insert-default-settings';
 
 const runScripts = async () => {
     // SCRIPTS to execute
    await inserDefaultLongTravelsTypes();
    await inserDefaultVouchers();
+   await inserDefaultSetting();
 }
 
 if (config.get('env') !== 'development') {
