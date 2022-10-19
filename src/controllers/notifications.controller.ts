@@ -9,13 +9,13 @@ export const notificationsController = {
             const data = await notificationService.getNotifications(req.query);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
-                const message = 'forbbiden to get data';
+                const message = 'Forbbiden to get data';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(403).json(errResp);
             }
 
             if (data instanceof Error) {
-                const message = 'unable to get transaction file';
+                const message = 'Unable to get transaction file';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
             }
@@ -33,7 +33,7 @@ export const notificationsController = {
             }
 
             if (data instanceof Error) {
-                const message = 'unable to get transaction file';
+                const message = 'U++nable to get transaction file';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
             }

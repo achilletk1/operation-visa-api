@@ -174,6 +174,7 @@ export const inserDefaultLongTravelsTypes = async () => {
     ]
 
     console.log('insert default transfertTypesinto visa_operations_long_travel_types collection');
+    db.dropCollection("visa_operations_long_travel_types",function(err, result) { console.log("Collection droped");});
     const response = await db.collection('visa_operations_long_travel_types').insertMany(transfertTypes);
     console.log(response.insertedIds);
     console.log('');
