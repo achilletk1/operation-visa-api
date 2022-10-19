@@ -1,8 +1,5 @@
-import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
-import * as helper from './helpers/visa-operations.service.helper';
 import { commonService } from './common.service';
 import { logger } from '../winston';
-import { config } from '../config';
 import * as generateId from 'generate-unique-id';
 import moment = require('moment');
 import { travelsCollection } from '../collections/travels.collection';
@@ -108,7 +105,7 @@ export const travelService = {
 
             const actualTravel = await travelsCollection.getTravelById(id);
 
-            if (actualTravel) { return new Error('TravelNotFound'); }
+            if (!actualTravel) { return new Error('TravelNotFound'); }
 
 
 

@@ -89,7 +89,7 @@ export interface TravelMonth {
         created?: number;
         updated?: number;
     };
-    expenseDetails: ExpenseDetail[];
+    expenseDetails?: ExpenseDetail[];
     transactions?: VisaTransaction[];
 
 }

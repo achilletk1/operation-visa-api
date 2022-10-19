@@ -1,3 +1,4 @@
+import { travelMonthsController } from './controllers/travel-month.controller';
 import { temporaryFilesController } from './controllers/temporary-files-controller';
 import { templatesController } from './controllers/templates.controller';
 import { exportController } from './controllers/export.controller';
@@ -71,6 +72,7 @@ templatesController.init(app);
 lettersController.init(app);
 notificationsController.init(app);
 temporaryFilesController.init(app);
+travelMonthsController.init(app);
 
 const main = express().use(config.get('basePath') || '', app);
 
