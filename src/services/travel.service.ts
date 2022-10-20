@@ -15,7 +15,7 @@ export const travelService = {
 
     insertTravel: async (travel: Travel): Promise<any> => {
         try {
-            const existingTravels = await travelsCollection.getTravelsBy({ $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
+            const existingTravels = await travelsCollection.getTravelsBy({ 'user._id': get(travel, 'user._id'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
 
             if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
             // Set request status to created
@@ -115,12 +115,15 @@ export const travelService = {
 
             if (!isEmpty(travel.expenseDetails)) {
                 for (let expenseDetail of travel.expenseDetails) {
+                    if (isEmpty(expenseDetail.attachments)) { continue; }
                     expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travel.dates.created);
                 }
             }
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel.othersAttachements) {
+                    if (isEmpty(othersAttachement.attachments)) { continue; }
+
                     othersAttachement.attachments = saveAttachment(othersAttachement.attachments, id, travel.dates.created);
                 }
             }
