@@ -40,8 +40,8 @@ export const exportController = {
             return res.status(200).json(data);
         });
 
-        app.get('/export/attachment/:path/view', async (req: Request, res: Response) => {
-            const data = await exportService.generateExportVisaAttachmentView(req.params.path);
+        app.get('/export/attachment/view', async (req: Request, res: Response) => {
+            const data = await exportService.generateExportVisaAttachmentView(req.query);
 
             if (data instanceof Error) {
                 const message = 'unable to export file';

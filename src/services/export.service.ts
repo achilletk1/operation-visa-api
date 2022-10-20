@@ -93,9 +93,9 @@ export const exportService = {
     },
 
 
-    generateExportVisaAttachmentView: async (path: any) => {
+    generateExportVisaAttachmentView: async (query: any) => {
         try {
-
+            const { path } = query;
             const data = filesService.readFile(path);
             return data;
 
