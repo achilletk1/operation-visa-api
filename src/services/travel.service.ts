@@ -196,13 +196,6 @@ export const travelService = {
                 tobeUpdated = { expenseDetails };
             }
 
-            /*    if (step === 'othersAttachements') {
-                   let { othersAttachements } = travel;
-                   othersAttachements.validators.push(validator);
-                   othersAttachements = { ...othersAttachements, ...updateData }
-                   tobeUpdated = { othersAttachements };
-               } */
-
             //TODO send notifications for status update
 
             return await travelsCollection.updateTravelsById(id, tobeUpdated);

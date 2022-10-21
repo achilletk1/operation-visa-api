@@ -2,6 +2,9 @@ import { travelMonthsCollection } from './../collections/travel-months.collectio
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import { TravelMonth } from '../models/travel';
+import { isEmpty } from 'lodash';
+import { Attachment } from '../models/visa-operations';
+import { filesService } from './files.service';
 
 
 export const travelMonthsService = {
@@ -53,9 +56,21 @@ export const travelMonthsService = {
             return error;
         }
     },
-    updateTravelMonthsById: async (id: string, data: TravelMonth) => {
+    updateTravelMonthsById: async (id: string, travelMonth: TravelMonth) => {
         try {
-            return await travelMonthsCollection.updateTravelMonthsById(id, data);
+
+            const actualTravelMonth = await travelMonthsCollection.getTravelMonthById(id);
+
+            if (!actualTravelMonth) { return new Error('TravelMonthNotFound'); }
+
+
+            if (!isEmpty(travelMonth.expenseDetails)) {
+                for (let expenseDetail of travelMonth.expenseDetails) {
+                    if (isEmpty(expenseDetail.attachments)) { continue; }
+                    expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travelMonth.dates.created);
+                }
+            }
+            return await travelMonthsCollection.updateTravelMonthsById(id, travelMonth);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -64,3 +79,22 @@ export const travelMonthsService = {
 
 
 };
+
+const saveAttachment = (attachements: Attachment[], id: string, date: number) => {
+    for (let attachment of attachements) {
+        if (!attachment.temporaryFile) { continue; }
+
+        const content = filesService.readFile(attachment.temporaryFile.path);
+
+        if (!content) { continue; }
+
+        attachment.content = content;
+
+        attachment = commonService.saveAttachment(id, attachment, date, 'travel');
+
+        filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
+        delete attachment.temporaryFile;
+    }
+
+    return attachements;
+}

@@ -61,7 +61,7 @@ export const travelMonthsController = {
             res.status(200).json(data);
         });
 
-        app.put('/travel-months/update/:id', async (req: Request, res: Response) => {
+        app.put('/travel-months/:id', async (req: Request, res: Response) => {
             const { id } = req.params;
 
             const data = await travelMonthsService.updateTravelMonthsById(id, req.body);
