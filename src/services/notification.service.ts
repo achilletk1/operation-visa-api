@@ -72,7 +72,15 @@ export const notificationService = {
         const receiver = `${email}`;
 
         try {
-            return sendEmail(receiver, subject, HtmlBody);
+             sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message:HtmlBody    ,
+                email:receiver,
+                id :data?._id.toString(),
+            }
+             await insertNotification(notification);
         } catch (error) {
             logger.error(
                 `Error during sendEmailDetectTravel to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -127,6 +135,7 @@ export const notificationService = {
 
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);
+            
         } catch (error) {
             logger.error(
                 `Error during sendEmailFormalNotice to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -153,7 +162,15 @@ export const notificationService = {
         const receiver = `${email}`;
 
         try {
-            return sendEmail(receiver, subject, HtmlBody);
+             sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message:HtmlBody    ,
+                email:receiver,
+                id :data?._id.toString(),
+            }
+             await insertNotification(notification);
         } catch (error) {
             logger.error(
                 `Error during sendEamailRejectStep to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -277,7 +294,7 @@ const insertNotification = async (notification: any) => {
     try {
         return await notificationsCollection.insertNotifications(notification);
     } catch (error) {
-        logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
+        logger.error(`\nError in insert notification \n${error.message}\n${error.stack}\n`);
         return error;
     }
 };
