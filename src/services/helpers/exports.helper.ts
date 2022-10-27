@@ -92,11 +92,11 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
         }
         const data = replaceVariables(content, values, isTest);
 
-        const temlateData = generateTemplateFormalNoticeLetter(data, signature);
+        const templateData = generateTemplateFormalNoticeLetter(data, signature);
 
         const template = handlebars.compile(templateFormalNoticeLetter);
 
-        const html = template(temlateData);
+        const html = template(templateData);
 
         const options = {
             method: 'POST',
