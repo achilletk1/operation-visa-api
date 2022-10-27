@@ -11,10 +11,11 @@ import { User } from '../../models/user';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification :any ;
-
+let templateFormalNoticeMail:any ; 
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
     templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
+    templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-template-mail.template.html', 'utf8');
 })();
 
 export const generateNotificationExportPdf = async (user: any, notification: any, start: any, end: any) => {
@@ -112,6 +113,33 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
     }
 };
 
+export const generateFormalNoticeMail = async (content: any, userData: any,  isTest?: boolean) => {
+    try {
+        const values = {
+            ...userData,
+            'SYSTEM_TODAY_LONG': moment().locale('fr'),
+            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
+        }
+        const data = replaceVariables(content, values, isTest);
+
+        const temlateData = generateTemplateFormalNoticeMail(data);
+
+        const template = handlebars.compile(templateFormalNoticeMail);
+
+        const html = template(temlateData);
+       /* const options = {
+            method: 'POST',
+            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
+            body: { html },
+            json: true
+        }*/
+        return html;
+    } catch (error) {
+        logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
+        return error;
+    }
+};
+
 const replaceVariables = (content: any, values: any, isTest?: boolean) => {
     const obj = {};
     for (const key in content) {
@@ -154,6 +182,16 @@ const generateTemplateFormalNoticeLetter = (letter: Letter, signature: string) =
         footerText: goToTheLine(`${get(letter, 'footerText', '')}`, reg),
         signatureText: get(letter, 'signatureText', ''),
         signature
+    }
+
+    return data;
+};
+
+const generateTemplateFormalNoticeMail = (content: any) => {
+    const reg = '//';
+    const data = {
+        objectText: get(content, 'object', ''),
+        bodyText: goToTheLine(`${get(content, 'content', '')}`, reg)
     }
 
     return data;

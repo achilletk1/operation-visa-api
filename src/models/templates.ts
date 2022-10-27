@@ -10,7 +10,7 @@ export interface TemplateForm {
     label?: string;
     desc?: string;
 
-    objet?:  {
+    obj?:  {
       english?:string,
       french?:string,
     };

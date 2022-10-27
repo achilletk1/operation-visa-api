@@ -2,6 +2,7 @@ import { TemplateForm } from './../models/templates';
 import { templatesCollection } from '../collections/templates.collection';
 import { logger } from '../winston';
 import { commonService } from './common.service';
+import { VariableCollection } from '../collections/variables';
 
 
 export const templatesService = {
@@ -13,6 +14,18 @@ export const templatesService = {
             delete filters.offset;
             delete filters.limit;
             return await templatesCollection.getTemplates(filters || {}, offset || 1, limit || 40);
+        } catch (error) {
+            logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+    getVariables: async (filters: any) => {
+        try {
+            commonService.parseNumberFields(filters);
+            const { offset, limit } = filters;
+            delete filters.offset;
+            delete filters.limit;
+            return await VariableCollection.getVariables(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
             return error;
@@ -65,5 +78,15 @@ export const templatesService = {
             return error;
         }
     },
+    
+    insertVariable: async (data: TemplateForm) => {
+        try {
+            return await VariableCollection.insertVariable(data);
+        } catch (error) {
+            logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+    
 
 };
