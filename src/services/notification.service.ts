@@ -7,10 +7,15 @@ import { config } from '../config';
 import * as moment from 'moment';
 import { Letter } from '../models/letter';
 import * as exportHelper from './helpers/exports.helper';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
 import { Notification, NotificationFormat } from '../models/notification';
+
+import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
+import * as exportsHelper from './helpers/exports.helper';
+import { usersService } from './users.service';
+const classPath = 'services.notificationService';
 
 export const notificationService = {
 
@@ -197,8 +202,80 @@ export const notificationService = {
             logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
             return error;
         }
-    }
+    },
 
+    generateNotificationExportLinks: async (userId: string, query: any) => {
+       
+        const user = await usersService.getUserById(userId);
+        if (!user || isEmpty(user)) { return new Error('UserNotFound'); }
+        
+        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+        delete query.action;
+
+        const options = { userId, query , ttl };
+
+        const pdfCode = encode({ format: 'pdf', ...options });
+
+        const xlsxCode = encode({ format: 'xlsx', ...options });
+
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/notification-generate/${userId}/export`
+
+        return {
+            pdfPath: `${basePath}/${pdfCode}`,
+            xlsxPath: `${basePath}/${xlsxCode}`
+        }
+    },
+
+    generateNotificationExportData: async (id: string, code: any) => {
+        try {
+            let options;
+
+            try {
+                options = decode(code);
+            } catch (error) { return new Error('BadExportCode'); }
+    
+            const { format, query , userId, ttl } = options;
+            if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+    
+            if (id !== userId) { return new Error('Forbbiden'); }
+    
+            const user = await usersService.getUserById(userId);
+    
+            if (!user) { return new Error('UserNotFound'); }
+            commonService.parseNumberFields(query);
+            const { offset, limit, start, end } = query;
+            delete query.offset;
+            delete query.limit;
+            delete query.start;
+            delete query.end;
+    
+            const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
+                undefined;
+    
+            const {data} =  await notificationsCollection.getNotifications(query || {}, offset || 1, limit || 40, range);
+    
+            if (!data || isEmpty(data)) {
+                logger.info(`notification not found, ${classPath}.getNotifications()`);
+                return new Error('NotificationNotFound');
+            }
+    
+            let result: any;
+    
+            if (format === 'pdf') {
+                const pdfString = await exportsHelper.generateNotificationExportPdf(user, data, start, end );
+                const buffer = Buffer.from(pdfString, 'base64');
+                result = { contentType: 'application/pdf', fileContent: buffer };
+            }
+     
+            return result;
+
+        } catch (error) {
+            logger.error(`\nError export PDF \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+      
+    }
 };
 
 // END Visa operations mails //

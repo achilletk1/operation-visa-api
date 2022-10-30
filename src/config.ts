@@ -195,6 +195,12 @@ export const config = convict({
             arg: 'template-color'
         },
     },
+    maxFileSizeUpload: {
+        doc: 'CBS API base url.',
+        format: Number,
+        default: 5,
+        env: 'MAX_FILE_SIZE_UPLOAD'
+    }, 
 });
 
 // Load environment dependent configuration

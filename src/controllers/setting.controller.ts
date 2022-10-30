@@ -1,6 +1,7 @@
 import { commonService } from '../services/common.service';
 import { Request, Response } from 'express';
 import { settingService } from '../services/setting.service';
+import { config } from '../config';
 
 
 export const SettingController = {
@@ -42,6 +43,9 @@ export const SettingController = {
             }
 
             res.status(200).json({ message: 'setting data updated succesfully.' });
+        });
+        app.get('/max_size_file_upload', async (req: Request, res: Response) => {
+            res.status(200).json(config.get("maxFileSizeUpload"));
         });
 
         
