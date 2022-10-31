@@ -26,7 +26,7 @@
         "url": "https://gateway.londo-tech.com",
         "timeout": 180000
     },
-    "pdfApiUrl": "http://localhost:9000",
+    "pdfApiUrl": "http://localhost:5000",
     "timeout": 100000,
     "fileStoragePath": "./filesrec",
     "cbsApiUrl": "http://localhost:4000",
