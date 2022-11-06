@@ -49,6 +49,7 @@ export const notificationService = {
                 email: receiver,
                 id: data?._id.toString(),
             }
+            
             await insertNotification(notification)
 
         } catch (error) {
