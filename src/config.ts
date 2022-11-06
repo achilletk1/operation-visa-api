@@ -127,7 +127,8 @@ export const config = convict({
     basePath: {
         doc: 'API base path.',
         format: String,
-        default: ''
+        default: '',
+        env: 'BASE_PATH',
     },
     pdfApiUrl: {
         doc: 'PDF API base url.',

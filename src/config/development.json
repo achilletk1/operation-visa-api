@@ -21,7 +21,7 @@
     "emailTokenSalt": "5L9#8N*L&&qcX53",
     "emailTokenTTL": 9000,
     "baseUrl": "http://localhost:3500",
-    "basePath": "/api/v1",
+    "basePath": "/visaope/v1",
     "londoGateway": {
         "url": "https://gateway.londo-tech.com",
         "timeout": 180000

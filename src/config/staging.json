@@ -31,7 +31,7 @@
     "emailTokenSalt": "$giTVUOWKh&EtXE",
     "emailTokenTTL": 900,
     "baseUrl": "https://dbanking-test.bcicongo.com",
-    "basePath": "/api/v1/trade-finance",
+    "basePath": "/visaope/v1",
     "smsBaseUrl": "http://10.100.23.21/bicec/admin/json.php",
     "emailBaseUrl": "http://plateformesvp.intra.bicec/bicec/admin/json.php",
     "londoGateway": {
