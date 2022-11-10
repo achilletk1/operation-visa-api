@@ -8,6 +8,7 @@ import { Travel } from '../models/travel';
 import { Attachment, OpeVisaStatus } from '../models/visa-operations';
 import { notificationService } from './notification.service';
 import { isEmpty, get } from 'lodash';
+import * as httpContext from 'express-http-context';
 
 
 export const travelService = {
@@ -39,7 +40,8 @@ export const travelService = {
 
             //TODO send notification
             Promise.all([
-                await notificationService.sendEmailTravelDeclaration(travel, get(travel, 'user.email'))
+                //await notificationService.sendEmailTravelDeclaration(travel, get(travel, 'user.email')),
+                await notificationService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), 'Déclaration de voyage', 'TravelDeclaration')
             ]);
 
             return insertedId;
@@ -102,12 +104,15 @@ export const travelService = {
 
     updateTravelById: async (id: string, travel: Travel) => {
         try {
+            const authUser = httpContext.get('user');
+            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            const actualTravel = await travelsCollection.getTravelById(id);
+            if (travel.proofTravel.status && !adminAuth) { delete travel.proofTravel.status }
 
-            if (!actualTravel) { return new Error('TravelNotFound'); }
-
-
+            if (travel.proofTravel && travel.proofTravel.isEdit) {
+                travel.proofTravel.status = OpeVisaStatus.PENDING;
+                delete travel.proofTravel.isEdit;
+            }
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
@@ -115,6 +120,13 @@ export const travelService = {
 
             if (!isEmpty(travel.expenseDetails)) {
                 for (let expenseDetail of travel.expenseDetails) {
+                    if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
+                    
+                    if (expenseDetail.isEdit) {
+                        expenseDetail.status = OpeVisaStatus.PENDING;
+                        delete expenseDetail.isEdit;
+                    }
+
                     if (isEmpty(expenseDetail.attachments)) { continue; }
                     expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travel.dates.created);
                 }
@@ -122,13 +134,30 @@ export const travelService = {
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel.othersAttachements) {
+                    if (othersAttachement.status && !adminAuth) { delete othersAttachement.status }
+
+                    if (othersAttachement.isEdit) {
+                        othersAttachement.status = OpeVisaStatus.PENDING;
+                        delete othersAttachement.isEdit;
+                    }
+
                     if (isEmpty(othersAttachement.attachments)) { continue; }
 
                     othersAttachement.attachments = saveAttachment(othersAttachement.attachments, id, travel.dates.created);
                 }
             }
 
-            return await travelsCollection.updateTravelsById(id, travel);
+            const result = await travelsCollection.updateTravelsById(id, travel);
+
+            let upadatedTravel = await travelsCollection.getTravelById(id);
+
+            const status = getTravelStatus(upadatedTravel);
+
+            if (status !== upadatedTravel.status) {
+                await travelsCollection.updateTravelsById(id, { status });
+                //TODO send notifications for status update
+            }
+            return result;
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -205,6 +234,34 @@ export const travelService = {
         }
     },
 
+    getValidationsTravel: async (id: string) => {
+        let validators: any[] = [];
+        try {
+            const travel = await travelsCollection.getTravelById(id);
+
+            if ('validators' in travel?.proofTravel) {
+                validators.push(...travel?.proofTravel?.validators)
+            }
+
+            travel?.expenseDetails?.forEach(expense => {
+                if ('validators' in expense) {
+                    validators.push(...expense.validators)
+                }
+            })
+
+            travel?.othersAttachements?.forEach(expense => {
+                if ('validators' in expense) {
+                    validators.push(...expense.validators)
+                }
+            })
+
+            return validators;
+
+        } catch (error) {
+            logger.error(`\nError getting vis transactions \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    }
 };
 
 const saveAttachment = (attachements: Attachment[], id: string, date: number) => {
@@ -226,3 +283,19 @@ const saveAttachment = (attachements: Attachment[], id: string, date: number) =>
     return attachements;
 }
 
+
+const getTravelStatus = (travel: Travel): OpeVisaStatus => {
+
+    if (!travel) { throw new Error('TravelNotDefined'); }
+
+    if (
+        travel?.proofTravel.status === OpeVisaStatus.ACCEPTED &&
+        !isEmpty(travel?.expenseDetails) &&
+        travel.expenseDetails?.every((elt) => elt.status === OpeVisaStatus.ACCEPTED) &&
+        travel.othersAttachements?.every((elt) => elt.status === OpeVisaStatus.ACCEPTED)
+    ) {
+        return OpeVisaStatus.ACCEPTED;
+    } else {
+        return travel.status === OpeVisaStatus.ACCEPTED ? OpeVisaStatus.PENDING : travel.status;
+    }
+}

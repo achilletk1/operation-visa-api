@@ -202,6 +202,13 @@ export const config = convict({
         default: 5,
         env: 'MAX_FILE_SIZE_UPLOAD'
     }, 
+    ceilingIncreaseEmail: {
+        doc: 'mail requesting a ceiling increase.',
+        format: String,
+        default: '',
+        env: 'EMAIL_REQUESTING_CEILING_INCREASE',
+        arg: 'email-requesting-ceiling-increase'
+    },
 });
 
 // Load environment dependent configuration

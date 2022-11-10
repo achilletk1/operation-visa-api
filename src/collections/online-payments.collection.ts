@@ -32,9 +32,8 @@ export const onlinePaymentsCollection = {
             query.$set = { ...set };
         }
 
-        return await database
-            .collection(collectionName)
-            .updateOne({ _id: new ObjectId(id.toString()) }, query);
+        const result =  await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
+        return result.upsertedId;
     },
 
 

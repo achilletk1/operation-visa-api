@@ -1,16 +1,15 @@
-import { get } from 'lodash';
-import { usersCollection } from '../collections/users.collection';
 import { onlinePaymentsCollection } from '../collections/online-payments.collection';
-import { Attachment, AttachementStatus, OpeVisaStatus } from '../models/visa-operations';
-import { commonService } from './common.service';
-import { logger } from '../winston';
-import * as generateId from 'generate-unique-id';
-import moment = require('moment');
-import { filesService } from './files.service';
-import { config } from '../config';
-import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
-import * as helper from './helpers/visa-operations.service.helper'
 import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
+import { usersCollection } from '../collections/users.collection';
+import { notificationService } from './notification.service';
+import {  OpeVisaStatus } from '../models/visa-operations';
+import * as httpContext from 'express-http-context';
+import { commonService } from './common.service';
+import * as generateId from 'generate-unique-id';
+import { filesService } from './files.service';
+import { logger } from '../winston';
+import moment = require('moment');
+import { get } from 'lodash';
 
 
 export const onlinePaymentsService = {
@@ -19,9 +18,9 @@ export const onlinePaymentsService = {
     insertOnlinePaymentStatement: async (userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> => {
         try {
 
-           // const user = await usersCollection.getUserById(userId);
+           const user = await usersCollection.getUserById(userId);
 
-           // if (!user) { return new Error('UserNotFound'); }
+           if (!user) { return new Error('UserNotFound'); }
 
             const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
 
@@ -36,9 +35,9 @@ export const onlinePaymentsService = {
             if (!onlinePayment) {
                 onlinePayment = {
                    user: {
-                       // _id: get(user, '_id').toString(),
-                        //clientCode: get(user, 'clientCode'),
-                        //fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
+                       _id: get(user, '_id').toString(),
+                        clientCode: get(user, 'clientCode'),
+                        fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
                     },
                     dates: {
                         created: moment().valueOf(),
@@ -75,6 +74,9 @@ export const onlinePaymentsService = {
 
             result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
             //TODO send notification
+            Promise.all([
+                await notificationService.sendEmailOnlinePayementDeclaration(onlinePayment, user.email)
+            ]);
 
             const data = { _id: result };
 
@@ -134,11 +136,21 @@ export const onlinePaymentsService = {
     },
     updateOnlinePaymentsById: async (id: string, data: OnlinePaymentMonth) => {
         try {
+            const authUser = httpContext.get('user');
+            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+
             const actualOninePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
             if (!actualOninePayment) { return new Error('TravelNotFound'); }
 
             for (let statement of data.statements) {
+                if (statement.status && !adminAuth) { delete statement.status }
+
+                if (statement.isEdit) {
+                    statement.status = OpeVisaStatus.PENDING;
+                    delete statement.isEdit;
+                }
+
                 for (let attachment of statement.attachments) {
                     if (!attachment.temporaryFile) { continue; }
 
@@ -155,12 +167,50 @@ export const onlinePaymentsService = {
                 }
 
             }
+            const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
+
+            let upadatedTravel = await onlinePaymentsCollection.getOnlinePaymentById(id);
+
+            const status = getPayementStatus(upadatedTravel);
+
+            if (status !== upadatedTravel.status) {
+                await onlinePaymentsCollection.updateOnlinePaymentsById(id, { status });
+                //TODO send notifications for status update
+            }
+
+            return result;
             return await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
+    getValidationsOnlinePayment: async (id: string) => {
+        let validators: any[] = [];
+        try {
+            const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
+            onlinePayment?.statements?.forEach(online => {
+                if ('validators' in online) {
+                    validators.push(...online.validators)
+                }
+            })
+
+            return validators;
+
+        } catch (error) {
+            logger.error(`\nError getting vis transactions \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    }
 
 };
+const getPayementStatus = (onlinePayment: OnlinePaymentMonth) => {
+    if (!onlinePayment) { throw new Error('OnlinePaymentNotDefined'); }
+
+    if (onlinePayment.statements.every((elt) => elt.status === OpeVisaStatus.ACCEPTED)) {
+        return OpeVisaStatus.ACCEPTED;
+    } else {
+        return onlinePayment.status === OpeVisaStatus.ACCEPTED ? OpeVisaStatus.PENDING : onlinePayment.status
+    }
+}

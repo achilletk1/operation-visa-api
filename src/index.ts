@@ -29,6 +29,8 @@ import { notificationsController } from './controllers/notifications.controller'
 import { oauthVerification } from './middlewares/auth.middleware';
 import { SettingController } from './controllers/setting.controller';
 import { mailController } from './controllers/mail.controller';
+import { visaTransactionsCeilingsController } from './controllers/visa-transactions-ceilings.controller';
+import { requestCeillingIncreaseController } from './controllers/requestCeilingIncrease.controller';
 
 
 
@@ -63,7 +65,8 @@ downloadsController.init(app);
 usersController.init(app);
 authController.init(app);
 
-
+requestCeillingIncreaseController.init(app);
+visaTransactionsCeilingsController.init(app);
 voucherController.init(app);
 travelController.init(app);
 onlinePaymentsController.init(app);

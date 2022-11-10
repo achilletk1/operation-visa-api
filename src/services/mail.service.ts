@@ -1,8 +1,8 @@
 import { cbsService } from './cbs.service';
-import { Letter } from '../models/letter';
 import { logger } from '../winston';
 import * as exportsHelper from './helpers/exports.helper'
 import { TemplateForm } from '../models/templates';
+import * as NotificationHeper from './helpers/notification.service.helper'
 
 
 export const mailService = {
@@ -36,11 +36,11 @@ export const mailService = {
                 }
             }
             
-            const pdfStringEn = await exportsHelper.generateFormalNoticeMail(EmailContentObject.Emailen,{},  true);
+            const pdfStringEn = await NotificationHeper.generateVisaTemplate(EmailContentObject.Emailen,{},  true);
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await exportsHelper.generateFormalNoticeMail(EmailContentObject.Emailfr,{},true);
+            const pdfStringFr = await NotificationHeper.generateVisaTemplate(EmailContentObject.Emailfr,{},true);
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 

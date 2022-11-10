@@ -30,5 +30,6 @@ export interface OnlinePaymentStatement {
   validators?: Validator[];
   status?: OpeVisaStatus;
   expenseCategory?: ExpenseCategory;
+  isEdit?: boolean;
 }
 

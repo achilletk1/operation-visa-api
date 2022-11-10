@@ -27,7 +27,7 @@ export const travelsCollection = {
         if (!isEmpty(unset)) { query.$unset = { ...unset } }
 
         const result = await database.collection(collectionName).updateOne({ _id: new ObjectId(id) }, query);
-        return result;
+        return result.upsertedId;
     },
 
 

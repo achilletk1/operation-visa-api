@@ -20,6 +20,7 @@ export interface ExpenseDetail {
     expenceCategory?: ExpenseCategory;
     validators?: Validator[];
     attachments?: Attachment[];
+    isEdit?: boolean;
 }
 
 export interface OthersAttachement {
@@ -32,6 +33,7 @@ export interface OthersAttachement {
     rejectReason?: string;
     attachments: Attachment[];
     validators?: Validator[];
+    isEdit?: boolean;
 }
 
 
@@ -72,7 +74,8 @@ export interface Travel {
         proofTravelAttachs?: Attachment[];
         status?: OpeVisaStatus;
         rejectReason?: string;
-        validators?: Validator[]
+        validators?: Validator[];
+        isEdit?: boolean;
     };
     expenseDetails?: ExpenseDetail[];
     othersAttachements?: OthersAttachement[];

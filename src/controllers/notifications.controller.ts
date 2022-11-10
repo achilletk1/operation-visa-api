@@ -23,7 +23,7 @@ export const notificationsController = {
             res.status(200).json(data);
         });
 
-        app.get('/notification-generate/:id/export/:code', async (req, res) => {
+        app.get('/notification-generate/:id/export/:code', async (req: Request, res: Response) => {
             const id = req.params.id;
             const code = req.params.code;
             const data = await notificationService.generateNotificationExportData(id, code);

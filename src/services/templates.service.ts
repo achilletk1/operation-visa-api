@@ -13,7 +13,7 @@ export const templatesService = {
             const { offset, limit } = filters;
             delete filters.offset;
             delete filters.limit;
-            return await templatesCollection.getTemplates(filters || {}, offset || 1, limit || 40);
+            return await templatesCollection.getAllTemplates(filters || {}, offset || 1, limit || 40);
         } catch (error) {
             logger.error(`\nError getting visa operations \n${error.message}\n${error.stack}\n`);
             return error;

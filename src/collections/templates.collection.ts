@@ -5,7 +5,26 @@ import { TemplateForm } from '../models/templates';
 
 const collectionName = 'visa_operations_templates';
 export const templatesCollection = {
-    getTemplates: async (params: any, offset: any, limit: any) => {
+    getTemplates: async (params: any, offset?: any, limit?: any) => {
+        const database = await getDatabase();
+        let { end, start } = params;
+        let query = {};
+        const startIndex = (offset - 1) * limit;
+
+        if (end && start) {
+            end = parseInt(end);
+            start = parseInt(start);
+            delete params.end;
+            delete params.start;
+        }
+
+        query = { ...params }
+        const total = await database.collection(collectionName).find(query).count();
+        const data = await database.collection(collectionName).findOne(query);
+        return { data, total };
+
+    },
+    getAllTemplates: async (params: any, offset: any, limit: any) => {
         const database = await getDatabase();
         let { end, start } = params;
         let query = {};

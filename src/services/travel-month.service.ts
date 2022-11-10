@@ -1,10 +1,11 @@
 import { travelMonthsCollection } from './../collections/travel-months.collection';
+import { Attachment,OpeVisaStatus } from '../models/visa-operations';
+import * as httpContext from 'express-http-context';
 import { commonService } from './common.service';
-import { logger } from '../winston';
-import { TravelMonth } from '../models/travel';
-import { isEmpty } from 'lodash';
-import { Attachment } from '../models/visa-operations';
 import { filesService } from './files.service';
+import { TravelMonth } from '../models/travel';
+import { logger } from '../winston';
+import { isEmpty } from 'lodash';
 
 
 export const travelMonthsService = {
@@ -58,6 +59,8 @@ export const travelMonthsService = {
     },
     updateTravelMonthsById: async (id: string, travelMonth: TravelMonth) => {
         try {
+            const authUser = httpContext.get('user');
+            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
             const actualTravelMonth = await travelMonthsCollection.getTravelMonthById(id);
 
@@ -66,6 +69,13 @@ export const travelMonthsService = {
 
             if (!isEmpty(travelMonth.expenseDetails)) {
                 for (let expenseDetail of travelMonth.expenseDetails) {
+                    if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
+                    
+                    if (expenseDetail.isEdit) {
+                        expenseDetail.status = OpeVisaStatus.PENDING;
+                        delete expenseDetail.isEdit;
+                    }
+                    
                     if (isEmpty(expenseDetail.attachments)) { continue; }
                     expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travelMonth.dates.created);
                 }

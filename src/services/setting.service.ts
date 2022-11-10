@@ -14,7 +14,7 @@ export const settingService = {
     getSettingByKey: async (key: string) => {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { return new Error('Forbidden'); }
+            // if (authUser.category < 500) { return new Error('Forbidden'); }
             return await settingCollection.getSettingsByKey(key);
         } catch (error) {
             logger.error(`Error getting Setting data \n${error.message}\n${error.stack}`);
@@ -36,12 +36,12 @@ export const settingService = {
             const authUser = httpContext.get('user');
             if(isEmpty(setting.users)){setting.users = [];}
             if(isEmpty(setting.dateUpdated)){ setting.dateUpdated = [];}
-            if(setting.dateUpdated.length === 10){       
+            if(setting.dateUpdated.length >= 10){       
                 var index = 0, value = setting.dateUpdated.reduce(function(pre, cur, i) {
-                    return cur < pre? (index = i) && cur : pre;
+                    return cur < pre ? (index = i) && cur : pre;
                 });
                 setting.dateUpdated[index] = moment().valueOf();
-                setting.users[index] = authUser
+                setting.users[index] = authUser;
            }               
             setting.users.push(authUser);
             setting.dateUpdated.push(moment().valueOf()) ;

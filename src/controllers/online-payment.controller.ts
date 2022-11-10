@@ -100,5 +100,23 @@ export const onlinePaymentsController = {
 
             res.status(200).json({ message: 'online payment data updated succesfully.' });
         });
+
+        app.get('/validators-online-payment/:id', async (req: Request, res: Response) => {
+
+            const data = await onlinePaymentsService.getValidationsOnlinePayment(req.params.id);
+            if (data instanceof Error && data.message === 'Forbbiden') {
+                const message = 'forbbiden to get data';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(403).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'unable to get online payment by id';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json(data);
+        });
     }
 };
