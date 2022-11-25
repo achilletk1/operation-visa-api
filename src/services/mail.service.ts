@@ -1,8 +1,8 @@
 import { cbsService } from './cbs.service';
 import { logger } from '../winston';
-import  exportsHelper from './helpers/exports.helper'
+import * as exportsHelper from './helpers/exports.helper'
 import { TemplateForm } from '../models/templates';
-import  NotificationHeper from './helpers/notification.service.helper'
+import  * as NotificationHeper from './helpers/notification.service.helper'
 
 
 export const mailService = {

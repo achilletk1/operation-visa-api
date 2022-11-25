@@ -1,6 +1,6 @@
 import { visaTransactionsFilesCollection } from '../collections/visa-transactions-files.collections';
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
-import  helper from './helpers/visa-operations.service.helper';
+import * as helper from './helpers/visa-operations.service.helper';
 import { filesCollection } from '../collections/files.collection';
 import { commonService } from './common.service';
 import { logger } from '../winston';

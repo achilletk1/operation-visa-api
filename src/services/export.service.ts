@@ -3,8 +3,8 @@ import { commonService } from './common.service';
 import moment = require("moment");
 import { config } from "../config";
 import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
-import  helper from "./helpers/exports.helper";
-import  visaHelper from "./helpers/visa-operations.service.helper";
+import  * as helper from "./helpers/exports.helper";
+import * as visaHelper from "./helpers/visa-operations.service.helper";
 import { logger } from '../winston';
 
 export const exportService = {

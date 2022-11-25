@@ -5,7 +5,7 @@ import { config } from '../config';
 import  moment from 'moment';
 import XLSX = require('xlsx');
 import { filesService } from './files.service';
-import  visaHelper from './helpers/visa-operations.service.helper';
+import  * as visaHelper from './helpers/visa-operations.service.helper';
 import { Attachment } from './../models/visa-operations';
 
 

@@ -3,8 +3,8 @@ import  sinon from 'sinon';
 import  chai from 'chai';
 import  sinonChai from 'sinon-chai';
 import { TokenPayload, OauthToken } from '../../../models/access-token';
-import config from '../../../config';
-import  oauthHelper from './oauth.service.helper';
+import {config} from '../../../config';
+import  * as oauthHelper from './oauth.service.helper';
 import { ImportMock } from 'ts-mock-imports';
 import { before } from 'mocha';
 

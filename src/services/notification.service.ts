@@ -1,12 +1,12 @@
 import { Travel } from './../models/travel';
-import  notificationHelper from './helpers/notification.service.helper';
+import * as notificationHelper from './helpers/notification.service.helper';
 import  http from 'request-promise';
 import  postmark from 'postmark';
 import { logger } from '../winston';
 import { config } from '../config';
 import  moment from 'moment';
 import { Letter } from '../models/letter';
-import  exportHelper from './helpers/exports.helper';
+import * as  exportHelper from './helpers/exports.helper';
 import { get, isEmpty } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
@@ -14,7 +14,7 @@ import { Notification, NotificationFormat } from '../models/notification';
 import { OnlinePaymentMonth } from '../models/online-payment';
 
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
-import  exportsHelper from './helpers/exports.helper';
+import * as exportsHelper from './helpers/exports.helper';
 import { usersService } from './users.service';
 import { templatesCollection } from '../collections/templates.collection';
 const classPath = 'services.notificationService';

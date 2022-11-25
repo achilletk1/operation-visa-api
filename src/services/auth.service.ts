@@ -1,5 +1,5 @@
 import { usersCollection } from '../collections/users.collection';
-import  oauthHelper from './helpers/oauth/oauth.service.helper'
+import  * as oauthHelper from './helpers/oauth/oauth.service.helper'
 import { notificationService } from './notification.service';
 import { commonService } from './common.service';
 import { isString, isEmpty, get } from 'lodash';
