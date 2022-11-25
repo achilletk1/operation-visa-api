@@ -15,11 +15,13 @@ RUN mkdir -p /usr/src/dbanking && cp -a /tmp/node_modules /usr/src/dbanking/
 
 WORKDIR /usr/src/dbanking
 
+
+
+COPY tsconfig.json /usr/src/dbanking/tsconfig.json
+
 RUN tsc -p .
 
 COPY dist /usr/src/dbanking/dist
-
-COPY tsconfig.json /usr/src/dbanking/tsconfig.json
 
 
 COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/dist/src/services/helpers/oauth/
