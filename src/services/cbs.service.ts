@@ -1,4 +1,4 @@
-import * as http from 'request-promise';
+import  http from 'request-promise';
 import { config } from '../config';
 import { logger } from '../winston';
 import { commonService } from './common.service';

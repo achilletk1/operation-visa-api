@@ -4,7 +4,7 @@ import { visaTransactionsCollection } from '../collections/visa-transactions.col
 import { visaOperationsCollection } from '../collections/visa-operations.collection';
 import { OperationType } from './../models/visa-operations';
 import { usersCollection } from '../collections/users.collection';
-import * as helper from './helpers/visa-operations.service.helper';
+import  helper from './helpers/visa-operations.service.helper';
 import { filesCollection } from '../collections/files.collection';
 import { notificationService } from './notification.service';
 import httpContext = require('express-http-context');

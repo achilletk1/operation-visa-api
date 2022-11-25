@@ -1,8 +1,8 @@
 import { config } from '../../../config';
 import { load } from 'protobufjs';
-import * as moment from 'moment';
-import * as crypto from 'crypto';
-import * as bs58 from 'bs58';
+import  moment from 'moment';
+import  crypto from 'crypto';
+import  bs58 from 'bs58';
 
 // Load URL prototype
 let URLCryptMessage = null;

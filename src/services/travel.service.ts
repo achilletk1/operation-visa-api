@@ -1,6 +1,6 @@
 import { commonService } from './common.service';
 import { logger } from '../winston';
-import * as generateId from 'generate-unique-id';
+import  generateId from 'generate-unique-id';
 import moment = require('moment');
 import { travelsCollection } from '../collections/travels.collection';
 import { filesService } from './files.service';
@@ -8,7 +8,7 @@ import { Travel } from '../models/travel';
 import { Attachment, OpeVisaStatus } from '../models/visa-operations';
 import { notificationService } from './notification.service';
 import { isEmpty, get } from 'lodash';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 
 
 export const travelService = {

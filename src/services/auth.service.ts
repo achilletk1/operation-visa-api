@@ -1,13 +1,13 @@
 import { usersCollection } from '../collections/users.collection';
-import * as oauthHelper from './helpers/oauth/oauth.service.helper'
+import  oauthHelper from './helpers/oauth/oauth.service.helper'
 import { notificationService } from './notification.service';
 import { commonService } from './common.service';
 import { isString, isEmpty, get } from 'lodash';
 import { User } from '../models/user';
 import { logger } from '../winston';
 import { config } from '../config';
-import * as moment from 'moment';
-import * as bcrypt from 'bcrypt';
+import  moment from 'moment';
+import  bcrypt from 'bcrypt';
 
 const classPath = `services.auth`;
 

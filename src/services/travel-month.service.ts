@@ -1,6 +1,6 @@
 import { travelMonthsCollection } from './../collections/travel-months.collection';
 import { Attachment,OpeVisaStatus } from '../models/visa-operations';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { filesService } from './files.service';
 import { TravelMonth } from '../models/travel';

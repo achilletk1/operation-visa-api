@@ -1,12 +1,12 @@
 import { onlinePaymentsCollection } from './../collections/online-payments.collection';
 import { travelsCollection } from './../collections/travels.collection';
 import { usersCollection } from '../collections/users.collection';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { User } from './../models/user';
 import { isEmpty, get } from 'lodash';
 import { logger } from '../winston';
-import * as moment from 'moment';
+import  moment from 'moment';
 import { TravelType } from '../models/travel';
 
 export const usersService = {

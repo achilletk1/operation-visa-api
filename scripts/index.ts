@@ -1,5 +1,5 @@
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
-import * as Confirm from 'prompt-confirm';
+import  Confirm from 'prompt-confirm';
 import { config } from './config-env';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 import { inserDefaultSetting } from './helpers/insert-default-settings';

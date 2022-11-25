@@ -3,7 +3,7 @@ import { commonService } from './common.service';
 import { logger } from '../winston';
 import moment = require('moment');
 import { Setting } from '../models/setting';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { settingCollection } from '../collections/settings.collection';
 import { isEmpty } from 'lodash';
 

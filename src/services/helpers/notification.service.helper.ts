@@ -1,5 +1,5 @@
-import * as readFilePromise from 'fs-readfile-promise';
-import * as handlebars from 'handlebars';
+import  readFilePromise from 'fs-readfile-promise';
+import  handlebars from 'handlebars';
 import { logger } from '../../winston';
 import { config } from '../../config';
 import { get } from 'lodash';

@@ -2,7 +2,7 @@ import { notificationService } from './notification.service';
 import moment = require("moment");
 import { config } from "../config";
 import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
-import * as helper from "./helpers/exports.helper";
+import  helper from "./helpers/exports.helper";
 
 export const reportingService = {
 

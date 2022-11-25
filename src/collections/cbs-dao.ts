@@ -1,8 +1,8 @@
 import { config } from '../config';
 import { logger } from '../winston';
-import * as http from 'request-promise';
+import  http from 'request-promise';
 import { commonService } from '../services/common.service';
-import * as moment from 'moment';
+import  moment from 'moment';
 
 const classPath = 'database.cbsDAO';
 

@@ -3,7 +3,7 @@ import { Letter } from '../models/letter';
 import { lettersCollection } from '../collections/letters.collection';
 import { logger } from '../winston';
 import { commonService } from './common.service';
-import * as exportsHelper from './helpers/exports.helper'
+import  exportsHelper from './helpers/exports.helper'
 
 
 export const lettersService = {

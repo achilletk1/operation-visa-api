@@ -1,7 +1,7 @@
 import { requestCeillingIncreaseCollection } from '../collections/requestCeilingIncrease.collection';
 import { RequestCeilingIncrease, Validator } from '../models/request-ceiling-increase';
 import { notificationService } from './notification.service';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import moment = require('moment');

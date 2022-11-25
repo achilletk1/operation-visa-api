@@ -1,11 +1,11 @@
 import { Letter } from './../../models/letter';
-import * as readFilePromise from 'fs-readfile-promise';
-import * as handlebars from 'handlebars';
-import * as http from 'request-promise';
+import  readFilePromise from 'fs-readfile-promise';
+import  handlebars from 'handlebars';
+import  http from 'request-promise';
 import { logger } from "../../winston";
 import { config } from '../../config';
-import * as moment from "moment";
-import * as XLSX from 'xlsx';
+import  moment from "moment";
+import  XLSX from 'xlsx';
 import { get } from 'lodash';
 import { User } from '../../models/user';
 
@@ -204,7 +204,7 @@ const goToTheLine = (str: string, reg: string) => {
 
 export const generateTransactionExportXlsx = (transactions) => {
 
-    // if (typeof XLSX === 'undefined') import * as XLSX from 'xlsx';
+    // if (typeof XLSX === 'undefined') import  XLSX from 'xlsx';
 
     const { result } = transactions;
 

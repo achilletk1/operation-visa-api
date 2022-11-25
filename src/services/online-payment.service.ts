@@ -3,9 +3,9 @@ import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-pay
 import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
 import {  OpeVisaStatus } from '../models/visa-operations';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
-import * as generateId from 'generate-unique-id';
+import  generateId from 'generate-unique-id';
 import { filesService } from './files.service';
 import { logger } from '../winston';
 import moment = require('moment');

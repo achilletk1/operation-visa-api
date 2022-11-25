@@ -1,10 +1,10 @@
 import beautify from 'json-beautify';
 import { config } from './config';
-import * as winston from 'winston';
+import  winston from 'winston';
 import { Options } from 'morgan';
-import * as  moment from 'moment';
+import   moment from 'moment';
 import { isEmpty } from 'lodash';
-import * as fs from 'fs';
+import  fs from 'fs';
 
 const { format, } = winston;
 const { combine, timestamp, label, printf, metadata, colorize, errors } = format;

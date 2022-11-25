@@ -1,9 +1,9 @@
 
 import { TokenPayload, OauthToken } from '../../../models/access-token';
 import { config } from '../../../config';
-import * as jwt from 'jsonwebtoken';
+import  jwt from 'jsonwebtoken';
 import { load } from 'protobufjs';
-import * as moment from 'moment';
+import  moment from 'moment';
 
 // Load Toke prototype
 let AccessTokenMessage = null;

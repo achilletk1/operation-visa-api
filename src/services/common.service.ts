@@ -2,10 +2,10 @@ import replaceSpecialCharacters = require('replace-special-characters');
 import { isString, isNumber } from 'lodash';
 import { logger } from '../winston';
 import { config } from '../config';
-import * as moment from 'moment';
+import  moment from 'moment';
 import XLSX = require('xlsx');
 import { filesService } from './files.service';
-import * as visaHelper from './helpers/visa-operations.service.helper';
+import  visaHelper from './helpers/visa-operations.service.helper';
 import { Attachment } from './../models/visa-operations';
 
 

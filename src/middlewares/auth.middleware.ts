@@ -1,7 +1,7 @@
 import { Request, NextFunction } from 'express';
-import * as httpContext from 'express-http-context';
+import  httpContext from 'express-http-context';
 import { logger } from '../winston';
-import * as jwt from 'jsonwebtoken';
+import  jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { encode } from 'js-base64';
 

@@ -1,4 +1,4 @@
-import * as convict from 'convict';
+import  convict from 'convict';
 
 // Define a schema
 export const config = convict({
