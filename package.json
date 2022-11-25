@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec ts-node src/index.ts ",
-    "start:dev": "cross-env NODE_ENV=development node dist/index.js",
-    "start:staging": "cross-env NODE_ENV=staging node dist/index.js",
-    "start:staging-bci": "cross-env NODE_ENV=staging-bci node dist/index.js",
-    "start:prod": "cross-env NODE_ENV=production node  dist/index.js",
+    "start:dev": "cross-env NODE_ENV=development node dist/src/index.js",
+    "start:staging": "cross-env NODE_ENV=staging node dist/src/index.js",
+    "start:staging-bci": "cross-env NODE_ENV=staging-bci node dist/src/index.js",
+    "start:prod": "cross-env NODE_ENV=production node  dist/src/index.js",
     "scripts": "node -r ts-node/register/transpile-only scripts/index.ts"
   },
   "author": "Londo Technology",
