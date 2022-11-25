@@ -13,33 +13,26 @@ COPY scripts /tmp/scripts
 RUN cd /tmp && tsc -p .
 
 
-
 FROM node:16-alpine
 
-ENV NODE_PATH=/usr/lib/node_modules
+RUN mkdir -p /usr/src/dbanking 
 
-COPY package.json /tmp/package.json
+COPY --from=0 /tmp/package*.json /usr/src/dbanking/
 
-RUN cd /tmp && npm install --only=production --unsafe-perm=true && npm i -g typescript
+COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
-RUN mkdir -p /usr/src/dbanking && cp -a /tmp/node_modules /usr/src/dbanking/
-
-WORKDIR /usr/src/dbanking
+COPY --from=0 /tmp/dist /usr/src/dbanking/
 
 
+COPY src/upload-folder /usr/src/dbanking/src/upload-folder
 
-COPY tsconfig.json /usr/src/dbanking/tsconfig.json
+COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/src/services/helpers/oauth/
 
-COPY dist /usr/src/dbanking/dist
+COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/url-crypt/
 
+COPY src/config /usr/src/dbanking/src/config
 
-COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/dist/src/services/helpers/oauth/
-
-COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/dist/src/services/helpers/url-crypt/
-
-COPY src/config /usr/src/dbanking/dist/src/config
-
-COPY src/services/helpers/templates /usr/src/dbanking/dist/src/services/helpers/templates
+COPY src/services/helpers/templates /usr/src/dbanking/src/services/helpers/templates
 
 COPY .gitignore /usr/src/dbanking/.gitignore
 
@@ -51,10 +44,9 @@ COPY scripts /usr/src/dbanking/scripts
 
 COPY tsconfig.json /usr/src/dbanking/tsconfig.json
 
+WORKDIR  /usr/src/dbanking
 
-COPY src/config /usr/src/dbanking/dist/config
+EXPOSE 3000
 
-
-# RUN NODE_ENV=staging-bci
-CMD npm run start:staging
+CMD ["npm", "run", "start:staging-bci"]
 
