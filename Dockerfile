@@ -36,9 +36,9 @@ COPY src/config /usr/src/dbanking/dist/src/config
 
 COPY src/services/helpers/templates /usr/src/dbanking/dist/src/services/helpers/templates
 
-COPY .gitignore /usr/src/dist/dbanking/.gitignore
+COPY .gitignore /usr/src/dbanking/dist/.gitignore
 
-COPY Dockerfile /usr/src/dist/dbanking/Dockerfile
+COPY Dockerfile /usr/src/dbanking/dist/Dockerfile
 
 COPY package*.json /usr/src/dbanking/dist/
 
