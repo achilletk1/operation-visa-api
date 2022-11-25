@@ -21,9 +21,9 @@ COPY --from=0 /tmp/package*.json /usr/src/dbanking/
 
 COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
-COPY --from=0 /tmp/dist /usr/src/dbanking/dist
+COPY --from=0 /tmp/dist /usr/src/dbanking/dist/
 
-RUN ls -l /usr/src/dbanking/dist
+RUN ls -l /usr/src/dbanking/dist/
 
 COPY src/upload-folder /usr/src/dbanking/src/upload-folder
 
