@@ -23,7 +23,6 @@ COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
 COPY --from=0 /tmp/dist /usr/src/dbanking/
 
-RUN ls -l /usr/src/dbanking/
 
 COPY src/upload-folder /usr/src/dbanking/src/upload-folder
 
@@ -44,6 +43,8 @@ COPY package*.json /usr/src/dbanking/
 COPY scripts /usr/src/dbanking/scripts
 
 COPY tsconfig.json /usr/src/dbanking/tsconfig.json
+
+RUN ls -l /usr/src/dbanking/
 
 WORKDIR  /usr/src/dbanking
 
