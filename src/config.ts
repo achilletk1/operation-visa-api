@@ -213,7 +213,7 @@ export const config = convict({
 
 // Load environment dependent configuration
 const env = config.get('env');
-config.loadFile(((env === 'development') ? './src/config/' : './dist/config/') + env + '.json');
+config.loadFile(((env === 'development') ? './src/config/' : './dist/src/config/') + env + '.json');
 
 // Perform validation
 config.validate({ allowed: 'strict' });
