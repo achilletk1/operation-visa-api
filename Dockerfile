@@ -1,9 +1,20 @@
-FROM londotech/node-oracle-ts:latest
+FROM node:16-alpine
 
-USER root
+COPY package*.json /tmp/
 
-# Expose the port the app runs in
-EXPOSE 3000
+RUN cd /tmp && npm install --only=production --unsafe-perm=true && npm i -g typescript
+
+COPY tsconfig.json /tmp/
+
+COPY src /tmp/src
+
+COPY scripts /tmp/scripts
+
+RUN cd /tmp && tsc -p .
+
+
+
+FROM node:16-alpine
 
 ENV NODE_PATH=/usr/lib/node_modules
 
@@ -18,8 +29,6 @@ WORKDIR /usr/src/dbanking
 
 
 COPY tsconfig.json /usr/src/dbanking/tsconfig.json
-
-RUN tsc -p .
 
 COPY dist /usr/src/dbanking/dist
 
