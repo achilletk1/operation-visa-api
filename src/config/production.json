@@ -11,6 +11,14 @@
             "password": ""
         }
     },
+    "dbOracle": {
+        "host": "10.100.203.171",
+        "name": "BCIRCO",
+        "auth": {
+            "user": "svc_efacture",
+            "password": "lndE-F@cture2020"
+        }
+    },
     "cookieSalt": "3RKuQbJ73U",
     "cookieTTL": 900000,
     "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
@@ -18,13 +26,10 @@
     "saltRounds": 10,
     "exportSalt": "D@^wkTVOtx77cg7MALT^VNW2gEo9mu5a#yoVpFTOxtpv79uJ65",
     "exportTTL": 900,
-    "postmarkToken": "9544980c-2e81-4625-9102-9b5774b31a2d",
     "emailTokenSalt": "dPpjRo8O!1%HOD4uOB6D",
     "emailTokenTTL": 900,
     "baseUrl": "https://bcionline.bcicongo.com",
     "basePath": "/visaope/v1",
-    "smsBaseUrl": "http://10.100.23.21/bicec/admin/json.php",
-    "emailBaseUrl": "http://plateformesvp.intra.bicec/bicec/admin/json.php",
     "londoGateway": {
         "url": "https://alert01.intra.bci/api/v1",
         "timeout": 180000

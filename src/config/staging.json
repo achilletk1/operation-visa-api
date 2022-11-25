@@ -27,19 +27,15 @@
     "saltRounds": 5,
     "exportSalt": "@vf*hQkN4lKaO5rG51F2B1$skXpiD!VfQBa9zKOLetXGEv8%V!",
     "exportTTL": 900,
-    "postmarkToken": "9544980c-2e81-4625-9102-9b5774b31a2d",
     "emailTokenSalt": "$giTVUOWKh&EtXE",
     "emailTokenTTL": 900,
     "baseUrl": "https://dbanking-test.bcicongo.com",
     "basePath": "/visaope/v1",
-    "smsBaseUrl": "http://10.100.23.21/bicec/admin/json.php",
-    "emailBaseUrl": "http://plateformesvp.intra.bicec/bicec/admin/json.php",
     "londoGateway": {
         "url": "http://10.100.31.5/api/v1",
         "timeout": 180000
     },
     "pdfApiUrl": "http://pdf:5000",
-    "accountId": 6,
     "timeout": 110000,
     "cbsApiUrl": "https://cbs:3000",
     "template": {
