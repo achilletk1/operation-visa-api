@@ -23,31 +23,30 @@ COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
 COPY --from=0 /tmp/dist /usr/src/dbanking/dist/
 
-RUN ls -l /usr/src/dbanking/dist/
 
-COPY src/upload-folder /usr/src/dbanking/src/upload-folder
+COPY src/upload-folder /usr/src/dbanking/dist/src/upload-folder
 
-COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/src/services/helpers/oauth/
+COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/dist/src/services/helpers/oauth/
 
-COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/url-crypt/
-
-COPY src/config /usr/src/dbanking/src/config
+COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/dist/src/services/helpers/url-crypt/
 
 COPY src/config /usr/src/dbanking/dist/src/config
 
-COPY src/services/helpers/templates /usr/src/dbanking/src/services/helpers/templates
+COPY src/config /usr/src/dbanking/dist/src/config
 
-COPY .gitignore /usr/src/dbanking/.gitignore
+COPY src/services/helpers/templates /usr/src/dbanking/dist/src/services/helpers/templates
 
-COPY Dockerfile /usr/src/dbanking/Dockerfile
+COPY .gitignore /usr/src/dist/dbanking/.gitignore
 
-COPY package*.json /usr/src/dbanking/
+COPY Dockerfile /usr/src/dist/dbanking/Dockerfile
 
-COPY scripts /usr/src/dbanking/scripts
+COPY package*.json /usr/src/dbanking/dist/
 
-COPY tsconfig.json /usr/src/dbanking/tsconfig.json
+COPY scripts /usr/src/dbanking/dist/scripts
 
-RUN ls -l /usr/src/dbanking/
+COPY tsconfig.json /usr/src/dbanking/dist/tsconfig.json
+
+RUN ls -l /usr/src/dbanking/dist
 
 WORKDIR  /usr/src/dbanking
 
