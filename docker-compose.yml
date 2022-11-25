@@ -24,7 +24,7 @@ services:
             - NODE_ENV=development
         entrypoint: npm run start:dev
     cbs:
-        image: 'londotech/dbanking-cbs:1.0.11'
+        image: 'londotech/dbanking-cbs:latest-op'
         restart: unless-stopped
         environment:
             - NODE_ENV=development
