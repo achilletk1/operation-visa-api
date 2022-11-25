@@ -33,6 +33,8 @@ COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/servic
 
 COPY src/config /usr/src/dbanking/src/config
 
+COPY src/config /usr/src/dbanking/dist/src/config
+
 COPY src/services/helpers/templates /usr/src/dbanking/src/services/helpers/templates
 
 COPY .gitignore /usr/src/dbanking/.gitignore
