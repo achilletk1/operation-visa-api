@@ -54,6 +54,35 @@ export const config = convict({
             }
         }
     },
+    dbOracle: {
+        host: {
+            doc: 'Database host string',
+            format: String,
+            default: 'localhost:1521',
+            env: 'DB_ORACLE_HOST'
+        },
+        name: {
+            doc: 'Database name',
+            format: String,
+            default: '',
+            env: 'DB_ORACLE_NAME'
+        },
+        auth: {
+            user: {
+                doc: 'Database user name',
+                format: String,
+                default: 'database',
+                env: 'DB_ORACLE_USERNAME'
+            },
+            password: {
+                doc: 'Database user password',
+                format: String,
+                default: 'oracle',
+                env: 'DB_ORACLE_PASSWORD'
+            },
+        }
+
+    },
     cookieSalt: {
         doc: 'Salt to encrypt Cookies.',
         format: String,
