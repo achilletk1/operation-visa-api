@@ -77,7 +77,7 @@ export const travelService = {
             }
 
             // Set request status to created
-            travel.status = OpeVisaStatus.PENDING;
+            // travel.status = OpeVisaStatus.PENDING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
@@ -99,7 +99,7 @@ export const travelService = {
             const insertedId = await travelsCollection.insertTravel(travel);
 
 
-            travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
+            // travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
 
             await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
 
