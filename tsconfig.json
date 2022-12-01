@@ -19,7 +19,7 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
   },
-  "include": ["src/**/*", "decs.d.ts", "scripts/**/*"],
+  "include": ["src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "src/**/*.spec.ts"]
 }
 
