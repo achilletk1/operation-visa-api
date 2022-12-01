@@ -31,10 +31,6 @@ export const visaTransactionsCollection = {
     getVisaTransactionsById: async (id: string): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id.toString()) });
-        // try {
-        // } catch (error) {
-        //     return null;
-        // }
     },
 
     updateVisaTransactionById: async (id: string, set: VisaTransaction): Promise<any> => {

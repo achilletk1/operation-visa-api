@@ -11,6 +11,8 @@ import { filesService } from './files.service';
 import { isEmpty, get } from 'lodash';
 import moment = require('moment');
 import { usersCollection } from '../collections/users.collection';
+import { visaTransactionsCollection } from '../collections/visa-transactions.collection';
+import { ObjectId } from 'mongodb';
 
 export const travelService = {
 
@@ -209,6 +211,10 @@ export const travelService = {
                 }
             }
 
+            if (adminAuth && travel.proofTravel.status === OpeVisaStatus.ACCEPTED) {
+                travel = await VerifyTravelTransactions(id, travel);
+            }
+
             const result = await travelsCollection.updateTravelsById(id, travel);
 
             let updatedTravel = await travelsCollection.getTravelById(id);
@@ -329,6 +335,44 @@ export const travelService = {
             logger.error(`\nError getting vis transactions \n${error.message}\n${error.stack}\n`);
             return error;
         }
+    },
+
+    getTravelRangesTransactions: async (fields: any): Promise<any> => {
+
+        const { start, end, clientCode } = fields;
+        commonService.parseNumberFields(fields);
+        let transactionQuery: any;
+        let travelQuery: any;
+
+        if (start) {
+            transactionQuery = { date: { $gte: +start } };
+            travelQuery = { "proofTravel.dates.start": { $gte: +start } };
+        }
+        if (start) {
+            transactionQuery.date['$lte'] = +end;
+            travelQuery = { ...travelQuery, "proofTravel.dates.end": { $lte: +end } };
+        }
+        if (clientCode) {
+            transactionQuery.clientCode = clientCode;
+            travelQuery['user.clientCode'] = clientCode
+        }
+
+        transactionQuery.clientCode = clientCode;
+        travelQuery['user.clientCode'] = clientCode
+
+
+        const transactions = await visaTransactionsCollection.getVisaTransactionsBy(transactionQuery);
+
+        if (transactions instanceof Error) { return transactions; }
+
+
+        const travels = await travelsCollection.getTravelsBy(travelQuery)
+
+        if (travels instanceof Error) { return travels; }
+
+        return { travels, transactions };
+
+
     }
 };
 
@@ -366,4 +410,37 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
     } else {
         return travel.status === OpeVisaStatus.ACCEPTED ? OpeVisaStatus.PENDING : travel.status;
     }
+}
+
+
+const VerifyTravelTransactions = async (id: string, travel: Travel): Promise<any> => {
+
+    const existingTravels = await travelsCollection.getTravelsBy({ _id: { $ne: new ObjectId(id) }, "user.clientCode": travel?.user?.clientCode, "proofTravel.dates.start": { $gte: travel?.proofTravel?.dates?.start }, "proofTravel.dates.end": { $gte: travel?.proofTravel?.dates?.end } });
+
+    if (isEmpty(existingTravels)) { return travel; }
+
+    const ids = [];
+    for (const data of existingTravels) {
+        travel.proofTravel.continents.push(...data.proofTravel.continents);
+        travel.proofTravel.countries.push(...data.proofTravel.countries);
+        travel.proofTravel.proofTravelAttachs.push(...data.proofTravel.proofTravelAttachs);
+        if (data.proofTravel.isTransportTicket) { travel.proofTravel.isTransportTicket = true; }
+        if (data.proofTravel.isVisa) { travel.proofTravel.isVisa = true; }
+        if (data.proofTravel.isPassIn) { travel.proofTravel.isPassIn = true; }
+        if (data.proofTravel.isPassOut) { travel.proofTravel.isPassOut = true; }
+        travel.transactions.push(...data?.transactions);
+        ids.push(new ObjectId(data._id.toString()));
+    }
+
+    travel.proofTravel.continents = [...new Set(travel.proofTravel.continents)];
+    const countries = [];
+    travel.proofTravel.countries.forEach((elt) => {
+        if (!countries.find((e) => e.name === elt.name)) { countries.push(elt) }
+    });
+
+    travel.proofTravel.countries = countries;
+
+    await travelsCollection.deleteTravels({ _id: { $in: ids } });
+
+    return travel;
 }

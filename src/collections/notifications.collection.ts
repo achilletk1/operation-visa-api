@@ -28,7 +28,6 @@ export const notificationsCollection = {
     
     insertNotifications: async (data: any) => {
         const database = await getDatabase();
-        console.log("Insertion de la notification dans l'API");
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return { insertedId };
     },

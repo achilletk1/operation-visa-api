@@ -8,7 +8,7 @@ import { travelService } from "./travel.service";
 import { OpeVisaStatus } from "../models/visa-operations";
 import { travelMonthsCollection } from "../collections/travel-months.collection";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
-import { visaTransactionsCollection } from "../collections/visa_transactions.collection";
+import { visaTransactionsCollection } from "../collections/visa-transactions.collection";
 import { onlinePaymentsService } from "./online-payment.service";
 import { ObjectId } from 'mongodb';
 import { notificationService } from './notification.service';
@@ -22,6 +22,7 @@ export const visaTransactonsProcessingService = {
     startTransactionsProcessing: async (): Promise<any> => {
         try {
             const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
+            if (isEmpty(content)) { return; }
             const transactions = extractTransactionsFromContent(content);
             const clientCodes = {};
             const toBeDeleted = [];
@@ -54,7 +55,7 @@ export const visaTransactonsProcessingService = {
 
 
             }
-            await visaTransactionsCollection.insertVisaTransactions(transactions);
+            await visaTransactionsCollection.insertTransactions(transactions);
             await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
         } catch (error) {
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
@@ -272,6 +273,7 @@ const insertTransactionsInTravels = async (cli: string, data: any[], onlinePayme
                         start: firstDate,
                         end: lastDate,
                     },
+                    status: OpeVisaStatus.PENDING,
                     comment: '',
                     travelReason: {
                         _id: null,
@@ -283,7 +285,6 @@ const insertTransactionsInTravels = async (cli: string, data: any[], onlinePayme
                     isPassOut: false,
                     isPassIn: false,
                     proofTravelAttachs: [],
-                    status: OpeVisaStatus.PENDING,
                     rejectReason: '',
                     validators: []
                 },
@@ -350,7 +351,7 @@ const insertTransactionsInTravels = async (cli: string, data: any[], onlinePayme
 
         }
 
-        travelService.updateTravelById(get(travel, '_id').toString(), travel);
+        travelsCollection.updateTravelsById(get(travel, '_id').toString(), travel);
 
         if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
             const totalAmount = getTotal(travel.transactions);

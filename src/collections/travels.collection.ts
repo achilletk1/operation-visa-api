@@ -136,5 +136,9 @@ export const travelsCollection = {
         const database = await getDatabase();
         return await database.collection(collectionName).aggregate([{ $match: { travelType } }, { $group: { _id: '$user' } }]).toArray();
     },
-
+    deleteTravels: async (field: any): Promise<any> => {
+        const database = await getDatabase();
+        const result = await database.collection(collectionName).deleteMany(field);
+        return result
+    },
 }
