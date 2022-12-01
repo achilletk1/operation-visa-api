@@ -2,6 +2,7 @@ import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 import { OnlinePaymentMonth } from "../models/online-payment";
 import { getDatabase } from "./config";
+import { AverageTimeJustifyTravelData, generateConsolidateData, statusOperation } from "./helpers/reporting.collection.helper";
 
 const collectionName = 'visa_operations_online_payments';
 
@@ -37,6 +38,64 @@ export const onlinePaymentsCollection = {
     },
 
 
+    getOnlinePaymentReport: async (params: any) => {
+        const database = await getDatabase();
+
+        const query = generateConsolidateData(params)
+
+        return await database.collection(collectionName).aggregate(query).toArray();
+
+    },
+
+    getStatusOperationOnlinePaymentReport: async (params: any) => {
+        const database = await getDatabase();
+
+        const query = statusOperation(params);
+
+        return await database.collection(collectionName).aggregate(query).toArray();
+
+    },
+
+    getAverageTimeJustifyOnlinePaymentReport: async (params: any) => {
+        const database = await getDatabase();
+
+        const query = AverageTimeJustifyTravelData(params);
+
+
+        return await database.collection(collectionName).aggregate(query).toArray();
+
+    },
+
+    getChartDataOnlinePayment: async (param?: any): Promise<any> => {
+        const database = await getDatabase();
+
+        let query = [];
+
+        // Add date filter
+        // if (param.start && param.end) { query.push({ $match: { 'dates.created': { $gte: param.start, $lte: param.end } } }); }
+
+        query = [
+            { $unwind: '$transactions' },
+            {
+                $project: {
+                    yearMonthDate: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: { $toDate: { $toLong: '$dates.created' } }
+                        }
+                    },
+                    amount: '$transactions.amount'
+                }
+            },
+            { $group: { _id: { date: '$yearMonthDate' }, total: { $sum: '$amount' }, count: { $sum: 1 } } },
+            { $sort: { '_id.date': 1 } },
+            { $project: { _id: 0, date: '$_id.date', total: '$total', nbrTransactions: '$count' } }
+        ]
+
+
+        const data = await database.collection(collectionName).aggregate(query).toArray();
+        return data;
+    },
     getOnlinePayments: async (params: any, offset: any, limit: any): Promise<any> => {
         const database = await getDatabase();
         let { end, start } = params;

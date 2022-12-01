@@ -238,6 +238,21 @@ export const config = convict({
         env: 'EMAIL_REQUESTING_CEILING_INCREASE',
         arg: 'email-requesting-ceiling-increase'
     },
+    cronRevivalMail: {
+        doc: 'cron of visa revival mail.',
+        format: String,
+        default: '',
+        env: 'VISA_REVIVAL_MAIL',
+        arg: 'visa-revival-mail'
+    },
+
+    cronTransactionProcessing: {
+        doc: 'cron of transaction processing.',
+        format: String,
+        default: '',
+        env: 'CRON_TRANSACTION_PROCESSING',
+        arg: 'cron-transaction-processing'
+    },
 });
 
 // Load environment dependent configuration

@@ -1,33 +1,65 @@
-import { Travel } from './../models/travel';
+import { Travel, TravelType } from './../models/travel';
 import * as notificationHelper from './helpers/notification.service.helper';
-import  http from 'request-promise';
-import  postmark from 'postmark';
+import http from 'request-promise';
+import postmark from 'postmark';
 import { logger } from '../winston';
 import { config } from '../config';
-import  moment from 'moment';
+import moment from 'moment';
 import { Letter } from '../models/letter';
-import * as  exportHelper from './helpers/exports.helper';
+import * as exportHelper from './helpers/exports.helper';
 import { get, isEmpty } from 'lodash';
 import { commonService } from './common.service';
 import { notificationsCollection } from '../collections/notifications.collection';
 import { Notification, NotificationFormat } from '../models/notification';
 import { OnlinePaymentMonth } from '../models/online-payment';
+import * as visaHelper from './helpers/visa-operations.service.helper';
 
 import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as exportsHelper from './helpers/exports.helper';
 import { usersService } from './users.service';
 import { templatesCollection } from '../collections/templates.collection';
+import { OpeVisaStatus } from '../models/visa-operations';
+
 const classPath = 'services.notificationService';
 
 export const notificationService = {
 
     /***************** SMS *****************/
 
-    sendVisaTemplateEmail: async (dataParameter: any, email: string, subject: string , label: string) => {
-        const {data} = await templatesCollection.getTemplates({label});
-        
+    // sendVisaTemplateEmail: async (dataParameter: any, email: string, subject: string , label: string) => {
+    //     const {data} = await templatesCollection.getTemplates({label});
+
+    //     const HtmlBody: string = await notificationHelper.generateVisaTemplateForNotification(data, dataParameter);
+
+    //     const receiver = `${email}`;
+
+    //     try {
+    //         sendEmail(receiver, subject, HtmlBody);
+    //         const notification: Notification = {
+    //             object: subject,
+    //             format: NotificationFormat.MAIL,
+    //             message: HtmlBody,
+    //             email: receiver,
+    //             id: dataParameter?._id.toString(),
+    //         }     
+
+    //         await insertNotification(notification)
+
+    //     } catch (error) {
+    //         logger.error(
+    //             `Error during sendEmailVisaDepassment to ${receiver}. \n ${error.message} \n${error.stack}`
+    //         );
+    //         return error;
+    //     }
+    // },
+
+    sendVisaTemplateEmail: async (dataParameter: any, email: string, subject: string, label: string) => {
+        if (!email) { return }
+
+        const { data } = await templatesCollection.getTemplates({ label });
+
         const HtmlBody: string = await notificationHelper.generateVisaTemplateForNotification(data, dataParameter);
- 
+
         const receiver = `${email}`;
 
         try {
@@ -38,8 +70,8 @@ export const notificationService = {
                 message: HtmlBody,
                 email: receiver,
                 id: dataParameter?._id.toString(),
-            }     
-            
+            }
+
             await insertNotification(notification)
 
         } catch (error) {
@@ -50,15 +82,16 @@ export const notificationService = {
         }
     },
 
-    sendEmailDetectTravel: async (data: any, email: string) => {
 
-        data = {
-            civility: 'MR',
-            name: `ACHILLE KAMGA`,
-            start: `08/09/2022`,
-            card: `445411******7134`,
-            created: `08/09/2022`,
-            link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
+    sendEmailDetectTravel: async (travel: Travel, email: string) => {
+        if (!email) { return }
+
+        const data = {
+            name: `${get(travel, 'user.fullName', '')}`,
+            start: moment(get(travel, 'transactions[0].date')).format('DD/MM/YYYY') || '',
+            card: travel?.transactions[0]?.card?.code,
+            created: moment(get(travel, 'dates.created')).format('DD/MM/YYYY'),
+            // link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
         }
 
         const HtmlBody = notificationHelper.generateMailTravelDetect(data);
@@ -68,15 +101,15 @@ export const notificationService = {
         const receiver = `${email}`;
 
         try {
-             sendEmail(receiver, subject, HtmlBody);
+            sendEmail(receiver, subject, HtmlBody);
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody    ,
-                email:receiver,
-                id :data?._id.toString(),
+                message: HtmlBody,
+                email: receiver,
+                id: travel?._id.toString(),
             }
-             await insertNotification(notification);
+            await insertNotification(notification);
         } catch (error) {
             logger.error(
                 `Error during sendEmailDetectTravel to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -86,9 +119,10 @@ export const notificationService = {
     },
 
     sendEmailTravelDeclaration: async (travel: Travel, email: string) => {
+        if (!email) { return }
 
         const data = {
-            civility: 'Mr/Mme',
+            civility: 'M./Mme',
             name: `${get(travel.user, 'fullName')}`,
             start: `${get(travel, 'proofTravel.dates.start')}`,
             end: `${get(travel, 'proofTravel.dates.end')}`,
@@ -96,9 +130,9 @@ export const notificationService = {
             ceiling: `${get(travel, 'ceiling')}`,
         }
 
-        const HtmlBody = notificationHelper.generateMailTravelDetect(data);
+        const HtmlBody = notificationHelper.generateMailTravelDeclaration(data);
 
-        const subject = `Déclaration de voyage`;
+        const subject = `Déclaration de voyage Hors zone CEMAC`;
 
         const receiver = `${email}`;
 
@@ -107,9 +141,9 @@ export const notificationService = {
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody    ,
-                email:receiver,
-                id :travel?._id.toString(),
+                message: HtmlBody,
+                email: receiver,
+                id: travel?._id.toString(),
             }
             await insertNotification(notification);
         } catch (error) {
@@ -120,28 +154,60 @@ export const notificationService = {
         }
     },
 
-
-    sendEmailOnlinePayementDeclaration: async (onlinePayement: OnlinePaymentMonth, email: string) => {
-        console.log("Online Payement",onlinePayement);  
-        
+    sendEmailVisaExceding: async (operation: Travel | OnlinePaymentMonth, email: string, start: number, created: number, total: number) => {
+        if (!email) { return }
         const data = {
             civility: 'Mr/Mme',
-            name: `${get(onlinePayement.user, 'fullName')}`,
-            created: `${moment(get(onlinePayement, 'dates.created')).format('DD/MM/YYYY')}`,
+            name: `${get(operation, 'user.fullName')}`,
+            start: moment(start).format('DD/MM/YYYY'),
+            created: moment(created).format('DD/MM/YYYY'),
+            ceiling: `${get(operation, 'ceiling')}`,
+            total
+        }
+
+        const HtmlBody = notificationHelper.generateMailVisaExceding(data);
+
+        const subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`;
+
+        const receiver = `${email}`;
+
+        try {
+            sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message: HtmlBody,
+                email: receiver,
+                id: operation?._id.toString(),
+            }
+            await insertNotification(notification);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailTravelDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEmailOnlinePayementDeclaration: async (onlinePayement: OnlinePaymentMonth, email: string) => {
+        const data = {
+            civility: 'M./Mme',
+            name: `${get(onlinePayement?.user, 'fullName')}`,
+            created: `${moment(+get(onlinePayement, 'dates.created')).format('DD/MM/YYYY')}`,
             ceiling: `${get(onlinePayement, 'ceiling')}`,
         }
 
         const HtmlBody = notificationHelper.generateOnlinePayementDeclarationMail(data);
-        const subject = `Payement en ligne`;
+        const subject = `Déclaration de payement en ligne`;
         const receiver = `${email}`;
         try {
-             sendEmail(receiver, subject, HtmlBody);
-             const notification: Notification = {
+            sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody    ,
-                email:receiver,
-                //id :onlinePayement?._id.toString(),
+                message: HtmlBody,
+                email: receiver,
+                id: onlinePayement?._id.toString(),
             }
             await insertNotification(notification);
         } catch (error) {
@@ -152,13 +218,73 @@ export const notificationService = {
         }
     },
 
-       
+
+    sendEmailOnlinePayementStatusChanged: async (onlinePayement: OnlinePaymentMonth, email: string) => {
+        if (email) { return; }
+        const data = {
+            civility: 'Mr/Mme',
+            name: `${get(onlinePayement.user, 'fullName')}`,
+            date: `${visaHelper.transformDateExpression(get(onlinePayement, 'currentMonth'))}`,
+            ceiling: `${get(onlinePayement, 'ceiling')}`,
+            status: visaHelper.getStatusExpression(get(onlinePayement, 'status'))
+        }
+
+        const HtmlBody = notificationHelper.generateOnlinePayementStatusChangedMail(data);
+        const subject = `Mise à jour de la déclaration de payement en ligne`;
+        const receiver = `${email}`;
+        try {
+            sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message: HtmlBody,
+                email: receiver,
+                // id :onlinePayement?._id.toString(),
+            }
+            await insertNotification(notification);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEmailTravelStatusChanged: async (travel: Travel, email: string) => {
+        if (email) { return; }
+        const data = {
+            civility: 'Mr/Mme',
+            name: `${get(travel.user, 'fullName')}`,
+            start: `${moment(get(travel, 'proofTravel.dates.start')).format('DD/MM/YYYY')}`,
+            end: `${moment(get(travel, 'proofTravel.dates.end')).format('DD/MM/YYYY')}`,
+            status: visaHelper.getStatusExpression(get(travel, 'status'))
+        }
+
+        const HtmlBody = notificationHelper.generateOnlinePayementStatusChangedMail(data);
+        const subject = `Mise à jour de la déclaration de voyage hors zone CEMAC`;
+        const receiver = `${email}`;
+        try {
+            sendEmail(receiver, subject, HtmlBody);
+            const notification: Notification = {
+                object: subject,
+                format: NotificationFormat.MAIL,
+                message: HtmlBody,
+                email: receiver,
+            }
+            await insertNotification(notification);
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
     sendEmailFormalNotice: async (letter: Letter, userData: any, user: any, email: string, lang: string) => {
 
         const text = exportHelper.formatContent(letter.emailText[lang], userData);
 
         const data = {
-            name: `${get(user, 'fname', '')} ${get(user, 'lname', '')}`,
+            name: `${get(user, 'fullName', '')} ${get(user, 'lname', '')}`,
             text
         }
 
@@ -180,16 +306,16 @@ export const notificationService = {
                     ContentType: 'application/pdf'
                 });
             }
-             sendEmail(receiver, subject, HtmlBody, pdfString);
-             const notification: Notification = {
+            sendEmail(receiver, subject, HtmlBody, pdfString);
+            const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody,
-                email:receiver,
-                id :letter?._id.toString(),
-                Attachments:Attachments,
+                message: HtmlBody,
+                email: receiver,
+                id: letter?._id.toString(),
+                Attachments: Attachments,
             }
-             await insertNotification(notification);             
+            await insertNotification(notification);
         } catch (error) {
             logger.error(
                 `Error during sendEmailFormalNotice to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -198,33 +324,34 @@ export const notificationService = {
         }
     },
 
-    sendEmailRejectStep: async (data: any, email: string) => {
+    sendEmailStepStatusChanged: async (travel: Travel, step: string, email: string) => {
 
-        data = {
-            civility: 'MR',
-            name: `ACHILLE KAMGA`,
-            start: `08/09/2022`,
-            step: `la preuve de voyage`,
-            reason: `Pièces justificatives non conforme`,
-            link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
+        const data = {
+            name: `${get(travel.user, 'fullName')}`,
+            start: `${moment(get(travel, 'proofTravel.dates.start')).format('DD/MM/YYYY')}`,
+            end: `${moment(get(travel, 'proofTravel.dates.end')).format('DD/MM/YYYY')}`,
+            step: visaHelper.transformStepExpression(step),
+            status: get(travel[step], 'status'),
+            rejected: get(travel[step], 'status') === OpeVisaStatus.REJECTED,
+            reason: `${travel[step].rejectReason}`,
         }
 
-        const HtmlBody = notificationHelper.generateMailRejectStep(data);
+        const HtmlBody = notificationHelper.generateMailStatusChanged(data);
 
         const subject = `Mise à jour du statut de la preuve de voyage`;
 
         const receiver = `${email}`;
 
         try {
-             sendEmail(receiver, subject, HtmlBody);
+            sendEmail(receiver, subject, HtmlBody);
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
-                message:HtmlBody    ,
-                email:receiver,
-                id :data?._id.toString(),
+                message: HtmlBody,
+                email: receiver,
+                id: travel?._id.toString(),
             }
-             await insertNotification(notification);
+            await insertNotification(notification);
         } catch (error) {
             logger.error(
                 `Error during sendEamailRejectStep to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -253,16 +380,16 @@ export const notificationService = {
         }
     },
 
-    generateNotificationExportLinks: async (userId: string, query: any) => {       
-       
+    generateNotificationExportLinks: async (userId: string, query: any) => {
+
         const user = await usersService.getUserById(userId);
-        if (!user || isEmpty(user)) { return new Error('UserNotFound'); }        
-        
+        if (!user || isEmpty(user)) { return new Error('UserNotFound'); }
+
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
         delete query.action;
 
-        const options = { userId, query , ttl };
+        const options = { userId, query, ttl };
 
         const pdfCode = encode({ format: 'pdf', ...options });
 
@@ -283,13 +410,13 @@ export const notificationService = {
             try {
                 options = decode(code);
             } catch (error) { return new Error('BadExportCode'); }
-    
-            const { format, query , userId, ttl } = options;
-            if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }    
-            if (id !== userId) { return new Error('Forbbiden'); }    
-            const user = await usersService.getUserById(userId);    
-    
-    
+
+            const { format, query, userId, ttl } = options;
+            if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+            if (id !== userId) { return new Error('Forbbiden'); }
+            const user = await usersService.getUserById(userId);
+
+
             if (!user) { return new Error('UserNotFound'); }
             commonService.parseNumberFields(query);
             const { offset, limit, start, end } = query;
@@ -297,40 +424,40 @@ export const notificationService = {
             delete query.limit;
             delete query.start;
             delete query.end;
-            delete query.end;    
+            delete query.end;
 
             const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
-            undefined;    
-            const {data} =  await notificationsCollection.getNotifications(query || {}, offset || 1, limit || 40, range);    
- 
-    
+                undefined;
+            const { data } = await notificationsCollection.getNotifications(query || {}, offset || 1, limit || 40, range);
+
+
             if (!data || isEmpty(data)) {
                 logger.info(`notification not found, ${classPath}.getNotifications()`);
                 return new Error('NotificationNotFound');
-            }    
-            let result: any;    
-     
+            }
+            let result: any;
+
             if (format === 'pdf') {
-                const pdfString = await exportsHelper.generateNotificationExportPdf(user, data, start, end );
+                const pdfString = await exportsHelper.generateNotificationExportPdf(user, data, start, end);
                 const buffer = Buffer.from(pdfString, 'base64');
                 result = { contentType: 'application/pdf', fileContent: buffer };
             }
-     
+
             return result;
 
         } catch (error) {
             logger.error(`\nError export PDF \n${error.message}\n${error.stack}\n`);
             return error;
         }
-      
+
     },
 
-    sendEmailIncreaseCeiling : async (ceiling: any) => {
+    sendEmailIncreaseCeiling: async (ceiling: any) => {
         const HtmlBody = notificationHelper.generateMailContentRequestCeiling(ceiling);
         const subject = `Demande d'augmentation de plafond du ${moment().format('DD/MM/YYYY')}`;
         const receiver = `${ceiling?.user?.email}`;
         const pdfString = await exports.generatePdfContentCeilingRequest(ceiling);
-    
+
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);
         } catch (error) {
@@ -338,13 +465,13 @@ export const notificationService = {
             return error;
         }
     },
-    
-    sendEmailIncreaseCeilingBank : async (ceiling: any) => {
+
+    sendEmailIncreaseCeilingBank: async (ceiling: any) => {
         const HtmlBody = notificationHelper.generateMailContentCeilingRequestBank(ceiling);
         const subject = `Nouvelle demande d'augmentation de plafond enregistrée sur le portail BCIONLINE`;
         const receiver = `${config.get('ceilingIncreaseEmail')}`;
         const pdfString = await exports.generatePdfContentCeilingRequest(ceiling);
-    
+
         try {
             return sendEmail(receiver, subject, HtmlBody, pdfString);
         } catch (error) {
@@ -352,7 +479,7 @@ export const notificationService = {
             return error;
         }
     },
-    
+
     sendEmailAppointmentCreatedBank: async (request: any, receiver?: string, caeEmail?: string) => {
         const HtmlBody = notificationHelper.generateMailContentAppointmentBank(request);
         const subject = `Nouvelle demande de rendez-vous enregistrée sur le portail BCIONLINE`;
@@ -502,7 +629,7 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
         logger.info(`error when send mail form BCI server ${error.stack} \n${(error.message)}`);
         return error
     }
-    
+
 };
 
 

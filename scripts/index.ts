@@ -4,6 +4,7 @@ import { config } from './config-env';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
+import { inserDefaultVaraibles } from './helpers/insert-default-variables';
 
 const runScripts = async () => {
     // SCRIPTS to execute
@@ -11,6 +12,7 @@ const runScripts = async () => {
    await inserDefaultVouchers();
    await inserDefaultSetting();
    await inserDefaultVisaCeilings();
+   await inserDefaultVaraibles();
 }
 
 if (config.get('env') !== 'development') {

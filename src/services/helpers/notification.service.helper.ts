@@ -1,5 +1,5 @@
-import  readFilePromise from 'fs-readfile-promise';
-import  handlebars from 'handlebars';
+import readFilePromise from 'fs-readfile-promise';
+import handlebars from 'handlebars';
 import { logger } from '../../winston';
 import { config } from '../../config';
 import { get } from 'lodash';
@@ -7,9 +7,9 @@ import { RequestCeilingIncrease } from '../../models/request-ceiling-increase';
 import { commonService } from '../common.service';
 import moment = require('moment');
 
-let templateVisaDepassment: any;
+let templateVisaExceding: any;
 let templateDetectTravel: any;
-let templateRejectStep: any;
+let templateStepStatus: any;
 let templateDeclaration: any;
 let templateRequestCeiling: any;
 let templateRequestCeilingBank: any;
@@ -20,11 +20,13 @@ let templateRejectCeiling: any;
 let templateValidCeiling: any;
 let templateVisaOpe: any;
 let templateOnlinePayement: any;
+let templateOnlinePayementStatus: any;
+let templateTravelStatus: any;
 
 (async () => {
-    templateVisaDepassment = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
+    templateVisaExceding = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
     templateDetectTravel = await readFilePromise(__dirname + '/templates/travel-detect-mail.template.html', 'utf8');
-    templateRejectStep = await readFilePromise(__dirname + '/templates/travel-reject-step.template.html', 'utf8');
+    templateStepStatus = await readFilePromise(__dirname + '/templates/travel-reject-step.template.html', 'utf8');
     templateDeclaration = await readFilePromise(__dirname + '/templates/travel-declaration-mail.template.html', 'utf8');
     templateRequestCeiling = await readFilePromise(__dirname + '/templates/request-ceiling-mail.template.html', 'utf8');
     templateRequestCeilingBank = await readFilePromise(__dirname + '/templates/request-ceiling-bank-mail.template.html', 'utf8');
@@ -35,27 +37,29 @@ let templateOnlinePayement: any;
     templateValidCeiling = await readFilePromise(__dirname + '/templates/request-ceiling-mail-validation.template.html', 'utf8');
     templateVisaOpe = await readFilePromise(__dirname + '/templates/formal-notice-template-mail.template.html', 'utf8');
     templateOnlinePayement = await readFilePromise(__dirname + '/templates/online-payment-declaration-mail.template.html', 'utf8');
+    templateOnlinePayementStatus = await readFilePromise(__dirname + '/templates/online-payment-status-changed-mail.template.html', 'utf8');
+    templateTravelStatus = await readFilePromise(__dirname + '/templates/travel-status-changed-mail.template.html', 'utf8');
 
 })();
 
 const actionUrl = `${config.get('baseUrl')}/home`;
 
-export const generateMailVisaDepassment = (info: any) => {
+export const generateMailVisaExceding = (info: any) => {
 
     try {
 
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
+            start: `${moment(+get(info, `start`)).startOf('day').format('DD/MM/YYYY')}`,
             total: `${get(info, `total`)}`,
-            ceilling: `${get(info, `ceilling`)}`,
-            created: `${get(info, 'created')}`,
+            ceiling: `${get(info, `ceiling`)}`,
+            created: `${moment(+get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
             link: `${get(info, 'link')}`,
             actionUrl
         }
 
-        const template = handlebars.compile(templateVisaDepassment);
+        const template = handlebars.compile(templateVisaExceding);
 
         const html = template(data);
 
@@ -78,7 +82,7 @@ export const generateMailFormalNotice = (info: any) => {
             actionUrl
         }
 
-        const template = handlebars.compile(templateVisaDepassment);
+        const template = handlebars.compile(templateVisaExceding);
 
         const html = template(data);
 
@@ -98,9 +102,9 @@ export const generateMailTravelDetect = (info: any) => {
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
+            start: `${moment(+get(info, `start`)).format('DD/MM/YYYY')}`,
+            created: `${moment(+get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
             card: `${get(info, `card`)}`,
-            created: `${get(info, 'created')}`,
             actionUrl
         }
 
@@ -125,14 +129,14 @@ export const generateMailTravelDeclaration = (info: any) => {
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
-            end: `${get(info, `end`)}`,
-            created: `${get(info, 'created')}`,
             ceiling: `${get(info, 'ceiling')}`,
+            start: `${moment(+get(info, `start`)).startOf('day').format('DD/MM/YYYY')}`,
+            end: `${moment(+get(info, 'end')).endOf('day').format('DD/MM/YYYY')}`,
+            created: `${moment(+get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
             actionUrl
         }
 
-        const template = handlebars.compile(templateDetectTravel);
+        const template = handlebars.compile(templateDeclaration);
 
         const html = template(data);
 
@@ -146,28 +150,33 @@ export const generateMailTravelDeclaration = (info: any) => {
 };
 
 
-export const generateMailRejectStep = (info: any) => {
+export const generateMailStatusChanged = (info: any) => {
 
     try {
 
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
+            start: `${moment(+get(info, `start`)).startOf('day').format('DD/MM/YYYY')}`,
+            end: `${moment(+get(info, `end`)).startOf('day').format('DD/MM/YYYY')}`,
+            // end: `${get(info, `end`)}`,
             step: `${get(info, `step`)}`,
             reason: `${get(info, 'reason')}`,
+            rejected: `${get(info, 'rejected')}`,
+            status: `${get(info, 'status')}`,
+
             link: `${get(info, 'link')}`,
             actionUrl
         }
 
-        const template = handlebars.compile(templateRejectStep);
+        const template = handlebars.compile(templateStepStatus);
 
         const html = template(data);
 
         return html;
 
     } catch (error) {
-        logger.error(`html visa depassement mail generation failed. \n${error.name}\n${error.stack}`);
+        logger.error(`html visa status of step mail generation failed. \n${error.name}\n${error.stack}`);
         return error;
     }
 }
@@ -176,8 +185,11 @@ export const generateMailContentRequestCeiling = (ceiling: RequestCeilingIncreas
 
     try {
         const userFullName = `${get(ceiling?.user, 'fullName', '')}`;
+        const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
+            `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
+
         const data = {
-            greetings: `Bonjour ${userFullName},`,
+            greetings: `Bonjour ${gender} ${userFullName},`,
             userFullName: `${userFullName}`,
             tel: `${get(ceiling?.user, 'tel', '')}`,
             email: `${get(ceiling?.user, 'email', '')}`,
@@ -210,9 +222,10 @@ export const generateMailContentCeilingRequestBank = (ceiling: any) => {
 
     try {
         const userFullName = `${get(ceiling?.user, 'fullName', '')}`;
+        const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
+            `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
         const data = {
-            greetings: `Bonjour ,`,
-            userFullName: `${userFullName}`,
+            greetings: `Bonjour ${gender} ${userFullName},`,
             tel: `${get(ceiling?.user, 'tel', '')}`,
             email: `${get(ceiling?.user, 'email', '')}`,
             clientCode: `${get(ceiling?.user, 'clientCode', '')}`,
@@ -278,10 +291,12 @@ export const generateMailContentAppointmentBank = (request) => {
 export const generateMailContentCeilingAssigned = (ceiling: any, userAssigned: any) => {
     const { fname, lname, tel, email } = userAssigned;
     const userFullName = `${get(ceiling, 'user?.fullName', '')}`;
+    const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
+        `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
     try {
 
         const data = {
-            greetings: `Bonjour ${userFullName},`,
+            greetings: `Bonjour ${gender} ${userFullName},`,
             date: moment(ceiling?.date?.assigned).format('DD/MM/YYYY'),
             hour: moment(ceiling?.date?.assigned).format('HH:mm'),
             assignered: `${fname} ${lname}`,
@@ -311,10 +326,12 @@ export const generateMailContentCaeAssigned = (ceiling: any, userAssigned: any) 
 
     const assignedCae = `${get(userAssigned, 'fname', '')} ${get(userAssigned, 'lname', '')}`;
     const fullName = ceiling?.user?.fullName;
+    const gender = `${get(userAssigned, 'gender')}` === 'm' ? 'M' :
+        `${get(userAssigned, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
     try {
 
         const data = {
-            greetings: `Bonjour ${assignedCae},`,
+            greetings: `Bonjour ${gender} ${assignedCae},`,
             date: moment(ceiling?.date?.assigned).format('DD/MM/YYYY'),
             hour: moment(ceiling?.date?.assigned).format('HH:mm'),
             userFullName: fullName,
@@ -347,9 +364,11 @@ export const generateMailRejectCeiling = (ceiling: any) => {
     try {
         const userFullName = `${get(ceiling?.user, 'fullName', '')}`;
         const reason = ceiling?.validator?.rejectReason;
+        const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
+            `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
 
         const data = {
-            greetings: `Bonjour ${userFullName},`,
+            greetings: `Bonjour ${gender} ${userFullName},`,
             userFullName: `${userFullName}`,
             clientCode: `${get(ceiling, 'user.clientCode', '')}`,
             account: `${get(ceiling?.account, 'ncp', '')}`,
@@ -383,8 +402,11 @@ export const generateMailValidCeiling = (ceiling: any) => {
     try {
 
         const userFullName = `${get(ceiling?.user, 'fullName', '')}`;
+        const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
+            `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
+
         const data = {
-            greetings: `Bonjour ${userFullName},`,
+            greetings: `Bonjour ${gender} ${userFullName},`,
             userFullName: `${userFullName}`,
             clientCode: `${get(ceiling, 'user.clientCode', '')}`,
             account: `${get(ceiling?.account, 'ncp', '')}`,
@@ -492,11 +514,62 @@ export const generateOnlinePayementDeclarationMail = (info: any) => {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
             ceiling: `${get(info, 'ceiling')}`,
-            created: `${get(info, 'created')}`,
+            created: `${moment(get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
             actionUrl
         }
 
         const template = handlebars.compile(templateOnlinePayement);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`Html online Payement detected mail generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+
+};
+
+export const generateOnlinePayementStatusChangedMail = (info: any) => {
+
+    try {
+
+        const data = {
+            civility: `${get(info, 'civility')}`,
+            name: `${get(info, 'name')}`,
+            ceiling: `${get(info, 'ceiling')}`,
+            date: `${get(info, 'date')}`,
+            status: `${get(info, 'status')}`,
+            actionUrl
+        }
+
+        const template = handlebars.compile(templateOnlinePayementStatus);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`Html online Payement detected mail generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+
+};
+
+export const generateTravelStatusChangedMail = (info: any) => {
+
+    try {
+        const data = {
+            civility: `${get(info, 'civility')}`,
+            name: `${get(info, 'name')}`,
+            start: `${get(info, 'start')}`,
+            end: `${get(info, 'end')}`,
+            status: `${get(info, 'status')}`,
+            actionUrl
+        }
+
+        const template = handlebars.compile(templateTravelStatus);
 
         const html = template(data);
 

@@ -21,4 +21,15 @@ export const cbsService = {
             return error;
         }
     },
+    getUserDataByCode: async (cli: any) => {
+
+        if (config.get('env') === 'development' || config.get('env') === 'staging') { await commonService.timeout(500); }
+
+        try {
+            const data = await await cbsDAO.getUserDataByCode(cli);
+            return data;
+        } catch (error) {
+            return error;
+        }
+    },
 }

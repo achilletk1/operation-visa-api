@@ -1,4 +1,4 @@
-import   moment from 'moment'
+import moment from 'moment'
 import { getDatabase } from '../config';
 
 export const inserDefaultVouchers = async () => {
@@ -20,6 +20,11 @@ export const inserDefaultVouchers = async () => {
             date: { created: moment().valueOf() }
         },
         {
+            label: `Visa`,
+            description: `Visa de l'utilisateur`,
+            date: { created: moment().valueOf() }
+        },
+        {
             label: `Ordre de mission`,
             description: `Ordre de mission`,
             date: { created: moment().valueOf() }
@@ -32,7 +37,7 @@ export const inserDefaultVouchers = async () => {
     ]
 
     console.log('insert default vouchersinto vouchers collection');
-    db.dropCollection("visa_operations_vouchers",function(err, result) { console.log("Collection droped");});
+    db.dropCollection("visa_operations_vouchers", function (err, result) { console.log("Collection droped"); });
     const response = await db.collection('visa_operations_vouchers').insertMany(vouchers);
     console.log(response.insertedIds);
     console.log('');

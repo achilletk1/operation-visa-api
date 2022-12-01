@@ -1,6 +1,8 @@
 import { visaOperationsCollection } from '../../collections/visa-operations.collection';
 import { settingsFilesCollection } from '../../collections/settings-files.collection';
 import moment = require('moment');
+import { isEmpty } from 'lodash';
+import { OpeVisaStatus } from '../../models/visa-operations';
 
 export const getTransactionType = (type: string) => {
     const data = {
@@ -211,3 +213,50 @@ export const generateOperationData = async (clientCode: string): Promise<void> =
         await visaOperationsCollection.insertOperations(operation)
     }
 }
+export const getStatementByStatus = (statement: any[]) => {
+    const tabStatus = [100, 200, 300, 400]
+    let data = []
+    for (const iterator of tabStatus) {
+        const found = statement.filter(v => {
+            return v._id === iterator
+        }).map((elt) => elt.valueResult);
+        let valueResult = 0;
+        if (!isEmpty(found)) {
+            valueResult = found.reduce((u, v) => u + v)
+        }
+        data.push({
+            _id: iterator,
+            valueResult: valueResult
+
+        })
+
+    }
+
+    return data;
+}
+export const getStatusExpression = (status: OpeVisaStatus) => {
+    const dataLabel = { 100: 'NON RENSEGNEE', 200: 'VALIDÉE', 300: 'REJETÉE', 400: 'EN COURS' };
+    return dataLabel[status];
+}
+
+export const transformDateExpression = (str: any): any => {
+    if (!str) { return '' }
+    str = str.toString()
+    const months = { '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril', '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août', '09': 'Septembre', 10: 'Octobre', 11: 'Novembre', 12: 'Décembre' }
+    const month = str.slice(str.length - 2);
+    const year = str.slice(0, str.length - 2);
+    return `${months[month]} ${year}`;
+}
+
+export const transformStepExpression = (str: any): any => {
+    if (!str) { return '' }
+
+    const data = {
+        'proofTravel': 'la preuve de voyage',
+        'expenseDetails': 'Etat détaillé des dépenses',
+        'othersAttachements': 'Autre justificatis de dépense',
+    }
+
+    return data[str];
+}
+

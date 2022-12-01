@@ -81,15 +81,10 @@ export const visaOperationsCollection = {
     getAttachementsByOperationId: async (id: string): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id.toString()) });
-        // try {
-        // } catch (error) {
-        //     return null;
-        // }
     },
 
     updateVisaOperationById: async (id: any, set: any) => {
         const database = await getDatabase();
-        await helper.updateOperationStatus(set);
         delete set._id;
         const query = { $set: {} };
         delete set._id;

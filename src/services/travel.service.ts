@@ -1,15 +1,16 @@
 import { commonService } from './common.service';
 import { logger } from '../winston';
-import  generateId from 'generate-unique-id';
-import moment = require('moment');
+import generateId from 'generate-unique-id';
+import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
 import { travelsCollection } from '../collections/travels.collection';
-import { filesService } from './files.service';
-import { Travel } from '../models/travel';
-import { Attachment, OpeVisaStatus } from '../models/visa-operations';
+import { Attachment, OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { notificationService } from './notification.service';
+import { Travel, TravelType } from '../models/travel';
+import httpContext from 'express-http-context';
+import { filesService } from './files.service';
 import { isEmpty, get } from 'lodash';
-import  httpContext from 'express-http-context';
-
+import moment = require('moment');
+import { usersCollection } from '../collections/users.collection';
 
 export const travelService = {
 
@@ -19,13 +20,76 @@ export const travelService = {
             const existingTravels = await travelsCollection.getTravelsBy({ 'user._id': get(travel, 'user._id'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
 
             if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
+            // Set travel status to pending
+            travel.status = OpeVisaStatus.PENDING;
+
+            // Set proofTravel status to pending
+            travel.proofTravel.status = OpeVisaStatus.PENDING;
+
+            // Set travel creation date
+            travel.dates = { ...travel.dates, created: moment().valueOf() };
+
+            // insert ceiling in travel
+            const { data } = await visaTransactionsCeillingsCollection.getVisaTransactionsCeillings({ type: { '$in': [100, 400, 300] } }, 1, 40);
+            const type = (+travel.travelType === TravelType.LONG_TERM_TRAVEL && +travel.proofTravel?.travelReason?.code === 300) ? 400 : (travel.travelType === TravelType.LONG_TERM_TRAVEL) ? 300 : 100;
+            travel.ceiling = data.find(elt => +elt.type === type)?.value;
+
+            // insert travel reference
+            travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
+
+            const insertedId = await travelsCollection.insertTravel(travel);
+
+            travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
+
+            await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
+            const updateTravel = await travelsCollection.getTravelById(insertedId);
+
+
+            //TODO send notification
+            Promise.all([
+                await notificationService.sendEmailTravelDeclaration(updateTravel, get(updateTravel, 'user.email')),
+                // await notificationService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), 'Déclaration de voyage', 'TravelDeclaration')
+            ]);
+
+            return insertedId;
+
+        } catch (error) {
+            logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
+            return error;
+        }
+    },
+
+    insertTravelFromSystem: async (travel: Travel): Promise<any> => {
+        try {
+            const existingTravels = await travelsCollection.getTravelsBy({ 'user.clientCode': get(travel, 'user.clientCode'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
+
+
+            if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
+
+            const user = await usersCollection.getUserBy({ clientCode: get(travel, 'user.clientCode') });
+
+            if (user) {
+                travel.user._id = user?._id.toString();
+                travel.user.fullName = `${user?.fname} ${user?.lname}`;
+                travel.user.email = user?.email;
+            }
+
             // Set request status to created
             travel.status = OpeVisaStatus.PENDING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
+            const firstDate = Math.min(...travel.transactions.map((elt => elt.date)));
+            const lastDate = Math.min(...travel.transactions.map((elt => elt.date)));
 
-            travel.ceiling = travel.proofTravel?.travelReason?.code === 300 ? 2000000 : 5000000;
+            travel.proofTravel.dates = { start: firstDate, end: lastDate }
+            travel.proofTravel.status = OpeVisaStatus.PENDING;
+
+            const visaCeilingType = travel.proofTravel?.travelReason?.code === 300 ? VisaCeilingType.STUDYING_TRAVEL : VisaCeilingType.SHORT_TERM_TRAVEL;
+
+            const ceiling = await visaTransactionsCeillingsCollection.getVisaTransactionsCeilingBy({ type: visaCeilingType });
+
+            travel.ceiling = get(ceiling, 'value', 0);
 
             // insert travel reference
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
@@ -38,10 +102,8 @@ export const travelService = {
             await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
 
 
-            //TODO send notification
             Promise.all([
-                //await notificationService.sendEmailTravelDeclaration(travel, get(travel, 'user.email')),
-                await notificationService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), 'Déclaration de voyage', 'TravelDeclaration')
+                await notificationService.sendEmailDetectTravel(travel, get(travel, 'user.email')),
             ]);
 
             return insertedId;
@@ -107,7 +169,7 @@ export const travelService = {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (travel.proofTravel.status && !adminAuth) { delete travel.proofTravel.status }
+            if (travel.proofTravel.status && !adminAuth && travel.proofTravel.isEdit) { delete travel.proofTravel.status }
 
             if (travel.proofTravel && travel.proofTravel.isEdit) {
                 travel.proofTravel.status = OpeVisaStatus.PENDING;
@@ -120,8 +182,8 @@ export const travelService = {
 
             if (!isEmpty(travel.expenseDetails)) {
                 for (let expenseDetail of travel.expenseDetails) {
-                    if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
-                    
+                    if (expenseDetail.status && !adminAuth && expenseDetail.isEdit) { delete expenseDetail.status }
+
                     if (expenseDetail.isEdit) {
                         expenseDetail.status = OpeVisaStatus.PENDING;
                         delete expenseDetail.isEdit;
@@ -134,7 +196,7 @@ export const travelService = {
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel.othersAttachements) {
-                    if (othersAttachement.status && !adminAuth) { delete othersAttachement.status }
+                    if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
 
                     if (othersAttachement.isEdit) {
                         othersAttachement.status = OpeVisaStatus.PENDING;
@@ -149,13 +211,16 @@ export const travelService = {
 
             const result = await travelsCollection.updateTravelsById(id, travel);
 
-            let upadatedTravel = await travelsCollection.getTravelById(id);
+            let updatedTravel = await travelsCollection.getTravelById(id);
 
-            const status = getTravelStatus(upadatedTravel);
+            const status = getTravelStatus(updatedTravel);
 
-            if (status !== upadatedTravel.status) {
+            if (status !== updatedTravel.status) {
                 await travelsCollection.updateTravelsById(id, { status });
-                //TODO send notifications for status update
+                await Promise.all([
+                    travelsCollection.updateTravelsById(id, { status }),
+                    notificationService.sendEmailTravelStatusChanged(updatedTravel, get(updatedTravel, 'travel.user.email', ''))
+                ]);
             }
             return result;
         } catch (error) {
@@ -225,7 +290,7 @@ export const travelService = {
                 tobeUpdated = { expenseDetails };
             }
 
-            //TODO send notifications for status update
+            await notificationService.sendEmailStepStatusChanged(tobeUpdated, step, get(tobeUpdated, 'user.email'));
 
             return await travelsCollection.updateTravelsById(id, tobeUpdated);
         } catch (error) {
@@ -240,17 +305,20 @@ export const travelService = {
             const travel = await travelsCollection.getTravelById(id);
 
             if ('validators' in travel?.proofTravel) {
+                travel?.proofTravel?.validators.forEach((elt: any) => { elt.status = travel?.proofTravel?.status, elt.step = 'Preuve de voyage' })
                 validators.push(...travel?.proofTravel?.validators)
             }
 
             travel?.expenseDetails?.forEach(expense => {
                 if ('validators' in expense) {
+                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status, elt.step = 'Etat détaillé des dépenses' });
                     validators.push(...expense.validators)
                 }
             })
 
             travel?.othersAttachements?.forEach(expense => {
                 if ('validators' in expense) {
+                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status, elt.step = 'Autres justificatifs' });
                     validators.push(...expense.validators)
                 }
             })

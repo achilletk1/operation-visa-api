@@ -35,6 +35,8 @@
         "color": "#DC752A"
     },
     "maxFileSizeUpload": 5,
-    "ceilingIncreaseEmail": "kevin.moutassi@londo-tech.com"
+    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
+    "cronRevivalMail":"*/20 0-5 * * *",
+    "cronTransactionProcessing": "* * * * *"
 
 }

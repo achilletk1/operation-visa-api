@@ -50,13 +50,20 @@ export const lettersCollection = {
 
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
     },
-    getLetterBy: async (params: any) => {
+    getLettersBy: async (params: any) => {
         const database = await getDatabase();
 
         const result = await database.collection(collectionName).find(params).toArray();
         return result
     },
 
+    getLetterBy: async (params: any):Promise<any> => {
+        const database = await getDatabase();
+
+        const result = await database.collection(collectionName).findOne(params);
+        return result
+    },
+    
     deleteLetter: async (id: string) => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).deleteOne({ _id: new ObjectId(id) });

@@ -20,21 +20,8 @@ export const visaTransactionsService = {
     getVisaTransactions: async (filters: any) => {
         try {
             commonService.parseNumberFields(filters);
-            const { offset, limit, userId, card, type } = filters;
-            // if (userId) {
-            //     // const { clientCode } = await notSubscriberCollection.getNotSubscriberById(userId);
-            //     if (!clientCode) { return new Error('ClientNotFound') }
-            //     filters['clientCode'] = clientCode;
-            //     delete filters.userId;
-            // }
-            if (card) {
-                filters['card.code'] = card;
-                delete filters.card;
-            }
+            const { offset, limit} = filters;
 
-            if (type) {
-                filters['type'] = helper.getTransactionType(type);
-            }
             delete filters.offset;
             delete filters.limit;
             return await visaTransactionsCollection.getVisaTransactions(filters || {}, offset || 1, limit || 40);

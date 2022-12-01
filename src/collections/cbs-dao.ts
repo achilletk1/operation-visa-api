@@ -34,4 +34,26 @@ export const cbsDAO = {
             return error;
         }
     },
+
+    getUserDataByCode: async (code: any, includeAccounts?: any, isChaFilter?: boolean) => {
+        const methodPath = `${classPath}.getUserDataByCode()`;
+        const qs = includeAccounts ? { include_accounts: true } : {};
+
+        try {
+
+            options.method = 'GET';
+            options.uri = `${cbsApiUrl}/clients/${code}`;
+            options.qs = qs;
+            logger.info(`Attempt to call CBS API; getUserDataByCode`, methodPath, options);
+            const result = await http(options);
+
+            if ([true, 'true'].includes(isChaFilter)) { result.accounts = result?.accounts.filter(elt => ['371', '372'].includes(elt?.CHA.slice(0, 3))); }
+
+            return result;
+        } catch (error) {
+            logger.error(`\ngetUserDataByCode failed`, methodPath, error);
+            // process.exit(1);
+            return error;
+        }
+    },
 }

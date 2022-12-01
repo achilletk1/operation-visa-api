@@ -31,6 +31,7 @@ import { SettingController } from './controllers/setting.controller';
 import { mailController } from './controllers/mail.controller';
 import { visaTransactionsCeilingsController } from './controllers/visa-transactions-ceilings.controller';
 import { requestCeillingIncreaseController } from './controllers/requestCeilingIncrease.controller';
+import { cronService } from './services/cron.service';
 
 
 
@@ -89,6 +90,8 @@ const server = http.createServer(main);
 server.listen(config.get('port'), config.get('host'), async () => {
     logger.info(`server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
 });
+cronService.startTransactionsProcessing();
+cronService.startRevivalMail();
 
 
 export default app;

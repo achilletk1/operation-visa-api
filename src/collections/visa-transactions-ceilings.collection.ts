@@ -54,7 +54,7 @@ export const visaTransactionsCeillingsCollection = {
         return result
     },
 
-    getVisaTransactionsCeilingBy: async (params: any) => {
+    getVisaTransactionsCeilingBy: async (params: any): Promise<any> => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).findOne(params);
         return result

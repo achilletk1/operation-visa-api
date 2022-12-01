@@ -1,13 +1,10 @@
-import { onlinePaymentsCollection } from './../collections/online-payments.collection';
-import { travelsCollection } from './../collections/travels.collection';
 import { usersCollection } from '../collections/users.collection';
 import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { User } from './../models/user';
-import { isEmpty, get } from 'lodash';
 import { logger } from '../winston';
-import  moment from 'moment';
-import { TravelType } from '../models/travel';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
 
 export const usersService = {
 
@@ -129,13 +126,10 @@ export const usersService = {
 
     getUserByOperations: async (fields: any): Promise<any> => {
         try {
-            const { type } = fields
-            let usersId: any[];
-            if (!type) { return await usersCollection.getUsersBy({ category: 100 }) }
-            if (type === 'long-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.LONG_TERM_TRAVEL) }
-            if (type === 'short-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.SHORT_TERM_TRAVEL) }
-            if (type === 'online-payment') { usersId = await onlinePaymentsCollection.getUsersOnlinepaymentId() }
-            return usersCollection.getUsersByIds(usersId);
+            return await usersCollection.getUsersBy({ category: 100 });
+            // if (type === 'long-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.LONG_TERM_TRAVEL) }
+            // if (type === 'short-travel') { usersId = await travelsCollection.getUsersTravelId(TravelType.SHORT_TERM_TRAVEL) }
+            // if (type === 'online-payment') { usersId = await onlinePaymentsCollection.getUsersOnlinepaymentId() }
 
         } catch (error) {
             logger.error(`get user by type failed \n${error.name} \n${error.stack}`);

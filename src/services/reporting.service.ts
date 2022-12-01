@@ -1,68 +1,105 @@
-import { notificationService } from './notification.service';
-import moment = require("moment");
-import { config } from "../config";
-import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
-import * as helper from "./helpers/exports.helper";
+import moment = require('moment');
+import { commonService } from './common.service';
+import { travelsCollection } from '../collections/travels.collection';
+import { onlinePaymentsCollection } from '../collections/online-payments.collection';
+import * as reportingHelper from '../collections/helpers/reporting.collection.helper';
+import { getStatementByStatus } from './helpers/visa-operations.service.helper';
+
 
 export const reportingService = {
 
 
     getConsolidateData: async (fields: any) => {
+        commonService.parseNumberFields(fields);
+        const { statemenType, travelType, status, start, end } = fields
+        const data = statemenType === 'TRAVEL' ?
+            await travelsCollection.getTravelReport({ travelType, status, start, end }) :
+            await onlinePaymentsCollection.getOnlinePaymentReport({ status, start, end });
 
-        return {
-            totalAmount: [
-                {
-                    type: 101,
-                    total: 127
-                },
-                {
-                    type: 102,
-                    total: 12
-                },
-                {
-                    type: 103,
-                    total: 520
-                },
-                {
-                    type: 104,
-                    total: 271932650
-                },
-            ],
-            statusAmount: [
-                {
-                    status: 200,
-                    total: 48
-                },
-                {
-                    status: 300,
-                    total: 40
-                },
-                {
-                    status: 400,
-                    total: 39
-                }
-            ]
-        };
+        return [
+            {
+                type: 101,
+                total: data[0]?.total[0]
+            },
+            {
+                type: 102,
+                total: data[0]?.nbreTransactions[0],
+            },
+            {
+                type: 103,
+                total: data[0]?.amountTransactions[0],
+            },
+
+        ]
+
     },
 
-    getChartData: async (code: string) => {
-        return {
-            week: {
-                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                data: [12, 5, 25, 2, 5, 7, 6],
-                travelData: [17, 22, 5, 14, 13, 11, 2]
-            },
-            month: {
-                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
-                    '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31'],
-                data: [2, 5, 1, 5, 2, 5, 5, 2, 6, 2, 2, 4, 3, 2, 4, 2, 3, 4, 3, 4, 5, 4, 6, 8, 4, 3, 9, 3, 1, 6, 1],
-                travelData: [7, 1, 5, 7, 9, 1, 4, 3, 5, 3, 2, 4, 8, 4, 1, 6, 8, 2, 9, 7, 3, 4, 7, 5, 8, 2, 1, 5, 7, 9, 2],
-            },
-            year: {
-                labels: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
-                data: [10, 15, 20, 12, 13, 3, 3, 14, 15, 12, 3, 0],
-                travelData: [17, 11, 21, 15, 10, 5, 8, 12, 16, 7, 0, 19],
+    getStatusOperation: async (fields: any) => {
+        commonService.parseNumberFields(fields);
+        let { filterStatus, travelType, statemenType, status, start, end } = fields;
+        const data = statemenType === 'TRAVEL' ? await travelsCollection.getStatusOperationTravelReport({ travelType, filterStatus, start, end }) :
+            await onlinePaymentsCollection.getStatusOperationOnlinePaymentReport({ filterStatus, start, end });
+        return getStatementByStatus(data);
+    },
+
+    getAverageTimeJustify: async (fields: any) => {
+        commonService.parseNumberFields(fields);
+        let { statemenType, travelType,status, start, end } = fields;
+
+        const data = statemenType === 'TRAVEL'? await travelsCollection.getAverageTimeJustifyTravelReport({ travelType, status, start, end }):
+        await onlinePaymentsCollection.getAverageTimeJustifyOnlinePaymentReport({ status, start, end });
+        const dateTime = new Date(data[0]?.time);
+
+        return `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s`
+    },
+
+    getChartData: async (fields: any): Promise<any> => {
+        await commonService.timeout(1000);
+
+        commonService.parseNumberFields(fields);
+
+        const { start, end, travelType, statemenType } = fields;
+        delete fields.start;
+        delete fields.end;
+        delete fields.type;
+
+        const range = (start && end) ?
+            { start: moment(start, 'YYYY-MM-DD').startOf('day').valueOf(), end: moment(start, 'YYYY-MM-DD').endOf('day').valueOf() }
+            : { start: moment().startOf('year').valueOf(), end: moment().endOf('year').valueOf() }
+
+        try {
+            let data = [];
+            if (statemenType === 'TRAVEL') {
+                data = await travelsCollection.getChartDataTravel({ travelType, start, end });
             }
-        };
-    }
+            else {
+                data = await onlinePaymentsCollection.getChartDataOnlinePayment({ start, end });
+            }
+
+            let result = {};
+
+            // tslint:disable-next-line: forin
+            for (const types in data) {
+                // if (!data.hasOwnProperty(types)) { break; }
+                result = reportingHelper.generateChartByType(data);
+                const r = ""
+            }
+            return result;
+        } catch (error) {
+            return error;
+        }
+    },
+
+
 }
+
+
+
+
+
+
+
+
+
+
+

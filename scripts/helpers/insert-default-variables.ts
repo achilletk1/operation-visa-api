@@ -1,7 +1,7 @@
-import  moment from 'moment'
+import moment from 'moment'
 import { getDatabase } from '../config';
 
-export const inserDefaultSetting = async () => {
+export const inserDefaultVaraibles= async () => {
 
     console.log('----------------------------------------');
     console.log('-------  INSERT DEFAULTS VARIABLES ------');
@@ -18,7 +18,7 @@ export const inserDefaultSetting = async () => {
         },
     ]
     console.log('insert default Variables  collection');   
-    db.dropCollection("variables",function(err, result) { console.log("Collection droped");});
-    const response = await db.collection('settings').insertMany(Variables);
-    console.log(response.insertedIds);
+    // db.dropCollection("variables",function(err, result) { console.log("Collection droped");});
+    // const response = await db.collection('settings').insertMany(Variables);
+    // console.log(response.insertedIds);
 };

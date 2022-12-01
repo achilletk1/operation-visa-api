@@ -43,5 +43,12 @@ export const visaTransactionsCeilingsService = {
     //         return error;
     //     }
     // }
-
+    getVisaTransactionCeillingsBy: async (data: any) => {
+        try {
+            return await visaTransactionsCeillingsCollection.getVisaTransactionsCeilingBy(data);
+        } catch (error) {
+            logger.error(`\nError getting visa trnsactions by queries \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
 };

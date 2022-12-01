@@ -69,7 +69,7 @@ export interface VisaTransaction {
 
 export interface VisaCeiling {
   _id: string;
-  type: number;
+  type: VisaCeilingType;
   value: number;
   description: string;
   date: {
@@ -82,7 +82,12 @@ export interface VisaCeiling {
   };
 }
 
-
+export enum VisaCeilingType {
+  SHORT_TERM_TRAVEL = 100,
+  ONLINE_PAYMENT = 200,
+  LONG_TERM_TRAVEL = 300,
+  STUDYING_TRAVEL = 400,
+}
 
 
 

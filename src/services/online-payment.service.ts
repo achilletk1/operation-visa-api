@@ -2,15 +2,16 @@ import { onlinePaymentsCollection } from '../collections/online-payments.collect
 import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
 import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
-import {  OpeVisaStatus } from '../models/visa-operations';
+import { OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
-import  generateId from 'generate-unique-id';
+import generateId from 'generate-unique-id';
 import { filesService } from './files.service';
 import { logger } from '../winston';
 import moment = require('moment');
 import { get } from 'lodash';
-
+import { visaTransactionsCeilingsService } from './visa-transactions-ceilings.service';
+import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
 
 export const onlinePaymentsService = {
 
@@ -18,9 +19,9 @@ export const onlinePaymentsService = {
     insertOnlinePaymentStatement: async (userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> => {
         try {
 
-           const user = await usersCollection.getUserById(userId);
+            const user = await usersCollection.getUserById(userId);
 
-           if (!user) { return new Error('UserNotFound'); }
+            if (!user) { return new Error('UserNotFound'); }
 
             const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
 
@@ -32,17 +33,20 @@ export const onlinePaymentsService = {
 
             onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth, 'user._id': userId });
 
+            const ceiling = await visaTransactionsCeilingsService.getVisaTransactionCeillingsBy({ type: 200 });
+            if (!ceiling) { return new Error('CeilingNotFound'); }
+
             if (!onlinePayment) {
                 onlinePayment = {
-                   user: {
-                       _id: get(user, '_id').toString(),
+                    user: {
+                        _id: get(user, '_id').toString(),
                         clientCode: get(user, 'clientCode'),
                         fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
                     },
                     dates: {
                         created: moment().valueOf(),
                     },
-                    ceiling: 200000,
+                    ceiling: ceiling?.value,
                     amounts: 0,
                     status: OpeVisaStatus.PENDING,
                     currentMonth,
@@ -52,8 +56,8 @@ export const onlinePaymentsService = {
                 result = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinePayment);
                 onlinePayment._id = result;
             }
-
-            for (let attachment of onlinepaymentStatement.attachments) {
+            const id = get(onlinePayment, '_id');
+            for (let attachment of onlinepaymentStatement?.attachments) {
                 if (!attachment.temporaryFile) { continue; }
 
                 const content = filesService.readFile(attachment.temporaryFile.path);
@@ -73,14 +77,39 @@ export const onlinePaymentsService = {
             onlinePayment.statements.push(onlinepaymentStatement);
 
             result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
-            //TODO send notification
             Promise.all([
-                await notificationService.sendEmailOnlinePayementDeclaration(onlinePayment, user.email)
+                await notificationService.sendEmailOnlinePayementDeclaration({...onlinePayment, _id: id}, user.email)
             ]);
 
             const data = { _id: result };
 
             return data;
+
+        } catch (error) {
+            logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
+            return error;
+        }
+    },
+
+    insertOnlinePayment: async (onlinePayment: OnlinePaymentMonth): Promise<any> => {
+        try {
+
+            const user = await usersCollection.getUserBy({ clientCode: get(onlinePayment, 'user.clientCode') });
+
+            if (user) {
+                onlinePayment.user.fullName = `${get(user, 'fname')} ${get(user, 'lname')}`;
+
+                onlinePayment.user._id = user?._id.toString();
+            }
+
+
+            const ceiling = await visaTransactionsCeillingsCollection.getVisaTransactionsCeilingBy({ type: VisaCeilingType.ONLINE_PAYMENT })
+            onlinePayment.dates.created = moment().valueOf();
+            onlinePayment.ceiling = get(ceiling, 'value', 0);
+
+            const insertedId = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinePayment);
+
+            return insertedId;
 
         } catch (error) {
             logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
@@ -144,7 +173,7 @@ export const onlinePaymentsService = {
             if (!actualOninePayment) { return new Error('TravelNotFound'); }
 
             for (let statement of data.statements) {
-                if (statement.status && !adminAuth) { delete statement.status }
+                if (statement.status && !adminAuth && statement.isEdit) { delete statement.status }
 
                 if (statement.isEdit) {
                     statement.status = OpeVisaStatus.PENDING;
@@ -169,13 +198,13 @@ export const onlinePaymentsService = {
             }
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
 
-            let upadatedTravel = await onlinePaymentsCollection.getOnlinePaymentById(id);
+            let updatedOnlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
-            const status = getPayementStatus(upadatedTravel);
+            const status = getPayementStatus(updatedOnlinePayment);
 
-            if (status !== upadatedTravel.status) {
+            if (status !== updatedOnlinePayment.status) {
                 await onlinePaymentsCollection.updateOnlinePaymentsById(id, { status });
-                //TODO send notifications for status update
+                await notificationService.sendEmailOnlinePayementStatusChanged(updatedOnlinePayment, get(updatedOnlinePayment, 'user.email', ''));
             }
 
             return result;
@@ -192,6 +221,7 @@ export const onlinePaymentsService = {
 
             onlinePayment?.statements?.forEach(online => {
                 if ('validators' in online) {
+                    online?.validators.forEach((elt: any) => {elt.status = online?.status, elt.step = 'Liste des déclarations'});
                     validators.push(...online.validators)
                 }
             })
