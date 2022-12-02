@@ -21,15 +21,13 @@ COPY --from=0 /tmp/package*.json /usr/src/dbanking/
 
 COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
-COPY --from=0 /tmp/dist /usr/src/dbanking/
+COPY --from=0 /tmp/dist/ /usr/src/dbanking/
 
 COPY src/upload-folder /usr/src/dbanking/src/upload-folder
 
-COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/dist/src/services/helpers/oauth/
+COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/src/services/helpers/oauth/
 
 COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/url-crypt/
-
-COPY src/config /usr/src/dbanking/src/config
 
 COPY src/config /usr/src/dbanking/src/config
 
@@ -39,14 +37,9 @@ COPY .gitignore /usr/src/dbanking/.gitignore
 
 COPY Dockerfile /usr/src/dbanking/Dockerfile
 
-COPY scripts /usr/src/dbanking/scripts
-
-COPY src /usr/src/dbanking/src
-
 COPY tsconfig.json /usr/src/dbanking/tsconfig.json
 
 RUN ls -l /usr/src/dbanking/
-RUN ls -l /usr/src/dbanking/dist
 
 WORKDIR  /usr/src/dbanking
 

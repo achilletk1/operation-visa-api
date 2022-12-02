@@ -28,7 +28,7 @@ services:
         restart: unless-stopped
         environment:
             - NODE_ENV=development
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
     gimac:
         image: 'londotech/gimac-api:1.0.3'
         restart: unless-stopped
@@ -53,7 +53,7 @@ services:
             - DB_MONGO_HOST=mongodb
             - DB_MONGO_NAME=banking-bci
             - DBANKING_URL=http://api:3000
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
     airtel:
         image: 'londotech/airtel-api:1.0.0'
         restart: unless-stopped
@@ -73,7 +73,7 @@ services:
             - NODE_HOST=notif
             - DB_MONGO_HOST=mongodb
             - DB_MONGO_NAME=banking-bci
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
     gotenberg:
         image: 'gotenberg/gotenberg:7'
         restart: unless-stopped
@@ -85,7 +85,7 @@ services:
             - NODE_HOST=visaApi
             - DB_MONGO_HOST=mongodb
             - DB_MONGO_NAME=banking-bci
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
     visaCbs:
         image: 'londotech/operation-visa-cbs:latest'
         restart: unless-stopped
@@ -94,7 +94,7 @@ services:
             - NODE_HOST=visaCbs
             - DB_MONGO_HOST=mongodb
             - DB_MONGO_NAME=banking-bci
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
     api:
         image: 'londotech/dbanking-api:latest'
         restart: unless-stopped
@@ -130,7 +130,7 @@ services:
             - BALANCE_ALERT_EMAIL_BCI=kevin.moutassi@londo-tech.com
             - BALANCE_ALERT_EMAIL_BCI_CC=kevin.moutassi@londo-tech.com
             - MINIMAL_MOBILEE_VERSION=1.0.6
-        entrypoint: npm run start:dev
+        entrypoint: npm run start:staging
         depends_on:
             - mongodb
             - cbs

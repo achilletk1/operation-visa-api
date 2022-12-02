@@ -9,7 +9,7 @@
     "start:dev": "cross-env NODE_ENV=development node src/index",
     "start:staging": "cross-env NODE_ENV=staging node src/index",
     "start:staging-bci": "cross-env NODE_ENV=staging-bci node src/index",
-    "start:prod": "cross-env NODE_ENV=production node  dist/src/index",
+    "start:prod": "cross-env NODE_ENV=production node  src/index",
     "scripts": "node -r ts-node/register/transpile-only scripts/index"
   },
   "author": "Londo Technology",
