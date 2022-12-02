@@ -27,7 +27,7 @@ COPY src/upload-folder /usr/src/dbanking/src/upload-folder
 
 COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/src/services/helpers/oauth/
 
-COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/
+COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/url-crypt/
 
 COPY src/config /usr/src/dbanking/src/config
 

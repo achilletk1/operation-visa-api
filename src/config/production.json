@@ -2,10 +2,10 @@
     "env": "production",
     "ip": "127.0.0.1",
     "port": 3000,
-    "host": "api",
+    "host": "visaApi",
     "db": {
         "host": "127.0.0.1:27017",
-        "name": "banking-bci",
+        "name": "bcionline",
         "auth": {
             "user": "",
             "password": ""
