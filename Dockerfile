@@ -39,7 +39,7 @@ COPY Dockerfile /usr/src/dbanking/Dockerfile
 
 COPY tsconfig.json /usr/src/dbanking/tsconfig.json
 
-RUN ls -l /usr/src/dbanking/
+RUN ls -l /usr/src/dbanking/src
 
 WORKDIR  /usr/src/dbanking
 
