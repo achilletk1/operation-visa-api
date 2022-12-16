@@ -19,6 +19,7 @@ import * as exportsHelper from './helpers/exports.helper';
 import { usersService } from './users.service';
 import { templatesCollection } from '../collections/templates.collection';
 import { OpeVisaStatus } from '../models/visa-operations';
+import { queueCollection } from '../collections/queue.collection';
 
 const classPath = 'services.notificationService';
 
@@ -597,11 +598,29 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
                 ContentType: excelData.contentType,
             });
         }
+        return queueNotification('mail', { subject, receiver, cc, date: new Date(), body, Attachments });
 
-        return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
+        // return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
     }
 };
 
+async function queueNotification(type: string, data: any = null, delayUntil?: number | Date) {
+    try {
+        // calculate start date/time
+        let proc = new Date(); const priority = 1;
+        if (delayUntil instanceof Date) { proc = delayUntil; }
+        else if (!isNaN(delayUntil)) { proc = new Date(+proc + delayUntil * 1000); }
+
+        // aad item in queue
+        const newQueueItem:any = await queueCollection.add({ type, proc, data, priority })
+
+        // return qItem
+        return newQueueItem && newQueueItem.insertedCount && newQueueItem.insertedId ? { _id: newQueueItem.insertedId, sent: newQueueItem.insertedId.getTimestamp(), data } : null;
+    } catch (error) {
+        console.log(`Queue.send ${type} to ${get(data, 'receiver', '')} error: \n${error.message}\n${error.stack}\n`);
+        return null;
+    }
+};
 
 const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 
