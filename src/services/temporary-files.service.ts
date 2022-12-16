@@ -3,6 +3,8 @@ import { TemporaryFile } from '../models/settings';
 import { temporaryFilesCollection } from '../collections/temporary-files.collection';
 import { logger } from '../winston';
 import moment = require('moment');
+import { isEmpty } from 'lodash';
+import { ObjectId } from 'mongodb';
 
 
 export const temporaryFilesService = {
@@ -21,6 +23,23 @@ export const temporaryFilesService = {
             return await temporaryFilesCollection.getTemporaryFilesBy(data);
         } catch (error) {
             logger.error(`\nError getting visa trnsactions by queries \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+    removeTemporaryFiles: async () => {
+        try {
+            const currentDate = moment().valueOf();
+            const temporaryFiles = await temporaryFilesCollection.getTemporaryFilesBy({ expiresAt: { $lt: currentDate } });
+            const ids = [];
+            if (isEmpty(temporaryFiles)) { return; }
+            for (const temporaryFile of temporaryFiles) {
+                ids.push(new ObjectId(temporaryFile?._id));
+                filesService.deleteDirectory(`temporaryFiles/${temporaryFile?._id}`);
+            }
+
+            await temporaryFilesCollection.deleteTemporaryFileMany({ _id: { $in: ids } });
+        } catch (error) {
+            logger.error(`\nError removing temporary files \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },

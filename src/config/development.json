@@ -37,6 +37,8 @@
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "cronRevivalMail":"*/20 0-5 * * *",
-    "cronTransactionProcessing": "* * * * *"
+    "cronTransactionProcessing": "* * * * *",
+    "cronDeleteTemporaryFile": "0 */3 * * *"
+
 
 }

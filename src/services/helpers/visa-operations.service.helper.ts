@@ -58,35 +58,6 @@ export const updateOperationStatus = async (operation: any) => {
 
 }
 
-export const verifyTransactionFile = (header: any) => {
-    const data =
-        [
-            'DATE',
-            'HEURE',
-            'CLIENT',
-            'COMPTE',
-            'NOM DETENTEUR',
-            'CARTE',
-            'PRODUIT',
-            'NATURE',
-            'MONTANT_TRANS',
-            'DEVISE_TRANS',
-            'MONTANT_COMPENS',
-            'EUR',
-            'MONTANT_XAF',
-            'COURS_CHANGE',
-            'COMMISSION',
-            'BENEFICIAIRE',
-            'PAYS',
-            'CATEGORIE',
-        ];
-    const containsAll = data.find(element => {
-        return !header.includes(element);
-    });
-
-    return containsAll;
-
-}
 
 export const verifyTransactionFileName = (fileName: string) => {
     fileName = fileName.toLowerCase();

@@ -40,5 +40,11 @@
     "template": {
         "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
         "color": "#DC752A"
-    }
+    },
+    "maxFileSizeUpload": 5,
+    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
+    "cronRevivalMail":"*/20 0-5 * * *",
+    "cronTransactionProcessing": "* * * * *",
+    "cronDeleteTemporaryFile": "0 */3 * * *"
+
 }

@@ -253,6 +253,13 @@ export const config = convict({
         env: 'CRON_TRANSACTION_PROCESSING',
         arg: 'cron-transaction-processing'
     },
+    cronDeleteTemporaryFile: {
+        doc: 'cron to delete temporaries files.',
+        format: String,
+        default: '',
+        env: 'DELETE_TEMPORARY_FILES',
+        arg: 'delete-temporary-files'
+    },
 });
 
 // Load environment dependent configuration

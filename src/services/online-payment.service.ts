@@ -98,7 +98,6 @@ export const onlinePaymentsService = {
 
             if (user) {
                 onlinePayment.user.fullName = `${get(user, 'fname')} ${get(user, 'lname')}`;
-
                 onlinePayment.user._id = user?._id.toString();
             }
 
@@ -108,8 +107,9 @@ export const onlinePaymentsService = {
             onlinePayment.ceiling = get(ceiling, 'value', 0);
 
             const insertedId = await onlinePaymentsCollection.insertVisaOnlinePayment(onlinePayment);
+            onlinePayment._id = insertedId;
 
-            return insertedId;
+            return onlinePayment;
 
         } catch (error) {
             logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);

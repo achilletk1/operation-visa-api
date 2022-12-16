@@ -96,44 +96,58 @@ export const visaTransactonsProcessingService = {
 const travelTreatment = async (cli: string, travelTransactions: any[], onlinePaymentsTransactions: any[]): Promise<any[]> => {
 
     if (!travelTransactions) { return onlinePaymentsTransactions; }
-    let foundIndex = 0
-    const savingContent = [];
+    let currentIndex = 0
+    const transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[] = [];
 
+    // sort transactions by date in ascending order
+    travelTransactions = travelTransactions.sort((a, b) => {
+        return a.date - b.date;
+    });
     for (const transaction of travelTransactions) {
 
-        let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $lte: transaction }, "proofTravel.dates.end": { $gte: transaction } });
+        // find travel which dates matchs with the current transaction date
+        let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $lte: transaction.date }, "proofTravel.dates.end": { $gte: transaction.date } });
 
         if (!travel) {
-            const firstDate = Math.min(savingContent[foundIndex]?.transactions.map((elt => elt.date))) || 0;
-            const maxDate = moment(firstDate).add(30, 'days');
 
-            if ((transaction.date > maxDate || !!savingContent[foundIndex]?.travel) && foundIndex > 0) {
-                foundIndex++;
+            // if the loop is in the first index we only have to insert the transaction an continue 
+            if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
+                transactionsGroupedByTravel[currentIndex] = { transactions: [transaction] }
+                continue;
             }
 
+            // get the first date of the current transactions Grouped By Travel's transactions
+            const firstDate = Math.min(...transactionsGroupedByTravel[currentIndex]?.transactions.map((elt => elt?.date)));
+            const maxDate = moment(firstDate).add(30, 'days');
 
-            if (isEmpty(savingContent[foundIndex])) { savingContent[foundIndex] = { transactions: [] } }
+            // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
+            if (transaction.date > maxDate || !!transactionsGroupedByTravel[currentIndex]?.travel) {
+                currentIndex++;
+            }
+
+            // verify if current transactions Grouped By Travel is empty
+            if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
 
-            savingContent[foundIndex].transactions.push(transaction);
+            transactionsGroupedByTravel[currentIndex].transactions.push(transaction);
 
             continue;
 
         }
 
-        if (!savingContent[foundIndex]?.travel || savingContent[foundIndex]?.travel?._id !== travel?._id) {
-            foundIndex++;
+        if (!transactionsGroupedByTravel[currentIndex]?.travel || transactionsGroupedByTravel[currentIndex]?.travel?._id !== travel?._id) {
+            currentIndex++;
         }
 
-        if (isEmpty(savingContent[foundIndex])) { savingContent[foundIndex] = { transactions: [] } }
+        if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
-        savingContent[foundIndex].transactions.push(transaction);
+        transactionsGroupedByTravel[currentIndex].transactions.push(transaction);
 
-        savingContent[foundIndex].travel = travel;
+        transactionsGroupedByTravel[currentIndex].travel = travel;
 
     }
 
-    return insertTransactionsInTravels(cli, savingContent, onlinePaymentsTransactions);
+    return insertTransactionsInTravels(cli, transactionsGroupedByTravel, onlinePaymentsTransactions);
 
 }
 
@@ -141,7 +155,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: any[]) => {
     if (!onlinepaymentTransactions) { return; }
 
-    const months = onlinepaymentTransactions.map((elt) => moment(elt.date).format('YYYYMM')).filter((item, pos, self) => self.indexOf(item) === pos);
+    const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt.date).format('YYYYMM')))];
 
     for (const month of months) {
 
@@ -153,8 +167,9 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             onlinePayment = {
                 user: {
                     clientCode: cli,
-                    fullName: selectedTransactions[0].fullName
-
+                    fullName: selectedTransactions[0].fullName,
+                    email: selectedTransactions[0].email,
+                    tel: selectedTransactions[0].tel
                 },
                 currentMonth: +month,
                 status: OpeVisaStatus.PENDING,
@@ -167,8 +182,7 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
                 transactions: [],
                 othersAttachements: []
             }
-            const insertedId = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
-            onlinePayment._id = insertedId;
+            onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
         }
 
         onlinePayment.transactions.push(...selectedTransactions);
@@ -177,7 +191,7 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
 
         const totalAmount = getTotal(onlinePayment.transactions);
         onlinePayment.amounts = totalAmount;
-        const firstDate = Math.min(onlinePayment?.transactions.map((elt => elt.date))) || 0;
+        const firstDate = Math.min(...onlinePayment?.transactions.map((elt => elt.date))) || 0;
 
 
         if (totalAmount > onlinePayment.ceiling) {
@@ -210,20 +224,26 @@ const extractTransactionsFromContent = (dataArray) => {
         return {
             _id: element._id,
             clientCode: element['CLIENT'].toString().trim(),
-            fullName: element['NOM DETENTEUR'].trim(),
-            beneficiary: element['BENEFICIAIRE'].trim(),
-            amount: parseFloat(element['MONTANT_XAF']) || 0,
-            amountTrans: parseFloat(element['MONTANT_TRANS']) || 0,
-            currencyTrans: parseFloat(element['DEVISE_TRANS']) || 0,
-            amountCompens: parseFloat(element['MONTANT_COMPENS']) || 0,
-            eur: parseFloat(element['EUR']) || 0,
-            cours_change: parseFloat(element['COURS_CHANGE']) || 0,
-            commission: parseFloat(element['COMMISSION']) || 0,
+            fullName: element['NOM_CLIENT'].trim(),
+            manager: {
+                code: element['CODE_GESTIONNAIRE'].trim(),
+                name: element['NOM_GESTIONNAIRE'].trim()
+            },
+            tel: element['TELEPHONE_CLIENT'],
+            email: element['EMAIL_CLIENT'],
+            beneficiary: element['ACQUEREUR'].trim(),
+            amount: +element['MONTANT_XAF'] || 0,
+            amountTrans: +element['MONTANT'] || 0,
+            currencyTrans: +element['DEVISE'] || 0,
+            amountCompens: +element['MONTANT_COMPENS'] || 0,
+            currencyCompens: element['DEVISE_COMPENS'].trim(),
             date: moment(`${element['DATE'].trim()} ${element['HEURE'].trim()}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
-            type: element['NATURE'],
-            ncp: element['COMPTE'].trim().split('-')[1],
-            age: element['COMPTE'].trim().split('-')[0],
+            type: element['TYPE_TRANS'],
+            ncp: element['COMPTE'].trim(),
+            age: element['AGENCE'].trim(),
+            cha: element['CHAPITRE'],
             card: {
+                name: element['NOM_CARTE'].trim(),
                 code: element['CARTE'].trim(),
                 label: element['PRODUIT'].trim(),
             },
@@ -238,13 +258,14 @@ const extractTransactionsFromContent = (dataArray) => {
     return transactions;
 }
 
-const insertTransactionsInTravels = async (cli: string, data: any[], onlinePaymentsTransactions: any[]) => {
-    for (const element of data) {
+
+const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[], onlinePaymentsTransactions: any[]) => {
+    for (const element of transactionsGroupedByTravel) {
 
         if (isEmpty(element.transactions)) { return }
 
-        const firstDate = Math.min(element?.transactions.map((elt => elt.date)));
-        const lastDate = Math.min(element?.transactions.map((elt => elt.date)));
+        const firstDate = Math.min(...element?.transactions.map((elt => elt.date)));
+        const lastDate = Math.min(...element?.transactions.map((elt => elt.date)));
 
         let travel = element.travel;
 
@@ -257,6 +278,8 @@ const insertTransactionsInTravels = async (cli: string, data: any[], onlinePayme
                     _id: null,
                     clientCode: cli,
                     fullName: element.transactions[0].fullName,
+                    email: element.transactions[0].email,
+                    tel: element.transactions[0].tel,
 
                 },
                 travelRef: '',
@@ -292,11 +315,9 @@ const insertTransactionsInTravels = async (cli: string, data: any[], onlinePayme
                 othersAttachements: [],
                 transactions: element.transactions,
             };
-            const insertedId = await travelService.insertTravelFromSystem(travel);
+            travel = await travelService.insertTravelFromSystem(travel);
 
-            if (insertedId instanceof Error) { continue }
-
-            travel._id = insertedId;
+            if (travel instanceof Error) { continue }
         }
 
 

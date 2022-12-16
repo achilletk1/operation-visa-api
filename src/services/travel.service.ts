@@ -63,11 +63,7 @@ export const travelService = {
 
     insertTravelFromSystem: async (travel: Travel): Promise<any> => {
         try {
-            const existingTravels = await travelsCollection.getTravelsBy({ 'user.clientCode': get(travel, 'user.clientCode'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
-
-
-            if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
-
+ 
             const user = await usersCollection.getUserBy({ clientCode: get(travel, 'user.clientCode') });
 
             if (user) {
@@ -77,7 +73,7 @@ export const travelService = {
             }
 
             // Set request status to created
-            // travel.status = OpeVisaStatus.PENDING;
+            travel.status = OpeVisaStatus.PENDING;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
@@ -101,14 +97,15 @@ export const travelService = {
 
             // travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
 
-            await travelsCollection.updateTravelsById(insertedId, { proofTravel: travel.proofTravel });
+            await travelsCollection.updateTravelsById(insertedId, travel);
 
 
             Promise.all([
                 await notificationService.sendEmailDetectTravel(travel, get(travel, 'user.email')),
             ]);
+            travel._id = insertedId;
 
-            return insertedId;
+            return travel;
 
         } catch (error) {
             logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);

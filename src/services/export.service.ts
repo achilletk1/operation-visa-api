@@ -41,7 +41,7 @@ export const exportService = {
         if ((new Date()).getTime() >= ttl) {
             return new Error('ExportLinkExpired');
         }
-        const transaction = helper.visaTransaction;
+        const transaction = []; // TODO get transactions for reporting
         const data = helper.generateVisaTransactionExportXlsx(transaction);
         const buffer = Buffer.from(data, 'base64');
 
