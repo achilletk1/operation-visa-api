@@ -120,7 +120,7 @@ export const onlinePaymentsService = {
     getOnlinePayments: async (filters: any) => {
         try {
             commonService.parseNumberFields(filters);
-            const { offset, limit } = filters;
+            const { offset, limit, clientCode } = filters;
             delete filters.offset;
             delete filters.limit;
 
@@ -130,7 +130,10 @@ export const onlinePaymentsService = {
                 delete filters.userId;
                 filters['user._id'] = userId;
             }
-
+            if (clientCode) {
+                delete filters.clientCode;
+                filters['user.clientCode'] = clientCode;
+            }
 
             return await onlinePaymentsCollection.getOnlinePayments(filters || {}, offset || 1, limit || 40);
         } catch (error) {
