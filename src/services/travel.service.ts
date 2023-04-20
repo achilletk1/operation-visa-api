@@ -13,6 +13,7 @@ import moment = require('moment');
 import { usersCollection } from '../collections/users.collection';
 import { visaTransactionsCollection } from '../collections/visa-transactions.collection';
 import { ObjectId } from 'mongodb';
+import { log } from 'winston';
 
 export const travelService = {
 
@@ -116,7 +117,7 @@ export const travelService = {
     getTravels: async (filters: any) => {
         try {
             commonService.parseNumberFields(filters);
-            const { offset, limit } = filters;
+            const { offset, limit, clientCode } = filters;
             delete filters.offset;
             delete filters.limit;
 
@@ -131,8 +132,15 @@ export const travelService = {
                 delete filters.name;
                 filters['user.fullName'] = name;
             }
+            
+            if (clientCode) {
+                delete filters.clientCode;
+                filters['user.clientCode'] = clientCode;
+            }
 
             return await travelsCollection.getTravels(filters || {}, offset || 1, limit || 40);
+
+            
         } catch (error) {
             logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
             return error;
