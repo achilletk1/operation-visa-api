@@ -141,4 +141,19 @@ export const travelsCollection = {
         const result = await database.collection(collectionName).deleteMany(field);
         return result
     },
+
+    getAllTravelsList: async (fields: any) => {
+        const database = await getDatabase();
+        const query = { ...fields };
+        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
+    },
+
+    getTravelsList: async (id: string): Promise<any> => {
+        const database = await getDatabase();        
+       return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
+
+    },
+
+   
+
 }

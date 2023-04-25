@@ -9,9 +9,12 @@ import generateId from 'generate-unique-id';
 import { filesService } from './files.service';
 import { logger } from '../winston';
 import moment = require('moment');
-import { get } from 'lodash';
+import { get, isEmpty } from "lodash";
 import { visaTransactionsCeilingsService } from './visa-transactions-ceilings.service';
 import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
+import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
+import { config } from '../config';
+import * as exportHelper from './helpers/exports.helper';
 
 export const onlinePaymentsService = {
 
@@ -235,7 +238,7 @@ export const onlinePaymentsService = {
             logger.error(`\nError getting vis transactions \n${error.message}\n${error.stack}\n`);
             return error;
         }
-    }
+    },
 
 };
 const getPayementStatus = (onlinePayment: OnlinePaymentMonth) => {

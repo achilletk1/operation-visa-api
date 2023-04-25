@@ -65,7 +65,6 @@ export const onlinePaymentsController = {
         app.get('/online-payments/:id', async (req: Request, res: Response) => {
             const data = await onlinePaymentsService.getOnlinePaymentById(req.params.id);
 
-
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to get data';
                 const errResp = commonService.generateErrResponse(message, data);
@@ -118,5 +117,6 @@ export const onlinePaymentsController = {
 
             res.status(200).json(data);
         });
+
     }
 };

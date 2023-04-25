@@ -14,6 +14,9 @@ import { usersCollection } from '../collections/users.collection';
 import { visaTransactionsCollection } from '../collections/visa-transactions.collection';
 import { ObjectId } from 'mongodb';
 import { log } from 'winston';
+import { config } from '../config';
+import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
+import * as exportHelper from './helpers/exports.helper';
 
 export const travelService = {
 
@@ -378,7 +381,53 @@ export const travelService = {
         return { travels, transactions };
 
 
-    }
+    },
+
+    
+    generateTravelsExportLinks: async (fields: any) => {
+        delete fields.action;
+        commonService.parseNumberFields(fields);
+        delete fields.ttl;
+
+        const travels = await travelsCollection.getAllTravelsList({ ...fields });
+        if (isEmpty(travels)) { return new Error('travelsNotFound'); }
+
+        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+        const options = { ttl, ...fields };
+
+        const code = encode(options);
+
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/travels`
+
+        return {
+            link: `${basePath}/${code}`
+        }
+    },
+
+    generateTravelsExporData: async (code: any) => {
+        let options;
+        try {
+            options = decode(code);
+        } catch (error) { return new Error('BadExportCode'); }
+
+        const {ttl} = options;
+        delete options.ttl;
+
+        options = { ...options }
+        if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+
+        const travels = await travelsCollection.getAllTravelsList(options);
+
+        let data;
+        const excelArrayBuffer = await exportHelper.generateTravelsExportXlsx(travels);
+        const buffer = Buffer.from(excelArrayBuffer);
+
+        data = { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer };
+
+        return data;
+    },
+
 };
 
 const saveAttachment = (attachements: Attachment[], id: string, date: number) => {

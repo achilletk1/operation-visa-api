@@ -6,6 +6,10 @@ import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
 import  * as helper from "./helpers/exports.helper";
 import * as visaHelper from "./helpers/visa-operations.service.helper";
 import { logger } from '../winston';
+import { isEmpty } from 'lodash';
+import { onlinePaymentsCollection } from '../collections/online-payments.collection';
+import * as exportHelper from './helpers/exports.helper';
+import { travelsCollection } from '../collections/travels.collection';
 
 export const exportService = {
 
@@ -92,7 +96,151 @@ export const exportService = {
 
     },
 
+    generateOnlinePaymentExportLinks: async (fields: any) => {
+        delete fields.action;
+        commonService.parseNumberFields(fields);
+        delete fields.name;
+        delete fields.status;
+        delete fields.clientCode;
+        delete fields.offset;
+        delete fields.limit;
+        delete fields.ttl;
 
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsList({ ...fields });
+        if (isEmpty(payments)) { return new Error('OnlinePaymentNotFound'); }
+
+        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+        const options = { ttl, ...fields };
+
+        const code = encode(options);
+
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/online-payment`
+
+        return {
+            link: `${basePath}/${code}`
+        }
+    },
+
+    generateOnlinePaymentExporData: async (code: any) => {
+        let options;
+        try {
+            options = decode(code);
+        } catch (error) { return new Error('BadExportCode'); }
+
+        const {ttl} = options;
+        delete options.name;
+        delete options.status;
+        delete options.clientCode;
+        delete options.offset;
+        delete options.limit;
+        delete options.ttl;
+
+        options = { ...options }
+        if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsList(options);
+
+        let data;
+        const excelArrayBuffer = await exportHelper.generateOnlinePaymentExportXlsx(payments);
+        const buffer = Buffer.from(excelArrayBuffer);
+
+        data = { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer };
+
+        return data;
+    },
+
+    generateOnlinePaymentOperationsExportLinks: async (fields: any) => {
+        delete fields.action;
+        commonService.parseNumberFields(fields);
+        delete fields.operationId;
+        delete fields.ttl;
+
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsListById(fields.operationId);
+        if (isEmpty(payments)) { return new Error('OnlineOperationsNotFound'); }
+
+        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+        const options = { ttl, ...fields };
+
+        const code = encode(options);
+
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/payment-operations`
+
+        return {
+            link: `${basePath}/${code}`
+        }
+    },
+
+    generateOnlinePaymenOperationstExporData: async (code: any) => {
+        let options;
+        try {
+            options = decode(code);
+        } catch (error) { return new Error('BadExportCode'); }
+
+        const {ttl} = options;
+        delete options.operationId;
+        delete options.ttl;
+
+        options = { ...options }
+        if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+
+        const operations = await onlinePaymentsCollection.getOnlinePaymentsList(options);
+
+        let data;
+        const excelArrayBuffer = await exportHelper.generateOnlineOperationsExportXlsx(operations);
+        const buffer = Buffer.from(excelArrayBuffer);
+
+        data = { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer };
+
+        return data;
+    },
+    
+    generateTravelsCeillingExportLinks: async (travelId: string) => {
+  
+        const ceilling = await travelsCollection.getTravelsList(travelId);
+        if (isEmpty(ceilling)) { return new Error('OnlineCeillingNotFound'); }
+
+        const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+        const options = { ttl, travelId };
+
+        const code = encode(options);
+
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/ceillingCode`
+
+        return {
+            link: `${basePath}/${code}`
+        }
+    },
+
+    generateTravelsCeillingExporData: async (code: string) => {
+        let options;
+        try {
+            options = decode(code);
+        } catch (error) { return new Error('BadExportCode'); }
+
+        const {ttl} = options;
+        // delete options.travelId
+        // delete options.ttl;
+
+        options = { ...options }
+        if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+
+        const ceilling = await  travelsCollection.getTravelsList(options.travelId);;
+
+        let data;
+        const excelArrayBuffer = await exportHelper.generateCeillingExportXlsx(ceilling);
+        const buffer = Buffer.from(excelArrayBuffer);
+
+        data = { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer };
+
+        return data;
+    },
+
+
+    
+    
     generateExportVisaAttachmentView: async (query: any) => {
         try {
             const { path } = query;
