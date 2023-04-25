@@ -61,4 +61,10 @@ export const visaTransactionsCollection = {
         return result
     },
 
+    getTravelsList: async (fields: any) => {
+        const database = await getDatabase();
+        const query = { ...fields };
+        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
+    },
+
 };

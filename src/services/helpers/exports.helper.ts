@@ -1,16 +1,16 @@
 import { Letter } from './../../models/letter';
-import  readFilePromise from 'fs-readfile-promise';
-import  handlebars from 'handlebars';
-import  http from 'request-promise';
+import readFilePromise from 'fs-readfile-promise';
+import handlebars from 'handlebars';
+import http from 'request-promise';
 import { logger } from "../../winston";
 import { config } from '../../config';
-import  moment from "moment";
-import  XLSX from 'xlsx';
+import moment from "moment";
+import XLSX from 'xlsx';
 import { get } from 'lodash';
 import { User } from '../../models/user';
 
 let templateFormalNoticeLetter: any;
-let templateExportNotification :any ;
+let templateExportNotification: any;
 // let templateFormalNoticeMail:any ; 
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
@@ -46,40 +46,40 @@ export const generateNotificationExportPdf = async (user: any, notification: any
     }
 }
 
-const getTemplateNotificationPdfData = (user: User,  notifications: any, start: any, end: any) => {
-    
+const getTemplateNotificationPdfData = (user: User, notifications: any, start: any, end: any) => {
+
     const data: any = {};
     data.range_start = start;
     data.range_end = end;
     //var message
 
-    if(!start){
-        data.range_start =  moment().subtract(6,'M').format('DD/MM/YYYY');
+    if (!start) {
+        data.range_start = moment().subtract(6, 'M').format('DD/MM/YYYY');
     }
 
-    if(!end){
-        data.range_end =  moment().format('DD/MM/YYYY');
+    if (!end) {
+        data.range_end = moment().format('DD/MM/YYYY');
     }
-  
+
     // Add export date
     data.export_date = moment().format('DD/MM/YYYY');
 
-    data.notifications = notifications.map( elt =>{
-        console.log("elt",elt)
-        const dataStatus = { 100: 'CRÉÉE',200: 'ENVOYÉE', 300: 'REÇU',400:'LU'};
-        const dataFormat = { 100: 'SMS',200: 'MAIL'};      
+    data.notifications = notifications.map(elt => {
+        console.log("elt", elt)
+        const dataStatus = { 100: 'CRÉÉE', 200: 'ENVOYÉE', 300: 'REÇU', 400: 'LU' };
+        const dataFormat = { 100: 'SMS', 200: 'MAIL' };
 
-            return {
-                notification_send_date: elt.dates.sentAt ? moment(elt.dates.sentAt).format('DD/MM/YYYY')  :'N/A',
-                notification_received_date : elt.dates.receivedAt ? moment(elt.dates.receivedAt).format('DD/MM/YYYY')  : 'N/A',
-                notification_read_at: elt.dates.readAt ?  moment(elt.dates.readAt).format('DD/MM/YYYY')  : 'N/A',
-                notification_status : dataStatus[elt.status],
-                notification_format : dataFormat[elt.format],
-                notification_contact: elt.format ==100 ? elt.tel : elt.email,
-                notification_message: elt.message,
-            }
+        return {
+            notification_send_date: elt.dates.sentAt ? moment(elt.dates.sentAt).format('DD/MM/YYYY') : 'N/A',
+            notification_received_date: elt.dates.receivedAt ? moment(elt.dates.receivedAt).format('DD/MM/YYYY') : 'N/A',
+            notification_read_at: elt.dates.readAt ? moment(elt.dates.readAt).format('DD/MM/YYYY') : 'N/A',
+            notification_status: dataStatus[elt.status],
+            notification_format: dataFormat[elt.format],
+            notification_contact: elt.format == 100 ? elt.tel : elt.email,
+            notification_message: elt.message,
+        }
     })
-    
+
     return data;
 };
 
@@ -233,14 +233,177 @@ export const generateTransactionExportXlsx = (transactions) => {
 
 }
 
+export const generateOnlinePaymentExportXlsx = async (onlinePayment: any[]) => {
+
+    let result = onlinePayment;
+
+    const status = {
+        100: 'INITIÉE',
+        200: 'CONFIRMÉE',
+        300: 'ECHEC',
+        400: 'EN ATTENTE',
+    }
+    // Format Excel file columns headers;
+    if (result) {
+        const excelData = [];
+        excelData.push(['Date création', 'Code client', 'Client', 'Total', 'status']);
+
+        // if (!(result instanceof Array)) { result = [...onlinePayment]; }
+
+        result.forEach(async (payment) => {
+            const elt = [
+                `${moment(payment?.dates?.created).format('DD/MM/YYYY')}`,
+                `${payment.user.clientCode || ''}`,
+                `${payment.user.fullName || ''}`,
+                `${payment.amounts || ''}`,
+                `${status[payment?.status]}`,
+            ];
+            excelData.push(elt);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 28 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `onlinePayment_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
+    }
+}
+
+export const generateOnlineOperationsExportXlsx = async (onlineOperations: any[]) => {
+
+    let result = onlineOperations;
+
+    // Format Excel file columns headers;
+    if (result) {
+        const excelData = [];
+        excelData.push(['Date opération', 'Pays', 'Type de carte', 'Bénéficiaire', 'Montant (XAF)']);
+
+        if (!(result instanceof Array)) { result = [...onlineOperations]; }
+
+        result.forEach(async (operation) => {
+            const elt = [
+                `${moment(operation?.transactions?.date).format('DD/MM/YYYY')}`,
+                `${operation.transactions.country || ''}`,
+                `${operation.transactions.card.label || ''}`,
+                `${operation.user.fullName || ''}`,
+                `${operation.transactions.amount || ''}`,
+            ];
+            excelData.push(elt);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 28 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `onlineOperations_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
+    }
+}
+
+export const generateTravelsExportXlsx = async (onlinePayment: any[]) => {
+
+    let result = onlinePayment;
+
+    const status = {
+        100: 'INITIÉE',
+        200: 'CONFIRMÉE',
+        300: 'ECHEC',
+        400: 'EN ATTENTE',
+    };
+
+    const type = {
+        100: 'SHORT_TERM_TRAVEL ',
+        200: 'LONG_TERM_TRAVEL ',
+    };
+    // Format Excel file columns headers;
+    if (result) {
+        const excelData = [];
+        excelData.push(['Reférence', 'Code client', 'Nom du client', 'Date départ', 'Date retour', 'Nbre opérations', 'Total(XAF)', 'Dépassement', 'Statut', 'travel type']);
+
+        result.forEach(async (travel) => {
+            const elt = [
+                `${travel?.travelRef || ''}`,
+                `${travel?.user?.clientCode || ''}`,
+                `${travel?.user?.fullName || ''}`,
+                `${moment(travel?.proofTravel?.dates?.start).format('DD/MM/YYYY')}`,
+                `${moment(travel?.proofTravel?.dates?.end).format('DD/MM/YYYY')}`,
+                `${travel?.transactions?.length || ''}`,
+                `${travel?.transactions?.amount || ''}`,
+                `${travel?.ceiling || ''}`,
+                `${status[travel?.status]}`,
+                `${type[travel?.travelType]}`,
+            ];
+            excelData.push(elt);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 23 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `travel_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
+    }
+}
+
+export const generateCeillingExportXlsx = async (onlinePaymentCeilling: any[]) => {
+
+    let result = onlinePaymentCeilling;
+    let transactions;
+    // Format Excel file columns headers;
+    if (Object.keys(result).length) {
+        const excelData = [];
+        excelData.push(['Date opération', 'Montant (XAF)', 'Pays', 'Carte', 'Bénéficiaire', 'Type Operation']);
+
+        if ('transactions' in result) {
+            transactions = result.transactions;
+            console.log(JSON.stringify(transactions, null, 2))
+        }
+        
+        if (Array.isArray(transactions)) {
+            transactions.forEach(async (transaction) => {
+                const row = [
+                    `${moment(transaction?.date).format('DD/MM/YYYY')}`,
+                    `${transaction?.amount || ''}`,
+                    `${transaction?.country || ''}`,
+                    `${transaction?.card?.code || ''}`,
+                    `${transaction?.beneficiary || ''}`,
+                    `${transaction?.type || ''}`,
+                ];
+                excelData.push(row);
+            });
+        }
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 23 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `ceilling_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
+    }
+}
+
 const getNumberWithSpaces = (x) => {
     if (!x) { return '0' }
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-
 export const generateVisaTransactionExportXlsx = (transactions: any[]) => {
-
 
     const ws = XLSX.utils.json_to_sheet(transactions);
     const wb = XLSX.utils.book_new();

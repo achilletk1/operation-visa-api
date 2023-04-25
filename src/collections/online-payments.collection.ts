@@ -22,7 +22,7 @@ export const onlinePaymentsCollection = {
     getOnlinePaymentBy: async (fields: any): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne(fields);
-    },
+    },    
 
     updateOnlinePaymentsById: async (id: string, set: OnlinePaymentMonth) => {
         const database = await getDatabase();
@@ -47,6 +47,7 @@ export const onlinePaymentsCollection = {
 
     },
 
+      
     getStatusOperationOnlinePaymentReport: async (params: any) => {
         const database = await getDatabase();
 
@@ -96,7 +97,7 @@ export const onlinePaymentsCollection = {
         const data = await database.collection(collectionName).aggregate(query).toArray();
         return data;
     },
-    getOnlinePayments: async (params: any, offset: any, limit: any): Promise<any> => {
+    getOnlinePayments: async (params: any, offset?: any, limit?: any): Promise<any> => {
         const database = await getDatabase();
         let { end, start } = params;
         let query = {};
@@ -119,6 +120,18 @@ export const onlinePaymentsCollection = {
         return { data, total };
 
     },
+
+    getOnlinePaymentsList: async (fields: any) => {
+        const database = await getDatabase();
+        const query = { ...fields };
+        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
+    },
+
+    getOnlinePaymentsListById: async (id: any): Promise<OnlinePaymentMonth> => {
+        const database = await getDatabase();
+        return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
+    },
+
 
     insertVisaOnlinePayment: async (data: OnlinePaymentMonth): Promise<any> => {
         const database = await getDatabase();
