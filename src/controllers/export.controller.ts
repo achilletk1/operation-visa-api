@@ -125,7 +125,7 @@ export const exportController = {
             return res.send(data.fileContent);
         });
 
-        app.get('/export/payment-operations', async (req: Request, res: Response) => {
+        app.get('/export/payment-operations/:id', async (req: Request, res: Response) => {
 
             if (req.query.action !== 'generate_link') {
                 const message = 'no action provided.';
@@ -133,8 +133,13 @@ export const exportController = {
                 return res.status(400).json(errResp);
             }
 
-            const data = await exportService.generateOnlinePaymentOperationsExportLinks(req.body);
+            const data = await exportService.generateOnlinePaymentOperationsExportLinks(req.params.id);
 
+            if (data instanceof Error && data.message === 'MonthOnlineOperationsNotFound') {
+                const message = 'Aucune donnée trouvée pour cette transaction';
+                const errResp = commonService.generateErrResponse(message, data, 'Aucune donnée');
+                return res.status(404).json(errResp);
+            }
             if (data instanceof Error) {
                 const message = 'internal server error.';
                 const errResp = commonService.generateErrResponse(message, data);
@@ -144,7 +149,7 @@ export const exportController = {
             return res.status(200).json(data);
         });
 
-        app.get('/export/payment-operations/:code', async (req: Request, res: Response) => {
+        app.get('/export/payment-operationsCode/:code', async (req: Request, res: Response) => {
             const code = req.params.code;
 
             const data = await exportService.generateOnlinePaymenOperationstExporData(code);
