@@ -277,24 +277,32 @@ export const generateOnlinePaymentExportXlsx = async (onlinePayment: any[]) => {
 export const generateOnlineOperationsExportXlsx = async (onlineOperations: any[]) => {
 
     let result = onlineOperations;
-
+    let transactions;
     // Format Excel file columns headers;
-    if (result) {
+    if (Object.keys(result).length) {
         const excelData = [];
         excelData.push(['Date opération', 'Pays', 'Type de carte', 'Bénéficiaire', 'Montant (XAF)']);
 
-        if (!(result instanceof Array)) { result = [...onlineOperations]; }
+        if ('transactions' in result) {
+            transactions = result.transactions;
+            console.log(JSON.stringify(transactions, null, 2))
+        }
 
-        result.forEach(async (operation) => {
-            const elt = [
-                `${moment(operation?.transactions?.date).format('DD/MM/YYYY')}`,
-                `${operation.transactions.country || ''}`,
-                `${operation.transactions.card.label || ''}`,
-                `${operation.user.fullName || ''}`,
-                `${operation.transactions.amount || ''}`,
-            ];
-            excelData.push(elt);
-        });
+        // if (!(result instanceof Array)) { result = [...onlinetransactions]; }
+
+        if (Array.isArray(transactions)) {
+
+            transactions.forEach(async (transaction) => {
+                const row = [
+                    `${moment(transaction?.date).format('DD/MM/YYYY')}`,
+                    `${transaction?.country || ''}`,
+                    `${transaction?.card.label || ''}`,
+                    `${transaction?.user?.fullName || ''}`,
+                    `${transaction?.amount || ''}`,
+                ];
+                excelData.push(row);
+            });
+        }
 
         const ws = XLSX.utils.aoa_to_sheet(excelData);
         const wb = XLSX.utils.book_new();
@@ -371,7 +379,7 @@ export const generateCeillingExportXlsx = async (onlinePaymentCeilling: any[]) =
             transactions = result.transactions;
             console.log(JSON.stringify(transactions, null, 2))
         }
-        
+
         if (Array.isArray(transactions)) {
             transactions.forEach(async (transaction) => {
                 const row = [

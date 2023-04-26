@@ -127,7 +127,7 @@ export const onlinePaymentsCollection = {
         return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
     },
 
-    getOnlinePaymentsListById: async (id: any): Promise<OnlinePaymentMonth> => {
+    getOnlinePaymentsListById: async (id: any): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
     },

@@ -150,42 +150,36 @@ export const exportService = {
         return data;
     },
 
-    generateOnlinePaymentOperationsExportLinks: async (fields: any) => {
-        delete fields.action;
-        commonService.parseNumberFields(fields);
-        delete fields.operationId;
-        delete fields.ttl;
-
-        const payments = await onlinePaymentsCollection.getOnlinePaymentsListById(fields.operationId);
-        if (isEmpty(payments)) { return new Error('OnlineOperationsNotFound'); }
+    generateOnlinePaymentOperationsExportLinks: async (operationId: string) => {
+      
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsListById(operationId);
+        if (isEmpty(payments)) { return new Error('MonthOnlineOperationsNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
-        const options = { ttl, ...fields };
+        const options = { ttl, operationId };
 
         const code = encode(options);
 
-        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/payment-operations`
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/payment-operationsCode`
 
         return {
             link: `${basePath}/${code}`
         }
     },
 
-    generateOnlinePaymenOperationstExporData: async (code: any) => {
+    generateOnlinePaymenOperationstExporData: async (code: string) => {
         let options;
         try {
             options = decode(code);
         } catch (error) { return new Error('BadExportCode'); }
 
         const {ttl} = options;
-        delete options.operationId;
-        delete options.ttl;
 
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const operations = await onlinePaymentsCollection.getOnlinePaymentsList(options);
+        const operations = await onlinePaymentsCollection.getOnlinePaymentsListById(options.operationId);
 
         let data;
         const excelArrayBuffer = await exportHelper.generateOnlineOperationsExportXlsx(operations);
