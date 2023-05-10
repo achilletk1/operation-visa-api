@@ -219,7 +219,7 @@ const getTotal = (transactions: any[]) => {
 
 
 const extractTransactionsFromContent = (dataArray) => {
-
+try {
     const transactions = dataArray.map((element) => {
         return {
             _id: element._id,
@@ -239,8 +239,8 @@ const extractTransactionsFromContent = (dataArray) => {
             currencyCompens: element['DEVISE_COMPENS'].trim(),
             date: moment(`${element['DATE'].trim()} ${element['HEURE'].trim()}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
             type: element['TYPE_TRANS'],
-            ncp: element['COMPTE'].trim(),
-            age: element['AGENCE'].trim(),
+            ncp: element['COMPTE']?.trim(),
+            age: element['AGENCE']?.trim(),
             cha: element['CHAPITRE'],
             card: {
                 name: element['NOM_CARTE'].trim(),
@@ -256,6 +256,10 @@ const extractTransactionsFromContent = (dataArray) => {
     });
 
     return transactions;
+} catch (error) {
+    logger.error(`error during extractTransactionsFromContent \n${error.name} \n${error.stack}\n`);
+    return error; 
+}
 }
 
 

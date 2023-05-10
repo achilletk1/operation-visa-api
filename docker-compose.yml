@@ -139,3 +139,5 @@ services:
         restart: unless-stopped
         depends_on:
             - api
+        ports:
+            - '4000:5000'
