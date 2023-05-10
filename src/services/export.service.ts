@@ -106,7 +106,7 @@ export const exportService = {
         delete fields.limit;
         delete fields.ttl;
 
-        const payments = await onlinePaymentsCollection.getOnlinePaymentsList({ ...fields });
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsBy({ ...fields });
         if (isEmpty(payments)) { return new Error('OnlinePaymentNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
@@ -139,7 +139,7 @@ export const exportService = {
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const payments = await onlinePaymentsCollection.getOnlinePaymentsList(options);
+        const payments = await onlinePaymentsCollection.getOnlinePaymentsBy(options);
 
         let data;
         const excelArrayBuffer = await exportHelper.generateOnlinePaymentExportXlsx(payments);
@@ -152,8 +152,8 @@ export const exportService = {
 
     generateOnlinePaymentOperationsExportLinks: async (operationId: string) => {
       
-        const payments = await onlinePaymentsCollection.getOnlinePaymentsListById(operationId);
-        if (isEmpty(payments)) { return new Error('MonthOnlineOperationsNotFound'); }
+        const payments = await onlinePaymentsCollection.getOnlinePaymentById(operationId);
+        if (isEmpty(payments?.transactions)) { return new Error('MonthOnlineOperationsNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -179,7 +179,7 @@ export const exportService = {
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const operations = await onlinePaymentsCollection.getOnlinePaymentsListById(options.operationId);
+        const operations: any = await onlinePaymentsCollection.getOnlinePaymentById(options.operationId);
 
         let data;
         const excelArrayBuffer = await exportHelper.generateOnlineOperationsExportXlsx(operations);
@@ -192,8 +192,8 @@ export const exportService = {
     
     generateTravelsCeillingExportLinks: async (travelId: string) => {
   
-        const ceilling = await travelsCollection.getTravelsList(travelId);
-        if (isEmpty(ceilling)) { return new Error('OnlineCeillingNotFound'); }
+        const ceilling = await travelsCollection.getTravelById(travelId);
+        if (isEmpty(ceilling?.transactions)) { return new Error('OnlineCeillingNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -221,7 +221,7 @@ export const exportService = {
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const ceilling = await  travelsCollection.getTravelsList(options.travelId);;
+        const ceilling:any = await  travelsCollection.getTravelById(options.travelId);;
 
         let data;
         const excelArrayBuffer = await exportHelper.generateCeillingExportXlsx(ceilling);
