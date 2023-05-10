@@ -11,7 +11,7 @@ export const travelsCollection = {
     getTravelsBy: async (filters: any): Promise<Travel[]> => {
         const database = await getDatabase();
         const query = { ...filters };
-        return await database.collection(collectionName).find(query).toArray();
+        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
     },
 
     getTravelById: async (id: any): Promise<Travel> => {
@@ -142,18 +142,5 @@ export const travelsCollection = {
         return result
     },
 
-    getAllTravelsList: async (fields: any) => {
-        const database = await getDatabase();
-        const query = { ...fields };
-        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
-    },
-
-    getTravelsList: async (id: string): Promise<any> => {
-        const database = await getDatabase();        
-       return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
-
-    },
-
-   
 
 }

@@ -11,7 +11,7 @@ export const onlinePaymentsCollection = {
     getOnlinePaymentsBy: async (filters: any): Promise<OnlinePaymentMonth[]> => {
         const database = await getDatabase();
         const query = { ...filters };
-        return await database.collection(collectionName).find(query).toArray();
+        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
     },
 
     getOnlinePaymentById: async (id: any): Promise<OnlinePaymentMonth> => {
@@ -120,18 +120,6 @@ export const onlinePaymentsCollection = {
         return { data, total };
 
     },
-
-    getOnlinePaymentsList: async (fields: any) => {
-        const database = await getDatabase();
-        const query = { ...fields };
-        return await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).toArray();
-    },
-
-    getOnlinePaymentsListById: async (id: any): Promise<any> => {
-        const database = await getDatabase();
-        return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
-    },
-
 
     insertVisaOnlinePayment: async (data: OnlinePaymentMonth): Promise<any> => {
         const database = await getDatabase();
