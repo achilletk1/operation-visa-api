@@ -389,7 +389,7 @@ export const travelService = {
         commonService.parseNumberFields(fields);
         delete fields.ttl;
 
-        const travels = await travelsCollection.getAllTravelsList({ ...fields });
+        const travels = await travelsCollection.getTravelsBy({ ...fields });
         if (isEmpty(travels)) { return new Error('travelsNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
@@ -417,7 +417,7 @@ export const travelService = {
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const travels = await travelsCollection.getAllTravelsList(options);
+        const travels = await travelsCollection.getTravelsBy(options);
 
         let data;
         const excelArrayBuffer = await exportHelper.generateTravelsExportXlsx(travels);
