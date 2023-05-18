@@ -221,35 +221,36 @@ const getTotal = (transactions: any[]) => {
 const extractTransactionsFromContent = (dataArray) => {
 try {
     const transactions = dataArray.map((element) => {
+        console.log('elt', element);
         return {
             _id: element?._id,
-            clientCode: element['CLIENT']?.toString()?.trim(),
-            fullName: element['NOM_CLIENT']?.trim(),
+            clientCode: element['CLIENT']?.toString()?.replace(/\s/g,''),
+            fullName: element['NOM_CLIENT']?.replace(/\s/g,''),
             manager: {
-                code: element['CODE_GESTIONNAIRE']?.trim(),
-                name: element['NOM_GESTIONNAIRE']?.trim()
+                code: element['CODE_GESTIONNAIRE']?.replace(/\s/g,''),
+                name: element['NOM_GESTIONNAIRE']?.replace(/\s/g,'')
             },
             tel: element['TELEPHONE_CLIENT'],
             email: element['EMAIL_CLIENT'],
-            beneficiary: element['ACQUEREUR']?.trim(),
+            beneficiary: element['ACQUEREUR']?.replace(/\s/g,''),
             amount: +element['MONTANT_XAF'] || 0,
             amountTrans: +element['MONTANT'] || 0,
             currencyTrans: +element['DEVISE'] || 0,
             amountCompens: +element['MONTANT_COMPENS'] || 0,
-            currencyCompens: element['DEVISE_COMPENS']?.trim(),
-            date: moment(`${element['DATE']?.trim()} ${element['HEURE']?.trim()}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
+            currencyCompens: element['DEVISE_COMPENS']?.replace(/\s/g,''),
+            date: moment(`${element['DATE']?.replace(/\s/g,'')} ${element['HEURE']?.replace(/\s/g,'')}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
             type: element['TYPE_TRANS'],
-            ncp: element['COMPTE']?.trim(),
-            age: element['AGENCE']?.trim(),
+            ncp: element['COMPTE']?.replace(/\s/g,''),
+            age: element['AGENCE']?.replace(/\s/g,''),
             cha: element['CHAPITRE'],
             card: {
-                name: element['NOM_CARTE']?.trim(),
-                code: element['CARTE']?.trim(),
-                label: element['PRODUIT']?.trim(),
+                name: element['NOM_CARTE']?.replace(/\s/g,''),
+                code: element['CARTE']?.replace(/\s/g,''),
+                label: element['PRODUIT']?.replace(/\s/g,''),
             },
             country: element['PAYS']?.trim(),
-            category: element['CATEGORIE']?.trim(),
-            currentMonth: moment(`${element['DATE']?.trim()}`, 'dd/MM/YYYY').format('YYYYMM')?.toString(),
+            category: element['CATEGORIE']?.replace(/\s/g,''),
+            currentMonth: moment(`${element['DATE']?.replace(/\s/g,'')}`, 'dd/MM/YYYY').format('YYYYMM')?.toString(),
             reference: '',
             statementRef: '',
         }

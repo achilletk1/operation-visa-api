@@ -36,9 +36,9 @@ export const notificationsController = {
 
             const fileExtension = data.contentType === 'application/pdf' ? 'pdf' : 'xlsx';
 
-            res.setHeader('Content-Type', data.contentType);
-            res.setHeader('Content-Disposition', `attachment; filename= export_${new Date().getTime()}.${fileExtension}`);
-            return res.send(data.fileContent);
+            res.setHeader('Content-Type', data?.contentType);
+            res.setHeader('Content-Disposition', `attachment; filename= notification_${new Date().getTime()}.${fileExtension}`);
+            return res.send(data?.fileContent);
         });
 
         app.get('/notification-generate/:id/export', async (req: Request, res: Response) => {

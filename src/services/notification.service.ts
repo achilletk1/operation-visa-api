@@ -171,7 +171,7 @@ export const notificationService = {
         const subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`;
 
 
-        const receiver = config.get('env') === 'production'?`${email}`:config.get('emailTest');
+        const receiver = config.get('env') === 'production' ? `${email}` : config.get('emailTest');
 
         try {
             sendEmail(receiver, subject, HtmlBody);
@@ -290,11 +290,11 @@ export const notificationService = {
             text
         }
 
-        const HtmlBody = await exportHelper.generateFormalNoticeMail(data,userData);
+        const HtmlBody = await exportHelper.generateFormalNoticeMail(data, userData);
 
         const subject = `Lettre de mise en demeure`;
 
-        const receiver = config.get('env') === 'production'?`${email}`:config.get('emailTest');
+        const receiver = config.get('env') === 'production' ? `${email}` : config.get('emailTest');
 
         const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData, letter.pdf.signature);
 
@@ -414,7 +414,7 @@ export const notificationService = {
             } catch (error) { return new Error('BadExportCode'); }
 
             const { format, query, userId, ttl } = options;
-            
+
             if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
             if (id !== userId) { return new Error('Forbbiden'); }
 
@@ -429,8 +429,8 @@ export const notificationService = {
             delete query.end;
 
             const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
-                undefined;
-            const { data } = await notificationsCollection.getNotifications(query || {}, offset || 1, limit || 40, range);
+                { start: moment().startOf('month').valueOf(), end: moment().endOf('month').valueOf() };
+            const { data } = await notificationsCollection.getNotifications(query || {}, null, null, range);
 
 
             if (!data || isEmpty(data)) {
@@ -613,7 +613,7 @@ async function queueNotification(type: string, data: any = null, delayUntil?: nu
         else if (!isNaN(delayUntil)) { proc = new Date(+proc + delayUntil * 1000); }
 
         // aad item in queue
-        const newQueueItem:any = await queueCollection.add({ type, proc, data, priority })
+        const newQueueItem: any = await queueCollection.add({ type, proc, data, priority })
 
         // return qItem
         return newQueueItem && newQueueItem.insertedCount && newQueueItem.insertedId ? { _id: newQueueItem.insertedId, sent: newQueueItem.insertedId.getTimestamp(), data } : null;

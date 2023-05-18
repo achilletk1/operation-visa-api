@@ -44,29 +44,28 @@ const getTemplateNotificationPdfData = (user: User, notifications: any, start: a
     //var message
 
     if (!start) {
-        data.range_start = moment().subtract(6, 'M').format('DD/MM/YYYY');
+        data.range_start = moment().startOf('month').format('DD/MM/YYYY');
     }
 
     if (!end) {
-        data.range_end = moment().format('DD/MM/YYYY');
+        data.range_end = moment().endOf('month').format('DD/MM/YYYY');
     }
 
     // Add export date
     data.export_date = moment().format('DD/MM/YYYY');
 
-    data.notifications = notifications.map(elt => {
-        console.log("elt", elt)
-        const dataStatus = { 100: 'CRÉÉE', 200: 'ENVOYÉE', 300: 'REÇU', 400: 'LU' };
-        const dataFormat = { 100: 'SMS', 200: 'MAIL' };
+    const dataStatus = { 100: 'CRÉÉE', 200: 'ENVOYÉE', 300: 'REÇU', 400: 'LUE' };
+    const dataFormat = { 100: 'SMS', 200: 'MAIL' };
 
+    data.notifications = notifications.map(elt => {
         return {
-            notification_send_date: elt.dates.sentAt ? moment(elt.dates.sentAt).format('DD/MM/YYYY') : 'N/A',
-            notification_received_date: elt.dates.receivedAt ? moment(elt.dates.receivedAt).format('DD/MM/YYYY') : 'N/A',
-            notification_read_at: elt.dates.readAt ? moment(elt.dates.readAt).format('DD/MM/YYYY') : 'N/A',
-            notification_status: dataStatus[elt.status],
-            notification_format: dataFormat[elt.format],
-            notification_contact: elt.format == 100 ? elt.tel : elt.email,
-            notification_message: elt.message,
+            notification_send_date: elt?.dates?.sentAt ? moment(elt?.dates?.sentAt).format('DD/MM/YYYY') : 'N/A',
+            notification_received_date: elt.dates.receivedAt ? moment(elt?.dates?.receivedAt).format('DD/MM/YYYY') : 'N/A',
+            notification_read_at: elt?.dates?.readAt ? moment(elt?.dates?.readAt).format('DD/MM/YYYY') : 'N/A',
+            notification_status: dataStatus[elt?.status] || 'CRÉÉE',
+            notification_format: dataFormat[elt?.format] || 'N/A',
+            notification_contact: elt?.format == 100 ? elt?.tel : elt?.email,
+            notification_message: elt?.message,
         }
     })
 
