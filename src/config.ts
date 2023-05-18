@@ -260,6 +260,18 @@ export const config = convict({
         env: 'DELETE_TEMPORARY_FILES',
         arg: 'delete-temporary-files'
     },
+    gotenbergUrl: {
+        doc: 'GOTENBERG PDF GENERATOR URL',
+        format: String,
+        default: 'http://gotenberg:3000',
+        env: 'GOTENBERG_URL'
+    },
+    emailTest: {
+        doc: 'email test to send notification',
+        format: String,
+        default: 'kevin.moutassi@londo-tech.com',
+        env: 'EMAIL_TEST'
+    },
 });
 
 // Load environment dependent configuration

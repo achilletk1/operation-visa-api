@@ -45,7 +45,7 @@ export const visaTransactonsProcessingService = {
             for (const cli in clientCodes) {
 
                 // Travel traitment
-                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli].travel, clientCodes[cli].onlinepayment);
+                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]?.travel, clientCodes[cli]?.onlinepayment);
 
 
                 // Online payment traitment
@@ -67,7 +67,7 @@ export const visaTransactonsProcessingService = {
         const travels = await travelsCollection.getTravelsBy({ 'proofTravel': OpeVisaStatus.PENDING });
 
         for (const travel of travels) {
-            const firstDate = Math.min(...travel?.transactions.map((elt => elt.date)));
+            const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
             const currentDate = moment().valueOf();
             let userData: any;
             if (moment(currentDate).diff(firstDate, 'days') === 30) {
@@ -222,7 +222,7 @@ const extractTransactionsFromContent = (dataArray) => {
 try {
     const transactions = dataArray.map((element) => {
         return {
-            _id: element._id,
+            _id: element?._id,
             clientCode: element['CLIENT']?.toString()?.trim(),
             fullName: element['NOM_CLIENT']?.trim(),
             manager: {

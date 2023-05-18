@@ -170,7 +170,8 @@ export const notificationService = {
 
         const subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`;
 
-        const receiver = `${email}`;
+
+        const receiver = config.get('env') === 'production'?`${email}`:config.get('emailTest');
 
         try {
             sendEmail(receiver, subject, HtmlBody);
@@ -289,11 +290,11 @@ export const notificationService = {
             text
         }
 
-        const HtmlBody = notificationHelper.generateMailTravelDetect(data);
+        const HtmlBody = await exportHelper.generateFormalNoticeMail(data,userData);
 
         const subject = `Lettre de mise en demeure`;
 
-        const receiver = `${email}`;
+        const receiver = config.get('env') === 'production'?`${email}`:config.get('emailTest');
 
         const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData, letter.pdf.signature);
 
@@ -413,18 +414,18 @@ export const notificationService = {
             } catch (error) { return new Error('BadExportCode'); }
 
             const { format, query, userId, ttl } = options;
+            
             if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
             if (id !== userId) { return new Error('Forbbiden'); }
+
             const user = await usersService.getUserById(userId);
-
-
             if (!user) { return new Error('UserNotFound'); }
+
             commonService.parseNumberFields(query);
             const { offset, limit, start, end } = query;
             delete query.offset;
             delete query.limit;
             delete query.start;
-            delete query.end;
             delete query.end;
 
             const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :

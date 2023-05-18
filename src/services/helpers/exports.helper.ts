@@ -1,21 +1,20 @@
-import { Letter } from './../../models/letter';
 import readFilePromise from 'fs-readfile-promise';
-import handlebars from 'handlebars';
-import http from 'request-promise';
+import { pdf } from '../pdf-generator.service';
+import { Letter } from './../../models/letter';
+import { User } from '../../models/user';
 import { logger } from "../../winston";
-import { config } from '../../config';
+import handlebars from 'handlebars';
+import { get } from 'lodash';
 import moment from "moment";
 import XLSX from 'xlsx';
-import { get } from 'lodash';
-import { User } from '../../models/user';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification: any;
-// let templateFormalNoticeMail:any ; 
+let templateFormalNoticeMail:any ; 
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
     templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
-    // templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-template-mail.template.html', 'utf8');
+    templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-template-mail.template.html', 'utf8');
 })();
 
 export const generateNotificationExportPdf = async (user: any, notification: any, start: any, end: any) => {
@@ -26,16 +25,7 @@ export const generateNotificationExportPdf = async (user: any, notification: any
         const template = handlebars.compile(templateExportNotification);
 
         const html = template(data);
-
-
-        const options = {
-            method: 'POST',
-            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
-            body: { html },
-            json: true
-        }
-
-        return await http(options);
+        return await pdf.setAttachment(html);
     } catch (error) {
         logger.error(
             'pdf export pdf generation failed.',
@@ -99,46 +89,39 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
 
         const html = template(templateData);
 
-        const options = {
-            method: 'POST',
-            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
-            body: { html },
-            json: true
-        }
-
-        return await http(options);
+        return await pdf.setAttachment(html);
     } catch (error) {
         logger.error(`\npdf RIB export generation failed ${JSON.stringify(error)}`);
         return error;
     }
 };
 
-// export const generateFormalNoticeMail = async (content: any, userData: any,  isTest?: boolean) => {
-//     try {
-//         const values = {
-//             ...userData,
-//             'SYSTEM_TODAY_LONG': moment().locale('fr'),
-//             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
-//         }
-//         const data = replaceVariables(content, values, isTest);
+export const generateFormalNoticeMail = async (content: any, userData: any,  isTest?: boolean) => {
+    try {
+        const values = {
+            ...userData,
+            'SYSTEM_TODAY_LONG': moment().locale('fr'),
+            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
+        }
+        const data = replaceVariables(content, values, isTest);
 
-//         const temlateData = generateTemplateFormalNoticeMail(data);
+        const temlateData = generateTemplateFormalNoticeMail(data);
 
-//         const template = handlebars.compile(templateFormalNoticeMail);
+        const template = handlebars.compile(templateFormalNoticeMail);
 
-//         const html = template(temlateData);
-//        /* const options = {
-//             method: 'POST',
-//             uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
-//             body: { html },
-//             json: true
-//         }*/
-//         return html;
-//     } catch (error) {
-//         logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
-//         return error;
-//     }
-// };
+        const html = template(temlateData);
+       /* const options = {
+            method: 'POST',
+            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
+            body: { html },
+            json: true
+        }*/
+        return html;
+    } catch (error) {
+        logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
+        return error;
+    }
+};
 
 const replaceVariables = (content: any, values: any, isTest?: boolean) => {
     const obj = {};
