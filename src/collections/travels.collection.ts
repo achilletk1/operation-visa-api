@@ -21,7 +21,7 @@ export const travelsCollection = {
 
     getTravelBy: async (filters: any): Promise<any> => {
         const database = await getDatabase();
-        return await database.collection(collectionName).findOne({ ...filters});
+        return await database.collection(collectionName).findOne({ ...filters });
     },
 
     updateTravelsById: async (id: string, set: Travel, unset?: Travel): Promise<any> => {
@@ -81,7 +81,7 @@ export const travelsCollection = {
     getAverageTimeJustifyTravelReport: async (params: any) => {
         const database = await getDatabase();
 
-       const query = AverageTimeJustifyTravelData(params);
+        const query = AverageTimeJustifyTravelData(params);
 
         return await database.collection(collectionName).aggregate(query).toArray();
 
@@ -91,7 +91,7 @@ export const travelsCollection = {
         const database = await getDatabase();
 
         let query = [];
-        let matchValue:any = {'$match': {status: 200}};
+        let matchValue: any = { };
         // let matchDate = {};
 
         const { travelType } = params
@@ -100,11 +100,11 @@ export const travelsCollection = {
         // if (param.start && param.end) { query.push({ $match: { 'dates.created': { $gte: param.start, $lte: param.end } } }); }
 
         if (+travelType) {
-            matchValue['$match'].travelType =   +travelType ;
+            matchValue['$match'] ={}
+            matchValue['$match'].travelType = +travelType;
         }
-
+        if (matchValue['$match']) { query.unshift(matchValue); }
         query = [
-            matchValue,
             { $unwind: '$transactions' },
             {
                 $project: {

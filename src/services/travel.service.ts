@@ -82,7 +82,7 @@ export const travelService = {
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
             const firstDate = Math.min(...travel.transactions.map((elt => elt.date)));
-            const lastDate = Math.min(...travel.transactions.map((elt => elt.date)));
+            const lastDate = Math.max(...travel.transactions.map((elt => elt.date)));
 
             travel.proofTravel.dates = { start: firstDate, end: lastDate }
             travel.proofTravel.status = OpeVisaStatus.PENDING;
@@ -232,7 +232,6 @@ export const travelService = {
             if (status !== updatedTravel.status) {
                 await travelsCollection.updateTravelsById(id, { status });
                 await Promise.all([
-                    travelsCollection.updateTravelsById(id, { status }),
                     notificationService.sendEmailTravelStatusChanged(updatedTravel, get(updatedTravel, 'travel.user.email', ''))
                 ]);
             }

@@ -62,8 +62,8 @@ export interface Travel {
         };
         comment?: string;
         travelReason?: {
-            _id: string;
-            label: string;
+            _id?: string;
+            label?: string;
             code?: number;
             otherLabel?: string;
         };

@@ -64,16 +64,16 @@ export const reportingService = {
         delete fields.type;
 
         const range = (start && end) ?
-            { start: moment(start, 'YYYY-MM-DD').startOf('day').valueOf(), end: moment(start, 'YYYY-MM-DD').endOf('day').valueOf() }
+            { start: moment(start, 'DD/MM/YYYY').startOf('day').valueOf(), end: moment(start, 'DD/MM/YYYY').endOf('day').valueOf() }
             : { start: moment().startOf('year').valueOf(), end: moment().endOf('year').valueOf() }
 
         try {
             let data = [];
             if (statemenType === 'TRAVEL') {
-                data = await travelsCollection.getChartDataTravel({ travelType, start, end });
+                data = await travelsCollection.getChartDataTravel({ travelType, start:range?.start, end:range?.end });
             }
             else {
-                data = await onlinePaymentsCollection.getChartDataOnlinePayment({ start, end });
+                data = await onlinePaymentsCollection.getChartDataOnlinePayment({ start:range?.start, end:range?.end  });
             }
 
             let result = {};
@@ -82,7 +82,6 @@ export const reportingService = {
             for (const types in data) {
                 // if (!data.hasOwnProperty(types)) { break; }
                 result = reportingHelper.generateChartByType(data);
-                const r = ""
             }
             return result;
         } catch (error) {

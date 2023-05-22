@@ -86,11 +86,11 @@ export const lettersService = {
 
             if (!letter) { return new Error('LetterNotFound') }
 
-            const pdfStringEn = await exportsHelper.generateFormalNoticeLetter(letter.pdf.en, {}, letter.pdf.signature, true);
+            const pdfStringEn = await exportsHelper.generateFormalNoticeLetter(letter?.pdf?.en, {}, letter?.pdf?.signature, true);
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await exportsHelper.generateFormalNoticeLetter(letter.pdf.fr, {},letter.pdf.signature, true);
+            const pdfStringFr = await exportsHelper.generateFormalNoticeLetter(letter?.pdf?.fr, {},letter?.pdf?.signature, true);
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 

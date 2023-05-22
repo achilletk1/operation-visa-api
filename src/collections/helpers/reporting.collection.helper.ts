@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get, isEmpty } from "lodash";
 import moment = require("moment");
 import { logger } from "../../winston";
 
@@ -169,8 +169,7 @@ export const statusOperation = (params: any) => {
     }
 
     if (filterStatus === 'NUMBER_STATUS') {
-        return [
-            { ...match },
+        let query = [
             {
                 $group: {
                     _id: '$status',
@@ -178,9 +177,10 @@ export const statusOperation = (params: any) => {
                 }
             }
         ]
+        if (match['$match']) { query.unshift(match) }
+        return query
     } else {
-        return [
-            { ...match },
+        let query = [
             { $unwind: '$transactions' },
             {
                 $group: {
@@ -189,6 +189,8 @@ export const statusOperation = (params: any) => {
                 }
             }
         ]
+        if (match['$match']) { query.unshift(match) }
+        return query
 
     }
 

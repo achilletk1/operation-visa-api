@@ -3,7 +3,7 @@ import { config } from '../config';
 
 const gotenbergUrl = (config.get('env') !== 'development')
                         ? config.get('gotenbergUrl')
-                        : 'http://localhost:7900';
+                        :  config.get('gotenbergUrl');
 const toPDF = pipe(
   gotenberg(`${gotenbergUrl}/forms/chromium`),
   convert,

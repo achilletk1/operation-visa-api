@@ -45,7 +45,7 @@ export const visaTransactonsProcessingService = {
             for (const cli in clientCodes) {
 
                 // Travel traitment
-                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]?.travel, clientCodes[cli]?.onlinepayment);
+                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
 
 
                 // Online payment traitment
@@ -121,7 +121,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
             const maxDate = moment(firstDate).add(30, 'days');
 
             // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
-            if (transaction.date > maxDate || !!transactionsGroupedByTravel[currentIndex]?.travel) {
+            if (transaction?.date > maxDate || !!transactionsGroupedByTravel[currentIndex]?.travel) {
                 currentIndex++;
             }
 
@@ -129,7 +129,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
             if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
 
-            transactionsGroupedByTravel[currentIndex].transactions.push(transaction);
+            transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
 
             continue;
 
@@ -141,7 +141,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 
         if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
-        transactionsGroupedByTravel[currentIndex].transactions.push(transaction);
+        transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
 
         transactionsGroupedByTravel[currentIndex].travel = travel;
 
@@ -155,11 +155,11 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: any[]) => {
     if (!onlinepaymentTransactions) { return; }
 
-    const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt.date).format('YYYYMM')))];
+    const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date).format('YYYYMM')))];
 
     for (const month of months) {
 
-        const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt.date).format('YYYYMM') === month);
+        const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
 
         let onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ 'user.clientCode': cli, currentMonth: +month });
 
@@ -189,12 +189,12 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
 
         onlinePayment.dates.updated = moment().valueOf();
 
-        const totalAmount = getTotal(onlinePayment.transactions);
+        const totalAmount = getTotal(onlinePayment?.transactions);
         onlinePayment.amounts = totalAmount;
-        const firstDate = Math.min(...onlinePayment?.transactions.map((elt => elt.date))) || 0;
+        const firstDate = Math.min(...onlinePayment?.transactions.map((elt => elt?.date))) || 0;
 
 
-        if (totalAmount > onlinePayment.ceiling) {
+        if (totalAmount > onlinePayment?.ceiling) {
             await notificationService.sendEmailVisaExceding(onlinePayment, get(onlinePayment, 'user.email'), firstDate, onlinePayment.dates.created, totalAmount)
             logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
         }
@@ -221,7 +221,6 @@ const getTotal = (transactions: any[]) => {
 const extractTransactionsFromContent = (dataArray) => {
 try {
     const transactions = dataArray.map((element) => {
-        console.log('elt', element);
         return {
             _id: element?._id,
             clientCode: element['CLIENT']?.toString()?.replace(/\s/g,''),
@@ -267,14 +266,14 @@ try {
 const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[], onlinePaymentsTransactions: any[]) => {
     for (const element of transactionsGroupedByTravel) {
 
-        if (isEmpty(element.transactions)) { return }
+        if (isEmpty(element?.transactions)) { return }
 
-        const firstDate = Math.min(...element?.transactions.map((elt => elt.date)));
-        const lastDate = Math.min(...element?.transactions.map((elt => elt.date)));
+        const firstDate = Math.min(...element?.transactions.map((elt => elt?.date)));
+        const lastDate = Math.max(...element?.transactions.map((elt => elt?.date)));
 
-        let travel = element.travel;
+        let travel = element?.travel;
 
-        if (travel && travel.travelType === TravelType.SHORT_TERM_TRAVEL) { travel.transactions.push(...element.transactions); }
+        if (travel && travel?.travelType === TravelType.SHORT_TERM_TRAVEL) { travel?.transactions.push(...element?.transactions); }
 
         if (!travel) {
             travel = {
@@ -282,9 +281,9 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 user: {
                     _id: null,
                     clientCode: cli,
-                    fullName: element.transactions[0].fullName,
-                    email: element.transactions[0].email,
-                    tel: element.transactions[0].tel,
+                    fullName: element.transactions[0]?.fullName,
+                    email: element.transactions[0]?.email,
+                    tel: element.transactions[0]?.tel,
 
                 },
                 travelRef: '',
@@ -292,7 +291,6 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 ceiling: 0,
                 dates: {
                     created: moment().valueOf(),
-                    updated: null,
                 },
                 proofTravel: {
                     continents: [],
@@ -302,23 +300,17 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                         end: lastDate,
                     },
                     status: OpeVisaStatus.PENDING,
-                    comment: '',
-                    travelReason: {
-                        _id: null,
-                        label: '',
-                        otherLabel: '',
-                    },
+                    travelReason: {},
                     isTransportTicket: false,
                     isVisa: false,
                     isPassOut: false,
                     isPassIn: false,
                     proofTravelAttachs: [],
-                    rejectReason: '',
                     validators: []
                 },
                 expenseDetails: [],
                 othersAttachements: [],
-                transactions: element.transactions,
+                transactions: element?.transactions,
             };
             travel = await travelService.insertTravelFromSystem(travel);
 
@@ -328,12 +320,12 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
 
         if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
             const mergedTransactions = [...element.transactions, ...onlinePaymentsTransactions];
-            const months = mergedTransactions.map((elt) => moment(elt.date).format('YYYYMM')).filter((item, pos, self) => self.indexOf(item) === pos);
+            const months = mergedTransactions.map((elt) => moment(elt?.date).format('YYYYMM')).filter((item, pos, self) => self.indexOf(item) === pos);
             for (const month of months) {
 
-                const selectedTransactions = element.transactions.filter(elt => moment(elt.date).format('YYYYMM') === month);
-                const selectedTransactionsOnlinePayment = onlinePaymentsTransactions.filter(elt => moment(elt.date).format('YYYYMM') === month);
-                onlinePaymentsTransactions = onlinePaymentsTransactions.filter(elt => moment(elt.date).format('YYYYMM') !== month);
+                const selectedTransactions = element.transactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
+                const selectedTransactionsOnlinePayment = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
+                onlinePaymentsTransactions = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') !== month);
                 selectedTransactions.push(...selectedTransactionsOnlinePayment);
                 let travelMonth = await travelMonthsCollection.getTravelMonthBy({ travelId: travel?._id, month });
 
@@ -348,7 +340,6 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                         month,
                         dates: {
                             created: moment().valueOf(),
-                            updated: null,
                         },
                         expenseDetails: [],
                         transactions: selectedTransactions
@@ -361,11 +352,11 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 }
                 travelMonth.dates.updated = moment().valueOf();
 
-                const totalAmount = getTotal(travelMonth.transactions);
-                if (totalAmount > travel.ceiling) {
-                    const firstDateTransactions = Math.min(...mergedTransactions.map((elt => elt.date)));
+                const totalAmount = getTotal(travelMonth?.transactions);
+                if (totalAmount > travel?.ceiling) {
+                    const firstDateTransactions = Math.min(...mergedTransactions.map((elt => elt?.date)));
                     await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDateTransactions, travelMonth.dates.created, totalAmount)
-                    logger.debug(`Exeding travel month, id: ${travelMonth._id}`);
+                    logger.debug(`Exeding travel month, id: ${travelMonth?._id}`);
 
                 }
 
@@ -381,7 +372,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
 
         if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
             const totalAmount = getTotal(travel.transactions);
-            if (totalAmount > travel.ceiling) {
+            if (totalAmount > travel?.ceiling) {
                 await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDate, travel.dates.created, totalAmount)
                 logger.debug(`Exeding travel, id: ${travel?._id}`);
 
