@@ -1,19 +1,19 @@
-import moment from 'moment';
-import { logger } from "../winston";
-import { get, isEmpty } from "lodash";
 import { visaTransactinnsTmpCollection } from "../collections/visa_transactions_tmp.collection";
-import { Travel, TravelType } from "../models/travel";
-import { travelsCollection } from "../collections/travels.collection";
-import { travelService } from "./travel.service";
-import { OpeVisaStatus } from "../models/visa-operations";
-import { travelMonthsCollection } from "../collections/travel-months.collection";
+import { verifyIfisInLongTermTravel, onlinePaymentsTreatment } from "./helpers/visa-operations.service.helper";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
-import { visaTransactionsCollection } from "../collections/visa-transactions.collection";
-import { onlinePaymentsService } from "./online-payment.service";
-import { ObjectId } from 'mongodb';
-import { notificationService } from './notification.service';
+import { travelMonthsCollection } from "../collections/travel-months.collection";
+import { settingCollection } from "../collections/settings.collection";
 import { lettersCollection } from '../collections/letters.collection';
+import { travelsCollection } from "../collections/travels.collection";
+import { onlinePaymentsService } from "./online-payment.service";
+import { notificationService } from './notification.service';
+import { OpeVisaStatus } from "../models/visa-operations";
+import { Travel, TravelType } from "../models/travel";
+import { travelService } from "./travel.service";
 import { cbsService } from './cbs.service';
+import { get, isEmpty } from "lodash";
+import { logger } from "../winston";
+import moment from 'moment';
 
 
 export const visaTransactonsProcessingService = {
@@ -21,50 +21,64 @@ export const visaTransactonsProcessingService = {
 
     startTransactionsProcessing: async (): Promise<any> => {
         try {
+            const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
+            if (setting?.value === true) {  console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH');return }
+            settingCollection.insertSetting({ key: 'visa_transaction_tmp_treatment_in_progress', value: true });
+
             const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
             if (isEmpty(content)) { return; }
-            const transactions = extractTransactionsFromContent(content);
+
+            let transactions = formatTransactions(content);
+
+            transactions = await verifyIfisInLongTermTravel(transactions);
+
+            const { onpTransactions, travelTransactions } = groupByType(transactions);
+
+            for (const transaction of onpTransactions) {
+                // await onlinePaymentTreatment(onpTransactions);
+            }
+
             const clientCodes = {};
-            const toBeDeleted = [];
-
-            // Organize transactions by clientcodes and types
-            for (const transaction of transactions) {
-                const cli = transaction?.clientCode.toString();
-                const type = getOperationType(transaction?.type);
-                if (isEmpty(clientCodes[cli])) { clientCodes[cli] = {} }
-
-                if (isEmpty(clientCodes[cli][type])) { clientCodes[cli][type] = [] }
-
-                clientCodes[cli][type].push(transaction);
-                toBeDeleted.push(new ObjectId(transaction?._id.toString()));
+            // const toBeDeleted = [];
 
 
-            }
+            // // Organize transactions by clientcodes and types
+            // for (const transaction of transactions) {
+            //     const cli = transaction?.clientCode.toString();
+            //     const type = getOperationType(transaction?.type);
+            //     if (isEmpty(clientCodes[cli])) { clientCodes[cli] = {} }
 
-            // tslint:disable-next-line: forin
-            for (const cli in clientCodes) {
+            //     if (isEmpty(clientCodes[cli][type])) { clientCodes[cli][type] = [] }
 
-                // Travel traitment
-                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
-
-
-                // Online payment traitment
-                await onlinePaymentTreatment(cli, onlinePaymentMonthsTransactions);
-
-
+            //     clientCodes[cli][type].push(transaction);
+            //     toBeDeleted.push(new ObjectId(transaction?._id.toString()));
+            // }
 
 
-            }
-            await visaTransactionsCollection.insertTransactions(transactions);
-            await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
+            // // tslint:disable-next-line: forin
+            // for (const cli in clientCodes) {
+            //     console.log('cli', cli);
+            //     // Travel traitment
+            //     const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
+
+            //     // Online payment traitment
+            //     await onlinePaymentTreatment(cli, onlinePaymentMonthsTransactions);
+
+            // }
+            // await visaTransactionsCollection.insertTransactions(transactions);
+            // await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
+
         } catch (error) {
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
             return error;
+        } finally {
+            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
+            console.log('resp', resp);
         }
     },
 
     startRevivalMail: async (): Promise<any> => {
-        const travels = await travelsCollection.getTravelsBy({ 'proofTravel': OpeVisaStatus.PENDING });
+        const travels = await travelsCollection.getTravelsBy({ 'proofTravel': OpeVisaStatus.TO_VALIDATED });
 
         for (const travel of travels) {
             const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
@@ -101,16 +115,16 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 
     // sort transactions by date in ascending order
     travelTransactions = travelTransactions.sort((a, b) => {
-        return a.date - b.date;
+        return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
     });
     for (const transaction of travelTransactions) {
 
         // find travel which dates matchs with the current transaction date
-        let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $lte: transaction.date }, "proofTravel.dates.end": { $gte: transaction.date } });
+        let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $lte: transaction?.date }, "proofTravel.dates.end": { $gte: transaction?.date } });
 
-        if (!travel) {
+        if (!travel || isEmpty(travel)) {
 
-            // if the loop is in the first index we only have to insert the transaction an continue 
+            //Insert the first transaction and continue
             if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
                 transactionsGroupedByTravel[currentIndex] = { transactions: [transaction] }
                 continue;
@@ -118,7 +132,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 
             // get the first date of the current transactions Grouped By Travel's transactions
             const firstDate = Math.min(...transactionsGroupedByTravel[currentIndex]?.transactions.map((elt => elt?.date)));
-            const maxDate = moment(firstDate).add(30, 'days');
+            const maxDate = moment(firstDate).endOf('month').valueOf();
 
             // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
             if (transaction?.date > maxDate || !!transactionsGroupedByTravel[currentIndex]?.travel) {
@@ -128,8 +142,7 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
             // verify if current transactions Grouped By Travel is empty
             if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
-
-            transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
+            transactionsGroupedByTravel[currentIndex]?.transactions?.push(transaction);
 
             continue;
 
@@ -147,13 +160,12 @@ const travelTreatment = async (cli: string, travelTransactions: any[], onlinePay
 
     }
 
-    return insertTransactionsInTravels(cli, transactionsGroupedByTravel, onlinePaymentsTransactions);
+    return await insertTransactionsInTravels(cli, transactionsGroupedByTravel, onlinePaymentsTransactions);
 
 }
 
-
 const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: any[]) => {
-    if (!onlinepaymentTransactions) { return; }
+    if (!onlinepaymentTransactions) { return onlinepaymentTransactions; }
 
     const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date).format('YYYYMM')))];
 
@@ -172,17 +184,14 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
                     tel: selectedTransactions[0].tel
                 },
                 currentMonth: +month,
-                status: OpeVisaStatus.PENDING,
-                dates: {
-                    created: null,
-                },
+                status: OpeVisaStatus.EMPTY,
+                dates: {},
                 amounts: 0,
                 ceiling: 0,
                 statements: [],
                 transactions: [],
                 othersAttachements: []
             }
-            onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
         }
 
         onlinePayment.transactions.push(...selectedTransactions);
@@ -193,11 +202,15 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
         onlinePayment.amounts = totalAmount;
         const firstDate = Math.min(...onlinePayment?.transactions.map((elt => elt?.date))) || 0;
 
+        const currStartDate = moment().startOf('month').valueOf();
+        const currEndDate = moment().endOf('month').valueOf();
 
-        if (totalAmount > onlinePayment?.ceiling) {
+        if (+totalAmount > +onlinePayment?.ceiling) {
             await notificationService.sendEmailVisaExceding(onlinePayment, get(onlinePayment, 'user.email'), firstDate, onlinePayment.dates.created, totalAmount)
             logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
         }
+        if (!onlinePayment?._id && +totalAmount > +onlinePayment?.ceiling) { onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment); }
+        if (!onlinePayment?._id && +totalAmount <= +onlinePayment?.ceiling && (firstDate > currStartDate && firstDate < currEndDate)) { onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment); }
 
         await onlinePaymentsCollection.updateOnlinePaymentsById(onlinePayment?._id, onlinePayment);
     }
@@ -206,8 +219,9 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
 
 
 const getOperationType = (type: string) => {
-    if (type === 'PAIEMENT INTERNET') { return 'onlinepayment' }
-    if (['RETRAIT DAB', 'PAIEMENT TPE']) { return 'travel' }
+    return type === 'PAIEMENT INTERNET' ? 'onlinepayment'
+        : ['RETRAIT DAB', 'PAIEMENT TPE'].includes(type) ?
+            'travel' : ''
 };
 
 const getTotal = (transactions: any[]) => {
@@ -217,51 +231,49 @@ const getTotal = (transactions: any[]) => {
     return totalAmountTransaction;
 };
 
+const formatTransactions = (dataArray) => {
+    try {
+        const transactions = dataArray.map((element) => {
+            return {
+                _id: element?._id,
+                clientCode: element['CLIENT']?.toString()?.replace(/\s/g, ''),
+                fullName: element['NOM_CLIENT'],
+                manager: {
+                    code: element['CODE_GESTIONNAIRE']?.replace(/\s/g, ''),
+                    name: element['NOM_GESTIONNAIRE']?.replace(/\s/g, '')
+                },
+                tel: element['TELEPHONE_CLIENT'],
+                email: element['EMAIL_CLIENT'],
+                beneficiary: element['ACQUEREUR']?.replace(/\s/g, ''),
+                amount: +element['MONTANT_XAF'] || 0,
+                amountTrans: +element['MONTANT'] || 0,
+                currencyTrans: +element['DEVISE'] || 0,
+                amountCompens: +element['MONTANT_COMPENS'] || 0,
+                currencyCompens: element['DEVISE_COMPENS']?.replace(/\s/g, ''),
+                date: moment(`${element['DATE']?.replace(/\s/g, '')} ${element['HEURE']?.replace(/\s/g, '')}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
+                type: element['TYPE_TRANS'],
+                ncp: element['COMPTE']?.replace(/\s/g, ''),
+                age: element['AGENCE']?.replace(/\s/g, ''),
+                cha: element['CHAPITRE'],
+                card: {
+                    name: element['NOM_CARTE']?.replace(/\s/g, ''),
+                    code: element['CARTE']?.replace(/\s/g, ''),
+                    label: element['PRODUIT']?.replace(/\s/g, ''),
+                },
+                country: element['PAYS']?.trim(),
+                category: element['CATEGORIE']?.replace(/\s/g, ''),
+                currentMonth: moment(`${element['DATE']?.replace(/\s/g, '')}`, 'dd/MM/YYYY').format('YYYYMM')?.toString(),
+                reference: '',
+                statementRef: '',
+            }
+        });
 
-const extractTransactionsFromContent = (dataArray) => {
-try {
-    const transactions = dataArray.map((element) => {
-        return {
-            _id: element?._id,
-            clientCode: element['CLIENT']?.toString()?.replace(/\s/g,''),
-            fullName: element['NOM_CLIENT']?.replace(/\s/g,''),
-            manager: {
-                code: element['CODE_GESTIONNAIRE']?.replace(/\s/g,''),
-                name: element['NOM_GESTIONNAIRE']?.replace(/\s/g,'')
-            },
-            tel: element['TELEPHONE_CLIENT'],
-            email: element['EMAIL_CLIENT'],
-            beneficiary: element['ACQUEREUR']?.replace(/\s/g,''),
-            amount: +element['MONTANT_XAF'] || 0,
-            amountTrans: +element['MONTANT'] || 0,
-            currencyTrans: +element['DEVISE'] || 0,
-            amountCompens: +element['MONTANT_COMPENS'] || 0,
-            currencyCompens: element['DEVISE_COMPENS']?.replace(/\s/g,''),
-            date: moment(`${element['DATE']?.replace(/\s/g,'')} ${element['HEURE']?.replace(/\s/g,'')}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
-            type: element['TYPE_TRANS'],
-            ncp: element['COMPTE']?.replace(/\s/g,''),
-            age: element['AGENCE']?.replace(/\s/g,''),
-            cha: element['CHAPITRE'],
-            card: {
-                name: element['NOM_CARTE']?.replace(/\s/g,''),
-                code: element['CARTE']?.replace(/\s/g,''),
-                label: element['PRODUIT']?.replace(/\s/g,''),
-            },
-            country: element['PAYS']?.trim(),
-            category: element['CATEGORIE']?.replace(/\s/g,''),
-            currentMonth: moment(`${element['DATE']?.replace(/\s/g,'')}`, 'dd/MM/YYYY').format('YYYYMM')?.toString(),
-            reference: '',
-            statementRef: '',
-        }
-    });
-
-    return transactions;
-} catch (error) {
-    logger.error(`error during extractTransactionsFromContent \n${error.name} \n${error.stack}\n`);
-    return error; 
+        return transactions;
+    } catch (error) {
+        logger.error(`error during formatTransactions \n${error.name} \n${error.stack}\n`);
+        return error;
+    }
 }
-}
-
 
 const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[], onlinePaymentsTransactions: any[]) => {
     for (const element of transactionsGroupedByTravel) {
@@ -272,18 +284,18 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         const lastDate = Math.max(...element?.transactions.map((elt => elt?.date)));
 
         let travel = element?.travel;
+        if (travel) { travel.transactions = !isEmpty(travel?.transactions) && !isEmpty(travel) ? travel?.transactions : []; }
 
         if (travel && travel?.travelType === TravelType.SHORT_TERM_TRAVEL) { travel?.transactions.push(...element?.transactions); }
 
         if (!travel) {
             travel = {
-                status: OpeVisaStatus.PENDING,
+                status: OpeVisaStatus.TO_COMPLETED,
                 user: {
-                    _id: null,
                     clientCode: cli,
-                    fullName: element.transactions[0]?.fullName,
-                    email: element.transactions[0]?.email,
-                    tel: element.transactions[0]?.tel,
+                    fullName: element?.transactions[0]?.fullName,
+                    email: element?.transactions[0]?.email,
+                    tel: element?.transactions[0]?.tel,
 
                 },
                 travelRef: '',
@@ -299,7 +311,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                         start: firstDate,
                         end: lastDate,
                     },
-                    status: OpeVisaStatus.PENDING,
+                    status: OpeVisaStatus.TO_COMPLETED,
                     travelReason: {},
                     isTransportTicket: false,
                     isVisa: false,
@@ -312,17 +324,16 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 othersAttachements: [],
                 transactions: element?.transactions,
             };
+
             travel = await travelService.insertTravelFromSystem(travel);
 
             if (travel instanceof Error) { continue }
         }
 
-
         if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
             const mergedTransactions = [...element.transactions, ...onlinePaymentsTransactions];
             const months = mergedTransactions.map((elt) => moment(elt?.date).format('YYYYMM')).filter((item, pos, self) => self.indexOf(item) === pos);
             for (const month of months) {
-
                 const selectedTransactions = element.transactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
                 const selectedTransactionsOnlinePayment = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
                 onlinePaymentsTransactions = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') !== month);
@@ -333,7 +344,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
 
                 if (!travelMonth) {
                     travelMonth = {
-                        status: OpeVisaStatus.PENDING,
+                        status: OpeVisaStatus.TO_COMPLETED,
                         userId: travel?.user?._id,
                         clientCode: travel?.user?.clientCode,
                         travelId: travel?._id,
@@ -372,8 +383,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
 
         if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
             const totalAmount = getTotal(travel.transactions);
-            if (totalAmount > travel?.ceiling) {
-                await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDate, travel.dates.created, totalAmount)
+            if (totalAmount > +travel?.ceiling) {
+                await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDate, travel?.dates?.created, totalAmount)
                 logger.debug(`Exeding travel, id: ${travel?._id}`);
 
             }
@@ -381,3 +392,12 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
     }
     return onlinePaymentsTransactions;
 }
+
+const groupByType = (transactions: any[]): any => {
+    let onpTransactions = transactions.filter(elt => ['PAIEMENT INTERNET'].includes(elt.type))
+    let travelTransactions = transactions.filter(elt => ['RETRAIT DAB', 'PAIEMENT TPE'].includes(elt.type))
+    return { onpTransactions, travelTransactions };
+
+}
+
+

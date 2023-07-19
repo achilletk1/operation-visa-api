@@ -100,12 +100,14 @@ export interface Validator {
 
 }
 export enum OpeVisaStatus {
-  WAITING = 100,
-  PENDING = 400,
-  ACCEPTED = 200,
+  EMPTY = 101,
+  TO_COMPLETED = 100,
+  TO_VALIDATED = 400,
+  EXCEDEED = 500,
+  JUSTIFY = 200,
   REJECTED = 300,
+  CLOSED = 600
 }
-
 export interface Chat {
   _id?: string;
   operationId?: string; // online payment ID or Travel ID

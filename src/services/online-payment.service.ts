@@ -1,17 +1,17 @@
-import { onlinePaymentsCollection } from '../collections/online-payments.collection';
+import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
+import { visaTransactionsCeilingsService } from './visa-transactions-ceilings.service';
 import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
+import { onlinePaymentsCollection } from '../collections/online-payments.collection';
+import { OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
-import { OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
-import  httpContext from 'express-http-context';
 import { commonService } from './common.service';
-import generateId from 'generate-unique-id';
+import  httpContext from 'express-http-context';
 import { filesService } from './files.service';
+import generateId from 'generate-unique-id';
+import { get, isEmpty } from "lodash";
 import { logger } from '../winston';
 import moment = require('moment');
-import { get, isEmpty } from "lodash";
-import { visaTransactionsCeilingsService } from './visa-transactions-ceilings.service';
-import { visaTransactionsCeillingsCollection } from '../collections/visa-transactions-ceilings.collection';
 import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import { config } from '../config';
 import * as exportHelper from './helpers/exports.helper';
@@ -32,7 +32,7 @@ export const onlinePaymentsService = {
             let result: any;
 
             onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
-            onlinepaymentStatement.status = OpeVisaStatus.PENDING;
+            onlinepaymentStatement.status = OpeVisaStatus.TO_VALIDATED;
 
             onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ currentMonth, 'user._id': userId });
 
@@ -51,7 +51,7 @@ export const onlinePaymentsService = {
                     },
                     ceiling: ceiling?.value,
                     amounts: 0,
-                    status: OpeVisaStatus.PENDING,
+                    status: OpeVisaStatus.TO_VALIDATED,
                     currentMonth,
                     statements: [],
                     transactions: [],
@@ -182,7 +182,7 @@ export const onlinePaymentsService = {
                 if (statement.status && !adminAuth && statement.isEdit) { delete statement.status }
 
                 if (statement.isEdit) {
-                    statement.status = OpeVisaStatus.PENDING;
+                    statement.status = OpeVisaStatus.TO_VALIDATED;
                     delete statement.isEdit;
                 }
 
@@ -244,9 +244,9 @@ export const onlinePaymentsService = {
 const getPayementStatus = (onlinePayment: OnlinePaymentMonth) => {
     if (!onlinePayment) { throw new Error('OnlinePaymentNotDefined'); }
 
-    if (onlinePayment.statements.every((elt) => elt.status === OpeVisaStatus.ACCEPTED)) {
-        return OpeVisaStatus.ACCEPTED;
+    if (onlinePayment.statements.every((elt) => elt.status === OpeVisaStatus.JUSTIFY)) {
+        return OpeVisaStatus.JUSTIFY;
     } else {
-        return onlinePayment.status === OpeVisaStatus.ACCEPTED ? OpeVisaStatus.PENDING : onlinePayment.status
+        return onlinePayment.status === OpeVisaStatus.JUSTIFY ? OpeVisaStatus.TO_VALIDATED : onlinePayment.status
     }
 }

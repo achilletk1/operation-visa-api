@@ -6,5 +6,6 @@ export interface Setting {
     maxUploadFileSize?: string;
     dateCreated?:number;
     dateUpdated?:number[];
-    users?:User[]
+    users?:User[];
+    value?:any
 }

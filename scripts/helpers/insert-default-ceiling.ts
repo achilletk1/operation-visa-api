@@ -4,7 +4,7 @@ import { getDatabase } from '../config';
 export const inserDefaultVisaCeilings = async () => {
 
     console.log('----------------------------------------');
-    console.log('-------  INSERT DEFAULTS SETTINGS ------');
+    console.log('-------  INSERT DEFAULTS VISA CEILINGS ------');
     console.log('----------------------------------------');
 
     const db = await getDatabase();
@@ -44,7 +44,7 @@ export const inserDefaultVisaCeilings = async () => {
         },
     ]
     console.log('insert default ceilings  collection');
-    db.dropCollection("settings", function (err, result) { console.log("Collection droped"); });
+    await db.collection("visa_transactions_ceillings").drop();
     const response = await db.collection('visa_transactions_ceillings').insertMany(ceilings);
     console.log(response.insertedIds);
 };

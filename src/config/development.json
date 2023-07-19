@@ -37,7 +37,7 @@
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "cronRevivalMail":"*/20 0-5 * * *",
-    "cronTransactionProcessing": "* * * * *",
+    "cronTransactionProcessing": "* */3 * * *",
     "cronDeleteTemporaryFile": "0 */3 * * *",
     "gotenbergUrl":"http://173.255.248.184:7900"
 }

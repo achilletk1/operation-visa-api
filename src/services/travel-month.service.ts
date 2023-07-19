@@ -72,7 +72,7 @@ export const travelMonthsService = {
                     if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
                     
                     if (expenseDetail.isEdit) {
-                        expenseDetail.status = OpeVisaStatus.PENDING;
+                        expenseDetail.status = OpeVisaStatus.TO_VALIDATED;
                         delete expenseDetail.isEdit;
                     }
                     

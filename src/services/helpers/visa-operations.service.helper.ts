@@ -1,8 +1,12 @@
+import { visaTransactinnsTmpCollection } from '../../collections/visa_transactions_tmp.collection';
 import { visaOperationsCollection } from '../../collections/visa-operations.collection';
 import { settingsFilesCollection } from '../../collections/settings-files.collection';
+import { travelMonthsCollection } from '../../collections/travel-months.collection';
+import { travelsCollection } from '../../collections/travels.collection';
+import { OpeVisaStatus } from '../../models/visa-operations';
+import { ObjectId } from 'mongodb';
 import moment = require('moment');
 import { isEmpty } from 'lodash';
-import { OpeVisaStatus } from '../../models/visa-operations';
 
 export const getTransactionType = (type: string) => {
     const data = {
@@ -231,3 +235,90 @@ export const transformStepExpression = (str: any): any => {
     return data[str];
 }
 
+export const verifyIfisInLongTermTravel = async (transactions: any[]): Promise<any> => {
+    let transactoinGroupByClientCodes = groupTransactionsByCLIs(transactions);
+
+    const transactionGroupByMonths = groupTransactionsByMonths(transactions, transactoinGroupByClientCodes);
+
+    let insertTransactions = [];
+    for (const month in transactionGroupByMonths) {
+        if (!transactionGroupByMonths.hasOwnProperty(month)) { continue; }
+
+        for (const cli in transactionGroupByMonths[month]) {
+            if (!transactionGroupByMonths[month].hasOwnProperty(cli)) { continue; }
+
+            const date = transactionGroupByMonths[month][cli][0]?.date;
+
+            let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $gte: date }, "proofTravel.dates.end": { $lte: date } });
+
+            if (!travel || isEmpty(travel)) { continue }
+
+            // find travel which dates matchs with the current transaction date
+            let travelMonth = await travelMonthsCollection.getTravelMonthBy({ travelId: travel?._id, month });
+            if (!travelMonth || isEmpty(travelMonth)) { continue }
+
+            travelMonth.transactions.push(...transactionGroupByMonths[month][cli]);
+
+            await travelMonthsCollection.updateTravelMonthsById(travelMonth?._id, travelMonth);
+
+            insertTransactions.push(...transactionGroupByMonths[month][cli]);
+
+        }
+    }
+
+    insertTransactions = insertTransactions.map(elt => new ObjectId(elt?._id.toString())) || [];
+    console.log('inserted transactions', insertTransactions);
+    if (!isEmpty(insertTransactions)) {
+        const result = await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(insertTransactions);
+        console.log('deleted result', result);
+    }
+
+    if (!isEmpty(insertTransactions)) {
+        for (const transactionId of insertTransactions) {
+            transactions = transactions.filter(elt => elt._id.toString() === transactionId.toString());
+        }
+    }
+
+    return transactions;
+}
+
+export const onlinePaymentsTreatment = async (onpTransactions: any[]) => {
+    let transactoinGroupByClientCodes = groupTransactionsByCLIs(onpTransactions);
+
+    const transactionGroupByMonths = groupTransactionsByMonths(onpTransactions, transactoinGroupByClientCodes);
+
+
+}
+
+const groupTransactionsByCLIs = (transactions: any[]) => {
+    let transactoinGroupByClientCodes = {};
+
+    let clientCodes = transactions.map(elt => elt.clientCode.toString());
+
+    clientCodes = [...new Set(clientCodes)];
+
+    for (const cli of clientCodes) {
+        if (isEmpty(transactoinGroupByClientCodes[cli])) { transactoinGroupByClientCodes[cli] = [] }
+        transactoinGroupByClientCodes[cli] = transactions.filter(elt => elt.clientCode === cli);
+    }
+
+    return transactoinGroupByClientCodes;
+}
+
+const groupTransactionsByMonths = (transactions: any[], clis: any) => {
+    let transactionGroupByMonths = {};
+
+    for (const cli in clis) {
+        if (!clis.hasOwnProperty(cli)) { continue; }
+
+        let months = clis[cli].map((elt) => moment(elt?.date).format('YYYYMM'));
+        months = [...new Set(months)];
+        for (const month of months) {
+            if (isEmpty(transactionGroupByMonths[month])) { transactionGroupByMonths[month] = {} }
+            if (isEmpty(transactionGroupByMonths[month][cli])) { transactionGroupByMonths[month][cli] = [] }
+            transactionGroupByMonths[month][cli] = clis[cli].filter(elt => moment(elt?.date).format('YYYYMM') === month);
+        }
+    }
+
+    return transactionGroupByMonths;
+}

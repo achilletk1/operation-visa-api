@@ -26,11 +26,11 @@ export const travelService = {
             const existingTravels = await travelsCollection.getTravelsBy({ 'user._id': get(travel, 'user._id'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel.dates.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel.dates.end } }] });
 
             if (!isEmpty(existingTravels)) { return new Error('TravelExistingInThisDateRange') }
-            // Set travel status to pending
-            travel.status = OpeVisaStatus.PENDING;
+            // Set travel status to TO_VALIDATED
+            travel.status = OpeVisaStatus.TO_COMPLETED;
 
-            // Set proofTravel status to pending
-            travel.proofTravel.status = OpeVisaStatus.PENDING;
+            // Set proofTravel status to TO_VALIDATED
+            travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
@@ -77,7 +77,7 @@ export const travelService = {
             }
 
             // Set request status to created
-            travel.status = OpeVisaStatus.PENDING;
+            travel.status = OpeVisaStatus.TO_COMPLETED;
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
@@ -85,7 +85,7 @@ export const travelService = {
             const lastDate = Math.max(...travel.transactions.map((elt => elt.date)));
 
             travel.proofTravel.dates = { start: firstDate, end: lastDate }
-            travel.proofTravel.status = OpeVisaStatus.PENDING;
+            travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
 
             const visaCeilingType = travel.proofTravel?.travelReason?.code === 300 ? VisaCeilingType.STUDYING_TRAVEL : VisaCeilingType.SHORT_TERM_TRAVEL;
 
@@ -98,16 +98,14 @@ export const travelService = {
 
             const insertedId = await travelsCollection.insertTravel(travel);
 
-
             // travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
 
-            await travelsCollection.updateTravelsById(insertedId, travel);
-
+            // await travelsCollection.updateTravelsById(insertedId, travel);
 
             Promise.all([
                 await notificationService.sendEmailDetectTravel(travel, get(travel, 'user.email')),
             ]);
-            travel._id = insertedId;
+            travel._id = insertedId.toString();
 
             return travel;
 
@@ -179,10 +177,10 @@ export const travelService = {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (travel.proofTravel.status && !adminAuth && travel.proofTravel.isEdit) { delete travel.proofTravel.status }
+            // if (travel.proofTravel.status && !adminAuth && travel.proofTravel.isEdit) { delete travel.proofTravel.status }
 
             if (travel.proofTravel && travel.proofTravel.isEdit) {
-                travel.proofTravel.status = OpeVisaStatus.PENDING;
+                // travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
                 delete travel.proofTravel.isEdit;
             }
 
@@ -195,7 +193,7 @@ export const travelService = {
                     if (expenseDetail.status && !adminAuth && expenseDetail.isEdit) { delete expenseDetail.status }
 
                     if (expenseDetail.isEdit) {
-                        expenseDetail.status = OpeVisaStatus.PENDING;
+                        // expenseDetail.status = OpeVisaStatus.TO_COMPLETED;
                         delete expenseDetail.isEdit;
                     }
 
@@ -209,7 +207,7 @@ export const travelService = {
                     if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
 
                     if (othersAttachement.isEdit) {
-                        othersAttachement.status = OpeVisaStatus.PENDING;
+                        // othersAttachement.status = OpeVisaStatus.TO_COMPLETED;
                         delete othersAttachement.isEdit;
                     }
 
@@ -219,7 +217,7 @@ export const travelService = {
                 }
             }
 
-            if (adminAuth && travel.proofTravel.status === OpeVisaStatus.ACCEPTED) {
+            if (adminAuth && travel.proofTravel.status === OpeVisaStatus.JUSTIFY) {
                 travel = await VerifyTravelTransactions(id, travel);
             }
 
@@ -454,14 +452,14 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
     if (!travel) { throw new Error('TravelNotDefined'); }
 
     if (
-        travel?.proofTravel.status === OpeVisaStatus.ACCEPTED &&
+        travel?.proofTravel.status === OpeVisaStatus.JUSTIFY &&
         !isEmpty(travel?.expenseDetails) &&
-        travel.expenseDetails?.every((elt) => elt.status === OpeVisaStatus.ACCEPTED) &&
-        travel.othersAttachements?.every((elt) => elt.status === OpeVisaStatus.ACCEPTED)
+        travel.expenseDetails?.every((elt) => elt.status === OpeVisaStatus.JUSTIFY) &&
+        travel.othersAttachements?.every((elt) => elt.status === OpeVisaStatus.JUSTIFY)
     ) {
-        return OpeVisaStatus.ACCEPTED;
+        return OpeVisaStatus.JUSTIFY;
     } else {
-        return travel.status === OpeVisaStatus.ACCEPTED ? OpeVisaStatus.PENDING : travel.status;
+        return travel.status === OpeVisaStatus.JUSTIFY ? OpeVisaStatus.TO_VALIDATED : travel.status;
     }
 }
 

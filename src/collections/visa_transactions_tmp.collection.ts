@@ -7,7 +7,8 @@ export const visaTransactinnsTmpCollection = {
 
     getAllVisaTransactionTmps: async (fields?: any): Promise<any[]> => {
         const database = await getDatabase();
-        return await database.collection(collectionName).find(fields || {}).sort({ _id: -1 }).toArray();
+        const data = await database.collection(collectionName).find(fields || {}).sort({ _id: -1 }).toArray();
+        return data;
     },
 
     getVisaTransactionTmpBy: async (filters: any): Promise<any> => {

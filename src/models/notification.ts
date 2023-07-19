@@ -3,7 +3,7 @@ export interface Notification {
   _id?: string;
   message?: string;
   object?: string;
-  status?: number;  // 100 (Created), 200 (Success Sent), 300 (Unsuccess Sent), 400 (Pending Sent)
+  status?: number;  // 100 (Created), 200 (Success Sent), 300 (Unsuccess Sent), 400 (TO_VALIDATED Sent)
   format?: number; // 100 SMS,200 MAIL, 300 WHATSAPPS
   dates?: {
     createdAt?: number;

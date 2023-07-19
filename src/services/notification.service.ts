@@ -85,32 +85,32 @@ export const notificationService = {
 
 
     sendEmailDetectTravel: async (travel: Travel, email: string) => {
+        logger.info(`send mail detect transaction to ${email}`);
         if (!email) { return }
-
+        email = ['development', 'staging-bci'].includes(config.get('env')) ?  config.get('emailTest') : email;
         const data = {
             name: `${get(travel, 'user.fullName', '')}`,
             start: moment(get(travel, 'transactions[0].date')).format('DD/MM/YYYY') || '',
             card: travel?.transactions[0]?.card?.code,
             created: moment(get(travel, 'dates.created')).format('DD/MM/YYYY'),
-            // link: `http://localhost:4200/visa-operations/client/ept-and-atm-withdrawal`,
         }
 
         const HtmlBody = notificationHelper.generateMailTravelDetect(data);
 
-        const subject = `Voyage hors de la zone CEMAC détecté`;
+        const subject = `Opération hors de la zone CEMAC détectée`;
 
         const receiver = `${email}`;
 
         try {
-            sendEmail(receiver, subject, HtmlBody);
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
                 message: HtmlBody,
                 email: receiver,
-                id: travel?._id.toString(),
+                id: travel?._id,
             }
             await insertNotification(notification);
+            await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
                 `Error during sendEmailDetectTravel to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -156,7 +156,9 @@ export const notificationService = {
     },
 
     sendEmailVisaExceding: async (operation: Travel | OnlinePaymentMonth, email: string, start: number, created: number, total: number) => {
+        logger.info(`send mail visa exceding transaction to ${email}`);
         if (!email) { return }
+        email = ['development', 'staging-bci'].includes(config.get('env')) ?  config.get('emailTest') : email;
         const data = {
             civility: 'Mr/Mme',
             name: `${get(operation, 'user.fullName')}`,
@@ -171,10 +173,9 @@ export const notificationService = {
         const subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`;
 
 
-        const receiver = config.get('env') === 'production' ? `${email}` : config.get('emailTest');
+        const receiver = email;
 
         try {
-            sendEmail(receiver, subject, HtmlBody);
             const notification: Notification = {
                 object: subject,
                 format: NotificationFormat.MAIL,
@@ -183,6 +184,7 @@ export const notificationService = {
                 id: operation?._id.toString(),
             }
             await insertNotification(notification);
+            sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
                 `Error during sendEmailTravelDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`

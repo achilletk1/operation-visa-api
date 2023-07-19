@@ -18,7 +18,7 @@ export const inserDefaultSetting = async () => {
         },
     ]
     console.log('insert default Settings  collection');   
-    db.dropCollection("settings",function(err, result) { console.log("Collection droped");});
+    // db.dropCollection("settings",function(err, result) { console.log("Collection droped");});
     const response = await db.collection('settings').insertMany(Settings);
     console.log(response.insertedIds);
 };

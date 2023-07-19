@@ -8,11 +8,11 @@ import { inserDefaultVaraibles } from './helpers/insert-default-variables';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-   await inserDefaultLongTravelsTypes();
-   await inserDefaultVouchers();
-   await inserDefaultSetting();
+//    await inserDefaultLongTravelsTypes();
+//    await inserDefaultVouchers();
+//    await inserDefaultSetting();
    await inserDefaultVisaCeilings();
-   await inserDefaultVaraibles();
+//    await inserDefaultVaraibles();
 }
 
 if (config.get('env') !== 'development') {

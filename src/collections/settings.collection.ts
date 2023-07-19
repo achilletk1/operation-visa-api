@@ -15,7 +15,7 @@ export const settingCollection = {
 
     getSettingsByKey: async (key: any): Promise<WithId<Setting>> => {
         const database = await getDatabase();
-        return await database.collection(collectionName).findOne();
+        return await database.collection(collectionName).findOne({key});
     },
 
     updateSettingsById: async (id: string, set: Setting): Promise<UpdateResult> => {
@@ -58,6 +58,10 @@ export const settingCollection = {
         const database = await getDatabase();
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return insertedId;
+    },
+    deleteSetting: async (key:string): Promise<any> => {
+        const database = await getDatabase();
+        return await database.collection(collectionName).deleteOne({key});
     },
 
 }

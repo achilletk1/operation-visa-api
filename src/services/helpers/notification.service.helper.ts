@@ -51,10 +51,10 @@ export const generateMailVisaExceding = (info: any) => {
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${moment(+get(info, `start`)).startOf('day').format('DD/MM/YYYY')}`,
+            start: `${get(info, `start`)}`,
+            created: `${get(info, `created`)}`,
             total: `${get(info, `total`)}`,
             ceiling: `${get(info, `ceiling`)}`,
-            created: `${moment(+get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
             link: `${get(info, 'link')}`,
             actionUrl
         }
@@ -102,8 +102,8 @@ export const generateMailTravelDetect = (info: any) => {
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${moment(+get(info, `start`)).format('DD/MM/YYYY')}`,
-            created: `${moment(+get(info, 'created')).format('DD/MM/YYYY:HH:mm')}`,
+            start: `${get(info, `start`)}`,
+            created: `${get(info, `created`)}`,
             card: `${get(info, `card`)}`,
             actionUrl
         }
@@ -157,8 +157,8 @@ export const generateMailStatusChanged = (info: any) => {
         const data = {
             civility: `${get(info, 'civility')}`,
             name: `${get(info, 'name')}`,
-            start: `${moment(+get(info, `start`)).startOf('day').format('DD/MM/YYYY')}`,
-            end: `${moment(+get(info, `end`)).startOf('day').format('DD/MM/YYYY')}`,
+            start: `${get(info, `start`)}`,
+            end: `${get(info, `end`)}`,
             // end: `${get(info, `end`)}`,
             step: `${get(info, `step`)}`,
             reason: `${get(info, 'reason')}`,

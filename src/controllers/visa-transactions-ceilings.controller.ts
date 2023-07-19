@@ -6,7 +6,7 @@ export const visaTransactionsCeilingsController = {
 
     init: (app: any): void => {
 
-        app.get('/visa-transactions-cellings/', async (req: Request, res: Response) => {
+        app.get('/visa-transactions-cellings', async (req: Request, res: Response) => {
             const data = await visaTransactionsCeilingsService.getVisaTransactionsCeillings(req.query);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
