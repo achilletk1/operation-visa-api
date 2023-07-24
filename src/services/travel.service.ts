@@ -479,7 +479,9 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
         !status.includes(OpeVisaStatus.REJECTED) &&
         !status.includes(OpeVisaStatus.EXCEDEED) &&
         !status.includes(OpeVisaStatus.TO_COMPLETED) &&
-        !status.includes(OpeVisaStatus.EMPTY)) {
+        !status.includes(OpeVisaStatus.EMPTY)
+        ) 
+        {
         return OpeVisaStatus.TO_VALIDATED;
     }
 
