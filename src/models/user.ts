@@ -74,6 +74,12 @@ export interface User {
   isNotSubscriber?: boolean;
   sex?: 'M' | 'F';
   gender?: string;
+  visaOpValidation?: {
+    level?: number;
+    fullRigth?: boolean;
+    joinValidation?: boolean;
+    enabled?: boolean
+  }
 }
 
 export interface Claimuser {

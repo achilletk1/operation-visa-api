@@ -21,14 +21,6 @@ export interface Attachment {
   temporaryFile?: TemporaryFile;
 }
 
-export interface Validator {
-  _id?: string;
-  fullName?: string;
-  clientCode?: string; // is only for admin with clientCode
-  signature?: string;
-  date?: number;
-
-}
 
 export enum AttachementStatus {
   UNAVAILABLE = 100, // When attachement is not uploaded
