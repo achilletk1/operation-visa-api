@@ -1,12 +1,13 @@
 import replaceSpecialCharacters = require('replace-special-characters');
-import { isString, isNumber } from 'lodash';
+import { isString, isNumber, isEmpty } from 'lodash';
 import { logger } from '../winston';
 import { config } from '../config';
-import  moment from 'moment';
+import moment from 'moment';
 import XLSX = require('xlsx');
 import { filesService } from './files.service';
-import  * as visaHelper from './helpers/visa-operations.service.helper';
-import { Attachment } from './../models/visa-operations';
+import * as visaHelper from './helpers/visa-operations.service.helper';
+import { Attachment, OpeVisaStatus } from './../models/visa-operations';
+import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
 
 
 export const commonService = {
@@ -177,8 +178,65 @@ export const commonService = {
             logger.error(`\nError saving attachement \n${error.message}\n${error.stack}\n`);
             return error;
         }
-    }
+    },
 
+    getTotal: (transactions: any[], type?: string | 'stepAmount') => {
+        if (!transactions || isEmpty(transactions)) { return 0; }
+
+        if (type === 'stepAmount') { transactions = transactions.filter(elt => [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(elt.status)) }
+
+        const totalAmountTransaction = transactions.map((elt) => elt.amount).reduce((elt, prev) => elt + prev, 0);
+
+        return totalAmountTransaction;
+    },
+
+    getOnpStatementStepStatus: (data: any, amount?: number, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') => {
+        if (!data) { throw new Error('OnlinePaymentNotDefined'); }
+        let array = [];let total:number = 0;
+        if (step === 'onp' && isEmpty(data?.statements)) { array = data?.statements;total = data?.statementAmounts;return OpeVisaStatus.EMPTY; }
+        if (step === 'month' && isEmpty(data?.expenseDetails)) { array = data?.expenseDetails;total = data?.expenseDetailsAmount;return OpeVisaStatus.EMPTY; }
+        if (step === 'othersAttachs' && isEmpty(data?.othersAttachement)) {array = data?.othersAttachement; total = data?.otherAttachmentAmount;return OpeVisaStatus.EMPTY; }
+        if (step === 'expenseDetail' && isEmpty(data?.expenseDetails)) { array = data?.expenseDetails;total = data?.expenseDetailsAmount;return OpeVisaStatus.EMPTY; }
+
+        let status = array.map(elt => +elt?.status);
+
+        // renvoi le statut à compléter
+        if (status.includes(OpeVisaStatus.TO_COMPLETED)
+            && !status.includes(OpeVisaStatus.REJECTED)
+            && !status.includes(OpeVisaStatus.EXCEDEED)) {
+            return OpeVisaStatus.TO_COMPLETED
+        }
+
+        // renvoi le statut à valider
+        if (status.includes(OpeVisaStatus.TO_VALIDATED)
+            && !status.includes(OpeVisaStatus.TO_COMPLETED)
+            && !status.includes(OpeVisaStatus.EMPTY)
+            && !status.includes(OpeVisaStatus.REJECTED)
+            && !status.includes(OpeVisaStatus.EXCEDEED)
+        ) {
+            return OpeVisaStatus.TO_VALIDATED;
+        }
+
+        // renvoi le statut rejeté
+        if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
+
+        // renvoi le statut justifié
+        if (status.includes(OpeVisaStatus.JUSTIFY)
+            && !status.includes(OpeVisaStatus.TO_COMPLETED)
+            && !status.includes(OpeVisaStatus.EMPTY)
+            && !status.includes(OpeVisaStatus.REJECTED)
+            && !status.includes(OpeVisaStatus.TO_VALIDATED)
+            && !status.includes(OpeVisaStatus.EXCEDEED)
+            && !status.includes(OpeVisaStatus.CLOSED)) {
+                if(['month'].includes(step)){amount = commonService.getTotal(data?.transactions);}
+            return amount !== total  ? OpeVisaStatus.TO_COMPLETED : OpeVisaStatus.JUSTIFY;
+        }
+
+        // renvoi le statut hors délais
+        if (status.includes(500)) { return OpeVisaStatus.EXCEDEED; }
+
+        return OpeVisaStatus.TO_COMPLETED;
+    }
 }
 
 const removeSpecialCharacter = (str) => {

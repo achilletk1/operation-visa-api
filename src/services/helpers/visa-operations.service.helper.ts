@@ -235,7 +235,7 @@ export const transformStepExpression = (str: any): any => {
     return data[str];
 }
 
-export const verifyIfisInLongTermTravel = async (transactions: any[]): Promise<any> => {
+export const verifyIfisInLongTermTravel = async (transactions = []): Promise<any> => {
     let transactoinGroupByClientCodes = groupTransactionsByCLIs(transactions);
 
     const transactionGroupByMonths = groupTransactionsByMonths(transactions, transactoinGroupByClientCodes);

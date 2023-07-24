@@ -2,19 +2,19 @@ import { visaTransactionsCeillingsCollection } from '../collections/visa-transac
 import { visaTransactionsCeilingsService } from './visa-transactions-ceilings.service';
 import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
 import { onlinePaymentsCollection } from '../collections/online-payments.collection';
+import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import { OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
+import * as exportHelper from './helpers/exports.helper';
 import { commonService } from './common.service';
-import  httpContext from 'express-http-context';
+import httpContext from 'express-http-context';
 import { filesService } from './files.service';
 import generateId from 'generate-unique-id';
 import { get, isEmpty } from "lodash";
 import { logger } from '../winston';
-import moment = require('moment');
-import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import { config } from '../config';
-import * as exportHelper from './helpers/exports.helper';
+import moment = require('moment');
 
 export const onlinePaymentsService = {
 
@@ -81,7 +81,7 @@ export const onlinePaymentsService = {
 
             result = await onlinePaymentsCollection.updateOnlinePaymentsById(get(onlinePayment, '_id').toString(), onlinePayment);
             Promise.all([
-                await notificationService.sendEmailOnlinePayementDeclaration({...onlinePayment, _id: id}, user.email)
+                await notificationService.sendEmailOnlinePayementDeclaration({ ...onlinePayment, _id: id }, user.email)
             ]);
 
             const data = { _id: result };
@@ -179,42 +179,53 @@ export const onlinePaymentsService = {
             if (!actualOninePayment) { return new Error('TravelNotFound'); }
 
             for (let statement of data.statements) {
-                if (statement.status && !adminAuth && statement.isEdit) { delete statement.status }
+                if (statement?.status && !adminAuth && statement?.isEdit) { delete statement?.status }
 
-                if (statement.isEdit) {
-                    statement.status = OpeVisaStatus.TO_VALIDATED;
-                    delete statement.isEdit;
-                }
+                // if (statement?.isEdit) {
+                //     statement.status = OpeVisaStatus.TO_VALIDATED;
+                //     delete statement.isEdit;
+                // }
 
-                for (let attachment of statement.attachments) {
-                    if (!attachment.temporaryFile) { continue; }
+                for (let attachment of statement?.attachments) {
+                    if (!attachment?.temporaryFile) { continue; }
 
-                    const content = filesService.readFile(attachment.temporaryFile.path);
+                    const content = filesService.readFile(attachment?.temporaryFile?.path);
 
                     if (!content) { continue; }
 
                     attachment.content = content;
 
-                    attachment = commonService.saveAttachment(id, attachment, actualOninePayment.dates?.created, 'onlinePayment', moment(statement.date).format('DD-MM-YY'));
+                    attachment = commonService.saveAttachment(id, attachment, actualOninePayment.dates?.created, 'onlinePayment', moment(statement?.date).format('DD-MM-YY'));
 
                     filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
-                    delete attachment.temporaryFile;
+                    delete attachment?.temporaryFile;
                 }
 
+                if (!statement.transactionRef) {
+                    statement.status = OpeVisaStatus.TO_COMPLETED;
+                }
+
+                if (statement.transactionRef) {
+                    statement.status = OpeVisaStatus.TO_VALIDATED;
+                }
             }
+            data.statementAmounts = commonService.getTotal(data?.statements, 'stepAmount');
+
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
 
             let updatedOnlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
-            const status = getPayementStatus(updatedOnlinePayment);
+            const status = commonService.getOnpStatementStepStatus(updatedOnlinePayment);
 
-            if (status !== updatedOnlinePayment.status) {
+            if (updatedOnlinePayment.statementsStatus !== status) { await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statementsStatus: status }); }
+
+
+            if (updatedOnlinePayment.status !== status) {
                 await onlinePaymentsCollection.updateOnlinePaymentsById(id, { status });
                 await notificationService.sendEmailOnlinePayementStatusChanged(updatedOnlinePayment, get(updatedOnlinePayment, 'user.email', ''));
             }
 
             return result;
-            return await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -227,7 +238,7 @@ export const onlinePaymentsService = {
 
             onlinePayment?.statements?.forEach(online => {
                 if ('validators' in online) {
-                    online?.validators.forEach((elt: any) => {elt.status = online?.status, elt.step = 'Liste des déclarations'});
+                    online?.validators.forEach((elt: any) => { elt.status = online?.status, elt.step = 'Liste des déclarations' });
                     validators.push(...online.validators)
                 }
             })
@@ -241,12 +252,5 @@ export const onlinePaymentsService = {
     },
 
 };
-const getPayementStatus = (onlinePayment: OnlinePaymentMonth) => {
-    if (!onlinePayment) { throw new Error('OnlinePaymentNotDefined'); }
 
-    if (onlinePayment.statements.every((elt) => elt.status === OpeVisaStatus.JUSTIFY)) {
-        return OpeVisaStatus.JUSTIFY;
-    } else {
-        return onlinePayment.status === OpeVisaStatus.JUSTIFY ? OpeVisaStatus.TO_VALIDATED : onlinePayment.status
-    }
-}
+

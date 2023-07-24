@@ -5,7 +5,7 @@ import { visaTransactionsCeillingsCollection } from '../collections/visa-transac
 import { travelsCollection } from '../collections/travels.collection';
 import { Attachment, OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { notificationService } from './notification.service';
-import { Travel, TravelType } from '../models/travel';
+import { ExpenseDetail, Travel, TravelType } from '../models/travel';
 import httpContext from 'express-http-context';
 import { filesService } from './files.service';
 import { isEmpty, get } from 'lodash';
@@ -67,7 +67,7 @@ export const travelService = {
 
     insertTravelFromSystem: async (travel: Travel): Promise<any> => {
         try {
- 
+
             const user = await usersCollection.getUserBy({ clientCode: get(travel, 'user.clientCode') });
 
             if (user) {
@@ -133,7 +133,7 @@ export const travelService = {
                 delete filters.name;
                 filters['user.fullName'] = name;
             }
-            
+
             if (clientCode) {
                 delete filters.clientCode;
                 filters['user.clientCode'] = clientCode;
@@ -141,7 +141,7 @@ export const travelService = {
 
             return await travelsCollection.getTravels(filters || {}, offset || 1, limit || 40);
 
-            
+
         } catch (error) {
             logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
             return error;
@@ -186,7 +186,9 @@ export const travelService = {
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
+                travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
+            const totalAmount = commonService.getTotal(travel.transactions);
 
             if (!isEmpty(travel.expenseDetails)) {
                 for (let expenseDetail of travel.expenseDetails) {
@@ -201,6 +203,8 @@ export const travelService = {
                     expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travel.dates.created);
                 }
             }
+            travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, totalAmount, 'expenseDetail');
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel.othersAttachements) {
@@ -216,6 +220,8 @@ export const travelService = {
                     othersAttachement.attachments = saveAttachment(othersAttachement.attachments, id, travel.dates.created);
                 }
             }
+            travel.othersAttachmentStatus = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, totalAmount, 'othersAttachs');
 
             if (adminAuth && travel.proofTravel.status === OpeVisaStatus.JUSTIFY) {
                 travel = await VerifyTravelTransactions(id, travel);
@@ -227,7 +233,7 @@ export const travelService = {
 
             const status = getTravelStatus(updatedTravel);
 
-            if (status !== updatedTravel.status) {
+            if (status !== updatedTravel?.status) {
                 await travelsCollection.updateTravelsById(id, { status });
                 await Promise.all([
                     notificationService.sendEmailTravelStatusChanged(updatedTravel, get(updatedTravel, 'travel.user.email', ''))
@@ -300,6 +306,12 @@ export const travelService = {
 
                 tobeUpdated = { expenseDetails };
             }
+
+            travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            travel.otherAttachmentAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            const travelTransactionAmount = commonService.getTotal(travel.transactions);
+
+            if (travel.expenseDetailAmount !== travelTransactionAmount && status === OpeVisaStatus.JUSTIFY) { return new Error('StepNotCompleted'); }
 
             await notificationService.sendEmailStepStatusChanged(tobeUpdated, step, get(tobeUpdated, 'user.email'));
 
@@ -380,7 +392,7 @@ export const travelService = {
 
     },
 
-    
+
     generateTravelsExportLinks: async (fields: any) => {
         delete fields.action;
         commonService.parseNumberFields(fields);
@@ -408,7 +420,7 @@ export const travelService = {
             options = decode(code);
         } catch (error) { return new Error('BadExportCode'); }
 
-        const {ttl} = options;
+        const { ttl } = options;
         delete options.ttl;
 
         options = { ...options }
@@ -450,17 +462,33 @@ const saveAttachment = (attachements: Attachment[], id: string, date: number) =>
 const getTravelStatus = (travel: Travel): OpeVisaStatus => {
 
     if (!travel) { throw new Error('TravelNotDefined'); }
+    const amount = commonService.getTotal(travel.transactions);
+    let status = travel?.ceiling < amount ? [travel?.proofTravel.status, travel?.expenseDetailsStatus] : [travel?.proofTravel.status];
 
-    if (
-        travel?.proofTravel.status === OpeVisaStatus.JUSTIFY &&
-        !isEmpty(travel?.expenseDetails) &&
-        travel.expenseDetails?.every((elt) => elt.status === OpeVisaStatus.JUSTIFY) &&
-        travel.othersAttachements?.every((elt) => elt.status === OpeVisaStatus.JUSTIFY)
-    ) {
-        return OpeVisaStatus.JUSTIFY;
-    } else {
-        return travel.status === OpeVisaStatus.JUSTIFY ? OpeVisaStatus.TO_VALIDATED : travel.status;
+    if (status.every(elt => elt === OpeVisaStatus.EMPTY)) { return OpeVisaStatus.EMPTY; }
+
+    if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.JUSTIFY; }
+
+    if (status.every(elt => elt === OpeVisaStatus.CLOSED)) { return OpeVisaStatus.CLOSED; }
+
+    if (status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.EXCEDEED; }
+
+    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
+
+    if (status.includes(OpeVisaStatus.TO_VALIDATED) &&
+        !status.includes(OpeVisaStatus.REJECTED) &&
+        !status.includes(OpeVisaStatus.EXCEDEED) &&
+        !status.includes(OpeVisaStatus.TO_COMPLETED) &&
+        !status.includes(OpeVisaStatus.EMPTY)) {
+        return OpeVisaStatus.TO_VALIDATED;
     }
+
+    if (status.includes(OpeVisaStatus.TO_COMPLETED) &&
+        !status.includes(OpeVisaStatus.REJECTED) &&
+        !status.includes(OpeVisaStatus.EXCEDEED)) {
+        return OpeVisaStatus.TO_COMPLETED;
+    }
+    return OpeVisaStatus.TO_COMPLETED;
 }
 
 

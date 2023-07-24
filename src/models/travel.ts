@@ -78,7 +78,11 @@ export interface Travel {
         isEdit?: boolean;
     };
     expenseDetails?: ExpenseDetail[];
+    expenseDetailsStatus?: OpeVisaStatus;
+    expenseDetailAmount?: number;
     othersAttachements?: OthersAttachement[];
+    othersAttachmentStatus?:OpeVisaStatus;
+    otherAttachmentAmount?: number;
     transactions?: VisaTransaction[];
 }
 
@@ -93,6 +97,8 @@ export interface TravelMonth {
         updated?: number;
     };
     expenseDetails?: ExpenseDetail[];
+    expenseDetailsStatus?: OpeVisaStatus;
+    expenseDetailsAmount?: number;
     transactions?: VisaTransaction[];
 
 }

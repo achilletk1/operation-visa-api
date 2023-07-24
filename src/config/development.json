@@ -5,7 +5,7 @@
     "host": "localhost",
     "db": {
         "host": "127.0.0.1:27017",
-        "name": "banking-bci",
+        "name": "dbanking",
         "auth": {
             "user": "",
             "password": ""

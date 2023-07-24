@@ -110,13 +110,18 @@ export const travelController = {
             const data = await travelService.updateTravelStepStatusById(id, req.body);
 
             if (data instanceof Error && data.message === 'Forbidden') {
-                const message = 'forbidden operation';
+                const message = 'Cette opération vous est prohibée';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+            if (data instanceof Error && data.message === 'StepNotCompleted') {
+                const message = 'Le montant total des états ne correspond pas au montant total des transactions.';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(401).json(errResp);
             }
 
             if (data instanceof Error) {
-                const message = 'update travel failed';
+                const message = 'Erreur lors de la mise à jour du voyage';
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
             }
