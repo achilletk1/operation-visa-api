@@ -24,6 +24,7 @@ export interface ExpenseDetail {
 }
 
 export interface OthersAttachement {
+    ref?: string;
     type?: OperationType;
     date?: number;
     currency?: any;
