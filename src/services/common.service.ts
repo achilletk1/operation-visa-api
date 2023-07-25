@@ -192,11 +192,27 @@ export const commonService = {
 
     getOnpStatementStepStatus: (data: any, amount?: number, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') => {
         if (!data) { throw new Error('OnlinePaymentNotDefined'); }
-        let array = [];let total:number = 0;
-        if (step === 'onp' && isEmpty(data?.statements)) { array = data?.statements;total = data?.statementAmounts;return OpeVisaStatus.EMPTY; }
-        if (step === 'month' && isEmpty(data?.expenseDetails)) { array = data?.expenseDetails;total = data?.expenseDetailsAmount;return OpeVisaStatus.EMPTY; }
-        if (step === 'othersAttachs' && isEmpty(data?.othersAttachement)) {array = data?.othersAttachement; total = data?.otherAttachmentAmount;return OpeVisaStatus.EMPTY; }
-        if (step === 'expenseDetail' && isEmpty(data?.expenseDetails)) { array = data?.expenseDetails;total = data?.expenseDetailsAmount;return OpeVisaStatus.EMPTY; }
+        let array = []; let total: number = 0;
+        if (step === 'onp') {
+            if (isEmpty(data?.statements)) { return OpeVisaStatus.EMPTY };
+            array = data?.statements;
+            total = data?.statementAmounts;
+        }
+        if (step === 'month') {
+            if (isEmpty(data?.expenseDetails)) { return OpeVisaStatus.EMPTY };
+            array = data?.expenseDetails;
+            total = data?.expenseDetailsAmount;
+        }
+        if (step === 'othersAttachs') {
+            if (isEmpty(data?.othersAttachements)) { return OpeVisaStatus.EMPTY };
+            array = data?.othersAttachements;
+            total = data?.otherAttachmentAmount;
+        }
+        if (step === 'expenseDetail') {
+            if (isEmpty(data?.expenseDetails)) { return OpeVisaStatus.EMPTY };
+            array = data?.expenseDetails;
+            total = data?.expenseDetailsAmount;
+        }
 
         let status = array.map(elt => +elt?.status);
 
@@ -228,8 +244,9 @@ export const commonService = {
             && !status.includes(OpeVisaStatus.TO_VALIDATED)
             && !status.includes(OpeVisaStatus.EXCEDEED)
             && !status.includes(OpeVisaStatus.CLOSED)) {
-                if(['month'].includes(step)){amount = commonService.getTotal(data?.transactions);}
-            return amount !== total  ? OpeVisaStatus.TO_COMPLETED : OpeVisaStatus.JUSTIFY;
+            // if (['month'].includes(step)) { amount = commonService.getTotal(data?.transactions); }
+            // return amount !== total ? OpeVisaStatus.TO_COMPLETED : OpeVisaStatus.JUSTIFY;
+            return OpeVisaStatus.JUSTIFY;
         }
 
         // renvoi le statut hors délais

@@ -186,7 +186,7 @@ export const travelService = {
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
                 travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
-                travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
+                // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
             const totalAmount = commonService.getTotal(travel.transactions);
 
@@ -264,9 +264,9 @@ export const travelService = {
 
     updateTravelStepStatusById: async (id: string, data: any) => {
         try {
-            const { status, step, rejectReason, validator, expenseDetailRef: expenseDetailRefs } = data;
+            const { status, step, rejectReason, validator, references } = data;
 
-            if (!step || !['proofTravel', 'expenseDetails', 'expenseAttachements', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
+            if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
 
             const travel = await travelsCollection.getTravelById(id);
 
@@ -274,7 +274,7 @@ export const travelService = {
 
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { return new Error('CannotRejectWithoutReason') }
 
-            let updateData, tobeUpdated: any;
+            let updateData: any, tobeUpdated: any;
 
             updateData = { status };
 
@@ -288,11 +288,11 @@ export const travelService = {
             }
 
             if (step === 'expenseDetails') {
-                if (!expenseDetailRefs) { return new Error('ReferenceNotProvided'); }
+                if (!references) { return new Error('ReferenceNotProvided'); }
 
                 const { expenseDetails } = travel;
 
-                for (const expenseDetailRef of expenseDetailRefs) {
+                for (const expenseDetailRef of references) {
 
                     const expenseDetailIndex = expenseDetails.findIndex((elt) => elt.ref === expenseDetailRef);
 
@@ -305,17 +305,49 @@ export const travelService = {
                 }
 
                 tobeUpdated = { expenseDetails };
+
+
+            }
+
+            if (step === 'othersAttachements') {
+                if (!references) { return new Error('ReferenceNotProvided'); }
+
+                const { othersAttachements } = travel;
+
+                for (const expenseDetailRef of references) {
+
+                    const expenseDetailIndex = othersAttachements.findIndex((elt) => elt.ref === expenseDetailRef);
+
+                    if (expenseDetailIndex < 0) { return new Error('BadReference') }
+
+                    othersAttachements[expenseDetailIndex].validators.push(validator);
+
+                    othersAttachements[expenseDetailIndex] = { ...othersAttachements[expenseDetailIndex], ...updateData }
+
+                }
+
+
+                tobeUpdated = { othersAttachements };
             }
 
             travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            travel.otherAttachmentAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            const travelTransactionAmount = commonService.getTotal(travel.transactions);
+            // const travelTransactionAmount = commonService.getTotal(travel.transactions);
 
-            if (travel.expenseDetailAmount !== travelTransactionAmount && status === OpeVisaStatus.JUSTIFY) { return new Error('StepNotCompleted'); }
+            // if (travel.expenseDetailAmount !== travelTransactionAmount && status === OpeVisaStatus.JUSTIFY) { return new Error('StepNotCompleted'); }
 
-            await notificationService.sendEmailStepStatusChanged(tobeUpdated, step, get(tobeUpdated, 'user.email'));
+            // await notificationService.sendEmailStepStatusChanged(tobeUpdated, step, get(tobeUpdated, 'user.email'));
+            const otherAttachmentAmount = commonService.getTotal(travel.othersAttachements, 'stepAmount');
+            const othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, otherAttachmentAmount, 'othersAttachs');
+            travel.othersAttachmentStatus = othersAttachmentStatus;
+            const expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            const expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, expenseDetailAmount, 'expenseDetail');
+            travel.expenseDetailsStatus = expenseDetailsStatus;
+            const travelStatus = getTravelStatus(travel);
 
-            return await travelsCollection.updateTravelsById(id, tobeUpdated);
+
+
+
+            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus, expenseDetailsStatus });
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -480,8 +512,7 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
         !status.includes(OpeVisaStatus.EXCEDEED) &&
         !status.includes(OpeVisaStatus.TO_COMPLETED) &&
         !status.includes(OpeVisaStatus.EMPTY)
-        ) 
-        {
+    ) {
         return OpeVisaStatus.TO_VALIDATED;
     }
 
