@@ -177,8 +177,6 @@ export const travelService = {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            // if (travel.proofTravel.status && !adminAuth && travel.proofTravel.isEdit) { delete travel.proofTravel.status }
-
             if (travel.proofTravel && travel.proofTravel.isEdit) {
                 // travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
                 delete travel.proofTravel.isEdit;
@@ -188,7 +186,6 @@ export const travelService = {
                 travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
                 // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
-            const totalAmount = commonService.getTotal(travel.transactions);
 
             if (!isEmpty(travel.expenseDetails)) {
                 for (let expenseDetail of travel.expenseDetails) {
@@ -203,8 +200,6 @@ export const travelService = {
                     expenseDetail.attachments = saveAttachment(expenseDetail.attachments, id, travel.dates.created);
                 }
             }
-            travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, totalAmount, 'expenseDetail');
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel.othersAttachements) {
@@ -220,25 +215,13 @@ export const travelService = {
                     othersAttachement.attachments = saveAttachment(othersAttachement.attachments, id, travel.dates.created);
                 }
             }
-            travel.othersAttachmentStatus = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, totalAmount, 'othersAttachs');
+
 
             if (adminAuth && travel.proofTravel.status === OpeVisaStatus.JUSTIFY) {
                 travel = await VerifyTravelTransactions(id, travel);
             }
 
             const result = await travelsCollection.updateTravelsById(id, travel);
-
-            let updatedTravel = await travelsCollection.getTravelById(id);
-
-            const status = getTravelStatus(updatedTravel);
-
-            if (status !== updatedTravel?.status) {
-                await travelsCollection.updateTravelsById(id, { status });
-                await Promise.all([
-                    notificationService.sendEmailTravelStatusChanged(updatedTravel, get(updatedTravel, 'travel.user.email', ''))
-                ]);
-            }
             return result;
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
@@ -285,6 +268,7 @@ export const travelService = {
                 proofTravel.validators.push(validator);
                 proofTravel = { ...proofTravel, ...updateData }
                 tobeUpdated = { proofTravel };
+                travel.proofTravel.status = status;
             }
 
             if (step === 'expenseDetails') {
@@ -305,7 +289,6 @@ export const travelService = {
                 }
 
                 tobeUpdated = { expenseDetails };
-
 
             }
 
@@ -330,24 +313,21 @@ export const travelService = {
                 tobeUpdated = { othersAttachements };
             }
 
-            travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            // const travelTransactionAmount = commonService.getTotal(travel.transactions);
-
-            // if (travel.expenseDetailAmount !== travelTransactionAmount && status === OpeVisaStatus.JUSTIFY) { return new Error('StepNotCompleted'); }
-
-            // await notificationService.sendEmailStepStatusChanged(tobeUpdated, step, get(tobeUpdated, 'user.email'));
-            const otherAttachmentAmount = commonService.getTotal(travel.othersAttachements, 'stepAmount');
-            const othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, otherAttachmentAmount, 'othersAttachs');
-            travel.othersAttachmentStatus = othersAttachmentStatus;
-            const expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-            const expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, expenseDetailAmount, 'expenseDetail');
-            travel.expenseDetailsStatus = expenseDetailsStatus;
+            travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, 'othersAttachs');
+            travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, 'expenseDetail');
             const travelStatus = getTravelStatus(travel);
 
+            const otherAttachmentAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
+            const expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
 
-
-
-            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus, expenseDetailsStatus });
+            if (travelStatus !== travel?.status) {
+                await travelsCollection.updateTravelsById(id, { status });
+                await Promise.all([
+                    // notificationService.sendEmailTravelStatusChanged(travel, get(travel, 'travel.user.email', ''))
+                    //  TODO send notification to validator
+                ]);
+            }
+            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus: travel.othersAttachmentStatus, expenseDetailsStatus: travel.expenseDetailsStatus, otherAttachmentAmount, expenseDetailAmount });
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -499,7 +479,7 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
 
     if (status.every(elt => elt === OpeVisaStatus.EMPTY)) { return OpeVisaStatus.EMPTY; }
 
-    if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.JUSTIFY; }
+    if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
 
     if (status.every(elt => elt === OpeVisaStatus.CLOSED)) { return OpeVisaStatus.CLOSED; }
 
