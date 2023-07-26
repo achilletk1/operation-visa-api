@@ -98,7 +98,9 @@ export enum OpeVisaStatus {
   EXCEDEED = 500,
   JUSTIFY = 200,
   REJECTED = 300,
-  CLOSED = 600
+  CLOSED = 600,
+  VALIDATION_CHAIN =  700
+
 }
 export interface Chat {
   _id?: string;

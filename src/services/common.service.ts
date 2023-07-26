@@ -185,12 +185,12 @@ export const commonService = {
 
         if (type === 'stepAmount') { transactions = transactions.filter(elt => [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(elt.status)) }
 
-        const totalAmountTransaction = transactions.map((elt) => elt.amount).reduce((elt, prev) => elt + prev, 0);
+        const totalAmountTransaction = transactions.map((elt) => +elt.amount).reduce((elt, prev) => elt + prev, 0);
 
         return totalAmountTransaction;
     },
 
-    getOnpStatementStepStatus: (data: any, amount?: number, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') => {
+    getOnpStatementStepStatus: (data: any, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') => {
         if (!data) { throw new Error('OnlinePaymentNotDefined'); }
         let array = []; let total: number = 0;
         if (step === 'onp') {
@@ -244,8 +244,6 @@ export const commonService = {
             && !status.includes(OpeVisaStatus.TO_VALIDATED)
             && !status.includes(OpeVisaStatus.EXCEDEED)
             && !status.includes(OpeVisaStatus.CLOSED)) {
-            // if (['month'].includes(step)) { amount = commonService.getTotal(data?.transactions); }
-            // return amount !== total ? OpeVisaStatus.TO_COMPLETED : OpeVisaStatus.JUSTIFY;
             return OpeVisaStatus.JUSTIFY;
         }
 

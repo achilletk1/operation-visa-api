@@ -208,7 +208,7 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
         onlinePayment.amounts = totalAmount;
         onlinePayment.statementAmounts = commonService.getTotal(onlinePayment?.statements, 'statement');
 
-        const statut = commonService.getOnpStatementStepStatus(onlinePayment, totalAmount, 'onp');
+        const statut = commonService.getOnpStatementStepStatus(onlinePayment, 'onp');
 
         if (onlinePayment.statementsStatus !== statut) {
             onlinePayment.statementsStatus = statut;
@@ -386,7 +386,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
 
                 const totalAmount = commonService.getTotal(travelMonth?.transactions);
                 travelMonth.expenseDetailAmount = commonService.getTotal(travelMonth?.transactions,'stepAmount');
-                travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth, totalAmount,'month');
+                travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth,'month');
 
                 if (totalAmount > travel?.ceiling) {
                     const firstDateTransactions = Math.min(...mergedTransactions.map((elt => elt?.date)));
@@ -405,10 +405,10 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         const totalAmount = commonService.getTotal(travel?.transactions);
 
         travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-        travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, totalAmount,'expenseDetail');
+        travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel,'expenseDetail');
 
         travel.otherAttachmentAmount = commonService.getTotal(travel.othersAttachements, 'stepAmount');
-        travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, totalAmount,'othersAttachs');
+        travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel,'othersAttachs');
 
         travelsCollection.updateTravelsById(get(travel, '_id').toString(), travel);
 
