@@ -1,10 +1,11 @@
+import { Attachment } from "./visa-operations";
 
 export interface Notification {
   _id?: string;
   message?: string;
   object?: string;
-  status?: number;  // 100 (Created), 200 (Success Sent), 300 (Unsuccess Sent), 400 (TO_VALIDATED Sent)
-  format?: number; // 100 SMS,200 MAIL, 300 WHATSAPPS
+  status?: NotificationStatus;  // 100 (Created), 200 (Success Sent), 300 (Unsuccess Sent), 400 (Pending Sent)
+  format?: NotificationFormat; // 100 SMS,200 MAIL, 300 WHATSAPPS
   dates?: {
     createdAt?: number;
     sentAt?: number;
@@ -12,14 +13,9 @@ export interface Notification {
     readAt?: number;
   };
   email?: string;
-  isAttachement?: boolean;
-  Attachments?: { //Si c'est pièces jointe ou pas.
-    Name?: string;
-    Content?: string;
-    ContentType?: string;
-  }
+  attachments?: Attachment[];
   id?: string; //online payement Id // voyage Id
-  telephone?: string;
+  tel?: string;
 }
 
 export enum NotificationStatus {
@@ -31,5 +27,5 @@ export enum NotificationStatus {
 export enum NotificationFormat {
   SMS = 100,
   MAIL = 200,
-  //WHATSAPPS = 300
+  WHATSAPP = 300
 }

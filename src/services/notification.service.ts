@@ -274,6 +274,7 @@ export const notificationService = {
                 format: NotificationFormat.MAIL,
                 message: HtmlBody,
                 email: receiver,
+                id: travel?._id.toString()
             }
             await insertNotification(notification);
         } catch (error) {
@@ -305,9 +306,9 @@ export const notificationService = {
             if (pdfString && !(pdfString instanceof Error)) {
                 Attachments ??= [];
                 Attachments.push({
-                    Name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
-                    Content: pdfString,
-                    ContentType: 'application/pdf'
+                    name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
+                    content: pdfString,
+                    contentType: 'application/pdf'
                 });
             }
             sendEmail(receiver, subject, HtmlBody, pdfString);
@@ -317,7 +318,7 @@ export const notificationService = {
                 message: HtmlBody,
                 email: receiver,
                 id: letter?._id.toString(),
-                Attachments: Attachments,
+                attachments: Attachments,
             }
             await insertNotification(notification);
         } catch (error) {
@@ -588,17 +589,17 @@ const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: 
         if (pdfString && !(pdfString instanceof Error)) {
             Attachments ??= [];
             Attachments.push({
-                Name: `Opération-du-${moment().valueOf()}.pdf`,
-                Content: pdfString,
-                ContentType: 'application/pdf'
+                name: `Opération-du-${moment().valueOf()}.pdf`,
+                content: pdfString,
+                contentType: 'application/pdf'
             });
         }
         if (excelData && !(excelData instanceof Error)) {
             Attachments ??= [];
             Attachments.push({
-                Name: excelData.fileName,
-                Content: excelData.fileContent.toString('base64'),
-                ContentType: excelData.contentType,
+                name: excelData.fileName,
+                content: excelData.fileContent.toString('base64'),
+                contentType: excelData.contentType,
             });
         }
         return queueNotification('mail', { subject, receiver, cc, date: new Date(), body, Attachments });
