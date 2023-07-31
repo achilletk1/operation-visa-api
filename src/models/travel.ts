@@ -82,9 +82,11 @@ export interface Travel {
     expenseDetailsStatus?: OpeVisaStatus;
     expenseDetailAmount?: number;
     othersAttachements?: OthersAttachement[];
-    othersAttachmentStatus?:OpeVisaStatus;
+    othersAttachmentStatus?: OpeVisaStatus;
     otherAttachmentAmount?: number;
     transactions?: VisaTransaction[];
+    validators?: Validator[];
+    validationLevel?: number;
 }
 
 export interface TravelMonth {

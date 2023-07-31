@@ -6,6 +6,7 @@ import { get } from 'lodash';
 import { RequestCeilingIncrease } from '../../models/request-ceiling-increase';
 import { commonService } from '../common.service';
 import moment = require('moment');
+import { User } from '../../models/user';
 
 let templateVisaExceding: any;
 let templateDetectTravel: any;
@@ -22,6 +23,7 @@ let templateVisaOpe: any;
 let templateOnlinePayement: any;
 let templateOnlinePayementStatus: any;
 let templateTravelStatus: any;
+let templateValidationTokenMail: any;
 
 (async () => {
     templateVisaExceding = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
@@ -39,10 +41,15 @@ let templateTravelStatus: any;
     templateOnlinePayement = await readFilePromise(__dirname + '/templates/online-payment-declaration-mail.template.html', 'utf8');
     templateOnlinePayementStatus = await readFilePromise(__dirname + '/templates/online-payment-status-changed-mail.template.html', 'utf8');
     templateTravelStatus = await readFilePromise(__dirname + '/templates/travel-status-changed-mail.template.html', 'utf8');
+    templateValidationTokenMail = await readFilePromise(__dirname + '/templates/validation-token-mail.template.html', 'utf8');
 
 })();
 
 const actionUrl = `${config.get('baseUrl')}/home`;
+const image = `${config.get('template.image')}`;
+const color = `${config.get('template.color')}`;
+const app = `${config.get('template.app')}`;
+const company = `${config.get('template.company')}`;
 
 export const generateMailVisaExceding = (info: any) => {
 
@@ -465,6 +472,34 @@ export const generateVisaTemplateForNotification = async (content: any, userData
         return error;
     }
 };
+
+export const generateMailContentValidationToken = (user: User, authToken: any) => {
+
+    try {
+
+        const data = {
+            greetings: `Bonjour ${get(user, 'fname', '')} ${get(user, 'lname', '')},`,
+            token: `${authToken.value}`,
+            actionUrl,
+            image,
+            color,
+            app,
+            company
+        }
+
+        const template = handlebars.compile(templateValidationTokenMail);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`html content auth token generation failed.\n${error.message} \n ${error.stack}`);
+        return error;
+    }
+
+
+}
 
 const formatVisaTemplate = (content: any) => {
     const reg = '//';

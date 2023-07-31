@@ -39,7 +39,9 @@
     "cbsApiUrl": "https://cbs:3000",
     "template": {
         "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
-        "color": "#DC752A"
+        "color": "#DC752A",
+        "app": "BCI MOBILE",
+        "company": "BCI"
     },
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",

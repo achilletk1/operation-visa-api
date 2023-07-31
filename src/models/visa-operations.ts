@@ -89,6 +89,9 @@ export interface Validator {
   clientCode?: string; // is only for admin with clientCode
   signature?: string;
   date?: number;
+  status?: OpeVisaStatus;
+  level?: number;
+  rejectReason?: string;
 
 }
 export enum OpeVisaStatus {
@@ -99,7 +102,7 @@ export enum OpeVisaStatus {
   JUSTIFY = 200,
   REJECTED = 300,
   CLOSED = 600,
-  VALIDATION_CHAIN =  700
+  VALIDATION_CHAIN = 700
 
 }
 export interface Chat {
