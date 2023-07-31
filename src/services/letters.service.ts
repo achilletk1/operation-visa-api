@@ -14,6 +14,7 @@ export const lettersService = {
             variables.push(...[
                 'SYSTEM_TODAY_LONG',
                 'SYSTEM_TODAY_SHORT',
+                'START'
             ]);
 
             return variables;

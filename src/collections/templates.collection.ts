@@ -71,7 +71,6 @@ export const templatesCollection = {
     },
     getTemplateBy: async (params: any) => {
         const database = await getDatabase();
-
         const result = await database.collection(collectionName).find(params).toArray();
         return result
     },

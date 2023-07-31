@@ -35,6 +35,11 @@ export const travelService = {
             // Set travel creation date
             travel.dates = { ...travel.dates, created: moment().valueOf() };
 
+            //========================== A supprimer =================
+           // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 1680252497051, travel.dates.created, 8000000)
+           //========================= le code en commentaire ci dessus a été ecrit pour des tests et peut etre supprimer ===
+
+
             // insert ceiling in travel
             const { data } = await visaTransactionsCeillingsCollection.getVisaTransactionsCeillings({ type: { '$in': [100, 400, 300] } }, 1, 40);
             const type = (+travel.travelType === TravelType.LONG_TERM_TRAVEL && +travel.proofTravel?.travelReason?.code === 300) ? 400 : (travel.travelType === TravelType.LONG_TERM_TRAVEL) ? 300 : 100;

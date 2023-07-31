@@ -190,15 +190,22 @@ export const notificationService = {
         const data = {
             civility: 'Mr/Mme',
             name: `${get(operation, 'user.fullName')}`,
-            start: moment(start).format('DD/MM/YYYY'),
+            start: moment(start).format('DD/MM/YYYY:HH:mm'),
             created: moment(created).format('DD/MM/YYYY'),
             ceiling: `${get(operation, 'ceiling')}`,
             total
-        }
+        }        //Get visaMailExceding in database
 
-        const HtmlBody = notificationHelper.generateMailVisaExceding(data);
 
-        const subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`;
+        const visaTemplateExceding = await templatesCollection.getTemplateBy({ key: 'ceilingOverrun'});
+        if (visaTemplateExceding.length <= 0 || isEmpty(visaTemplateExceding)) { { return new Error('TemplateNotFound'); } };
+        let emailContent = visaTemplateExceding[0]?.email;
+        let objectContent = visaTemplateExceding[0]?.obj;
+        let emailFrenchData = await commonService.formatTemplate(emailContent?.french, data);
+
+        const HtmlBody = notificationHelper.generateMailVisaExceding(emailFrenchData);
+
+        const subject = objectContent?.french || `Dépassement de plafond sur les transactions Hors zone CEMAC`;
 
 
         const receiver = email;
@@ -209,7 +216,7 @@ export const notificationService = {
                 format: NotificationFormat.MAIL,
                 message: HtmlBody,
                 email: receiver,
-                id: operation?._id.toString(),
+                //   id: operation?._id.toString() ,
             }
             await insertNotification(notification);
             sendEmail(receiver, subject, HtmlBody);
@@ -249,7 +256,6 @@ export const notificationService = {
             return error;
         }
     },
-
 
     sendEmailOnlinePayementStatusChanged: async (onlinePayement: OnlinePaymentMonth, email: string) => {
         if (email) { return; }
@@ -687,7 +693,6 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 const insertNotification = async (notification: any) => {
     notification.dates = { createdAt: moment().valueOf() },
         notification.status = 100;
-
     try {
         return await notificationsCollection.insertNotifications(notification);
     } catch (error) {

@@ -5,6 +5,9 @@ import { config } from '../../config';
 import { get } from 'lodash';
 import { RequestCeilingIncrease } from '../../models/request-ceiling-increase';
 import { commonService } from '../common.service';
+import { travelService } from '../travel.service';
+import { notificationService } from '../notification.service';
+
 import moment = require('moment');
 import { User } from '../../models/user';
 
@@ -24,6 +27,7 @@ let templateOnlinePayement: any;
 let templateOnlinePayementStatus: any;
 let templateTravelStatus: any;
 let templateValidationTokenMail: any;
+let visaTemplateExceding :any;
 
 (async () => {
     templateVisaExceding = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
@@ -51,18 +55,12 @@ const color = `${config.get('template.color')}`;
 const app = `${config.get('template.app')}`;
 const company = `${config.get('template.company')}`;
 
-export const generateMailVisaExceding = (info: any) => {
+export const generateMailVisaExceding = (content: any) => {
 
     try {
-
+     
         const data = {
-            civility: `${get(info, 'civility')}`,
-            name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
-            created: `${get(info, `created`)}`,
-            total: `${get(info, `total`)}`,
-            ceiling: `${get(info, `ceiling`)}`,
-            link: `${get(info, 'link')}`,
+            content,
             actionUrl
         }
 
@@ -73,7 +71,7 @@ export const generateMailVisaExceding = (info: any) => {
         return html;
 
     } catch (error) {
-        logger.error(`html visa depassement mail generation failed. \n${error.name}\n${error.stack}`);
+        logger.error(`Html visa depassement mail generation failed. \n${error.name}\n${error.stack}`);
         return error;
     }
 
@@ -226,7 +224,6 @@ export const generateMailContentRequestCeiling = (ceiling: RequestCeilingIncreas
 };
 
 export const generateMailContentCeilingRequestBank = (ceiling: any) => {
-
     try {
         const userFullName = `${get(ceiling?.user, 'fullName', '')}`;
         const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
@@ -244,13 +241,9 @@ export const generateMailContentCeilingRequestBank = (ceiling: any) => {
             desiredCeiling: `${commonService.formatNumber(get(ceiling?.desiredCeiling, 'amount', ''))} XAF`,
             actionUrl
         }
-
         const template = handlebars.compile(templateRequestCeilingBank);
-
         const html = template(data);
-
         return html;
-
     } catch (error) {
         logger.error(
             'html welcome mail generation failed.',
@@ -301,7 +294,6 @@ export const generateMailContentCeilingAssigned = (ceiling: any, userAssigned: a
     const gender = `${get(ceiling?.user, 'gender')}` === 'm' ? 'M' :
         `${get(ceiling?.user, 'gender')}` === 'f' ? 'Mme' : 'M/Mme';
     try {
-
         const data = {
             greetings: `Bonjour ${gender} ${userFullName},`,
             date: moment(ceiling?.date?.assigned).format('DD/MM/YYYY'),

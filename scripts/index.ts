@@ -1,10 +1,11 @@
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
-import  Confirm from 'prompt-confirm';
+import Confirm from 'prompt-confirm';
 import { config } from './config-env';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
 import { inserDefaultVaraibles } from './helpers/insert-default-variables';
+import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
 
 const runScripts = async () => {
     // SCRIPTS to execute
