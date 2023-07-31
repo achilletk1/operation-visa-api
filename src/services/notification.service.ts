@@ -20,9 +20,12 @@ import { usersService } from './users.service';
 import { templatesCollection } from '../collections/templates.collection';
 import { OpeVisaStatus } from '../models/visa-operations';
 import { queueCollection } from '../collections/queue.collection';
+import { User } from '../models/user';
 
 const classPath = 'services.notificationService';
 
+const appName = `${config.get('template.app')}`;
+const company = `${config.get('template.company')}`;
 export const notificationService = {
 
     /***************** SMS *****************/
@@ -54,6 +57,31 @@ export const notificationService = {
     //     }
     // },
 
+    sendTokenSMS: async (token: any, phone: any) => {
+        if (!phone || !token) { return; }
+
+        const body = `Bienvenue sur l'application ${appName} de la ${company}. Veuillez utiliser le mot de passe temporaire ${token} pour valider votre operation.`;
+
+        try {
+            return sendSMSFromBCIServer(phone, body);
+        } catch (error) {
+            logger.error(`Error during send email sendToken to ${phone}. \n ${error.message} \n${error.stack}`);
+            return error;
+        }
+    },
+
+    sendValidationTokenEmail: async (user: User, token: any) => {
+        const HtmlBody = notificationHelper.generateMailContentValidationToken(user, token);
+        const subject = `Mot de passe temporaire BCI MOBILE BCI`;
+        const receiver = `${user.email}`;
+
+        try {
+            return sendEmail(receiver, subject, HtmlBody);
+        } catch (error) {
+            logger.error(`Error during  email Token to ${user.email}. \n ${error.message} \n${error.stack}`);
+            return error;
+        }
+    },
     sendVisaTemplateEmail: async (dataParameter: any, email: string, subject: string, label: string) => {
         if (!email) { return }
 
@@ -87,7 +115,7 @@ export const notificationService = {
     sendEmailDetectTravel: async (travel: Travel, email: string) => {
         logger.info(`send mail detect transaction to ${email}`);
         if (!email) { return }
-        email = ['development', 'staging-bci'].includes(config.get('env')) ?  config.get('emailTest') : email;
+        email = ['development', 'staging-bci'].includes(config.get('env')) ? config.get('emailTest') : email;
         const data = {
             name: `${get(travel, 'user.fullName', '')}`,
             start: moment(get(travel, 'transactions[0].date')).format('DD/MM/YYYY') || '',
@@ -158,7 +186,7 @@ export const notificationService = {
     sendEmailVisaExceding: async (operation: Travel | OnlinePaymentMonth, email: string, start: number, created: number, total: number) => {
         logger.info(`send mail visa exceding transaction to ${email}`);
         if (!email) { return }
-        email = ['development', 'staging-bci'].includes(config.get('env')) ?  config.get('emailTest') : email;
+        email = ['development', 'staging-bci'].includes(config.get('env')) ? config.get('emailTest') : email;
         const data = {
             civility: 'Mr/Mme',
             name: `${get(operation, 'user.fullName')}`,
@@ -243,7 +271,7 @@ export const notificationService = {
                 format: NotificationFormat.MAIL,
                 message: HtmlBody,
                 email: receiver,
-                id :onlinePayement?._id.toString(),
+                id: onlinePayement?._id.toString(),
             }
             await insertNotification(notification);
         } catch (error) {

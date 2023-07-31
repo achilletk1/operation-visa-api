@@ -1,4 +1,4 @@
-import   convict from 'convict';
+import convict from 'convict';
 
 // Define a schema
 export const config = convict({
@@ -224,13 +224,27 @@ export const config = convict({
             env: 'TEMPLATE_COLOR',
             arg: 'template-color'
         },
+        app: {
+            doc: 'name of the app that must be used as the model on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_APP',
+            arg: 'template-app'
+        },
+        company: {
+            doc: 'company name that must be used as a model on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_COMPANY',
+            arg: 'template-company'
+        },
     },
     maxFileSizeUpload: {
         doc: 'CBS API base url.',
         format: Number,
         default: 5,
         env: 'MAX_FILE_SIZE_UPLOAD'
-    }, 
+    },
     ceilingIncreaseEmail: {
         doc: 'mail requesting a ceiling increase.',
         format: String,
