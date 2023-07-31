@@ -189,11 +189,11 @@ export const insertDefaultTemplateSetting = async () => {
         {
             templateType: 200,
             key: 'transactionOutsideNotJustified',
-            label: 'Transactions hors zone CEMAC non justifiée',
+            label: 'Blocage de  votre carte bancaire',
             desc: 'Notification transactions hors zone CEMAC non justifiée',
             email: {
                 french: `
-                Cher(e) {{NOM}} ,        
+                Cher(e) {{NAME}} ,        
                 Nous avons remarqué des transactions non justifiées sur votre compte bancaire.comme le précise la
                 circulaire BEAC
                     N004/G4/2002  nous avons l'obligation de bloquer votre carte bancaire.
@@ -210,14 +210,14 @@ export const insertDefaultTemplateSetting = async () => {
                 Go to  the application`
             },
             sms: {
-                french: ` Cher(e) "NOM" ,        
+                french: ` Cher(e) {{NAME}} ,        
                 Nous avons remarqué des transactions non justifiées sur votre compte bancaire.comme le précise la
                 circulaire BEAC
                     N004/G4/2002  nous avons l'obligation de bloquer votre carte bancaire.
                 Nous vous invitons à contacter notre service clientèle dès que possible pour discuter de ce sujet afin de trouver une solution. 
                 Nous sommes désolés pour les désagréments que cela pourrait causer et nous espérons que nous pourrions résoudre ce problème rapidement.
                 `,
-                english: `Dear "NOM" ,        
+                english: `Dear {{NAME}} ,        
                 We have noticed unjustified transactions on your bank account. As specified in the
                 BEAC circular
                     N004/G4/2002 we are obliged to block your bank card.

@@ -10,7 +10,6 @@ export const inserDefaultPropertyType = async () => {
 
     const db = await getDatabase();
     const propertyType =[{
-        "_id": new ObjectId('6319fa3ba6c09525b3ff4b36'),
         "label": "Paiement hors zone CEMAC",
         "vouchers": [
           {
@@ -36,7 +35,6 @@ export const inserDefaultPropertyType = async () => {
           "created": { created: moment().valueOf() }
         }
       },{
-        "_id":new ObjectId('6319fa4fa6c09525b3ff4b37'),
         "label": "Règlement frais de scolarité",
         "vouchers": [
           {
@@ -68,7 +66,6 @@ export const inserDefaultPropertyType = async () => {
           "created": { created: moment().valueOf() }
         }
       },{
-        "_id":new ObjectId('6319fa96a6c09525b3ff4b3a'),
         "label": "Règlement frais de santé",
         "vouchers": [
           {
@@ -94,7 +91,6 @@ export const inserDefaultPropertyType = async () => {
           "created": { created: moment().valueOf() }
         }
       },{
-        "_id":new ObjectId('6319fabba6c09525b3ff4b3b'),
         "label": "Règlement frais d'hôtel",
         "vouchers": [
           {

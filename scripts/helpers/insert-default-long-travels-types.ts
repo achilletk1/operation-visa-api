@@ -163,14 +163,6 @@ export const inserDefaultLongTravelsTypes = async () => {
             description: ``,
             dates: { created: moment().valueOf() }
         },
-        {
-            label: `Autres`,
-            code: 500,
-            vouchers: [],
-            description: ``,
-            dates: { created: moment().valueOf() }
-        },
-
     ]
 
     console.log('insert default transfertTypesinto visa_operations_long_travel_types collection');

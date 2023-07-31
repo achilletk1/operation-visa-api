@@ -32,10 +32,11 @@ export const commonService = {
 
     },
 
+
     formatTemplate: async (templateMessage: string, data: any) => {
         let variables = await lettersService.getLettersVariables();
         variables.push(...['AMOUNT', 'START',]);
-        const bindData = { NOMREST: data?.name || '', CEILLING: data?.ceiling || 0, START: data?.start, AMOUNT: +data?.total || 0, SYSTEM_TODAY_SHORT: +data?.created };
+        const bindData = { NOMREST: data?.name || '', CEILLING: data?.ceiling || 0, START: data?.start, AMOUNT: +data?.total || 0, SYSTEM_TODAY_SHORT: data?.created };
         for (const key in bindData) { templateMessage = templateMessage.replace(new RegExp(`{{${key}}}`, 'g'), bindData[key]); }
         return templateMessage.replace(/\\\\/g, "<br>").replace(/\*/g, "<strong>").replace(/\*\*/g, "</strong>") as string;
     },

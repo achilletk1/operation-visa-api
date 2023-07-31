@@ -36,7 +36,7 @@ export const inserDefaultVouchers = async () => {
         }
     ]
 
-    console.log('insert default vouchersinto vouchers collection');
+    console.log('Insert default vouchers into vouchers collection');
     db.dropCollection("visa_operations_vouchers", function (err, result) { console.log("Collection droped"); });
     const response = await db.collection('visa_operations_vouchers').insertMany(vouchers);
     console.log(response.insertedIds);
