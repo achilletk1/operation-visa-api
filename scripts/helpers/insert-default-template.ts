@@ -164,6 +164,7 @@ export const insertDefaultTemplateSetting = async () => {
               {{SYSTEM_TODAY_SHORT}} comme le précise la circulaire BEAC N004/G4/2002. Vous pouvez le faire à distance en vous
                 connectant à  la plateforme digitale BCIONLINE : via le lien //
                 Nous vous remercions pour votre fidélité.`,
+                
                 english: `Dear Customer We would like to inform you that we have detected a transaction outside the CEMAC zone.
                 please send us the details of your expenses
                 details of your expenses with supporting documents
