@@ -41,9 +41,9 @@ export const templatesService = {
         }
     },
 
-    getTemplateBy: async (data: any) => {
+    getTemplatesBy: async (data: any) => {
         try {
-            return await templatesCollection.getTemplateBy(data);
+            return await templatesCollection.getTemplatesBy(data);
         } catch (error) {
             logger.error(`\nError getting visa trnsactions by queries \n${error.message}\n${error.stack}\n`);
             return error;
@@ -51,7 +51,7 @@ export const templatesService = {
     },
     updateTemplateById: async (id: string, data: any) => {
         try {
-            const vourchers = await templatesCollection.getTemplateBy({});
+            const vourchers = await templatesCollection.getTemplatesBy({});
             const foundIndex = vourchers.findIndex((e) => e.label === data.label && e._id.toString() !== id);
             if (foundIndex > -1) { return new Error('VourcherAlreadyExist') }
             return await templatesCollection.updateTemplateById(id, data);

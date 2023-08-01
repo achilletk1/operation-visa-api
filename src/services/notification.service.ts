@@ -197,10 +197,10 @@ export const notificationService = {
         }        //Get visaMailExceding in database
 
 
-        const visaTemplateExceding = await templatesCollection.getTemplateBy({ key: 'ceilingOverrun'});
-        if (visaTemplateExceding.length <= 0 || isEmpty(visaTemplateExceding)) { { return new Error('TemplateNotFound'); } };
-        let emailContent = visaTemplateExceding[0]?.email;
-        let objectContent = visaTemplateExceding[0]?.obj;
+        const visaTemplateExceding = await templatesCollection.getTemplateBy({ key: 'ceilingOverrun' });
+        if (!visaTemplateExceding) { { return new Error('TemplateNotFound'); } };
+        let emailContent = visaTemplateExceding?.email;
+        let objectContent = visaTemplateExceding?.obj;
         let emailFrenchData = await commonService.formatTemplate(emailContent?.french, data);
 
         const HtmlBody = notificationHelper.generateMailVisaExceding(emailFrenchData);

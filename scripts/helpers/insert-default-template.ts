@@ -16,19 +16,19 @@ export const insertDefaultTemplateSetting = async () => {
             label: 'Dépassement de plafond sur les transactions Hors zone CEMAC',
             desc: 'Mail de Dépassement de plafond sur les transactions hors zone CEMAC',
             email: {
-                french: `Nous tenons à vous informer que le montant total ({{AMOUNT}}) des opérations hors
-                zone CEMAC que vous avez effectués le
-                {{START}} a
+                french: `Nous tenons à vous informer que le montant total ({{MONTANT_XAF}} XAF) des opérations hors
+                zone CEMAC que vous avez effectués le mois de 
+                {{MOIS_DEPART}} a
                 dépassé le plafond autorisé par la
                 BEAC qui est de
-                {{CEILLING}}.
+                {{PLAFOND}}.
                 //
                 //Nous vous
                 prions à cet effet de nous transmettre les
                 details de vos dépenses avec leurs justificatifs
                 dans un délai
                 maximum de 30 jours à compter du
-                {{SYSTEM_TODAY_SHORT}} comme le précise la
+                {{DATE}} comme le précise la
                 circulaireBEAC
                     N004/G4/2002. Vous pouvez le faire à distance en vous
                     connectant
@@ -40,19 +40,19 @@ export const insertDefaultTemplateSetting = async () => {
                 
                 Aller à
                         l'application`,
-                english: `We would like to inform you that the total amount ({{AMOUNT}}) of transactions outside the
-                CEMAC zone that you carried out on
-                {{START}} has
+                english: `We would like to inform you that the total amount ({{MONTANT_XAF}}) of transactions outside the
+                CEMAC zone that you carried out on 
+                {{MOIS_DEPART}} has
                 exceeded the
                 BEAC which is
-                {{CEILLING}}.
+                {{PLAFOND}}.
                 //
                 //We
                 please send us details of your expenses
                 details of your expenses with supporting documents
                 within
                 maximum of 30 days from
-               {{SYSTEM_TODAY_SHORT}} as specified in the
+               {{DATE}} as specified in the
                 circularBEAC
                     N004/G4/2002. You can do this remotely by
                     connecting
@@ -63,38 +63,38 @@ export const insertDefaultTemplateSetting = async () => {
                 thank you for your loyalty.`
             },
             sms: {
-                french: `Chèr(e) client(e) nous tenons à vous informer que le montant total ({{AMOUNT}}) des opérations hors
-                zone CEMAC que vous avez effectués le
-                {{START}} a
+                french: `Chèr(e) client(e) nous tenons à vous informer que le montant total ({{MONTANT_XAF}}) des opérations hors
+                zone CEMAC que vous avez effectués le mois de 
+                {{MOIS_DEPART}} a
                 dépassé le plafond autorisé par la
                 BEAC qui est de
-                {{CEILLING}}.
+                {{PLAFOND}}.
                 //
                 //Nous vous
                 prions à cet effet de nous transmettre les
                 details de vos dépenses avec leurs justificatifs
                 dans un délai
                 maximum de 30 jours à compter du
-               {{SYSTEM_TODAY_SHORT}} comme le précise la
+               {{DATE}} comme le précise la
                 circulaireBEAC
                     N004/G4/2002. Vous pouvez le faire à distance en vous
                     connectant
                     à
                     la plateforme digitale BCIONLINE : via le
                     lien //`,
-                english: `Dear customer, we would like to inform you that the total amount ({{AMOUNT}}) of transactions outside the
+                english: `Dear customer, we would like to inform you that the total amount ({{MONTANT_XAF}}) of transactions outside the
                 CEMAC zone that you carried out on
-                {{START}} has
+                {{MOIS_DEPART}} has
                 exceeded the
                 BEAC which is
-                {{CEILLING}}.
+                {{PLAFOND}}.
                 //
                 //We
                 please send us details of your expenses
                 details of your expenses with supporting documents
                 within
                 maximum of 30 days from
-               {{SYSTEM_TODAY_SHORT}} as specified in the
+               {{DATE}} as specified in the
                 circularBEAC
                     N004/G4/2002. You can do this remotely by
                     connecting
@@ -127,7 +127,7 @@ export const insertDefaultTemplateSetting = async () => {
                 preuves de votre voyage hors zone cemac
                 dans un délai
                 maximum de 30 jours à compter du
-               {{SYSTEM_TODAY_SHORT}} comme le précise la
+               {{DATE}} comme le précise la
                 circulaire BEAC
                     N004/G4/2002. Vous pouvez le faire à distance en vous
                     connectant
@@ -145,7 +145,7 @@ export const insertDefaultTemplateSetting = async () => {
                 details of your expenses with supporting documents
                 within
                 maximum of 30 days from
-               {{SYSTEM_TODAY_SHORT}} as specified in the
+               {{DATE}} as specified in the
                 BEAC circular
                     N004/G4/2002. You can do this remotely by
                     connecting
@@ -157,19 +157,19 @@ export const insertDefaultTemplateSetting = async () => {
                 Go to  the application`
             },
             sms: {
-                french: `Chèr(e) "NOM" Nous vous informons que nous avons  détectée uen transaction hors zone CEMAC et nous vous
+                french: `Chèr(e) {{NOM_CLIENT}} Nous vous informons que nous avons  détectée uen transaction hors zone CEMAC et nous vous
                prions à cet effet de nous transmettre les
                details de vos dépenses avec leurs justificatifs
                dans un délai  maximum de 30 jours à compter du
-              {{SYSTEM_TODAY_SHORT}} comme le précise la circulaire BEAC N004/G4/2002. Vous pouvez le faire à distance en vous
+              {{DATE}} comme le précise la circulaire BEAC N004/G4/2002. Vous pouvez le faire à distance en vous
                 connectant à  la plateforme digitale BCIONLINE : via le lien //
                 Nous vous remercions pour votre fidélité.`,
                 
-                english: `Dear Customer We would like to inform you that we have detected a transaction outside the CEMAC zone.
+                english: `Dear {{NOM_CLIENT}} We would like to inform you that we have detected a transaction outside the CEMAC zone.
                 please send us the details of your expenses
                 details of your expenses with supporting documents
                 within a maximum of 30 days from
-               {{SYSTEM_TODAY_SHORT}} as specified in BEAC circular N004/G4/2002. You can do this remotely by
+               {{DATE}} as specified in BEAC circular N004/G4/2002. You can do this remotely by
                  connecting to the BCIONLINE digital platform: via the link //.
                  Thank you for your loyalty.`
             },
@@ -192,7 +192,7 @@ export const insertDefaultTemplateSetting = async () => {
             desc: 'Notification transactions hors zone CEMAC non justifiée',
             email: {
                 french: `
-                Cher(e) {{NAME}} ,        
+                Cher(e) {{NOM_CLIENT}} ,        
                 Nous avons remarqué des transactions non justifiées sur votre compte bancaire.comme le précise la
                 circulaire BEAC
                     N004/G4/2002  nous avons l'obligation de bloquer votre carte bancaire.
@@ -200,7 +200,7 @@ export const insertDefaultTemplateSetting = async () => {
                 Nous sommes désolés pour les désagréments que cela pourrait causer et nous espérons que nous pourrions résoudre ce problème rapidement.
                 
                 Aller à l'application`,
-                english: `Dear {{NAME}} ,        
+                english: `Dear {{NOM_CLIENT}} ,        
                 We have noticed unjustified transactions on your bank account. As specified in the
                 BEAC circular
                     N004/G4/2002 we are obliged to block your bank card.
@@ -209,14 +209,14 @@ export const insertDefaultTemplateSetting = async () => {
                 Go to  the application`
             },
             sms: {
-                french: ` Cher(e) {{NAME}} ,        
+                french: ` Cher(e) {{NOM_CLIENT}} ,        
                 Nous avons remarqué des transactions non justifiées sur votre compte bancaire.comme le précise la
                 circulaire BEAC
                     N004/G4/2002  nous avons l'obligation de bloquer votre carte bancaire.
                 Nous vous invitons à contacter notre service clientèle dès que possible pour discuter de ce sujet afin de trouver une solution. 
                 Nous sommes désolés pour les désagréments que cela pourrait causer et nous espérons que nous pourrions résoudre ce problème rapidement.
                 `,
-                english: `Dear {{NAME}} ,        
+                english: `Dear {{NOM_CLIENT}} ,        
                 We have noticed unjustified transactions on your bank account. As specified in the
                 BEAC circular
                     N004/G4/2002 we are obliged to block your bank card.

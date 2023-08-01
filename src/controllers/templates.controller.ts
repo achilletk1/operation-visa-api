@@ -44,7 +44,7 @@ export const templatesController = {
         });
 
         app.get('/templates/all', async (req: Request, res: Response) => {
-            const data = await templatesService.getTemplateBy(req.query);
+            const data = await templatesService.getTemplatesBy(req.query);
 
             if (data instanceof Error && data.message === 'Forbbiden') {
                 const message = 'forbbiden to get data';

@@ -69,9 +69,14 @@ export const templatesCollection = {
 
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
     },
-    getTemplateBy: async (params: any) => {
+    getTemplatesBy: async (params: any) => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).find(params).toArray();
+        return result
+    },
+    getTemplateBy: async (params: any) => {
+        const database = await getDatabase();
+        const result = await database.collection(collectionName).findOne(params);
         return result
     },
 
