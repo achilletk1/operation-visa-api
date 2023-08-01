@@ -1,5 +1,5 @@
-import moment from 'moment'
 import { getDatabase } from '../config';
+import moment from 'moment'
 
 export const insertDefaultTemplateSetting = async () => {
 
@@ -111,7 +111,6 @@ export const insertDefaultTemplateSetting = async () => {
             period: 'J+0',
             date: {
                 created: moment().valueOf(),
-                updated: 0
             }
         },
 
@@ -182,7 +181,6 @@ export const insertDefaultTemplateSetting = async () => {
             period: 'J+0',
             date: {
                 created: moment().valueOf(),
-                updated: 0
             }
         },
 
@@ -233,15 +231,15 @@ export const insertDefaultTemplateSetting = async () => {
             enabled: true,
             date: {
                 created: moment().valueOf(),
-                updated: 0
             }
-        },
-
-
-
+        }
     ]
+
     console.log('Insert default Templates  collection');
-    db.dropCollection("visa_operations_templates", function (err, result) { console.log("Collection droped"); });
+
+    const respDelete = await db.collection("visa_operations_templates").drop();
+    console.log('response delete', respDelete);
+
     const response = await db.collection('visa_operations_templates').insertMany(templates);
     console.log(response.insertedIds);
 };

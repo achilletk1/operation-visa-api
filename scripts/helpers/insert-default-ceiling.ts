@@ -1,5 +1,5 @@
-import  moment from 'moment'
 import { getDatabase } from '../config';
+import moment from 'moment'
 
 export const inserDefaultVisaCeilings = async () => {
 
@@ -37,7 +37,7 @@ export const inserDefaultVisaCeilings = async () => {
         {
             type: 400,
             value: 2000000,
-            description: 'Plafond pour les étudiants lors des voyages courtes et longues durées',
+            description: `Plafond pour les étudiants hors zone CEMAC relevant d'un ménage de la CEMAC lors des voyages courtes et longues durées`,
             date: {
                 created: moment().valueOf()
             }

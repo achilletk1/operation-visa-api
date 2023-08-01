@@ -14,7 +14,7 @@ export const inserDefaultLetter = async () => {
 
                 "headRightText": "ARMAND NTOLO//BP 0000//Fait à Douala le 13/06/2023",
 
-                "letterRef": "Réf. : .../PDG-DG 2023",
+                "letterRef": "",
 
                 "objectText": " mise en demeure pour non-production des justificatifs de la réalité de votre déplacement après utilisation de la carte hors de la zone CEMAC",
 
@@ -58,14 +58,15 @@ export const inserDefaultLetter = async () => {
             "en": "We are sending you this e-mail in relation to your trip, which remains unjustified to this day. You will find attached a copy of the letter of formal notice.",
             "fr": "Nous vous envoyons ce mail par rapport votre voyage qui demeure non justifié à ce jour. Vous trouverez en annexe une copie de la lettre de mise en demeure."
         },
-        "period": 'J+30'
+        period: 'J+30'
     }
 
 
     console.log('insert default notice letter into visa_operations_letters collection');
-    db.dropCollection("visa_operations_letters",function(err, result) { console.log("Collection droped");});
+
+    const respDelete = await db.collection("visa_operations_letters").drop();
+    console.log('response delete', respDelete);
+
     const response = await db.collection('visa_operations_letters').insertOne(noticeLetters);
     console.log(response.insertedId);
-    console.log('');
-
 };

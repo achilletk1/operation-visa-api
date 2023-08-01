@@ -1,5 +1,5 @@
-import  moment from 'moment'
 import { getDatabase } from '../config';
+import  moment from 'moment'
 
 export const inserDefaultLongTravelsTypes = async () => {
 
@@ -17,63 +17,63 @@ export const inserDefaultLongTravelsTypes = async () => {
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Diplomates`,
+            label: `Diplomates et assimilés`,
             code: 101,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Corps diplomate`,
+            label: `Corps diplomatique`,
             code: 102,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Membres de famille d'un diplomate`,
+            label: `Membre de la famille d'un diplomate issus des pays de la CEMAC`,
             code: 103,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Malades en soins à l'extérieur  de la CEMAC`,
+            label: `Malade en soins à l'extérieur  de la CEMAC`,
             code: 200,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Personnes qui accompagnent un malade hors zone CEMAC`,
+            label: `Personne qui accompagne un malade hors zone CEMAC`,
             code: 201,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Etudiants à l'étranger dépendant d'un ménage résident en zone CEMAC`,
+            label: `Etudiant à l'étranger relevant d'un ménage résident de la CEMAC`,
             code: 300,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Fonctionnaires des Etats CEMAC employés hors zone CEMAC`,
+            label: `Fonctionnaire des Etats CEMAC employé à l'extérieur de ceux-ci dans des enclaves térritoriales`,
             code: 400,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Militiares participant à une missions hors zone CEMAC`,
+            label: `Militiare participant à une missions hors zone CEMAC`,
             code: 401,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Travailleurs saisonniers résident de la CEMAC qui exerce leur activité hors zone CEMAC`,
+            label: `Travailleur saisonnier résident de la CEMAC qui exerce leur activité hors zone CEMAC`,
             code: 402,
             vouchers: [],
             description: ``,
@@ -101,28 +101,28 @@ export const inserDefaultLongTravelsTypes = async () => {
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Employés de la CEMAC en travaillant en alternance hors zone CEMAC`,
+            label: `Employés de la CEMAC travaillant en alternance hors zone CEMAC`,
             vouchers: [],
             code: 406,
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Résident de la CEMAC membres d'équipage des navires hors zone CEMAC`,
+            label: `Résident de la CEMAC membre d'équipage des navires hors zone CEMAC`,
             code: 600,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Résident de la CEMAC membres d'équipage des aéronefs hors zone CEMAC`,
+            label: `Résident de la CEMAC membre d'équipage des aéronefs hors zone CEMAC`,
             code: 601,
             vouchers: [],
             description: ``,
             dates: { created: moment().valueOf() }
         },
         {
-            label: `Résident de la CEMAC membres d'équipage des plateformes pétrolières hors zone CEMAC`,
+            label: `Résident de la CEMAC membre d'équipage des plateformes pétrolières hors zone CEMAC`,
             code: 602,
             vouchers: [],
             description: ``,
@@ -166,9 +166,11 @@ export const inserDefaultLongTravelsTypes = async () => {
     ]
 
     console.log('insert default transfertTypesinto visa_operations_long_travel_types collection');
-    db.dropCollection("visa_operations_long_travel_types",function(err, result) { console.log("Collection droped");});
+
+    const respDelete = await db.collection("visa_operations_long_travel_types").drop();
+    console.log('response delete', respDelete);
+
     const response = await db.collection('visa_operations_long_travel_types').insertMany(transfertTypes);
     console.log(response.insertedIds);
-    console.log('');
 
 };

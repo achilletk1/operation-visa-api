@@ -1,5 +1,5 @@
-import moment from 'moment'
 import { getDatabase } from '../config';
+import moment from 'moment'
 
 export const inserDefaultVouchers = async () => {
 
@@ -10,36 +10,68 @@ export const inserDefaultVouchers = async () => {
     const db = await getDatabase();
     const vouchers = [
         {
-            label: `Carte d'identité`,
-            description: `Carte d'identité de l'utilisateur`,
+            label: `Facture proforma`,
+            description: ``,
             date: { created: moment().valueOf() }
         },
         {
-            label: `Passeport`,
-            description: `Passeport de l'utilisateur`,
+            label: `Preuve d'appels de fonds`,
+            description: `Preuve d'appels de fonds en vue d'un paiement`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Contrat(s)`,
+            description: ``,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Certificat de scolarité`,
+            description: ``,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Carte étudiant`,
+            description: `Contrat de travail`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Preuve de parenté`,
+            description: `Justification du lien entre le titulaire de l'instrument de paiement élèctronique et le bénéficiaire du paiement`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Facture(s)`,
+            description: ``,
             date: { created: moment().valueOf() }
         },
         {
             label: `Visa`,
-            description: `Visa de l'utilisateur`,
+            description: ``,
             date: { created: moment().valueOf() }
         },
         {
-            label: `Ordre de mission`,
-            description: `Ordre de mission`,
+            label: `Tampon d'entrée du passesport`,
+            description: `Cachet appliqué sur le passesport donnant autorisation d'entrée dans le térittoire de destination`,
             date: { created: moment().valueOf() }
         },
         {
-            label: `Contrat de travail`,
-            description: `Contrat de travail`,
+            label: `Tampon de sortie du passesport`,
+            description: `Cachet appliqué sur le passesport donnant autorisation de sortir du térittoire`,
+            date: { created: moment().valueOf() }
+        },
+        {
+            label: `Ticket de transport`,
+            description: ``,
             date: { created: moment().valueOf() }
         }
     ]
 
     console.log('Insert default vouchers into vouchers collection');
-    db.dropCollection("visa_operations_vouchers", function (err, result) { console.log("Collection droped"); });
+
+    const respDelete = await db.collection("visa_operations_vouchers").drop();
+    console.log('response delete', respDelete);
+
     const response = await db.collection('visa_operations_vouchers').insertMany(vouchers);
     console.log(response.insertedIds);
-    console.log('');
 
 };

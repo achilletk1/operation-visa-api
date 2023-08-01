@@ -1,13 +1,13 @@
-import  moment from 'moment'
 import { getDatabase } from '../config';
+import moment from 'moment'
 
 export const inserDefaultSetting = async () => {
 
-    console.log('----------------------------------------');
-    console.log('-------  INSERT DEFAULTS SETTINGS ------');
-    console.log('----------------------------------------');
+  console.log('----------------------------------------');
+  console.log('-------  INSERT DEFAULTS SETTINGS ------');
+  console.log('----------------------------------------');
 
-    const db = await getDatabase();
+  const db = await getDatabase();
 
     const Settings = [        {
             key: 'max_upload_file_size',

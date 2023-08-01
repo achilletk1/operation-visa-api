@@ -1,11 +1,12 @@
-import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
-import Confirm from 'prompt-confirm';
-import { config } from './config-env';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
-import { inserDefaultSetting } from './helpers/insert-default-settings';
-import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
-import { inserDefaultVaraibles } from './helpers/insert-default-variables';
+import { inserDefaultPropertyType } from './helpers/insert-default-proprety-type';
 import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
+import { inserDefaultLetter } from './helpers/insert-default-notice-letter';
+import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
+import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
+import { inserDefaultSetting } from './helpers/insert-default-settings';
+import { config } from './config-env';
+import Confirm from 'prompt-confirm';
 
 const runScripts = async () => {
     // SCRIPTS to execute
@@ -24,7 +25,7 @@ if (config.get('env') !== 'development') {
 } else {
     (async () => {
         try {
-            const answer = await new Confirm('Start reset BCIONLINE database scripts').run();
+            const answer = await new Confirm('Start reset visa operation data scripts').run();
 
             if (answer === false) { return process.exit(); }
 
@@ -39,3 +40,5 @@ if (config.get('env') !== 'development') {
 
     })()
 }
+
+
