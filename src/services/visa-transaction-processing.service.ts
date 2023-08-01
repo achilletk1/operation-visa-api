@@ -70,15 +70,14 @@ export const visaTransactonsProcessingService = {
             }
             await visaTransactionsCollection.insertTransactions(transactions);
             await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
+            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
+            console.log('resp', resp);
 
         } catch (error) {
             const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
             console.log('resp', resp);
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
             return error;
-        } finally {
-            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-            console.log('resp', resp);
         }
     },
 
@@ -246,9 +245,9 @@ const getTotal = (transactions: any[]) => {
     return totalAmountTransaction;
 };
 
-const formatTransactions = (dataArray) => {
+const formatTransactions = (dataArray: any[]) => {
     try {
-        const transactions = dataArray.map((element) => {
+        const transactions = dataArray.map((element: any) => {
             return {
                 _id: element?._id,
                 clientCode: element['CLIENT']?.toString()?.replace(/\s/g, ''),
@@ -339,7 +338,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 expenseDetailsStatus: OpeVisaStatus.EMPTY,
                 expenseDetailAmount: 0,
                 othersAttachements: [],
-                otherAttachmentAmount:0,
+                otherAttachmentAmount: 0,
                 othersAttachmentStatus: OpeVisaStatus.EMPTY,
                 transactions: element?.transactions,
             };
@@ -385,8 +384,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 travelMonth.dates.updated = moment().valueOf();
 
                 const totalAmount = commonService.getTotal(travelMonth?.transactions);
-                travelMonth.expenseDetailAmount = commonService.getTotal(travelMonth?.transactions,'stepAmount');
-                travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth,'month');
+                travelMonth.expenseDetailAmount = commonService.getTotal(travelMonth?.transactions, 'stepAmount');
+                travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth, 'month');
 
                 if (totalAmount > travel?.ceiling) {
                     const firstDateTransactions = Math.min(...mergedTransactions.map((elt => elt?.date)));
@@ -405,10 +404,10 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         const totalAmount = commonService.getTotal(travel?.transactions);
 
         travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-        travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel,'expenseDetail');
+        travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, 'expenseDetail');
 
         travel.otherAttachmentAmount = commonService.getTotal(travel.othersAttachements, 'stepAmount');
-        travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel,'othersAttachs');
+        travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, 'othersAttachs');
 
         travelsCollection.updateTravelsById(get(travel, '_id').toString(), travel);
 
