@@ -58,7 +58,7 @@ export const inserDefaultLetter = async () => {
             "en": "We are sending you this e-mail in relation to your trip, which remains unjustified to this day. You will find attached a copy of the letter of formal notice.",
             "fr": "Nous vous envoyons ce mail par rapport votre voyage qui demeure non justifié à ce jour. Vous trouverez en annexe une copie de la lettre de mise en demeure."
         },
-        period: 'J+30'
+        period: 30
     }
 
 

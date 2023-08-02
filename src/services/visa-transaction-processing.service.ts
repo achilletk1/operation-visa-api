@@ -83,7 +83,7 @@ export const visaTransactonsProcessingService = {
     },
 
     startRevivalMail: async (): Promise<any> => {
-        const travels = await travelsCollection.getTravelsBy({ 'proofTravel': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
+        const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
 
         for (const travel of travels) {
             const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
