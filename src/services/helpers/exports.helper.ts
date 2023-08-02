@@ -7,10 +7,11 @@ import handlebars from 'handlebars';
 import { get } from 'lodash';
 import moment from "moment";
 import XLSX from 'xlsx';
+import * as formatHelper from './format.helper';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification: any;
-let templateFormalNoticeMail:any ; 
+let templateFormalNoticeMail: any;
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
     templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
@@ -80,7 +81,7 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
             'SYSTEM_TODAY_LONG': moment().locale('fr'),
             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
         }
-        const data = replaceVariables(content, values, isTest);
+        const data = formatHelper.replaceVariables(content, values, isTest);
 
         const templateData = generateTemplateFormalNoticeLetter(data, signature);
 
@@ -95,26 +96,26 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
     }
 };
 
-export const generateFormalNoticeMail = async (content: any, userData: any,  isTest?: boolean) => {
+export const generateFormalNoticeMail = async (content: any, userData: any, isTest?: boolean) => {
     try {
         const values = {
             ...userData,
             'SYSTEM_TODAY_LONG': moment().locale('fr'),
             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
         }
-        const data = replaceVariables(content, values, isTest);
+        const data = formatHelper.replaceVariables(content, values, isTest);
 
         const temlateData = generateTemplateFormalNoticeMail(data);
 
         const template = handlebars.compile(templateFormalNoticeMail);
 
         const html = template(temlateData);
-       /* const options = {
-            method: 'POST',
-            uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
-            body: { html },
-            json: true
-        }*/
+        /* const options = {
+             method: 'POST',
+             uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
+             body: { html },
+             json: true
+         }*/
         return html;
     } catch (error) {
         logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
@@ -122,46 +123,17 @@ export const generateFormalNoticeMail = async (content: any, userData: any,  isT
     }
 };
 
-const replaceVariables = (content: any, values: any, isTest?: boolean) => {
-    const obj = {};
-    for (const key in content) {
-        if (!content.hasOwnProperty(key)) { break; }
-        obj[key] = formatContent(content[key], values, isTest);
-    }
-    return obj;
-}
-
-export const formatContent = (str: string, values: any, isTest?: boolean) => {
-    if (!str) { return '' }
-
-    if (isTest) {
-        str = str.split(`{{`).join(`[`);
-        str = str.split(`}}`).join(`]`);
-        return str;
-    }
-    for (const key of values) {
-        if (str.includes(`{{${key}}}`)) {
-            str = str.split(`{{${key}}}`).join(`${values[key]}`);
-        }
-    }
-
-    return str;
-}
-
 const generateTemplateFormalNoticeLetter = (letter: Letter, signature: string) => {
-
-    const reg = '//'
-
     const data = {
         letterRef: get(letter, 'letterRef', ''),
-        headLeftText: goToTheLine(`${get(letter, 'headLeftText', '')}`, reg),
-        headRightText: goToTheLine(`${get(letter, 'headRightText', '')}`, reg),
-        introductionTexT: goToTheLine(`${get(letter, 'introductionTexT', '')}`, reg),
-        salutationText: goToTheLine(`${get(letter, 'salutationText', '')}`, reg),
+        headLeftText: `${get(letter, 'headLeftText', '')}`,
+        headRightText: `${get(letter, 'headRightText', '')}`,
+        introductionTexT: `${get(letter, 'introductionTexT', '')}`,
+        salutationText: `${get(letter, 'salutationText', '')}`,
         objectText: get(letter, 'objectText', ''),
-        bodyText: goToTheLine(`${get(letter, 'bodyText', '')}`, reg),
-        conclusionText: goToTheLine(`${get(letter, 'conclusionText', '')}`, reg),
-        footerText: goToTheLine(`${get(letter, 'footerText', '')}`, reg),
+        bodyText: `${get(letter, 'bodyText', '')}`,
+        conclusionText: `${get(letter, 'conclusionText', '')}`,
+        footerText: `${get(letter, 'footerText', '')}`,
         signatureText: get(letter, 'signatureText', ''),
         signature
     }
@@ -170,19 +142,14 @@ const generateTemplateFormalNoticeLetter = (letter: Letter, signature: string) =
 };
 
 const generateTemplateFormalNoticeMail = (content: any) => {
-    const reg = '//';
     const data = {
         objectText: get(content, 'object', ''),
-        bodyText: goToTheLine(`${get(content, 'content', '')}`, reg)
+        bodyText: `${get(content, 'content', '')}`
     }
 
     return data;
 };
 
-
-const goToTheLine = (str: string, reg: string) => {
-    return str.split(reg);
-}
 
 export const generateTransactionExportXlsx = (transactions) => {
 

@@ -320,11 +320,10 @@ export const notificationService = {
     },
     sendEmailFormalNotice: async (letter: Letter, userData: any, user: any, email: string, lang: string) => {
 
-        const text = exportHelper.formatContent(letter.emailText[lang], userData);
 
         const data = {
             name: `${get(user, 'fullName', '')} ${get(user, 'lname', '')}`,
-            text
+            text: letter.emailText[lang]
         }
 
         const HtmlBody = await exportHelper.generateFormalNoticeMail(data, userData);

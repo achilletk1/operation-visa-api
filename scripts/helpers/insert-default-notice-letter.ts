@@ -12,7 +12,7 @@ export const inserDefaultLetter = async () => {
             "fr": {
                 "headLeftText": "BCI Congo//BP: 147 Congo brazzaville//242695848620",
 
-                "headRightText": "{{NOM_CLIENT}}// {{EMAIL_CLIENT}} //{{TELEPHONE_CLIENT}} //Fait à Brazaville le {{DATE_COURANTE_LONG}}",
+                "headRightText": "{{NOM_CLIENT}}//{{EMAIL_CLIENT}}//{{TELEPHONE_CLIENT}} //Fait à Brazaville le {{DATE_COURANTE_LONG}}",
 
                 "letterRef": "",
 

@@ -5,8 +5,7 @@ import { config } from '../../config';
 import { get } from 'lodash';
 import { RequestCeilingIncrease } from '../../models/request-ceiling-increase';
 import { commonService } from '../common.service';
-import { travelService } from '../travel.service';
-import { notificationService } from '../notification.service';
+import * as formatHelper from './format.helper';
 
 import moment = require('moment');
 import { User } from '../../models/user';
@@ -27,7 +26,6 @@ let templateOnlinePayement: any;
 let templateOnlinePayementStatus: any;
 let templateTravelStatus: any;
 let templateValidationTokenMail: any;
-let visaTemplateExceding :any;
 
 (async () => {
     templateVisaExceding = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
@@ -58,7 +56,7 @@ const company = `${config.get('template.company')}`;
 export const generateMailVisaExceding = (content: any) => {
 
     try {
-     
+
         const data = {
             content,
             actionUrl
@@ -435,7 +433,7 @@ export const generateMailValidCeiling = (ceiling: any) => {
 
 export const generateVisaTemplate = async (content: any, userData: any, isTest?: boolean) => {
     try {
-        const data = replaceVariables(content, {
+        const data = formatHelper.replaceVariables(content, {
             ...userData, 'SYSTEM_TODAY_LONG': moment().locale('fr'),
             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
         }, isTest);
@@ -451,7 +449,7 @@ export const generateVisaTemplate = async (content: any, userData: any, isTest?:
 
 export const generateVisaTemplateForNotification = async (content: any, userData: any, isTest?: boolean) => {
     try {
-        const data = replaceVariables(content?.email?.french, {
+        const data = formatHelper.replaceVariables(content?.email?.french, {
             ...userData, 'SYSTEM_TODAY_LONG': moment().locale('fr'),
             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
         }, isTest);
@@ -494,45 +492,14 @@ export const generateMailContentValidationToken = (user: User, authToken: any) =
 }
 
 const formatVisaTemplate = (content: any) => {
-    const reg = '//';
     const data = {
         objectText: get(content, 'object', ''),
-        bodyText: goToTheLine(`${get(content, 'content', '')}`, reg)
+        bodyText: `${get(content, 'content', '')}`
     }
 
     return data;
 };
 
-
-const goToTheLine = (str: string, reg: string) => {
-    return str.split(reg);
-}
-
-const replaceVariables = (content: any, values: any, isTest?: boolean) => {
-    const obj = {};
-
-    for (const key in content) {
-        if (!content.hasOwnProperty(key)) { break; }
-        obj[key] = formatContent(content[key], values, isTest);
-    }
-    return obj;
-}
-
-export const formatContent = (str: string, values: any, isTest?: boolean) => {
-    if (!str) { return '' }
-    if (isTest) {
-        str = str.split(`{{`).join(`[`);
-        str = str.split(`}}`).join(`]`);
-        return str;
-    }
-    for (const key of values) {
-        if (str.includes(`{{${key}}}`)) {
-            str = str.split(`{{${key}}}`).join(`${values[key]}`);
-        }
-    }
-
-    return str;
-};
 export const generateOnlinePayementDeclarationMail = (info: any) => {
 
     try {

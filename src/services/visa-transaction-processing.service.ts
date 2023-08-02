@@ -18,6 +18,7 @@ import { logger } from "../winston";
 import { ObjectId } from "mongodb";
 import moment from 'moment';
 import { commonService } from "./common.service";
+import * as formatHelper from './helpers/format.helper';
 
 
 export const visaTransactonsProcessingService = {
@@ -82,14 +83,17 @@ export const visaTransactonsProcessingService = {
     },
 
     startRevivalMail: async (): Promise<any> => {
-        const travels = await travelsCollection.getTravelsBy({ 'proofTravel': OpeVisaStatus.TO_VALIDATED });
+        const travels = await travelsCollection.getTravelsBy({ 'proofTravel': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
 
         for (const travel of travels) {
             const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
             const currentDate = moment().valueOf();
             let userData: any;
             if (moment(currentDate).diff(firstDate, 'days') === 30) {
-                userData = await cbsService.getUserDataByCode(get(travel, 'user.clientCode'));
+                userData = formatHelper.getVariablesValue({
+                    transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount,
+                    user: undefined
+                })
                 const letter = await lettersCollection.getLetterBy({});
                 if (!letter) { return; }
                 await notificationService.sendEmailFormalNotice(letter, userData, get(travel, 'user'), get(travel, 'user.email'), 'fr');

@@ -42,22 +42,34 @@ export interface VisaTransaction {
   _id?: string;
   clientCode?: string;
   fullName?: string;
+  manager?: {
+    code?: string;
+    name?: string
+  };
   beneficiary?: string;
   amount?: number;
+  amountTrans?: number;
+  currencyTrans?: string;
+  amountCompens?: number;
+  currencyCompens?: number;
   date?: number;
-  type: string;
+  type?: string;
   ncp?: string;
   age?: string;
   card?: {
-    code: string;
-    label: string;
+    code?: string;
+    label?: string;
+    name?: string;
   };
+  cha: string;
   country?: string;
   category?: string;
   reference?: string;
   currentMonth?: number;
   statementRef?: string;
-}
+  tel?: string;
+  email?: string;
+ }
 
 export interface VisaCeiling {
   _id: string;
