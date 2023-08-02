@@ -4,7 +4,7 @@ import { lettersCollection } from '../collections/letters.collection';
 import { logger } from '../winston';
 import { commonService } from './common.service';
 import * as  exportsHelper from './helpers/exports.helper'
-
+import * as formatHelper from './helpers/format.helper'
 
 export const lettersService = {
 
@@ -86,12 +86,14 @@ export const lettersService = {
         try {
 
             if (!letter) { return new Error('LetterNotFound') }
+            const pdfDataEn = formatHelper.replaceVariables(letter.pdf.fr, {}, true);
+            const pdfDataFr = formatHelper.replaceVariables(letter.pdf.fr, {}, true);
 
-            const pdfStringEn = await exportsHelper.generateFormalNoticeLetter(letter?.pdf?.en, {}, letter?.pdf?.signature, true);
+            const pdfStringEn = await exportsHelper.generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await exportsHelper.generateFormalNoticeLetter(letter?.pdf?.fr, {},letter?.pdf?.signature, true);
+            const pdfStringFr = await exportsHelper.generateFormalNoticeLetter({ ...pdfDataFr, signature: letter?.pdf?.signature });
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 

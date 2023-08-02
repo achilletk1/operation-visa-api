@@ -7,7 +7,6 @@ import handlebars from 'handlebars';
 import { get } from 'lodash';
 import moment from "moment";
 import XLSX from 'xlsx';
-import * as formatHelper from './format.helper';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification: any;
@@ -15,7 +14,7 @@ let templateFormalNoticeMail: any;
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
     templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
-    templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-template-mail.template.html', 'utf8');
+    templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-mail.template.html', 'utf8');
 })();
 
 export const generateNotificationExportPdf = async (user: any, notification: any, start: any, end: any) => {
@@ -74,20 +73,13 @@ const getTemplateNotificationPdfData = (user: User, notifications: any, start: a
 };
 
 
-export const generateFormalNoticeLetter = async (content: any, userData: any, signature: string, isTest?: boolean) => {
+export const generateFormalNoticeLetter = async (data: any) => {
     try {
-        const values = {
-            ...userData,
-            'SYSTEM_TODAY_LONG': moment().locale('fr'),
-            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
-        }
-        const data = formatHelper.replaceVariables(content, values, isTest);
 
-        const templateData = generateTemplateFormalNoticeLetter(data, signature);
 
         const template = handlebars.compile(templateFormalNoticeLetter);
 
-        const html = template(templateData);
+        const html = template(data);
 
         return await pdf.setAttachment(html);
     } catch (error) {
@@ -96,26 +88,10 @@ export const generateFormalNoticeLetter = async (content: any, userData: any, si
     }
 };
 
-export const generateFormalNoticeMail = async (content: any, userData: any, isTest?: boolean) => {
+export const generateFormalNoticeMail = async (data: any) => {
     try {
-        const values = {
-            ...userData,
-            'SYSTEM_TODAY_LONG': moment().locale('fr'),
-            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
-        }
-        const data = formatHelper.replaceVariables(content, values, isTest);
-
-        const temlateData = generateTemplateFormalNoticeMail(data);
-
         const template = handlebars.compile(templateFormalNoticeMail);
-
-        const html = template(temlateData);
-        /* const options = {
-             method: 'POST',
-             uri: `${config.get('pdfApiUrl')}/api/v1/generatePdf`,
-             body: { html },
-             json: true
-         }*/
+        const html = template(data);
         return html;
     } catch (error) {
         logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
@@ -123,32 +99,7 @@ export const generateFormalNoticeMail = async (content: any, userData: any, isTe
     }
 };
 
-const generateTemplateFormalNoticeLetter = (letter: Letter, signature: string) => {
-    const data = {
-        letterRef: get(letter, 'letterRef', ''),
-        headLeftText: `${get(letter, 'headLeftText', '')}`,
-        headRightText: `${get(letter, 'headRightText', '')}`,
-        introductionTexT: `${get(letter, 'introductionTexT', '')}`,
-        salutationText: `${get(letter, 'salutationText', '')}`,
-        objectText: get(letter, 'objectText', ''),
-        bodyText: `${get(letter, 'bodyText', '')}`,
-        conclusionText: `${get(letter, 'conclusionText', '')}`,
-        footerText: `${get(letter, 'footerText', '')}`,
-        signatureText: get(letter, 'signatureText', ''),
-        signature
-    }
 
-    return data;
-};
-
-const generateTemplateFormalNoticeMail = (content: any) => {
-    const data = {
-        objectText: get(content, 'object', ''),
-        bodyText: `${get(content, 'content', '')}`
-    }
-
-    return data;
-};
 
 
 export const generateTransactionExportXlsx = (transactions) => {

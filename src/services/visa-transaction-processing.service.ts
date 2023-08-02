@@ -82,34 +82,46 @@ export const visaTransactonsProcessingService = {
     },
 
     startRevivalMail: async (): Promise<any> => {
-        const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
+        try {
+            const setting = await settingCollection.getSettingsByKey('start_revival_mail_in_progress');
+            if (setting?.value === true) { console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH'); return }
+            await settingCollection.insertSetting({ key: 'start_revival_mail_in_progress', value: true });
 
-        for (const travel of travels) {
-            const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
-            const currentDate = moment().valueOf();
-            const letter = await lettersCollection.getLetterBy({});
-            if (!letter) { return; }
+            const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
 
-            let userData: any;
-            if (moment(currentDate).diff(firstDate, 'days') === letter?.period) {
-                userData = formatHelper.getVariablesValue({
-                    transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount,
-                    user: undefined
-                })
-                await notificationService.sendEmailFormalNotice(letter, userData, get(travel, 'user'), get(travel, 'user.email'), 'fr');
-                continue;
-            }
-
-
-            if (moment(currentDate).diff(firstDate, 'days') === 15) {
-                userData = await cbsService.getUserDataByCode(get(travel, 'user.clientCode'));
+            for (const travel of travels) {
+                const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
+                const currentDate = moment().valueOf();
                 const letter = await lettersCollection.getLetterBy({});
-                if (!letter) { return; }
-                await notificationService.sendVisaTemplateEmail(travel, userData, 'Preuve de voyage non justifiée', 'relance');
-                continue;
+                if (!letter) { return new Error('LetterNotFound'); }
+
+                let userData: any;
+                userData = formatHelper.getVariablesValue({
+                    transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount
+                })
+                if (moment(currentDate).diff(firstDate, 'days') >= letter?.period) {
+                    await Promise.all([
+                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'fr', 'Lettre de mise en demeure'),
+                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'en', 'Formal notice letter')
+                    ]);
+
+                    await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED });
+                    continue;
+                }
+                if (moment(currentDate).diff(firstDate, 'days') === 15) {
+                    await notificationService.sendVisaTemplateEmail(travel, userData, 'Preuve de voyage non justifiée', 'relance');
+                    continue;
+                }
+
+
             }
-
-
+            const resp = await settingCollection.deleteSetting('start_revival_mail_in_progress')
+            console.log('resp', resp);
+        } catch (error) {
+            const resp = await settingCollection.deleteSetting('start_revival_mail_in_progress')
+            console.log('resp', resp);
+            logger.error(`error during startRevivalMail \n${error.name} \n${error.stack}\n`);
+            return error
         }
     }
 

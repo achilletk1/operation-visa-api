@@ -8,6 +8,7 @@ import { filesService } from './files.service';
 import * as visaHelper from './helpers/visa-operations.service.helper';
 import { Attachment, OpeVisaStatus } from './../models/visa-operations';
 import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
+import { lettersService } from './letters.service';
 
 
 export const commonService = {

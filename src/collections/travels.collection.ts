@@ -24,7 +24,7 @@ export const travelsCollection = {
         return await database.collection(collectionName).findOne({ ...filters });
     },
 
-    updateTravelsById: async (id: string, set: Travel, unset?: Travel): Promise<any> => {
+    updateTravelsById: async (id: string, set: any, unset?: Travel): Promise<any> => {
         const database = await getDatabase();
         const query: any = {};
         delete set._id;

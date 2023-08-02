@@ -1,10 +1,10 @@
 import moment from "moment";
 import { VisaTransaction } from "../../models/visa-operations";
-import { User } from "../../models/user";
 import * as visaHelper from "../helpers/visa-operations.service.helper";
+import handlebars from 'handlebars';
 
 export const replaceVariables = (content: any, values: any, isTest?: boolean) => {
-    const obj = {};
+    const obj: any = {};
     for (const key in content) {
         if (!content.hasOwnProperty(key)) { break; }
         obj[key] = goToTheLine(formatContent(content[key], values, isTest));
@@ -20,7 +20,7 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
         str = str.split(`}}`).join(`]`);
         return str;
     }
-    for (const key of values) {
+    for (const key in values) {
         if (str.includes(`{{${key}}}`)) {
             str = str.split(`{{${key}}}`).join(`${values[key]}`);
         }
@@ -33,10 +33,10 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
 const goToTheLine = (str: string) => {
     const reg = '//';
     str = str ?? '';
-    return str.includes(reg) ? new Handlebars.SafeString(str.split(reg).join('<br>')) : str;
+    return str.includes(reg) ? new handlebars.SafeString(str.split(reg).join('<br>')) : str;
 }
 
-export const getVariablesValue = (data: { transactions: VisaTransaction[], user: User, amount: number, ceiling: number }) => {
+export const getVariablesValue = (data: { transactions: VisaTransaction[], amount: number, ceiling: number }) => {
     const { transactions, amount, ceiling } = data;
     const transaction = transactions[0];
     const date = Math.min(...transactions.map(elt => elt?.date));
@@ -48,8 +48,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], user:
         NOM_CLIENT: transaction?.fullName || '',
         CODE_GESTIONNAIRE: transaction?.manager?.code || '',
         NOM_GESTIONNAIRE: transaction?.manager?.name || '',
-        TELEPHONE_CLIENT:  transaction?.tel || '',
-        EMAIL_CLIENT:  transaction?.email || '',
+        TELEPHONE_CLIENT: transaction?.tel || '',
+        EMAIL_CLIENT: transaction?.email || '',
         NOM_CARTE: transaction?.card?.name || '',
         CARTE: transaction?.card?.code || '',
         PRODUIT: transaction?.card.label,

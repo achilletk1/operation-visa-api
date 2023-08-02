@@ -21,7 +21,7 @@ import { templatesCollection } from '../collections/templates.collection';
 import { OpeVisaStatus } from '../models/visa-operations';
 import { queueCollection } from '../collections/queue.collection';
 import { User } from '../models/user';
-
+import * as formatHelper from './helpers/format.helper';
 const classPath = 'services.notificationService';
 
 const appName = `${config.get('template.app')}`;
@@ -105,7 +105,7 @@ export const notificationService = {
 
         } catch (error) {
             logger.error(
-                `Error during sendEmailVisaDepassment to ${receiver}. \n ${error.message} \n${error.stack}`
+                `Error during sendVisaTemplateEmail to ${receiver}. \n ${error.message} \n${error.stack}`
             );
             return error;
         }
@@ -318,21 +318,28 @@ export const notificationService = {
             return error;
         }
     },
-    sendEmailFormalNotice: async (letter: Letter, userData: any, user: any, email: string, lang: string) => {
+    sendEmailFormalNotice: async (email: string, letter: Letter, userData: any, lang: string, subject: string) => {
 
 
-        const data = {
-            name: `${get(user, 'fullName', '')} ${get(user, 'lname', '')}`,
+        const content = {
             text: letter.emailText[lang]
         }
+        const formatedContent = formatHelper.replaceVariables(content, userData);
 
-        const HtmlBody = await exportHelper.generateFormalNoticeMail(data, userData);
+        const data = {
+            name: userData['NOM_CLIENT'],
+            civility: 'Mr/Mme',
+            ...formatedContent,
 
-        const subject = `Lettre de mise en demeure`;
+        }
+
+        const HtmlBody = await exportHelper.generateFormalNoticeMail(data);
 
         const receiver = config.get('env') === 'production' ? `${email}` : config.get('emailTest');
 
-        const pdfString = await exportHelper.generateFormalNoticeLetter(letter.pdf[lang], userData, letter.pdf.signature);
+        const pdfData = formatHelper.replaceVariables(letter.pdf[lang], userData);
+
+        const pdfString = await exportHelper.generateFormalNoticeLetter({ ...pdfData, signature: letter.pdf.signature });
 
         try {
             let Attachments: any;
@@ -618,26 +625,24 @@ const sendEmailFromLONDOServer = async (receiver?: any, subject?: any, body?: an
 const sendEmail = async (receiver?: any, subject?: any, body?: any, pdfString?: any, cc?: any, excelData?: any) => {
 
     if (config.get('env') !== 'staging-bci' && config.get('env') !== 'production') {
-        let Attachments: any[] = null;
+        let attachments: any[] = null;
         if (pdfString && !(pdfString instanceof Error)) {
-            Attachments ??= [];
-            Attachments.push({
+            attachments ??= [];
+            attachments.push({
                 name: `Opération-du-${moment().valueOf()}.pdf`,
                 content: pdfString,
                 contentType: 'application/pdf'
             });
         }
         if (excelData && !(excelData instanceof Error)) {
-            Attachments ??= [];
-            Attachments.push({
+            attachments ??= [];
+            attachments.push({
                 name: excelData.fileName,
                 content: excelData.fileContent.toString('base64'),
                 contentType: excelData.contentType,
             });
         }
-        return queueNotification('mail', { subject, receiver, cc, date: new Date(), body, Attachments });
-
-        // return sendEmailFromLONDOServer(receiver, subject, body, Attachments || null, cc || null);
+        return queueNotification('mail', { subject, receiver, cc, date: new Date(), body, attachments });
     }
 };
 
@@ -698,10 +703,6 @@ const insertNotification = async (notification: any) => {
         logger.error(`\nError in insert notification \n${error.message}\n${error.stack}\n`);
         return error;
     }
-};
-const getNumberWithSpaces = (x: { toString: () => string; }) => {
-    if (!x) { return '0' }
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 };
 
 

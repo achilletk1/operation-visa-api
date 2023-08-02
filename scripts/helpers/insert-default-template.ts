@@ -235,10 +235,6 @@ export const insertDefaultTemplateSetting = async () => {
     ]
 
     console.log('Insert default Templates  collection');
-
-    const respDelete = await db.collection("visa_operations_templates").drop();
-    console.log('response delete', respDelete);
-
     const response = await db.collection('visa_operations_templates').insertMany(templates);
     console.log(response.insertedIds);
 };
