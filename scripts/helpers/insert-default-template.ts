@@ -110,7 +110,7 @@ export const insertDefaultTemplateSetting = async () => {
             },
             sendType: 200,
             enabled: true,
-            period: 'J+0',
+            period: 0,
             date: {
                 created: moment().valueOf(),
             }
@@ -178,7 +178,7 @@ export const insertDefaultTemplateSetting = async () => {
             },
             sendType: 200,
             enabled: true,
-            period: 'J+0',
+            period: 0,
             date: {
                 created: moment().valueOf(),
             }
@@ -226,7 +226,7 @@ export const insertDefaultTemplateSetting = async () => {
                 obj: `Bank card block notification`
             },
             sendType: 200,
-            period: 'J+38',
+            period: 0,
             enabled: true,
             date: {
                 created: moment().valueOf(),
