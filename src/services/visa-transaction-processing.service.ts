@@ -1,4 +1,3 @@
-import { verifyIfisInLongTermTravel, onlinePaymentsTreatment } from "./helpers/visa-operations.service.helper";
 import { visaTransactinnsTmpCollection } from "../collections/visa_transactions_tmp.collection";
 import { visaTransactionsCollection } from "../collections/visa-transactions.collection";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
@@ -88,14 +87,15 @@ export const visaTransactonsProcessingService = {
         for (const travel of travels) {
             const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
             const currentDate = moment().valueOf();
+            const letter = await lettersCollection.getLetterBy({});
+            if (!letter) { return; }
+
             let userData: any;
-            if (moment(currentDate).diff(firstDate, 'days') === 30) {
+            if (moment(currentDate).diff(firstDate, 'days') === letter?.period) {
                 userData = formatHelper.getVariablesValue({
                     transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount,
                     user: undefined
                 })
-                const letter = await lettersCollection.getLetterBy({});
-                if (!letter) { return; }
                 await notificationService.sendEmailFormalNotice(letter, userData, get(travel, 'user'), get(travel, 'user.email'), 'fr');
                 continue;
             }

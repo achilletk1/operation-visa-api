@@ -10,11 +10,12 @@ import Confirm from 'prompt-confirm';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-//    await inserDefaultLongTravelsTypes();
-//    await inserDefaultVouchers();
-//    await inserDefaultSetting();
-   await inserDefaultVisaCeilings();
-//    await inserDefaultVaraibles();
+    await inserDefaultLongTravelsTypes();
+    await inserDefaultLetter();
+    await inserDefaultPropertyType();
+    await inserDefaultSetting();
+    await insertDefaultTemplateSetting();
+    await inserDefaultVouchers();
 }
 
 if (config.get('env') !== 'development') {

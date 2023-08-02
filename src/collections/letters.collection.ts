@@ -57,13 +57,13 @@ export const lettersCollection = {
         return result
     },
 
-    getLetterBy: async (params: any):Promise<any> => {
+    getLetterBy: async (params: any): Promise<Letter> => {
         const database = await getDatabase();
 
         const result = await database.collection(collectionName).findOne(params);
         return result
     },
-    
+
     deleteLetter: async (id: string) => {
         const database = await getDatabase();
         const result = await database.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
