@@ -101,15 +101,15 @@ export const visaTransactonsProcessingService = {
                 userData = formatHelper.getVariablesValue({
                     transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount
                 })
-                // if (moment(currentDate).diff(firstDate, 'days') >= letter?.period) {
-                //     await Promise.all([
-                //         notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'fr', 'Lettre de mise en demeure'),
-                //         notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'en', 'Formal notice letter')
-                //     ]);
+                if (moment(currentDate).diff(firstDate, 'days') >= letter?.period) {
+                    await Promise.all([
+                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'fr', 'Lettre de mise en demeure'),
+                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'en', 'Formal notice letter')
+                    ]);
 
-                //     await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED });
-                //     continue;
-                // }
+                    await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED });
+                    continue;
+                }
                 if (moment(currentDate).diff(firstDate, 'days') >= visaTemplate.period) {
                     await Promise.all([
                         notificationService.sendVisaTemplateEmail(userData, get(travel, 'user.email'), visaTemplate, 'fr'),
@@ -320,9 +320,9 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
     for (const element of transactionsGroupedByTravel) {
 
         if (isEmpty(element?.transactions)) { return }
-
-        const firstDate = Math.min(...element?.transactions.map((elt => elt?.date)));
-        const lastDate = Math.max(...element?.transactions.map((elt => elt?.date)));
+        const dates = element?.transactions.map((elt => elt?.date));
+        const firstDate = Math.min(...dates);
+        const lastDate = Math.max(...dates);
 
         let travel: Travel = element?.travel;
         if (travel) { travel.transactions = !isEmpty(travel?.transactions) && !isEmpty(travel) ? travel?.transactions : []; }

@@ -36,8 +36,8 @@ export const travelService = {
             travel.dates = { ...travel.dates, created: moment().valueOf() };
 
             //========================== A supprimer =================
-           // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 1680252497051, travel.dates.created, 8000000)
-           //========================= le code en commentaire ci dessus a été ecrit pour des tests et peut etre supprimer ===
+            // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 1680252497051, travel.dates.created, 8000000)
+            //========================= le code en commentaire ci dessus a été ecrit pour des tests et peut etre supprimer ===
 
 
             // insert ceiling in travel
@@ -85,11 +85,6 @@ export const travelService = {
             travel.status = OpeVisaStatus.TO_COMPLETED;
 
             // Set travel creation date
-            travel.dates = { ...travel.dates, created: moment().valueOf() };
-            const firstDate = Math.min(...travel.transactions.map((elt => elt.date)));
-            const lastDate = Math.max(...travel.transactions.map((elt => elt.date)));
-
-            travel.proofTravel.dates = { start: firstDate, end: lastDate }
             travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
 
             const visaCeilingType = travel.proofTravel?.travelReason?.code === 300 ? VisaCeilingType.STUDYING_TRAVEL : VisaCeilingType.SHORT_TERM_TRAVEL;
@@ -107,7 +102,7 @@ export const travelService = {
 
             // await travelsCollection.updateTravelsById(insertedId, travel);
 
-    
+
             travel._id = insertedId.toString();
 
             return travel;

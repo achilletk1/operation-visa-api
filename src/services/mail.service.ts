@@ -28,11 +28,11 @@ export const mailService = {
             let emailDataFr = await formatHelper.replaceVariables(data['fr'], {}, false);
             let emailDataEn = await formatHelper.replaceVariables(data['en'], {}, false);
 
-            const pdfStringEn = await NotificationHeper.generateMailByTemplate({ ...emailDataFr, name: '[UTILISATEUR]' });
+            const pdfStringEn = await NotificationHeper.generateMailByTemplate({ ...emailDataEn, name: '[UTILISATEUR]' });
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await NotificationHeper.generateMailByTemplate({ ...emailDataEn, name: '[UTILISATEUR]' });
+            const pdfStringFr = await NotificationHeper.generateMailByTemplate({ ...emailDataFr, name: '[UTILISATEUR]' });
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 

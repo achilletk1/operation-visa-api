@@ -11,13 +11,6 @@ export enum UserCategory {
   OPERATOR = 604
 }
 
-// export interface Recipient {
-//     label?: string;
-//     ncp?: string;
-//     age?: string;
-//     bankName?: string;
-//     bankCode?: string;
-// }
 
 export enum Status {
   ATTENTE = 100,
@@ -106,10 +99,3 @@ export interface CeilingInfors {
   amount?: number;
 }
 
-// export interface Validator {
-//   validatorId?: string;
-//   validatorName?: string;
-//   date?: number;
-//   isValidated?: boolean;
-//   rejectReason?: string;
-// }
