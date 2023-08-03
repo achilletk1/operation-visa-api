@@ -1,4 +1,5 @@
 import { getDatabase } from '../config';
+import { isEmpty } from 'lodash';
 
 export const inserDefaultLetter = async () => {
 
@@ -61,11 +62,15 @@ export const inserDefaultLetter = async () => {
         period: 30
     }
 
-
     console.log('insert default notice letter into visa_operations_letters collection');
 
-    const respDelete = await db.collection("visa_operations_letters").drop();
-    console.log('response delete', respDelete);
+    const collectionsExists = await db.listCollections({name: 'visa_operations_letters'}).toArray();
+    console.log('collectionsExists', collectionsExists[0]?.name);
+
+    if (!isEmpty(collectionsExists)) {
+        const respDelete = await db.collection("visa_operations_letters").drop();
+        console.log('response delete', respDelete);
+    }
 
     const response = await db.collection('visa_operations_letters').insertOne(noticeLetters);
     console.log(response.insertedId);

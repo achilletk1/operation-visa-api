@@ -1,4 +1,5 @@
 import { getDatabase } from '../config';
+import { isEmpty } from 'lodash';
 import  moment from 'moment'
 
 export const inserDefaultLongTravelsTypes = async () => {
@@ -164,11 +165,15 @@ export const inserDefaultLongTravelsTypes = async () => {
             dates: { created: moment().valueOf() }
         },
     ]
-
     console.log('insert default transfertTypesinto visa_operations_long_travel_types collection');
 
-    const respDelete = await db.collection("visa_operations_long_travel_types").drop();
-    console.log('response delete', respDelete);
+    const collectionsExists = await db.listCollections({name: 'visa_operations_long_travel_types'}).toArray();
+    console.log('collectionsExists', collectionsExists[0]?.name || 'not exists');
+
+    if (!isEmpty(collectionsExists)) {
+        const respDelete = await db.collection("visa_operations_long_travel_types").drop();
+        console.log('response delete', respDelete);
+    }
 
     const response = await db.collection('visa_operations_long_travel_types').insertMany(transfertTypes);
     console.log(response.insertedIds);

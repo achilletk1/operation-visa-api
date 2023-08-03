@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import { getDatabase } from '../config';
 import moment from 'moment'
 
@@ -68,8 +69,13 @@ export const inserDefaultVouchers = async () => {
 
     console.log('Insert default vouchers into vouchers collection');
 
-    const respDelete = await db.collection("visa_operations_vouchers").drop();
-    console.log('response delete', respDelete);
+    const collectionsExists = await db.listCollections({ name: 'visa_operations_vouchers' }).toArray();
+    console.log('collectionsExists', collectionsExists[0]?.name || 'not exists');
+
+    if (!isEmpty(collectionsExists)) {
+        const respDelete = await db.collection("visa_operations_vouchers").drop();
+        console.log('response delete', respDelete);
+    }
 
     const response = await db.collection('visa_operations_vouchers').insertMany(vouchers);
     console.log(response.insertedIds);

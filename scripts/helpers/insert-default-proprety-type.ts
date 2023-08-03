@@ -1,4 +1,5 @@
 import { getDatabase } from '../config';
+import { isEmpty } from 'lodash';
 import moment from 'moment'
 
 export const inserDefaultPropertyType = async () => {
@@ -39,10 +40,15 @@ export const inserDefaultPropertyType = async () => {
     }
   ];
 
-  console.log('insert default property-type vouchers collection');
+  console.log('insert default property-type AND SERVICES TYPES vouchers collection');
 
-  const respDelete = await db.collection("visa_operations_property_and_services_types").drop();
-  console.log('response delete', respDelete);
+  const collectionsExists = await db.listCollections({ name: 'visa_operations_property_and_services_types' }).toArray();
+  console.log('collectionsExists', collectionsExists[0]?.name || 'not exists');
+
+  if (!isEmpty(collectionsExists)) {
+    const respDelete = await db.collection("visa_operations_property_and_services_types").drop();
+    console.log('response delete', respDelete);
+  }
 
   const response = await db.collection('visa_operations_property_and_services_types').insertMany(propertyType);
   console.log(response.insertedIds);

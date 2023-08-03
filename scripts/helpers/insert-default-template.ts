@@ -1,4 +1,5 @@
 import { getDatabase } from '../config';
+import { isEmpty } from 'lodash';
 import moment from 'moment'
 
 export const insertDefaultTemplateSetting = async () => {
@@ -235,6 +236,15 @@ export const insertDefaultTemplateSetting = async () => {
     ]
 
     console.log('Insert default Templates  collection');
+
+    const collectionsExists = await db.listCollections({name: 'visa_operations_templates'}).toArray();
+    console.log('collectionsExists', collectionsExists[0]?.name);
+
+    if (!isEmpty(collectionsExists)) {
+        const respDelete = await db.collection("visa_operations_templates").drop();
+        console.log('response delete', respDelete);
+    }
+
     const response = await db.collection('visa_operations_templates').insertMany(templates);
     console.log(response.insertedIds);
 };

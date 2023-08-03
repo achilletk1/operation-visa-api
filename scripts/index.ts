@@ -10,6 +10,7 @@ import Confirm from 'prompt-confirm';
 
 const runScripts = async () => {
     // SCRIPTS to execute
+    await inserDefaultVisaCeilings();
     await inserDefaultLongTravelsTypes();
     await inserDefaultLetter();
     await inserDefaultPropertyType();

@@ -17,8 +17,11 @@ export const inserDefaultSetting = async () => {
             users: []
         },
     ]
-    console.log('insert default Settings  collection');   
-    // db.dropCollection("settings",function(err, result) { console.log("Collection droped");});
+    console.log('insert default max size file  collection');   
+
+    const respDelete = await db.collection("settings").deleteOne({key: 'max_upload_file_size'});
+    console.log('response delete', respDelete);
+
     const response = await db.collection('settings').insertMany(Settings);
     console.log(response.insertedIds);
 };

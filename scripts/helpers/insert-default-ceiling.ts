@@ -1,4 +1,5 @@
 import { getDatabase } from '../config';
+import { isEmpty } from 'lodash';
 import moment from 'moment'
 
 export const inserDefaultVisaCeilings = async () => {
@@ -44,7 +45,15 @@ export const inserDefaultVisaCeilings = async () => {
         },
     ]
     console.log('insert default ceilings  collection');
-    await db.collection("visa_transactions_ceillings").drop();
+
+    const collectionsExists = await db.listCollections({name:'visa_transactions_ceillings'}).toArray();
+    console.log('collectionsExists', collectionsExists[0]?.name || 'not exists');
+
+    if (!isEmpty(collectionsExists)) {
+        const respDelete = await db.collection("visa_transactions_ceillings").drop();
+        console.log('response delete', respDelete);
+    }
+
     const response = await db.collection('visa_transactions_ceillings').insertMany(ceilings);
     console.log(response.insertedIds);
 };
