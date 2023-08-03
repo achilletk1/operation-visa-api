@@ -112,8 +112,8 @@ export const visaTransactonsProcessingService = {
                 // }
                 if (moment(currentDate).diff(firstDate, 'days') >= visaTemplate.period) {
                     await Promise.all([
-                        notificationService.sendVisaTemplateEmail(travel, userData, visaTemplate, 'fr'),
-                        notificationService.sendVisaTemplateEmail(travel, userData, visaTemplate, 'en')
+                        notificationService.sendVisaTemplateEmail(userData, get(travel, 'user.email'), visaTemplate, 'fr'),
+                        notificationService.sendVisaTemplateEmail(userData, get(travel, 'user.email'), visaTemplate, 'en')
                     ]);
                     continue;
                 }
