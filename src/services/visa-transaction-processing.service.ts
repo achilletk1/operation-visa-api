@@ -11,13 +11,13 @@ import { notificationService } from './notification.service';
 import { OpeVisaStatus } from "../models/visa-operations";
 import { Travel, TravelType } from "../models/travel";
 import { travelService } from "./travel.service";
-import { cbsService } from './cbs.service';
-import { get, isEmpty } from "lodash";
+import { get, isEmpty, template } from "lodash";
 import { logger } from "../winston";
 import { ObjectId } from "mongodb";
 import moment from 'moment';
 import { commonService } from "./common.service";
 import * as formatHelper from './helpers/format.helper';
+import { templatesCollection } from "../collections/templates.collection";
 
 
 export const visaTransactonsProcessingService = {
@@ -88,28 +88,33 @@ export const visaTransactonsProcessingService = {
             await settingCollection.insertSetting({ key: 'start_revival_mail_in_progress', value: true });
 
             const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
+            const letter = await lettersCollection.getLetterBy({});
+            if (!letter) { return new Error('LetterNotFound'); }
+
+            const visaTemplate = await templatesCollection.getTemplateBy({ key: 'transactionOutsideNotJustified' });
 
             for (const travel of travels) {
                 const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
                 const currentDate = moment().valueOf();
-                const letter = await lettersCollection.getLetterBy({});
-                if (!letter) { return new Error('LetterNotFound'); }
 
                 let userData: any;
                 userData = formatHelper.getVariablesValue({
                     transactions: travel?.transactions, ceiling: travel?.ceiling, amount: travel.transactions[0].amount
                 })
-                if (moment(currentDate).diff(firstDate, 'days') >= letter?.period) {
-                    await Promise.all([
-                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'fr', 'Lettre de mise en demeure'),
-                        notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'en', 'Formal notice letter')
-                    ]);
+                // if (moment(currentDate).diff(firstDate, 'days') >= letter?.period) {
+                //     await Promise.all([
+                //         notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'fr', 'Lettre de mise en demeure'),
+                //         notificationService.sendEmailFormalNotice(get(travel, 'user.email'), letter, userData, 'en', 'Formal notice letter')
+                //     ]);
 
-                    await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED });
-                    continue;
-                }
-                if (moment(currentDate).diff(firstDate, 'days') === 15) {
-                    await notificationService.sendVisaTemplateEmail(travel, userData, 'Preuve de voyage non justifiée', 'relance');
+                //     await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED });
+                //     continue;
+                // }
+                if (moment(currentDate).diff(firstDate, 'days') >= visaTemplate.period) {
+                    await Promise.all([
+                        notificationService.sendVisaTemplateEmail(travel, userData, visaTemplate, 'fr'),
+                        notificationService.sendVisaTemplateEmail(travel, userData, visaTemplate, 'en')
+                    ]);
                     continue;
                 }
 
@@ -213,13 +218,23 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
                 statementsStatus: OpeVisaStatus.EMPTY,
                 transactions: [],
             }
+            onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
         }
+        const totalAmount = commonService.getTotal(selectedTransactions);
 
+        const userData = formatHelper.getVariablesValue({
+            transactions: selectedTransactions, ceiling: onlinePayment?.ceiling, amount: totalAmount,
+        });
+        if (isEmpty(onlinePayment?.transactions)) {
+            await Promise.all([
+                notificationService.sendEmailDetectTransactions(userData, selectedTransactions[0].email, 'fr'),
+                notificationService.sendEmailDetectTransactions(userData, selectedTransactions[0].email, 'en')
+            ]);
+        }
         onlinePayment.transactions.push(...selectedTransactions);
 
         onlinePayment.dates.updated = moment().valueOf();
 
-        const totalAmount = commonService.getTotal(onlinePayment?.transactions);
         onlinePayment.amounts = totalAmount;
         onlinePayment.statementAmounts = commonService.getTotal(onlinePayment?.statements, 'statement');
 
@@ -230,17 +245,13 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             onlinePayment.status = statut;
         }
 
-        const firstDate = Math.min(...onlinePayment?.transactions.map((elt => elt?.date))) || 0;
-
-        const currStartDate = moment().startOf('month').valueOf();
-        const currEndDate = moment().endOf('month').valueOf();
-
         if (+totalAmount > +onlinePayment?.ceiling) {
-            await notificationService.sendEmailVisaExceding(onlinePayment, get(onlinePayment, 'user.email'), firstDate, onlinePayment.dates.created, totalAmount)
+            await Promise.all([
+                notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'fr'),
+                notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'en')
+            ]);
             logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
         }
-        if (!onlinePayment?._id && +totalAmount > +onlinePayment?.ceiling) { onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment); }
-        if (!onlinePayment?._id && +totalAmount <= +onlinePayment?.ceiling && (firstDate > currStartDate && firstDate < currEndDate)) { onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment); }
 
         await onlinePaymentsCollection.updateOnlinePaymentsById(onlinePayment?._id, onlinePayment);
     }
@@ -316,7 +327,6 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         let travel: Travel = element?.travel;
         if (travel) { travel.transactions = !isEmpty(travel?.transactions) && !isEmpty(travel) ? travel?.transactions : []; }
 
-        if (travel && travel?.travelType === TravelType.SHORT_TERM_TRAVEL) { travel?.transactions.push(...element?.transactions); }
 
         if (!travel) {
             travel = {
@@ -356,13 +366,27 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 othersAttachements: [],
                 otherAttachmentAmount: 0,
                 othersAttachmentStatus: OpeVisaStatus.EMPTY,
-                transactions: element?.transactions,
+                transactions: []
             };
 
             travel = await travelService.insertTravelFromSystem(travel);
 
             if (travel instanceof Error) { continue }
         }
+
+        if (isEmpty(travel?.transactions)) {
+            const userData = formatHelper.getVariablesValue({
+                transactions: element?.transactions, ceiling: travel?.ceiling, amount: commonService.getTotal(element?.transactions),
+            });
+
+            await Promise.all([
+                notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'fr'),
+                notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'en')
+            ]);
+        }
+
+        if (travel?.travelType === TravelType.SHORT_TERM_TRAVEL) { travel?.transactions.push(...element?.transactions); }
+
 
         if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
             const mergedTransactions = [...element.transactions, ...onlinePaymentsTransactions];
@@ -404,8 +428,14 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth, 'month');
 
                 if (totalAmount > travel?.ceiling) {
-                    const firstDateTransactions = Math.min(...mergedTransactions.map((elt => elt?.date)));
-                    await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDateTransactions, travelMonth.dates.created, totalAmount);
+                    const userData = formatHelper.getVariablesValue({
+                        transactions: travel?.transactions, ceiling: travel?.ceiling, amount: totalAmount
+                    });
+                    await Promise.all([
+                        notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr'),
+                        notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'en')
+                    ]);
+
                     logger.debug(`Exeding travel month, id: ${travelMonth?._id}`);
                 }
 
@@ -428,9 +458,15 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         travelsCollection.updateTravelsById(get(travel, '_id').toString(), travel);
 
         if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
-            const totalAmount = getTotal(travel.transactions);
             if (totalAmount > +travel?.ceiling) {
-                await notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), firstDate, travel?.dates?.created, totalAmount)
+                const userData = formatHelper.getVariablesValue({
+                    transactions: travel?.transactions, ceiling: travel?.ceiling, amount: totalAmount
+                })
+
+                await Promise.all([
+                    notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr'),
+                    notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr')
+                ]);
                 logger.debug(`Exeding travel, id: ${travel?._id}`);
 
             }

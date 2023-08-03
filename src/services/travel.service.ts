@@ -107,9 +107,7 @@ export const travelService = {
 
             // await travelsCollection.updateTravelsById(insertedId, travel);
 
-            Promise.all([
-                await notificationService.sendEmailDetectTravel(travel, get(travel, 'user.email')),
-            ]);
+    
             travel._id = insertedId.toString();
 
             return travel;

@@ -10,8 +10,7 @@ import * as formatHelper from './format.helper';
 import moment = require('moment');
 import { User } from '../../models/user';
 
-let templateVisaExceding: any;
-let templateDetectTravel: any;
+let templateVisaMail: any;
 let templateStepStatus: any;
 let templateDeclaration: any;
 let templateRequestCeiling: any;
@@ -28,8 +27,7 @@ let templateTravelStatus: any;
 let templateValidationTokenMail: any;
 
 (async () => {
-    templateVisaExceding = await readFilePromise(__dirname + '/templates/visa-depassment-mail.template.html', 'utf8');
-    templateDetectTravel = await readFilePromise(__dirname + '/templates/travel-detect-mail.template.html', 'utf8');
+    templateVisaMail = await readFilePromise(__dirname + '/templates/visa-mail.template.html', 'utf8');
     templateStepStatus = await readFilePromise(__dirname + '/templates/travel-reject-step.template.html', 'utf8');
     templateDeclaration = await readFilePromise(__dirname + '/templates/travel-declaration-mail.template.html', 'utf8');
     templateRequestCeiling = await readFilePromise(__dirname + '/templates/request-ceiling-mail.template.html', 'utf8');
@@ -53,16 +51,17 @@ const color = `${config.get('template.color')}`;
 const app = `${config.get('template.app')}`;
 const company = `${config.get('template.company')}`;
 
-export const generateMailVisaExceding = (content: any) => {
+export const generateMailByTemplate = (content: any) => {
 
     try {
 
         const data = {
-            content,
-            actionUrl
+            ...content,
+            actionUrl,
+            civility: `Mr/Mme`,
         }
 
-        const template = handlebars.compile(templateVisaExceding);
+        const template = handlebars.compile(templateVisaMail);
 
         const html = template(data);
 
@@ -85,7 +84,7 @@ export const generateMailFormalNotice = (info: any) => {
             actionUrl
         }
 
-        const template = handlebars.compile(templateVisaExceding);
+        const template = handlebars.compile(templateVisaMail);
 
         const html = template(data);
 
@@ -98,31 +97,6 @@ export const generateMailFormalNotice = (info: any) => {
 
 };
 
-export const generateMailTravelDetect = (info: any) => {
-
-    try {
-
-        const data = {
-            civility: `${get(info, 'civility')}`,
-            name: `${get(info, 'name')}`,
-            start: `${get(info, `start`)}`,
-            created: `${get(info, `created`)}`,
-            card: `${get(info, `card`)}`,
-            actionUrl
-        }
-
-        const template = handlebars.compile(templateDetectTravel);
-
-        const html = template(data);
-
-        return html;
-
-    } catch (error) {
-        logger.error(`html travel detected mail generation failed. \n${error.name}\n${error.stack}`);
-        return error;
-    }
-
-};
 
 
 export const generateMailTravelDeclaration = (info: any) => {
@@ -431,21 +405,6 @@ export const generateMailValidCeiling = (ceiling: any) => {
 
 };
 
-export const generateVisaTemplate = async (content: any, userData: any, isTest?: boolean) => {
-    try {
-        const data = formatHelper.replaceVariables(content, {
-            ...userData, 'SYSTEM_TODAY_LONG': moment().locale('fr'),
-            'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
-        }, isTest);
-        const temlateData = formatVisaTemplate(data);
-        const template = handlebars.compile(templateVisaOpe);
-        const html = template(temlateData);
-        return html;
-    } catch (error) {
-        logger.error(`\nPreview  template mail  generation failed ${JSON.stringify(error)}`);
-        return error;
-    }
-};
 
 export const generateVisaTemplateForNotification = async (content: any, userData: any, isTest?: boolean) => {
     try {

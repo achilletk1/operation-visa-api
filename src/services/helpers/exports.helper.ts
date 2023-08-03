@@ -83,7 +83,7 @@ export const generateFormalNoticeLetter = async (data: any) => {
 
         return await pdf.setAttachment(html);
     } catch (error) {
-        logger.error(`\npdf RIB export generation failed ${JSON.stringify(error)}`);
+        logger.error(`\npdf notice letter generator failed ${JSON.stringify(error)}`);
         return error;
     }
 };

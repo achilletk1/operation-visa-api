@@ -1,37 +1,32 @@
 import { User } from "./user";
 
-export enum TemplateType {
-  ONLINEPAYMENT = 100,
-  TRAVEL = 200,
+export enum SendType {
+  SMS = 100,
+  EMAIL = 200,
+  ALL = 300
 }
 
 export interface TemplateForm {
-    _id?: string;
-    label?: string;
-    desc?: string;
-
-    obj?:  {
-      english?:string,
-      french?:string,
-    };
-
-    templateType?: TemplateType;
-    sendType?: number; // 100: SMS; 200: Email
-    notifyPeriod?: string;
-
-    email?: {
-      english?:string,
-      french?:string,
-    };
-
-    sms?:  {
-      english?:string,
-      french?:string,
-    };
-    enabled?: boolean;
-    author?: User;
-    dates?: {
-        created?: number;
-        updated?: number;
-    };
+  _id: any;
+  label?: string;
+  desc?: string;
+  sendType?: SendType; // 100: SMS; 200: Email ; 300 :Les deux ;
+  period: number;
+  enabled?: boolean;
+  author?: User;
+  key?: string;
+  dates?: {
+      created?: number;
+      updated?: number;
+  };
+  fr?:{
+    email?: string;
+    sms?: string;
+    obj?: string;
+  }
+  en?:{
+    email?: string;
+    sms?: string;
+    obj?: string;
+  }
 }

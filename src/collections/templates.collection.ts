@@ -49,11 +49,11 @@ export const templatesCollection = {
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return { insertedId };
     },
-    getTemplateById: async (id: string): Promise<any> => {
+    getTemplateById: async (id: string): Promise<TemplateForm> => {
         const database = await getDatabase();
         try {
             return await database.collection(collectionName)
-                .findOne({ _id: new ObjectId(id.toString()) });
+                .findOne({ _id: new ObjectId(id.toString()) }) as TemplateForm;
         } catch (error) {
             return null;
         }
@@ -74,9 +74,9 @@ export const templatesCollection = {
         const result = await database.collection(collectionName).find(params).toArray();
         return result
     },
-    getTemplateBy: async (params: any) => {
+    getTemplateBy: async (params: any): Promise<TemplateForm> =>{
         const database = await getDatabase();
-        const result = await database.collection(collectionName).findOne(params);
+        const result = await database.collection(collectionName).findOne(params) as TemplateForm;
         return result
     },
 

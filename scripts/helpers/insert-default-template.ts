@@ -22,7 +22,7 @@ export const insertDefaultTemplateSetting = async () => {
                 {{MOIS_DEPART}} a
                 dépassé le plafond autorisé par la
                 BEAC qui est de
-                {{PLAFOND}}.
+                {{PLAFOND}} XAF.
                 //
                 //Nous vous
                 prions à cet effet de nous transmettre les
@@ -46,7 +46,7 @@ export const insertDefaultTemplateSetting = async () => {
                 {{MOIS_DEPART}} a
                 dépassé le plafond autorisé par la
                 BEAC qui est de
-                {{PLAFOND}}.
+                {{PLAFOND}} XAF.
                 //
                 //Nous vous
                 prions à cet effet de nous transmettre les
@@ -70,7 +70,7 @@ export const insertDefaultTemplateSetting = async () => {
                 {{MOIS_DEPART}} has
                 exceeded the
                 BEAC which is
-                {{PLAFOND}}.
+                {{PLAFOND}} XAF.
                 //
                 //We
                 please send us details of your expenses
@@ -92,7 +92,7 @@ export const insertDefaultTemplateSetting = async () => {
                 {{MOIS_DEPART}} has
                 exceeded the
                 BEAC which is
-                {{PLAFOND}}.
+                {{PLAFOND}} XAF.
                 //
                 //We
                 please send us details of your expenses
@@ -110,7 +110,7 @@ export const insertDefaultTemplateSetting = async () => {
             },
             sendType: 200,
             enabled: true,
-            period: 'J+0',
+            period: 0,
             date: {
                 created: moment().valueOf(),
             }
@@ -178,7 +178,7 @@ export const insertDefaultTemplateSetting = async () => {
             },
             sendType: 200,
             enabled: true,
-            period: 'J+0',
+            period: 0,
             date: {
                 created: moment().valueOf(),
             }
@@ -226,7 +226,7 @@ export const insertDefaultTemplateSetting = async () => {
                 obj: `Bank card block notification`
             },
             sendType: 200,
-            period: 'J+38',
+            period: 38,
             enabled: true,
             date: {
                 created: moment().valueOf(),

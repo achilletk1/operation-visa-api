@@ -53,7 +53,7 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         NOM_CARTE: transaction?.card?.name || '',
         CARTE: transaction?.card?.code || '',
         PRODUIT: transaction?.card.label,
-        DATE: moment(date).format('dd/MM/YYYY'),
+        DATE: moment(date).format('DD/MM/YYYY'),
         HEURE: moment(date).format('HH:mm:ss'),
         MONTANT: amount,
         DEVISE: transaction?.currencyTrans,
@@ -66,7 +66,7 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
         MOIS_DEPART: visaHelper.transformDateExpression(transaction?.currentMonth.toString()),
-        DATE_COURANTE: moment().format('dd/MM/YYYY'),
+        DATE_COURANTE: moment().format('DD/MM/YYYY'),
         DATE_COURANTE_LONG: moment().locale('fr'),
     }
 

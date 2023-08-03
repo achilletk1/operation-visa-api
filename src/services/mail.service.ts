@@ -1,8 +1,8 @@
 import { cbsService } from './cbs.service';
 import { logger } from '../winston';
-import * as exportsHelper from './helpers/exports.helper'
+import * as formatHelper from './helpers/format.helper';
 import { TemplateForm } from '../models/templates';
-import  * as NotificationHeper from './helpers/notification.service.helper'
+import * as NotificationHeper from './helpers/notification.service.helper'
 
 
 export const mailService = {
@@ -25,22 +25,14 @@ export const mailService = {
     generateExportView: async (data: TemplateForm) => {
         try {
             if (!data) { return new Error('MailNotFound') }
-            const EmailContentObject ={
-                Emailfr:{
-                    content:data?.email?.french,
-                   object:data?.obj?.french
-                },
-                Emailen:{
-                    content:data?.email?.english,
-                    object:data?.obj?.english
-                }
-            }
-            
-            const pdfStringEn = await NotificationHeper.generateVisaTemplate(EmailContentObject.Emailen,{},  true);
+            let emailDataFr = await formatHelper.replaceVariables(data['fr'], {}, false);
+            let emailDataEn = await formatHelper.replaceVariables(data['en'], {}, false);
+
+            const pdfStringEn = await NotificationHeper.generateMailByTemplate({ ...emailDataFr, name: '[UTILISATEUR]' });
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await NotificationHeper.generateVisaTemplate(EmailContentObject.Emailfr,{},true);
+            const pdfStringFr = await NotificationHeper.generateMailByTemplate({ ...emailDataEn, name: '[UTILISATEUR]' });
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 
