@@ -32,6 +32,7 @@ import { mailController } from './controllers/mail.controller';
 import { visaTransactionsCeilingsController } from './controllers/visa-transactions-ceilings.controller';
 import { requestCeillingIncreaseController } from './controllers/requestCeilingIncrease.controller';
 import { cronService } from './services/cron.service';
+import { validationController } from './controllers/validation.controller';
 
 
 
@@ -82,6 +83,7 @@ temporaryFilesController.init(app);
 travelMonthsController.init(app);
 SettingController.init(app)
 mailController.init(app);
+validationController.init(app);
 const main = express().use(config.get('basePath') || '', app);
 
 

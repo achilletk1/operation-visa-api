@@ -9,8 +9,9 @@ import { usersCollection } from '../collections/users.collection';
 import { notificationService } from './notification.service';
 import { config } from '../config';
 import { User } from '../models/user';
-import { Validator } from '../models/visa-operations';
+import { OpeVisaStatus, Validator } from '../models/visa-operations';
 import { travelsCollection } from '../collections/travels.collection';
+import { ObjectId } from 'mongodb';
 
 export const validationService = {
 
@@ -72,8 +73,8 @@ export const validationService = {
 
                 const validator: Validator = {
                     _id: userId,
-                    fullName: `${user?.fullName}`,
-                    clientCode: user?.clientCode, // is only for admin with clientCode
+                    fullName: `${user.fname} ${user.lname}`,
+                    userCode: user?.userCode,
                     signature,
                     date: moment().valueOf(),
                     status,
@@ -81,29 +82,16 @@ export const validationService = {
                     rejectReason
                 }
 
-                if (user?.visaOpValidation.joinValidation) {
-                    let joinValidator: any;
-                    if (travel.validators) {
-                        joinValidator = travel.validators.find(e => e.level === level);
 
-                    }
-
-                    if (isEmpty(travel.validators) || !joinValidator) { level = travel.validationLevel; }
-                }
-
-
-                const otherValidators = usersCollection.getUsersBy({ category: { $gte: 500 }, _id: userId, 'visaOpValidation.enabled': true, 'visaOpValidation.level': { $gte: 2 } });
-                if (isEmpty(otherValidators) || user.visaOpValidation.fullRigth) {
+                const otherValidators = await usersCollection.getUsersBy({ category: { $gte: 500 }, 'visaOpValidation.enabled': true, 'visaOpValidation.level': { $gt: user.visaOpValidation.level } });
+                if (isEmpty(otherValidators) || user.visaOpValidation.fullRigth || status === OpeVisaStatus.REJECTED) {
                     travel.status = status;
                     //TODO send status changed notification
                 }
 
+
                 travel.validators = isEmpty(travel.validators) ? [validator] : [...travel.validators, validator];
-
                 travel.validationLevel = level;
-
-
-
                 await travelsCollection.updateTravelsById(id, travel);
 
                 //TODO send validation notification

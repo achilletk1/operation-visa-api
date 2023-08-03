@@ -98,7 +98,7 @@ export enum VisaCeilingType {
 export interface Validator {
   _id?: string;
   fullName?: string;
-  clientCode?: string; // is only for admin with clientCode
+  userCode?: string; // is only for admin with clientCode
   signature?: string;
   date?: number;
   status?: OpeVisaStatus;
