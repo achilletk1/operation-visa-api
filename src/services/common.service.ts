@@ -255,6 +255,15 @@ export const commonService = {
         if (status.includes(500)) { return OpeVisaStatus.EXCEDEED; }
 
         return OpeVisaStatus.TO_COMPLETED;
+    },
+    getOnpStatus: (statements: OnlinePaymentStatement[]) => {
+        if (isEmpty(statements)) { return OpeVisaStatus.EMPTY; }
+        const statusList = statements.map(elt => elt?.status);
+        if (statusList.includes(OpeVisaStatus.REJECTED)) { return OpeVisaStatus.REJECTED; }
+        if (statusList.includes(OpeVisaStatus.TO_COMPLETED)) { return OpeVisaStatus.TO_COMPLETED; }
+        if (statusList.every(e => e === OpeVisaStatus.TO_VALIDATED)) { return OpeVisaStatus.TO_VALIDATED; }
+        if (statusList.every(e => e === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+        return OpeVisaStatus.TO_COMPLETED;
     }
 }
 

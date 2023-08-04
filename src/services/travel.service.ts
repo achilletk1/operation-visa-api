@@ -5,7 +5,7 @@ import { visaTransactionsCeillingsCollection } from '../collections/visa-transac
 import { travelsCollection } from '../collections/travels.collection';
 import { Attachment, OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { notificationService } from './notification.service';
-import { ExpenseDetail, Travel, TravelType } from '../models/travel';
+import { Travel, TravelType } from '../models/travel';
 import httpContext from 'express-http-context';
 import { filesService } from './files.service';
 import { isEmpty, get } from 'lodash';
@@ -13,7 +13,6 @@ import moment = require('moment');
 import { usersCollection } from '../collections/users.collection';
 import { visaTransactionsCollection } from '../collections/visa-transactions.collection';
 import { ObjectId } from 'mongodb';
-import { log } from 'winston';
 import { config } from '../config';
 import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as exportHelper from './helpers/exports.helper';
@@ -56,7 +55,6 @@ export const travelService = {
             const updateTravel = await travelsCollection.getTravelById(insertedId);
 
 
-            //TODO send notification
             Promise.all([
                 await notificationService.sendEmailTravelDeclaration(updateTravel, get(updateTravel, 'user.email')),
                 // await notificationService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), 'Déclaration de voyage', 'TravelDeclaration')
@@ -97,11 +95,6 @@ export const travelService = {
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
             const insertedId = await travelsCollection.insertTravel(travel);
-
-            // travel.proofTravel.proofTravelAttachs = saveAttachment(travel.proofTravel.proofTravelAttachs, insertedId, travel.dates.created);
-
-            // await travelsCollection.updateTravelsById(insertedId, travel);
-
 
             travel._id = insertedId.toString();
 
@@ -227,22 +220,6 @@ export const travelService = {
         }
     },
 
-    updateTravelStatusById: async (id: string, data: any) => {
-        try {
-            const { status } = data;
-            const travel = await travelsCollection.getTravelById(id);
-
-            if (!travel) { return new Error('TravelNotFound') }
-
-            //TODO send notifications for status update
-            return await travelsCollection.updateTravelsById(id, { status });
-
-        } catch (error) {
-            logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
-            return error;
-        }
-    },
-
     updateTravelStepStatusById: async (id: string, data: any) => {
         try {
             const { status, step, rejectReason, validator, references } = data;
@@ -318,12 +295,9 @@ export const travelService = {
             const otherAttachmentAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
             const expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
 
-            if (travelStatus !== travel?.status) {
+            if (travelStatus !== travel?.status && [OpeVisaStatus.JUSTIFY, OpeVisaStatus.REJECTED].includes(travelStatus)) {
+                travel.status = travelStatus;
                 await travelsCollection.updateTravelsById(id, { status });
-                await Promise.all([
-                    // notificationService.sendEmailTravelStatusChanged(travel, get(travel, 'travel.user.email', ''))
-                    //  TODO send notification to validator
-                ]);
             }
             return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus: travel.othersAttachmentStatus, expenseDetailsStatus: travel.expenseDetailsStatus, otherAttachmentAmount, expenseDetailAmount });
         } catch (error) {

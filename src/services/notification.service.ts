@@ -236,7 +236,7 @@ export const notificationService = {
             status: visaHelper.getStatusExpression(get(travel, 'status'))
         }
 
-        const HtmlBody = notificationHelper.generateOnlinePayementStatusChangedMail(data);
+        const HtmlBody = notificationHelper.generateTravelStatusChangedMail(data);
         const subject = `Mise à jour de la déclaration de voyage hors zone CEMAC`;
         try {
             sendEmail(receiver, subject, HtmlBody);
@@ -244,6 +244,29 @@ export const notificationService = {
         } catch (error) {
             logger.error(
                 `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
+            );
+            return error;
+        }
+    },
+
+    sendEmailValidationRequired: async (data: Travel | OnlinePaymentMonth, receiver: string, user: User, type: string) => {
+        if (!receiver) { return; }
+        type = type === 'travel' ? 'Déclaration de voyage hors zone CEMAC' : 'Déclaration de paiement en ligne';
+        const info = {
+            name: `${get(user, 'fname')} ${get(user, 'lname')}`,
+            date: `${moment().format('DD/MM/YYYY')}`,
+            client: `${get(data, 'user.fullName')}`,
+            type
+        }
+
+        const HtmlBody = notificationHelper.generateValidationRequiredMail(info);
+        const subject = `Validation requise pour ${type}`;
+        try {
+            sendEmail(receiver, subject, HtmlBody);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, data?._id?.toString());
+        } catch (error) {
+            logger.error(
+                `Error during sendEmailValidationRequired to ${receiver}. \n ${error.message} \n${error.stack}`
             );
             return error;
         }

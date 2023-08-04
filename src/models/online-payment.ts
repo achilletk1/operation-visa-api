@@ -14,10 +14,11 @@ export interface OnlinePaymentMonth {
   ceiling?: number;
   statements?: OnlinePaymentStatement[];
   statementAmounts?: number;
-  statementsStatus?:OpeVisaStatus;
   othersAttachements?: any[];
   othersAttachmentStatus?:OpeVisaStatus;
   transactions?: VisaTransaction[];
+  validationLevel?: number;
+  validators?: Validator[];
 }
 
 export interface OnlinePaymentStatement {

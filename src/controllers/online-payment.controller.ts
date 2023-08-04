@@ -100,6 +100,25 @@ export const onlinePaymentsController = {
             res.status(200).json({ message: 'online payment data updated succesfully.' });
         });
 
+        app.put('/online-payments/:id/statement/status', async (req: Request, res: Response) => {
+            const { id } = req.params;
+
+            const data = await onlinePaymentsService.updateStatementStatusById(id, req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'Cette opération vous est prohibée';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'Erreur lors de la mise à jour du voyage';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'travel data updated succesfully.' });
+        });
         app.get('/validators-online-payment/:id', async (req: Request, res: Response) => {
 
             const data = await onlinePaymentsService.getValidationsOnlinePayment(req.params.id);

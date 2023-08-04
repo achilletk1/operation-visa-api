@@ -25,6 +25,7 @@ let templateOnlinePayement: any;
 let templateOnlinePayementStatus: any;
 let templateTravelStatus: any;
 let templateValidationTokenMail: any;
+let templateValidationRequired: any;
 
 (async () => {
     templateVisaMail = await readFilePromise(__dirname + '/templates/visa-mail.template.html', 'utf8');
@@ -42,7 +43,7 @@ let templateValidationTokenMail: any;
     templateOnlinePayementStatus = await readFilePromise(__dirname + '/templates/online-payment-status-changed-mail.template.html', 'utf8');
     templateTravelStatus = await readFilePromise(__dirname + '/templates/travel-status-changed-mail.template.html', 'utf8');
     templateValidationTokenMail = await readFilePromise(__dirname + '/templates/validation-token-mail.template.html', 'utf8');
-
+    templateValidationRequired = await readFilePromise(__dirname + '/templates/validation-required-mail.template.html', 'utf8');
 })();
 
 const actionUrl = `${config.get('baseUrl')}/home`;
@@ -523,6 +524,30 @@ export const generateTravelStatusChangedMail = (info: any) => {
         }
 
         const template = handlebars.compile(templateTravelStatus);
+
+        const html = template(data);
+
+        return html;
+
+    } catch (error) {
+        logger.error(`Html online Payement detected mail generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+
+};
+
+
+export const generateValidationRequiredMail = (info: any) => {
+
+    try {
+        const data = {
+            ...info,
+            civility: 'Mr/Mme',
+            image,
+            actionUrl
+        }
+
+        const template = handlebars.compile(templateValidationRequired);
 
         const html = template(data);
 

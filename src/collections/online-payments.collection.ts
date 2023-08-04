@@ -16,7 +16,7 @@ export const onlinePaymentsCollection = {
 
     getOnlinePaymentById: async (id: any): Promise<OnlinePaymentMonth> => {
         const database = await getDatabase();
-        return await database.collection(collectionName).findOne({ _id: new ObjectId(id) });
+        return await database.collection(collectionName).findOne({ _id: new ObjectId(id.toString()) });
     },
 
     getOnlinePaymentBy: async (fields: any): Promise<any> => {
@@ -34,15 +34,13 @@ export const onlinePaymentsCollection = {
         }
 
         const result =  await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
-        return result.upsertedId;
+        return result;
     },
 
 
     getOnlinePaymentReport: async (params: any) => {
         const database = await getDatabase();
-
         const query = generateConsolidateData(params)
-
         return await database.collection(collectionName).aggregate(query).toArray();
 
     },

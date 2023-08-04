@@ -13,7 +13,6 @@ import { filesService } from './files.service';
 import generateId from 'generate-unique-id';
 import { get, isEmpty } from "lodash";
 import { logger } from '../winston';
-import { config } from '../config';
 import moment = require('moment');
 
 export const onlinePaymentsService = {
@@ -89,7 +88,7 @@ export const onlinePaymentsService = {
             return data;
 
         } catch (error) {
-            logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
+            logger.error(`onlinePayment creation failed \n${error?.name} \n${error?.stack}`);
             return error;
         }
     },
@@ -104,7 +103,7 @@ export const onlinePaymentsService = {
                 onlinePayment.user._id = user?._id.toString();
             }
 
-
+            onlinePayment.status = OpeVisaStatus.TO_COMPLETED;
             const ceiling = await visaTransactionsCeillingsCollection.getVisaTransactionsCeilingBy({ type: VisaCeilingType.ONLINE_PAYMENT })
             onlinePayment.dates.created = moment().valueOf();
             onlinePayment.ceiling = get(ceiling, 'value', 0);
@@ -115,7 +114,7 @@ export const onlinePaymentsService = {
             return onlinePayment;
 
         } catch (error) {
-            logger.error(`travel creation failed \n${error?.name} \n${error?.stack}`);
+            logger.error(`onlinePayment creation failed \n${error?.name} \n${error?.stack}`);
             return error;
         }
     },
@@ -140,7 +139,7 @@ export const onlinePaymentsService = {
 
             return await onlinePaymentsCollection.getOnlinePayments(filters || {}, offset || 1, limit || 40);
         } catch (error) {
-            logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
+            logger.error(`\nError getting onlinePayment data \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
@@ -149,7 +148,7 @@ export const onlinePaymentsService = {
         try {
             return await onlinePaymentsCollection.getOnlinePaymentById(id);
         } catch (error) {
-            logger.error(`\nError getting travel data \n${error.message}\n${error.stack}\n`);
+            logger.error(`\nError getting onlinePayment data \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
@@ -165,7 +164,7 @@ export const onlinePaymentsService = {
 
             return await onlinePaymentsCollection.getOnlinePaymentsBy(data);
         } catch (error) {
-            logger.error(`\nError getting travel data by queries \n${error.message}\n${error.stack}\n`);
+            logger.error(`\nError getting onlinePayment data by queries \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
@@ -176,16 +175,11 @@ export const onlinePaymentsService = {
 
             const actualOninePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
-            if (!actualOninePayment) { return new Error('TravelNotFound'); }
+            if (!actualOninePayment) { return new Error('OnlinePayment'); }
 
             for (let statement of data.statements) {
                 if (statement?.status && !adminAuth && statement?.isEdit) { delete statement?.status }
-
-                // if (statement?.isEdit) {
-                //     statement.status = OpeVisaStatus.TO_VALIDATED;
-                //     delete statement.isEdit;
-                // }
-
+                statement.statementRef = statement.statementRef || `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
                 for (let attachment of statement?.attachments) {
                     if (!attachment?.temporaryFile) { continue; }
 
@@ -200,34 +194,56 @@ export const onlinePaymentsService = {
                     filesService.deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                     delete attachment?.temporaryFile;
                 }
+                if (![OpeVisaStatus.JUSTIFY, OpeVisaStatus.REJECTED].includes(statement?.status)) {
+                    if (!statement.transactionRef) {
+                        statement.status = OpeVisaStatus.TO_COMPLETED;
+                    }
 
-                if (!statement.transactionRef) {
-                    statement.status = OpeVisaStatus.TO_COMPLETED;
-                }
-
-                if (statement.transactionRef) {
-                    statement.status = OpeVisaStatus.TO_VALIDATED;
+                    if (statement.transactionRef) {
+                        statement.status = OpeVisaStatus.TO_VALIDATED;
+                    }
                 }
             }
             data.statementAmounts = commonService.getTotal(data?.statements, 'stepAmount');
 
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
-
-            let updatedOnlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
-
-            const status = commonService.getOnpStatementStepStatus(updatedOnlinePayment);
-
-            if (updatedOnlinePayment.statementsStatus !== status) { await onlinePaymentsCollection.updateOnlinePaymentsById(id, { statementsStatus: status }); }
-
-
-            if (updatedOnlinePayment.status !== status) {
-                await onlinePaymentsCollection.updateOnlinePaymentsById(id, { status });
-                await notificationService.sendEmailOnlinePayementStatusChanged(updatedOnlinePayment, get(updatedOnlinePayment, 'user.email', ''));
-            }
-
             return result;
         } catch (error) {
-            logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
+            logger.error(`\nError updating onlinePayment data  \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+
+    updateStatementStatusById: async (id: string, data: any) => {
+        try {
+            const authUser = httpContext.get('user');
+            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+
+            if (!adminAuth) { return new Error('Forbidden'); }
+
+            const { status, validator, statementRefs } = data;
+
+            if (isEmpty(statementRefs)) return new Error('MissingStatementRefs');
+
+            const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
+
+            if (!onlinePayment) { return new Error('OnlinePaymentNotFound'); }
+
+            const { statements } = onlinePayment;
+            let updateData: any = {};
+            for (let statement of statements) {
+                if (!statementRefs.includes(statement.statementRef)) { continue; }
+                statement.status = status;
+                statement.validators = isEmpty(statement.validators) ? statement.validators : [...statement.validators, validator];
+            }
+            updateData.statements = statements;
+
+            const globalStatus = commonService.getOnpStatus(statements);
+            if (onlinePayment.status !== globalStatus) { updateData.status = globalStatus; }
+            const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, updateData);
+            return result;
+        } catch (error) {
+            logger.error(`\nError updating onlinePayment status declaration  \n${error.message}\n${error.stack}\n`);
             return error;
         }
     },
