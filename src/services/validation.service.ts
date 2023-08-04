@@ -44,6 +44,20 @@ export const validationService = {
         }
     },
 
+    getMaxValidationLevel: async (): Promise<any> => {
+        try {
+            const authUser = httpContext.get('user');
+            if (authUser.category < 500) { return new Error('Forbidden'); }
+
+            const data = await usersCollection.getMaxValidationLevel();
+
+            return { level: data[0].level };
+        } catch (error) {
+            logger.error(`Error while getting validation otp \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
+
     insertvalidation: async (id: string, fields: any): Promise<any> => {
 
         try {
@@ -98,7 +112,7 @@ export const validationService = {
 
             const result = type === 'travel' ? await travelsCollection.updateTravelsById(id, data) : type === 'onlinePayment' ? await onlinePaymentsCollection.updateOnlinePaymentsById(id, data) : null;
 
-            if (!isEmpty(otherValidators) &&  status === OpeVisaStatus.JUSTIFY) {
+            if (!isEmpty(otherValidators) && status === OpeVisaStatus.JUSTIFY) {
                 await Promise.all(otherValidators.filter((otherValidator: User) => otherValidator.visaOpValidation.fullRigth || otherValidator.visaOpValidation.level === level + 1).map(async (otherValidator: User) => {
                     await notificationService.sendEmailValidationRequired({ _id: id, ...data }, otherValidator.email, otherValidator, type);
                 }));

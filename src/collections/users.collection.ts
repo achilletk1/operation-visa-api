@@ -65,11 +65,11 @@ export const usersCollection = {
         return database.collection(collectionName).findOne({ ...filters });
     },
 
-    getUsersBy: async (filters: any): Promise<any> => {
+    getUsersBy: async (filters: any, project?: any): Promise<any> => {
         const database = await getDatabase();
         if (filters._id) { filters._id = new ObjectId(filters._id) }
         if (filters?.category && filters?.category === 100499) { filters.category = { '$in': [100, 499] }; }
-        return await database.collection(collectionName).find({ ...filters }).sort({ 'userCode': -1 }).toArray();
+        return await database.collection(collectionName).find({ ...filters }).sort({ 'userCode': -1 }).project({ ...project }).toArray();
     },
 
     getUsersByIds: async (usersId: any[]): Promise<any> => {
@@ -83,6 +83,17 @@ export const usersCollection = {
     getUserByCode: async (userCode: any): Promise<User | any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ userCode });
+    },
+
+
+    getMaxValidationLevel: async (): Promise<User | any> => {
+        const database = await getDatabase();
+
+        const query = [
+            { $match: { visaOpValidation: { $exists: true }, 'visaOpValidation.enabled': true, } },
+            { $group: { _id: null, level: { $max: "$visaOpValidation.level" } } }
+        ]
+        return await database.collection(collectionName).aggregate(query).toArray();
     },
 
     checkUsersExist: async (emails): Promise<any> => {
