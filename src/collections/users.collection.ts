@@ -15,7 +15,6 @@ export const usersCollection = {
     getUsers: async (fields: any, offset?: any, limit?: any, range?: any): Promise<Datas> => {
         const database = await getDatabase();
         const startIndex = (offset - 1) * limit;
-        const endIndex = offset * limit;
 
         let query = { ...fields };
         if (range) { query['dates.created'] = { $gte: range.start, $lte: range.end }; }
@@ -83,17 +82,6 @@ export const usersCollection = {
     getUserByCode: async (userCode: any): Promise<User | any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne({ userCode });
-    },
-
-
-    getMaxValidationLevel: async (): Promise<User | any> => {
-        const database = await getDatabase();
-
-        const query = [
-            { $match: { visaOpValidation: { $exists: true }, 'visaOpValidation.enabled': true, } },
-            { $group: { _id: null, level: { $max: "$visaOpValidation.level" } } }
-        ]
-        return await database.collection(collectionName).aggregate(query).toArray();
     },
 
     checkUsersExist: async (emails): Promise<any> => {
