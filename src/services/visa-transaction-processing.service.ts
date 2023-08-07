@@ -215,7 +215,6 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
                 statementAmounts: 0,
                 ceiling: 0,
                 statements: [],
-                statementsStatus: OpeVisaStatus.EMPTY,
                 transactions: [],
             }
             onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
@@ -240,8 +239,8 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
 
         const statut = commonService.getOnpStatementStepStatus(onlinePayment, 'onp');
 
-        if (onlinePayment.statementsStatus !== statut) {
-            onlinePayment.statementsStatus = statut;
+        if (onlinePayment.status !== statut) {
+            onlinePayment.status = statut;
             onlinePayment.status = statut;
         }
 

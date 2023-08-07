@@ -101,21 +101,20 @@ export const onlinePaymentsCollection = {
         let query = {};
 
         if (end && start) {
-            end = parseInt(end);
-            start = parseInt(start);
-            query = { 'dates.created': { $gte: start, $lte: end } };
-            delete params.end;
-            delete params.start;
+            query = { 'dates.created': { $gte: +start, $lte: +end } };
+            delete params?.end;
+            delete params?.start;
         }
-
-        const startIndex = (offset - 1) * limit;
-
-        query = { ...query, ...params }
-        console.log(query);
         
-        const total = await database.collection(collectionName).find(query).count();
-        const data = await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).skip(startIndex).limit(limit).toArray();
-        return { data, total };
+        query = { ...query, ...params }
+        
+        if(offset && limit){
+            const startIndex = (offset - 1) * limit;
+            const total = await database.collection(collectionName).find(query).count();
+            const data = await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).skip(startIndex).limit(limit ||40).toArray();
+            return { data, total };
+        }
+        return await database.collection(collectionName).find(query).toArray();
 
     },
 
@@ -128,6 +127,10 @@ export const onlinePaymentsCollection = {
     getUsersOnlinepaymentId: async (): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).aggregate([{ $group: { _id: '$userId' } }]).toArray();
+    },
+    deleteOnlinePayment: async (id: string) => {
+        const database = await getDatabase();
+        return await database.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
     },
 
 }
