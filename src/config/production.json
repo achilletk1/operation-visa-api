@@ -47,6 +47,7 @@
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "cronRevivalMail":"*/20 0-5 * * *",
     "cronTransactionProcessing": "* * * * *",
-    "cronDeleteTemporaryFile": "0 */3 * * *"
+    "cronDeleteTemporaryFile": "0 */3 * * *",
+    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 */1 *"
 
 }

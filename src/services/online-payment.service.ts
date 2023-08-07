@@ -267,6 +267,18 @@ export const onlinePaymentsService = {
         }
     },
 
+    removeOnlinePaymentsWithExceedings: async () => {
+        let data = await onlinePaymentsCollection.getOnlinePayments({ currentMonth: { $lt: +moment().subtract(1, 'month').format('YYYYMM') } });
+
+        for (const payment of data) {
+            const total = commonService.getTotal(payment?.transactions);
+            if (total < payment?.ceiling) {
+                await onlinePaymentsCollection.deleteOnlinePayment(payment?._id);
+            }
+        }
+
+    }
+
 };
 
 

@@ -286,6 +286,13 @@ export const config = convict({
         default: 'kevin.moutassi@londo-tech.com',
         env: 'EMAIL_TEST'
     },
+    cronRemoveOnlinePaymentsWithExceedings: {
+        doc: 'cron of delete online payments With Exceedings.',
+        format: String,
+        default: '',
+        env: 'REMOVE_PAYMENTS_WITH_EXCEEDINGS',
+        arg: 'remove-travels-with_Exceedings'
+    },
 });
 
 // Load environment dependent configuration
