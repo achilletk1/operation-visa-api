@@ -163,8 +163,9 @@ export const travelService = {
         }
     },
 
-    updateTravelById: async (id: string, travel: Travel) => {
+    updateTravelById: async (id: string, data: any) => {
         try {
+            let { travel, steps } = data;
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
@@ -212,6 +213,12 @@ export const travelService = {
                 travel = await VerifyTravelTransactions(id, travel);
             }
 
+            travel.editors.push({
+                fullName: `${authUser.fname}${authUser.lname}`,
+                date: moment().valueOf(),
+                steps: steps.toString()
+            })
+
             const result = await travelsCollection.updateTravelsById(id, travel);
             return result;
         } catch (error) {
@@ -224,7 +231,7 @@ export const travelService = {
         try {
             const authUser = httpContext.get('user');
 
-            let stepData = { step1: '', step2: '', step3: '' };
+            let stepData = [];
 
             const { status, step, rejectReason, validator, references } = data;
 
@@ -248,7 +255,7 @@ export const travelService = {
                 proofTravel = { ...proofTravel, ...updateData }
                 tobeUpdated = { proofTravel };
                 travel.proofTravel.status = status;
-                stepData.step1 = 'proofTravel';
+                stepData.push('Preuve de voyage');
             }
 
             if (step === 'expenseDetails') {
@@ -256,7 +263,7 @@ export const travelService = {
 
                 const { expenseDetails } = travel;
 
-                stepData.step2 = 'expenseDetails';
+                stepData.push('État détaillé des dépenses');
 
                 for (const expenseDetailRef of references) {
 
@@ -279,7 +286,7 @@ export const travelService = {
 
                 const { othersAttachements } = travel;
 
-                stepData.step3 = 'othersAttachements';
+                stepData.push('Autres pièces justificatives');
 
                 for (const expenseDetailRef of references) {
 
@@ -296,11 +303,10 @@ export const travelService = {
 
                 tobeUpdated = { othersAttachements };
             }
-            travel.editors = [];
             travel.editors.push({
                 fullName: `${authUser.fname}${authUser.lname}`,
                 date: moment().valueOf(),
-                steps: stepData
+                steps: stepData.toString()
             })
 
             travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, 'othersAttachs');
@@ -314,7 +320,7 @@ export const travelService = {
                 travel.status = travelStatus;
                 await travelsCollection.updateTravelsById(id, { status });
             }
-            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus: travel.othersAttachmentStatus, expenseDetailsStatus: travel.expenseDetailsStatus, otherAttachmentAmount, expenseDetailAmount });
+            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus: travel.othersAttachmentStatus, expenseDetailsStatus: travel.expenseDetailsStatus, otherAttachmentAmount, expenseDetailAmount, editors: travel.editors });
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
