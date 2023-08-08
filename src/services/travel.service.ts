@@ -250,11 +250,11 @@ export const travelService = {
             if (status === OpeVisaStatus.REJECTED) { updateData = { ...updateData, rejectReason } }
 
             if (step === 'proofTravel') {
-                let { proofTravel } = travel;
-                proofTravel.validators.push(validator);
-                proofTravel = { ...proofTravel, ...updateData }
-                tobeUpdated = { proofTravel };
-                travel.proofTravel.status = status;
+                // let { proofTravel } = travel;
+                // proofTravel.validators.push(validator);
+                // proofTravel = { ...proofTravel, ...updateData }
+                // tobeUpdated = { proofTravel };
+                // travel.proofTravel.status = status;
                 stepData.push('Preuve de voyage');
             }
 
@@ -304,7 +304,7 @@ export const travelService = {
                 tobeUpdated = { othersAttachements };
             }
             travel.editors.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
+                fullName: `${authUser.fname} ${authUser.lname}`,
                 date: moment().valueOf(),
                 steps: stepData.toString()
             })
