@@ -222,6 +222,10 @@ export const travelService = {
 
     updateTravelStepStatusById: async (id: string, data: any) => {
         try {
+            const authUser = httpContext.get('user');
+
+            let stepData = { step1: '', step2: '', step3: '' };
+
             const { status, step, rejectReason, validator, references } = data;
 
             if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
@@ -244,12 +248,15 @@ export const travelService = {
                 proofTravel = { ...proofTravel, ...updateData }
                 tobeUpdated = { proofTravel };
                 travel.proofTravel.status = status;
+                stepData.step1 = 'proofTravel';
             }
 
             if (step === 'expenseDetails') {
                 if (!references) { return new Error('ReferenceNotProvided'); }
 
                 const { expenseDetails } = travel;
+
+                stepData.step2 = 'expenseDetails';
 
                 for (const expenseDetailRef of references) {
 
@@ -272,6 +279,8 @@ export const travelService = {
 
                 const { othersAttachements } = travel;
 
+                stepData.step3 = 'othersAttachements';
+
                 for (const expenseDetailRef of references) {
 
                     const expenseDetailIndex = othersAttachements.findIndex((elt) => elt.ref === expenseDetailRef);
@@ -287,6 +296,12 @@ export const travelService = {
 
                 tobeUpdated = { othersAttachements };
             }
+            travel.editors = [];
+            travel.editors.push({
+                fullName: `${authUser.fname}${authUser.lname}`,
+                date: moment().valueOf(),
+                steps: stepData
+            })
 
             travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, 'othersAttachs');
             travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, 'expenseDetail');

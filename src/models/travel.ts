@@ -86,6 +86,7 @@ export interface Travel {
     otherAttachmentAmount?: number;
     transactions?: VisaTransaction[];
     validators?: Validator[];
+    editors?: any[];
     validationLevel?: number;
 }
 
