@@ -206,12 +206,6 @@ export const onlinePaymentsService = {
             }
             data.statementAmounts = commonService.getTotal(data?.statements, 'stepAmount');
 
-            actualOninePayment.editors.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
-                date: moment().valueOf(),
-                steps: "liste des déclaration d'achat en ligne"
-            })
-
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
             return result;
         } catch (error) {
@@ -246,6 +240,11 @@ export const onlinePaymentsService = {
 
             const globalStatus = commonService.getOnpStatus(statements);
             if (onlinePayment.status !== globalStatus) { updateData.status = globalStatus; }
+            updateData.editors.push({
+                fullName: `${authUser.fname}${authUser.lname}`,
+                date: moment().valueOf(),
+                steps: "liste des déclaration d'achat en ligne"
+            })
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, updateData);
             return result;
         } catch (error) {
