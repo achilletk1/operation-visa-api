@@ -213,6 +213,7 @@ export const travelService = {
                 travel = await VerifyTravelTransactions(id, travel);
             }
 
+            travel.editors = !isEmpty(travel.editors)?travel.editors:[];
             travel.editors.push({
                 fullName: `${authUser.fname}${authUser.lname}`,
                 date: moment().valueOf(),
