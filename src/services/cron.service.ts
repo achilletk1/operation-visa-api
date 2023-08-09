@@ -1,12 +1,11 @@
 import { visaTransactonsProcessingService } from "./visa-transaction-processing.service";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
-import { lettersCollection } from "../collections/letters.collection";
+import { templatesCollection } from "../collections/templates.collection";
 import { travelsCollection } from "../collections/travels.collection";
 import { temporaryFilesService } from "./temporary-files.service";
 import { onlinePaymentsService } from "./online-payment.service";
-import { OnlinePaymentMonth } from "../models/online-payment";
 import { notificationService } from "./notification.service";
-import { Travel } from "../models/travel";
+import { OpeVisaStatus } from "../models/visa-operations";
 import { logger } from "../winston";
 import { config } from "../config";
 import { isEmpty } from "lodash";
@@ -73,46 +72,41 @@ export const cronService = {
 
     // detect users who have not justified their transactions outside the cemac zone and send them a letter of formal notice
     detectUsersNotJustifiedTransaction: async (): Promise<void> => {
-        // const cronExpression = `${config.get('cronTransactionProcessing')}`;
-        let usersLockTravel: any;
-        let usersLockOnlinePayment: any;
-
-        cron.schedule("* * * * * *", async () => {
+        cron.schedule(`${config.get('cronclientindemeure')}`, async () => {
             try {
-                const travel: Travel[] = await travelsCollection.getTravelsBy({ status: { $in: [500] } });
-                if (!isEmpty(travel)) { usersLockTravel = await getCustomerAccountBlocked(travel) };
+                const travelsExcedeed: any[] = await travelsCollection.getTravelsBy({ status: { $in: [OpeVisaStatus.EXCEDEED] } });
+                const onlinePaymentsExcedeed: any[] = await onlinePaymentsCollection.getOnlinePaymentsBy({ status: { $in: [OpeVisaStatus.EXCEDEED] } });
+                let transactionsExcedeed: any = [];
 
-                const onlinePayment: OnlinePaymentMonth[] = await onlinePaymentsCollection.getOnlinePaymentsBy({ status: { $in: [500] } });
-                if (!isEmpty(onlinePayment)) { usersLockOnlinePayment = await getCustomerAccountBlocked(onlinePayment) }
+                transactionsExcedeed = await getCustomerAccountToBlocked([...travelsExcedeed, ...onlinePaymentsExcedeed]);
 
-                if (!isEmpty(usersLockTravel) || !isEmpty(usersLockOnlinePayment)) {
-                    // await notificationService.sendEmailUsersBloqued(usersLockTravel.concat(usersLockOnlinePayment))
+                if (!isEmpty(transactionsExcedeed)) {
+                    await notificationService.sendEmailUsersBloqued(transactionsExcedeed)
                 }
 
             } catch (error) {
                 logger.error(`detect users not justified transaction failed \n${error.stack}\n`);
-                process.exit(1);
             }
         });
-
     },
 
 
 };
 
 //the list of customers whose accounts must be blocked
-const getCustomerAccountBlocked = async (dataOperation: any[]) => {
-    let dataTab: any[] = [];
-    const letters = await lettersCollection.getLettersBy({ key: 'mise en demeure' });
-    const timeLimit = +letters[0]?.period.substring(2, 4);
+const getCustomerAccountToBlocked = async (datas: any[]) => {
+    let transactionExcedeed: any[] = [];
+    const template = await templatesCollection.getTemplateBy({ key: 'transactionOutsideNotJustified' });
 
-    dataOperation.forEach((element: any) => {
-        if (element?.transactions) {
-            const dateDiffInDays = moment().diff(moment(element?.transactions[0]?.date), 'days');
-            if (dateDiffInDays > timeLimit) { dataTab.push(element?.user) }
-        }
-    })
+    for (const data of datas) {
+        const firsDate = Math.min(...data?.transactions?.map(elt => elt?.date));
+        const transaction = data.transactions.find(elt => elt?.date === firsDate);
 
-    return dataTab || [];
+        const dateDiffInDays = moment().diff(moment(firsDate), 'days');
+
+        if (dateDiffInDays > +template?.period) { transactionExcedeed.push(transaction) } else { continue }
+    }
+
+    return transactionExcedeed || [];
 }
 

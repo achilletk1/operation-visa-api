@@ -1,29 +1,26 @@
-import { Travel, TravelType } from './../models/travel';
+import { notificationsCollection } from '../collections/notifications.collection';
+import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as notificationHelper from './helpers/notification.service.helper';
-import http from 'request-promise';
-import postmark from 'postmark';
+import { templatesCollection } from '../collections/templates.collection';
+import * as visaHelper from './helpers/visa-operations.service.helper';
+import { queueCollection } from '../collections/queue.collection';
+import { OnlinePaymentMonth } from '../models/online-payment';
+import {  NotificationFormat } from '../models/notification';
+import { OpeVisaStatus } from '../models/visa-operations';
+import * as exportsHelper from './helpers/exports.helper';
+import * as exportHelper from './helpers/exports.helper';
+import * as formatHelper from './helpers/format.helper';
+const classPath = 'services.notificationService';
+import { commonService } from './common.service';
+import { usersService } from './users.service';
+import { Travel } from './../models/travel';
+import { Letter } from '../models/letter';
+import { get, isEmpty } from 'lodash';
+import { User } from '../models/user';
 import { logger } from '../winston';
+import http from 'request-promise';
 import { config } from '../config';
 import moment from 'moment';
-import { Letter } from '../models/letter';
-import * as exportHelper from './helpers/exports.helper';
-import { get, isEmpty } from 'lodash';
-import { commonService } from './common.service';
-import { notificationsCollection } from '../collections/notifications.collection';
-import { Notification, NotificationFormat } from '../models/notification';
-import { OnlinePaymentMonth } from '../models/online-payment';
-import * as visaHelper from './helpers/visa-operations.service.helper';
-
-import { encode, decode } from './helpers/url-crypt/url-crypt.service.helper';
-import * as exportsHelper from './helpers/exports.helper';
-import { usersService } from './users.service';
-import { templatesCollection } from '../collections/templates.collection';
-import { OpeVisaStatus } from '../models/visa-operations';
-import { queueCollection } from '../collections/queue.collection';
-import { User } from '../models/user';
-import * as formatHelper from './helpers/format.helper';
-import { TemplateForm } from '../models/templates';
-const classPath = 'services.notificationService';
 
 const appName = `${config.get('template.app')}`;
 const company = `${config.get('template.company')}`;
@@ -83,6 +80,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendVisaTemplateEmail: async (userData: any, receiver: string, visaTemplate: any, lang: string) => {
         if (!receiver) { return }
 
@@ -104,7 +102,6 @@ export const notificationService = {
             return error;
         }
     },
-
 
     sendEmailDetectTransactions: async (userData: any, receiver: string, lang: string) => {
         logger.info(`send mail detect transaction to ${receiver}`);
@@ -271,6 +268,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendEmailFormalNotice: async (receiver: string, letter: Letter, userData: any, lang: string, subject: string) => {
 
 
@@ -339,7 +337,6 @@ export const notificationService = {
             return error;
         }
     },
-
 
     getNotifications: async (filters: any) => {
         try {
@@ -473,6 +470,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendEmailCeilingAssigned: async (ceiling: any, userAssigned: any) => {
         const HtmlBody = notificationHelper.generateMailContentCeilingAssigned(ceiling, userAssigned);
         const subject = `Demande d'augmentation de plafond en cours de traitement`;
@@ -484,6 +482,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendEmailCaeAssigned: async (ceiling: any, userAssigned: any) => {
         const HtmlBody = notificationHelper.generateMailContentCaeAssigned(ceiling, userAssigned);
         const subject = `Traitement de la demande d'augmentation de plafond`;
@@ -498,6 +497,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendEmailRejectCeiling: async (ceiling: any) => {
 
         try {
@@ -510,6 +510,7 @@ export const notificationService = {
             return error;
         }
     },
+
     sendEmailValidCeiling: async (ceiling: any) => {
         const HtmlBody = notificationHelper.generateMailValidCeiling(ceiling);
         const subject = `Validation demande augmantation de plafond`;
@@ -523,6 +524,33 @@ export const notificationService = {
         }
     },
 
+    sendEmailUsersBloqued: async (usersLocked: any[]) => {
+        const HtmlBody = await notificationHelper.generateMailContainBlockedUser(usersLocked);
+
+        const subject = `[OPERATION VISA] Liste des clients en situation de blocage de carte`;
+
+        const receiver = config.get('env') === 'production' ? config.get('emailBank') : config.get('emailTest');
+
+        const pdfString = await exportHelper.generatePdfContainBlockedUser(usersLocked);
+
+        try {
+            let Attachments: any;
+            if (pdfString && !(pdfString instanceof Error)) {
+                Attachments ??= [];
+                Attachments.push({
+                    name: `client-en-demeure`,
+                    content: pdfString,
+                    contentType: 'application/pdf'
+                });
+            }
+            sendEmail(receiver, subject, HtmlBody, pdfString);
+
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, '', Attachments, { key: 'customer_in_demeure' }, 'mails_liste_clients_en_demeurres');
+        } catch (error) {
+            logger.error(`Error during  to ${receiver} for client in demeure. \n ${error.message} \n${error.stack}`);
+            return error;
+        }
+    },
 };
 
 // END Visa operations mails //
@@ -600,12 +628,25 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 
 };
 
-
-const insertNotification = async (object: string, format: NotificationFormat, message: string, email: string, id?: string, attachments?: any) => {
-
-    const notification = { object, format, message, email, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments };
+const insertNotification = async (object: string, format: NotificationFormat, message: string, email: string, id?: string, attachments?: any, key?: any,type?:string) => {
+    const notification = { object, format, message, email, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments, ...key };
     try {
-        return await notificationsCollection.insertNotifications(notification);
+        const { insertedId } = await notificationsCollection.insertNotifications(notification);
+        let attachment: any;
+        if (!isEmpty(attachments)) {
+            attachment = commonService.saveAttachment(
+                insertedId.toString(),
+                {
+                    content: attachments[0]?.content,
+                    contentType: attachments[0]?.contentType,
+                    label: attachments[0]?.name
+                },
+                notification?.dates?.createdAt,
+               type,
+            );
+            attachment.fileName = attachment.name;
+        }
+        await notificationsCollection.updateNotification(insertedId.toString(), { attachments: [attachment] });
     } catch (error) {
         logger.error(`\nError in insert notification \n${error.message}\n${error.stack}\n`);
         return error;

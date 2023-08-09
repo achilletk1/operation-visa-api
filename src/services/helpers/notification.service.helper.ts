@@ -1,14 +1,15 @@
-import readFilePromise from 'fs-readfile-promise';
-import handlebars from 'handlebars';
-import { logger } from '../../winston';
-import { config } from '../../config';
-import { get } from 'lodash';
 import { RequestCeilingIncrease } from '../../models/request-ceiling-increase';
+import readFilePromise from 'fs-readfile-promise';
 import { commonService } from '../common.service';
 import * as formatHelper from './format.helper';
-
-import moment = require('moment');
+import { pdf } from '../pdf-generator.service';
 import { User } from '../../models/user';
+import { logger } from '../../winston';
+import { config } from '../../config';
+import handlebars from 'handlebars';
+import moment = require('moment');
+import { get } from 'lodash';
+
 
 let templateVisaMail: any;
 let templateStepStatus: any;
@@ -26,6 +27,7 @@ let templateOnlinePayementStatus: any;
 let templateTravelStatus: any;
 let templateValidationTokenMail: any;
 let templateValidationRequired: any;
+let templateContainBlockedUser: any;
 
 (async () => {
     templateVisaMail = await readFilePromise(__dirname + '/templates/visa-mail.template.html', 'utf8');
@@ -44,6 +46,7 @@ let templateValidationRequired: any;
     templateTravelStatus = await readFilePromise(__dirname + '/templates/travel-status-changed-mail.template.html', 'utf8');
     templateValidationTokenMail = await readFilePromise(__dirname + '/templates/validation-token-mail.template.html', 'utf8');
     templateValidationRequired = await readFilePromise(__dirname + '/templates/validation-required-mail.template.html', 'utf8');
+    templateContainBlockedUser = await readFilePromise(__dirname + '/templates/contain-blocked-user-template-mail.template.html', 'utf8');
 })();
 
 const actionUrl = `${config.get('baseUrl')}/home`;
@@ -558,4 +561,29 @@ export const generateValidationRequiredMail = (info: any) => {
         return error;
     }
 
+};
+
+//generated mail contain blocked user
+export const generateMailContainBlockedUser = async (usersList:any[]) => {
+    try {
+        const data = {
+            greetings: `Bonjour`,
+            date: moment().format('DD/MM/YYYY'),
+            usersList,
+            image,
+            color,
+            app,
+            company,
+            actionUrl,
+        }
+
+        const template = handlebars.compile(templateContainBlockedUser);
+
+        const html = template(data);
+
+        return html;
+    } catch (error) {
+        logger.error(`\nPreview  template mail contain blocked user generation failed ${JSON.stringify(error)}`);
+        return error;
+    }
 };

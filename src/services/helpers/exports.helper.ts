@@ -1,8 +1,8 @@
 import readFilePromise from 'fs-readfile-promise';
 import { pdf } from '../pdf-generator.service';
-import { Letter } from './../../models/letter';
 import { User } from '../../models/user';
 import { logger } from "../../winston";
+import { config } from '../../config';
 import handlebars from 'handlebars';
 import { get } from 'lodash';
 import moment from "moment";
@@ -11,10 +11,18 @@ import XLSX from 'xlsx';
 let templateFormalNoticeLetter: any;
 let templateExportNotification: any;
 let templateFormalNoticeMail: any;
+let templateContainBlockedUserPdf: any;
+
+const actionUrl = ``;
+const image = `${config.get('template.image')}`;
+const color = `${config.get('template.color')}`;
+
+
 (async () => {
     templateFormalNoticeLetter = await readFilePromise(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
     templateExportNotification = await readFilePromise(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
     templateFormalNoticeMail = await readFilePromise(__dirname + '/templates/formal-notice-mail.template.html', 'utf8');
+    templateContainBlockedUserPdf = await readFilePromise(__dirname + '/templates/contain-blocked-users.pdf.template.html', 'utf8');
 })();
 
 export const generateNotificationExportPdf = async (user: any, notification: any, start: any, end: any) => {
@@ -305,6 +313,51 @@ export const generateCeillingExportXlsx = async (onlinePaymentCeilling: any[]) =
         return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
     }
 }
+
+export const generatePdfContainBlockedUser = async (usersLocked: any) => {
+
+    try {
+        const data = getTemplateContainBlockedUserPdf(usersLocked);
+
+        const template = handlebars.compile(templateContainBlockedUserPdf);
+
+        const html = template(data);
+
+        return await pdf.setAttachment(html);
+
+    } catch (error) {
+        logger.error(`pdf activation trasnfer generation failed. \n${error.name}\n${error.stack}`);
+        return error;
+    }
+}
+
+const getTemplateContainBlockedUserPdf = (data: any) => {
+    const _data: any = {};
+    _data.image = image;
+    _data.color = color;
+    _data.date = moment().format('DD/MM/YYYY');
+    _data.transactions =[];
+
+    // Add client data
+    data.forEach(elt=>
+        _data.transactions.push(
+            {
+                fullName : `${get(elt, 'fullName')}`,
+                clientCode : `${get(elt, 'clientCode')}`,
+                card :`${get(elt, 'card.code')}`,
+                tel : `${get(elt, 'tel','N/A')}`,
+                email :`${get(elt, 'email','N/A')}`,
+                label : `${get(elt, 'card.label')}`,
+                holder : `${get(elt, 'card.name')}`,
+                age : `${get(elt, 'age')}`,
+                ncp : `${get(elt, 'ncp')}`,
+            }
+        )
+        )
+
+    return _data;
+};
+
 
 const getNumberWithSpaces = (x) => {
     if (!x) { return '0' }

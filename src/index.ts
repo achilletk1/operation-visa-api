@@ -92,10 +92,9 @@ const server = http.createServer(main);
 server.listen(config.get('port'), config.get('host'), async () => {
     logger.info(`server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
 });
-cronService.startTransactionsProcessing();
-cronService.startRevivalMail();
-cronService.startRemoveTravelsWithoutExceeding();
-
-
+// cronService.startRemoveTravelsWithoutExceeding();
+cronService.detectUsersNotJustifiedTransaction();
+// cronService.startTransactionsProcessing();
+// cronService.startRevivalMail();
 
 export default app;

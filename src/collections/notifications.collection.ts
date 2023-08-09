@@ -1,6 +1,7 @@
 import { Notification } from "../models/notification";
-import { ObjectId } from "mongodb";
 import { getDatabase } from "./config";
+import { ObjectId } from "mongodb";
+import { isEmpty } from "lodash";
 
 const collectionName = 'notifications';
 
@@ -34,6 +35,13 @@ export const notificationsCollection = {
         const { insertedId } = await database.collection(collectionName).insertOne(data);
         return { insertedId };
     },
+    updateNotification: async (id: string, set: any) => {
+        const database = await getDatabase();
+        delete set?._id;
+        let query: any = {$set:{}};
+        delete set?._id;
+        if (!isEmpty(set)) { query.$set = { ...set }; }
 
-
+        return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
+    },
 }

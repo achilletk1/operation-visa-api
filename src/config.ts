@@ -286,12 +286,25 @@ export const config = convict({
         default: 'kevin.moutassi@londo-tech.com',
         env: 'EMAIL_TEST'
     },
+    emailBank: {
+        doc: 'email bank to send notification',
+        format: String,
+        default: '',
+        env: 'EMAIL_BANK'
+    },
     cronRemoveOnlinePaymentsWithExceedings: {
         doc: 'cron of delete online payments With Exceedings.',
         format: String,
         default: '',
         env: 'REMOVE_PAYMENTS_WITH_EXCEEDINGS',
         arg: 'remove-travels-with_Exceedings'
+    },
+    cronclientindemeure: {
+        doc: 'cron to send mail of list of client in demeure to bank.',
+        format: String,
+        default: '',
+        env: 'CLIENT_IN_DEMEURE',
+        arg: 'client_in_demeure'
     },
 });
 

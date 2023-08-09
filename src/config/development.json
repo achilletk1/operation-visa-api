@@ -42,6 +42,8 @@
     "cronTransactionProcessing": "* * * * * *",
     "cronDeleteTemporaryFile": "0 */3 * * *",
     "gotenbergUrl": "http://173.255.248.184:7900",
-    "emailTest": "dimitri.signe@londo-tech.com",
-    "cronRemoveOnlinePaymentsWithExceedings": "* * * * * *"
+    "emailTest": "kevin.moutassi@londo-tech.com",
+    "emailBank": "kevin.moutassi@londo-tech.com",
+    "cronRemoveOnlinePaymentsWithExceedings": "* * * * * *",
+    "cronclientindemeure":"* * * * * *"
 }
