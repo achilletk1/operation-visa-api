@@ -57,7 +57,7 @@ export const cronService = {
     },
 
     // delete Travel with exceeding ceiling
-    startRemoveTravelsWithoutExceeding: async (): Promise<void> => {
+    startRemoveOnpWithoutExceeding: async (): Promise<void> => {
         const cronExpression = `${config.get('cronRemoveOnlinePaymentsWithExceedings')}`;
         cron.schedule(cronExpression, async () => {
             try {

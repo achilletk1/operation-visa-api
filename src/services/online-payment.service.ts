@@ -205,7 +205,8 @@ export const onlinePaymentsService = {
                 }
             }
             data.statementAmounts = commonService.getTotal(data?.statements, 'stepAmount');
-
+            const globalStatus = commonService.getOnpStatus(data?.statements);
+            data.status = globalStatus;
             const result = await onlinePaymentsCollection.updateOnlinePaymentsById(id, data);
             return result;
         } catch (error) {
