@@ -5,7 +5,7 @@ import { templatesCollection } from '../collections/templates.collection';
 import * as visaHelper from './helpers/visa-operations.service.helper';
 import { queueCollection } from '../collections/queue.collection';
 import { OnlinePaymentMonth } from '../models/online-payment';
-import {  NotificationFormat } from '../models/notification';
+import { NotificationFormat } from '../models/notification';
 import { OpeVisaStatus } from '../models/visa-operations';
 import * as exportsHelper from './helpers/exports.helper';
 import * as exportHelper from './helpers/exports.helper';
@@ -28,33 +28,6 @@ export const notificationService = {
 
     /***************** SMS *****************/
 
-    // sendVisaTemplateEmail: async (dataParameter: any, email: string, subject: string , label: string) => {
-    //     const {data} = await templatesCollection.getTemplates({label});
-
-    //     const HtmlBody: string = await notificationHelper.generateVisaTemplateForNotification(data, dataParameter);
-
-    //     const receiver = `${email}`;
-
-    //     try {
-    //         sendEmail(receiver, subject, HtmlBody);
-    //         const notification: Notification = {
-    //             object: subject,
-    //             format: NotificationFormat.MAIL,
-    //             message: HtmlBody,
-    //             email: receiver,
-    //             id: dataParameter?._id.toString(),
-    //         }     
-
-    //         await insertNotification(subject, )
-
-    //     } catch (error) {
-    //         logger.error(
-    //             `Error during sendEmailVisaDepassment to ${receiver}. \n ${error.message} \n${error.stack}`
-    //         );
-    //         return error;
-    //     }
-    // },
-
     sendTokenSMS: async (token: any, phone: any) => {
         if (!phone || !token) { return; }
 
@@ -67,6 +40,26 @@ export const notificationService = {
             return error;
         }
     },
+
+    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string) => {
+        if (!phone) { return; }
+
+        const visaTemplate = await templatesCollection.getTemplateBy({ key });
+
+        if (!visaTemplate) { return; }
+
+        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData);
+        const body = data?.sms;
+        try {
+            return sendSMSFromBCIServer(phone, body);
+        } catch (error) {
+            logger.error(`Error during send email sendToken to ${phone}. \n ${error.message} \n${error.stack}`);
+            return error;
+        }
+    },
+
+
+    /**************** EMAIL ********************/
 
     sendValidationTokenEmail: async (user: User, token: any) => {
         const HtmlBody = notificationHelper.generateMailContentValidationToken(user, token);
@@ -81,7 +74,7 @@ export const notificationService = {
         }
     },
 
-    sendVisaTemplateEmail: async (userData: any, receiver: string, visaTemplate: any, lang: string) => {
+    sendVisaTemplateEmail: async (userData: any, receiver: string, visaTemplate: any, lang: string, id: string) => {
         if (!receiver) { return }
 
         let emailData = await formatHelper.replaceVariables(visaTemplate[lang], userData);
@@ -93,7 +86,7 @@ export const notificationService = {
         try {
             sendEmail(receiver, subject, HtmlBody);
 
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
 
         } catch (error) {
             logger.error(
@@ -103,7 +96,7 @@ export const notificationService = {
         }
     },
 
-    sendEmailDetectTransactions: async (userData: any, receiver: string, lang: string) => {
+    sendEmailDetectTransactions: async (userData: any, receiver: string, lang: string, id: string) => {
         logger.info(`send mail detect transaction to ${receiver}`);
         if (!receiver) { return }
 
@@ -116,7 +109,7 @@ export const notificationService = {
         const subject = emailData.obj || `Opération hors de la zone CEMAC détectée`;
 
         try {
-            await insertNotification(subject, HtmlBody, receiver, HtmlBody);
+            await insertNotification(subject, HtmlBody, receiver, HtmlBody, id);
             await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
@@ -145,7 +138,6 @@ export const notificationService = {
 
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, travel?._id.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEmailTravelDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -154,7 +146,7 @@ export const notificationService = {
         }
     },
 
-    sendEmailVisaExceding: async (userData: any, receiver: string, lang: string) => {
+    sendEmailVisaExceding: async (userData: any, receiver: string, lang: string, id: string) => {
         logger.info(`send mail visa exceding transaction to ${receiver}`);
         if (!receiver) { return }
 
@@ -169,7 +161,7 @@ export const notificationService = {
 
         try {
 
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
             sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
@@ -191,7 +183,6 @@ export const notificationService = {
         const subject = `Déclaration de payement en ligne`;
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, onlinePayement?._id.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -214,7 +205,6 @@ export const notificationService = {
         const subject = `Mise à jour de la déclaration de payement en ligne`;
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, onlinePayement?._id.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -237,7 +227,6 @@ export const notificationService = {
         const subject = `Mise à jour de la déclaration de voyage hors zone CEMAC`;
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, travel?._id.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEmailOnlinePayementDeclaration to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -260,7 +249,6 @@ export const notificationService = {
         const subject = `Validation requise pour ${type}`;
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, data?._id?.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEmailValidationRequired to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -269,7 +257,7 @@ export const notificationService = {
         }
     },
 
-    sendEmailFormalNotice: async (receiver: string, letter: Letter, userData: any, lang: string, subject: string) => {
+    sendEmailFormalNotice: async (receiver: string, letter: Letter, userData: any, lang: string, subject: string, id: string) => {
 
 
         const content = {
@@ -302,7 +290,7 @@ export const notificationService = {
                 });
             }
             sendEmail(receiver, subject, HtmlBody, pdfString);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, letter?._id.toString(), Attachments);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id, Attachments);
         } catch (error) {
             logger.error(
                 `Error during sendEmailFormalNotice to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -329,7 +317,6 @@ export const notificationService = {
 
         try {
             sendEmail(receiver, subject, HtmlBody);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, travel?._id.toString());
         } catch (error) {
             logger.error(
                 `Error during sendEamailRejectStep to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -600,35 +587,13 @@ async function queueNotification(type: string, data: any = null, delayUntil?: nu
 };
 
 const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
-
     if (!['staging-bci', 'production'].includes(config.get('env'))) { return; }
-
     if (!phone || !body) { return; }
-
-    // options to send with Londo Gateway
-    const optionsLND: any = {
-        method: 'POST',
-        uri: `${config.get('londoGateway.url')}/notify/instantaneous/generate/instant-sms`,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        timeout: config.get('londoGateway.timeout'),
-        form: { phone, text: body, source: 'DBANKING' },
-        rejectUnauthorized: false,
-        insecure: true,
-        json: true
-    };
-
-    try {
-        const result = await http(optionsLND);
-        logger.info(`token sms successfully send to client ${phone} \n${JSON.stringify(result, null, 4)}`);
-        return { message: 'SMS send' };
-    } catch (error) {
-        logger.info(`error when send mail form BCI server ${error.stack} \n${(error.message)}`);
-        return error
-    }
-
+    logger.info(`insert SMS to sending in queue, to: ${phone}`);
+    return queueNotification('sms', { receiver: phone, date: new Date(), body });
 };
 
-const insertNotification = async (object: string, format: NotificationFormat, message: string, email: string, id?: string, attachments?: any, key?: any,type?:string) => {
+const insertNotification = async (object: string, format: NotificationFormat, message: string, email: string, id?: string, attachments?: any, key?: any, type?: string) => {
     const notification = { object, format, message, email, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments, ...key };
     try {
         const { insertedId } = await notificationsCollection.insertNotifications(notification);
@@ -642,7 +607,7 @@ const insertNotification = async (object: string, format: NotificationFormat, me
                     label: attachments[0]?.name
                 },
                 notification?.dates?.createdAt,
-               type,
+                type,
             );
             attachment.fileName = attachment.name;
         }

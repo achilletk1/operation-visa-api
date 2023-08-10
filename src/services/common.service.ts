@@ -1,4 +1,3 @@
-import replaceSpecialCharacters = require('replace-special-characters');
 import { isString, isNumber, isEmpty } from 'lodash';
 import { logger } from '../winston';
 import { config } from '../config';
@@ -7,8 +6,7 @@ import XLSX = require('xlsx');
 import { filesService } from './files.service';
 import * as visaHelper from './helpers/visa-operations.service.helper';
 import { Attachment, OpeVisaStatus } from './../models/visa-operations';
-import { OnlinePaymentMonth, OnlinePaymentStatement } from '../models/online-payment';
-import { lettersService } from './letters.service';
+import { OnlinePaymentStatement } from '../models/online-payment';
 
 
 export const commonService = {
@@ -265,24 +263,4 @@ export const commonService = {
         if (statusList.every(e => e === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
         return OpeVisaStatus.TO_COMPLETED;
     }
-}
-
-const removeSpecialCharacter = (str) => {
-    if (!str) { return; }
-    str = str.replace(/@/g, '');
-    str = str.replace(/\|/g, '');
-    str = str.replace(/\//g, '');
-    str = str.replace(/\\/g, '');
-    str = str.replace(/\$/g, 's');
-    str = str.replace(/€/g, 'e');
-    str = str.replace(/d/g, '');
-    str = str.replace(/&/g, '');
-    str = str.replace(/#/g, '');
-    str = str.replace(/\^/g, '');
-    str = str.replace(/\¨/g, '');
-    str = str.replace(/\µ/g, '');
-    str = str.replace(/\£/g, '');
-    str = str.replace(/\~/g, '');
-    str = str.replace(/\`/g, '');
-    return replaceSpecialCharacters(str);
 }
