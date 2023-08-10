@@ -304,6 +304,7 @@ export const travelService = {
 
                 tobeUpdated = { othersAttachements };
             }
+            travel.editors = !isEmpty(travel.editors)?travel.editors:[];
             travel.editors.push({
                 fullName: `${authUser.fname} ${authUser.lname}`,
                 date: moment().valueOf(),
