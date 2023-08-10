@@ -234,10 +234,14 @@ export const generateTravelsExportXlsx = async (onlinePayment: any[]) => {
     let result = onlinePayment;
 
     const status = {
-        100: 'INITIÉE',
-        200: 'CONFIRMÉE',
-        300: 'ECHEC',
-        400: 'EN ATTENTE',
+        100: 'A COMPLETER', 
+        101: 'NON RENSEGNE', 
+        200: 'JUSTIFIE', 
+        300: 'REJETÉ',
+        400: 'A VALIDER', 
+        500: 'HORS DELAIS', 
+        600: 'CLÔTURE', 
+        700: 'CH DE VALIDATION'  
     };
 
     const type = {
