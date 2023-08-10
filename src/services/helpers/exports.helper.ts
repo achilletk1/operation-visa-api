@@ -234,6 +234,7 @@ export const generateTravelsExportXlsx = async (onlinePayment: any[]) => {
     let result = onlinePayment;
 
     const status = {
+        100: 'A COMPLETER', 
         101: 'NON RENSEGNE', 
         200: 'JUSTIFIE', 
         300: 'REJETÉ',
