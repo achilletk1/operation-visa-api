@@ -13,8 +13,6 @@ import  morgan from 'morgan';
 import { logger, morganOption } from './winston';
 import  xmlparser from 'express-xml-bodyparser';
 import  httpContext from 'express-http-context';
-
-// import { oauthVerification } from './middlewares/auth.middleware';
 import  http from 'http';
 import { authController } from './controllers/auth.controller';
 import { usersController } from './controllers/users.controller';
@@ -92,7 +90,7 @@ const server = http.createServer(main);
 server.listen(config.get('port'), config.get('host'), async () => {
     logger.info(`server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
 });
-cronService.startRemoveOnpWithoutExceeding();
+// cronService.startRemoveOnpWithoutExceeding();
 // cronService.detectUsersNotJustifiedTransaction();
 // cronService.startTransactionsProcessing();
 // cronService.startRevivalMail();

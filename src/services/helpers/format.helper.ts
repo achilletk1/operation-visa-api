@@ -3,11 +3,11 @@ import { VisaTransaction } from "../../models/visa-operations";
 import * as visaHelper from "../helpers/visa-operations.service.helper";
 import handlebars from 'handlebars';
 
-export const replaceVariables = (content: any, values: any, isTest?: boolean) => {
+export const replaceVariables = (content: any, values: any, isSms?: boolean, isTest?: boolean) => {
     const obj: any = {};
     for (const key in content) {
         if (!content.hasOwnProperty(key)) { break; }
-        obj[key] = goToTheLine(formatContent(content[key], values, isTest));
+        obj[key] = goToTheLine(formatContent(content[key], values, isTest), isSms);
     }
     return obj;
 }
@@ -30,10 +30,10 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
 }
 
 
-const goToTheLine = (str: string) => {
+const goToTheLine = (str: string, isSms?: boolean) => {
     const reg = '//';
     str = str ?? '';
-    return str.includes(reg) ? new handlebars.SafeString(str.split(reg).join('<br>')) : str;
+    return str.includes(reg) ? isSms ? str.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str.split(reg).join('<br>')) : str;
 }
 
 export const getVariablesValue = (data: { transactions: VisaTransaction[], amount: number, ceiling: number }) => {

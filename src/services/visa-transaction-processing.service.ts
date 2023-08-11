@@ -220,8 +220,8 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             await Promise.all([
                 notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'fr', get(onlinePayment, '_id').toString()),
                 notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'),'firstTransaction', 'fr'),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'),'firstTransaction', 'en')
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'fr', get(onlinePayment, '_id').toString()),
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'en', get(onlinePayment, '_id').toString())
             ]);
         }
         onlinePayment.transactions.push(...selectedTransactions);
@@ -242,8 +242,8 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             await Promise.all([
                 notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'fr', get(onlinePayment, '_id').toString()),
                 notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'),'ceilingOverrun', 'fr'),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'),'ceilingOverrun', 'en')
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'fr', get(onlinePayment, '_id').toString()),
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'en', get(onlinePayment, '_id').toString())
             ]);
             logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
         }
@@ -273,13 +273,13 @@ const formatTransactions = (dataArray: any[]) => {
             return {
                 _id: element?._id,
                 clientCode: element['CLIENT']?.toString()?.replace(/\s/g, ''),
-                fullName: element['NOM_CLIENT'],
+                fullName: element['NOM_CLIENT']?.toString()?.trim(),
                 manager: {
                     code: element['CODE_GESTIONNAIRE']?.replace(/\s/g, ''),
                     name: element['NOM_GESTIONNAIRE']?.replace(/\s/g, '')
                 },
-                tel: element['TELEPHONE_CLIENT'],
-                email: element['EMAIL_CLIENT'],
+                tel: element['TELEPHONE_CLIENT']?.toString()?.replace(/\s/g, ''),
+                email: element['EMAIL_CLIENT']?.toString()?.replace(/\s/g, ''),
                 beneficiary: element['ACQUEREUR']?.replace(/\s/g, ''),
                 amount: +element['MONTANT_XAF'] || 0,
                 amountTrans: +element['MONTANT'] || 0,
@@ -290,7 +290,7 @@ const formatTransactions = (dataArray: any[]) => {
                 type: element['TYPE_TRANS'],
                 ncp: element['COMPTE']?.replace(/\s/g, ''),
                 age: element['AGENCE']?.replace(/\s/g, ''),
-                cha: element['CHAPITRE'],
+                cha: element['CHAPITRE']?.toString()?.replace(/\s/g, ''),
                 card: {
                     name: element['NOM_CARTE']?.replace(/\s/g, ''),
                     code: element['CARTE']?.replace(/\s/g, ''),
@@ -377,8 +377,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
             await Promise.all([
                 notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                 notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'en', get(travel, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'firstTransaction', 'fr'),
-                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'firstTransaction', 'en')
+                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'fr', get(travel, '_id').toString()),
+                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'en', get(travel, '_id').toString())
 
             ]);
         }
@@ -430,10 +430,10 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                         transactions: travel?.transactions, ceiling: travel?.ceiling, amount: totalAmount
                     });
                     await Promise.all([
-                        notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr',  get(travel, '_id').toString()),
+                        notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                         notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'en', get(travel, '_id').toString()),
-                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'ceilingOverrun', 'fr'),
-                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'ceilingOverrun', 'en')
+                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'fr', get(travel, '_id').toString()),
+                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString())
                     ]);
 
                     logger.debug(`Exeding travel month, id: ${travelMonth?._id}`);
@@ -466,8 +466,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 await Promise.all([
                     notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                     notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
-                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'ceilingOverrun', 'fr'),
-                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'),'ceilingOverrun', 'en')
+                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'fr', get(travel, '_id').toString()),
+                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en',get(travel, '_id').toString())
                 ]);
                 logger.debug(`Exeding travel, id: ${travel?._id}`);
 

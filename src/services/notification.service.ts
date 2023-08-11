@@ -18,7 +18,6 @@ import { Letter } from '../models/letter';
 import { get, isEmpty } from 'lodash';
 import { User } from '../models/user';
 import { logger } from '../winston';
-import http from 'request-promise';
 import { config } from '../config';
 import moment from 'moment';
 
@@ -41,15 +40,16 @@ export const notificationService = {
         }
     },
 
-    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string) => {
+    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string, id: string) => {
         if (!phone) { return; }
 
         const visaTemplate = await templatesCollection.getTemplateBy({ key });
 
         if (!visaTemplate) { return; }
 
-        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData);
+        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData, true);
         const body = data?.sms;
+        await insertNotification('', NotificationFormat.SMS, body, phone, id, null, key);
         try {
             return sendSMSFromBCIServer(phone, body);
         } catch (error) {
@@ -109,7 +109,7 @@ export const notificationService = {
         const subject = emailData.obj || `Opération hors de la zone CEMAC détectée`;
 
         try {
-            await insertNotification(subject, HtmlBody, receiver, HtmlBody, id);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
             await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
@@ -532,7 +532,7 @@ export const notificationService = {
             }
             sendEmail(receiver, subject, HtmlBody, pdfString);
 
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, '', Attachments, { key: 'customer_in_demeure' }, 'mails_liste_clients_en_demeurres');
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, '', Attachments, 'customer_in_demeure', 'mails_liste_clients_en_demeurres');
         } catch (error) {
             logger.error(`Error during  to ${receiver} for client in demeure. \n ${error.message} \n${error.stack}`);
             return error;
@@ -593,8 +593,10 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
     return queueNotification('sms', { receiver: phone, date: new Date(), body });
 };
 
-const insertNotification = async (object: string, format: NotificationFormat, message: string, email: string, id?: string, attachments?: any, key?: any, type?: string) => {
-    const notification = { object, format, message, email, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments, ...key };
+const insertNotification = async (object: string, format: NotificationFormat, message: string, receiver: string, id?: string, attachments?: any, key?: any, type?: string) => {
+    const email = NotificationFormat.MAIL ? receiver : null;
+    const tel = NotificationFormat.SMS ? receiver : null;
+    const notification = { object, format, message, email, tel, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments, key };
     try {
         const { insertedId } = await notificationsCollection.insertNotifications(notification);
         let attachment: any;
