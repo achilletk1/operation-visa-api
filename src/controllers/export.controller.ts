@@ -95,7 +95,7 @@ export const exportController = {
             }
 
             const data = await exportService.generateOnlinePaymentExportLinks(req.body);
-            
+
             if (data instanceof Error && data.message === 'OnlinePaymentNotFound') {
                 const message = 'Aucune donnée trouvée pour cette transaction';
                 const errResp = commonService.generateErrResponse(message, data, 'Aucune donnée');
@@ -137,6 +137,11 @@ export const exportController = {
 
             if (data instanceof Error && data.message === 'MonthOnlineOperationsNotFound') {
                 const message = 'Aucune donnée trouvée pour cette transaction';
+                const errResp = commonService.generateErrResponse(message, data, 'Aucune donnée');
+                return res.status(404).json(errResp);
+            }
+            if (data instanceof Error && data.message === 'TransactionNotFound') {
+                const message = `Nous n'avons pas trouvé de transaction`;
                 const errResp = commonService.generateErrResponse(message, data, 'Aucune donnée');
                 return res.status(404).json(errResp);
             }
