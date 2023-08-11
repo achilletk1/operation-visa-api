@@ -3,7 +3,7 @@ import { commonService } from './common.service';
 import moment = require("moment");
 import { config } from "../config";
 import { decode, encode } from "./helpers/url-crypt/url-crypt.service.helper";
-import  * as helper from "./helpers/exports.helper";
+import * as helper from "./helpers/exports.helper";
 import * as visaHelper from "./helpers/visa-operations.service.helper";
 import { logger } from '../winston';
 import { isEmpty } from 'lodash';
@@ -128,7 +128,7 @@ export const exportService = {
             options = decode(code);
         } catch (error) { return new Error('BadExportCode'); }
 
-        const {ttl} = options;
+        const { ttl } = options;
         delete options.name;
         delete options.status;
         delete options.clientCode;
@@ -151,7 +151,7 @@ export const exportService = {
     },
 
     generateOnlinePaymentOperationsExportLinks: async (operationId: string) => {
-      
+
         const payments = await onlinePaymentsCollection.getOnlinePaymentById(operationId);
         if (isEmpty(payments?.transactions)) { return new Error('MonthOnlineOperationsNotFound'); }
 
@@ -174,12 +174,14 @@ export const exportService = {
             options = decode(code);
         } catch (error) { return new Error('BadExportCode'); }
 
-        const {ttl} = options;
+        const { ttl } = options;
 
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
         const operations: any = await onlinePaymentsCollection.getOnlinePaymentById(options.operationId);
+
+        if (isEmpty(operations)) { return new Error('TransactionNotFound'); }
 
         let data;
         const excelArrayBuffer = await exportHelper.generateOnlineOperationsExportXlsx(operations);
@@ -189,9 +191,9 @@ export const exportService = {
 
         return data;
     },
-    
+
     generateTravelsCeillingExportLinks: async (travelId: string) => {
-  
+
         const ceilling = await travelsCollection.getTravelById(travelId);
         if (isEmpty(ceilling?.transactions)) { return new Error('OnlineCeillingNotFound'); }
 
@@ -214,14 +216,14 @@ export const exportService = {
             options = decode(code);
         } catch (error) { return new Error('BadExportCode'); }
 
-        const {ttl} = options;
+        const { ttl } = options;
         // delete options.travelId
         // delete options.ttl;
 
         options = { ...options }
         if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
 
-        const ceilling:any = await  travelsCollection.getTravelById(options.travelId);;
+        const ceilling: any = await travelsCollection.getTravelById(options.travelId);;
 
         let data;
         const excelArrayBuffer = await exportHelper.generateCeillingExportXlsx(ceilling);
@@ -233,8 +235,8 @@ export const exportService = {
     },
 
 
-    
-    
+
+
     generateExportVisaAttachmentView: async (query: any) => {
         try {
             const { path } = query;
