@@ -260,37 +260,41 @@ export const notificationService = {
     sendEmailFormalNotice: async (receiver: string, letter: Letter, userData: any, lang: string, subject: string, id: string) => {
 
 
-        const content = {
-            text: letter.emailText[lang]
-        }
-        const formatedContent = formatHelper.replaceVariables(content, userData);
+        // const content = {
+        //     text: letter.emailText[lang]
+        // }
+        // const formatedContent = formatHelper.replaceVariables(content, userData);
+        const formatedContent = formatHelper.replaceVariables(letter.pdf[lang], userData);
 
         const data = {
             name: userData['NOM_CLIENT'],
             civility: 'Mr/Mme',
-            ...formatedContent,
+            signature: letter.pdf.signature,
+            ...formatedContent
 
         }
 
         const HtmlBody = await exportHelper.generateFormalNoticeMail(data);
 
 
-        const pdfData = formatHelper.replaceVariables(letter.pdf[lang], userData);
+        // const pdfData = formatHelper.replaceVariables(letter.pdf[lang], userData);
 
-        const pdfString = await exportHelper.generateFormalNoticeLetter({ ...pdfData, signature: letter.pdf.signature });
+        // const pdfString = await exportHelper.generateFormalNoticeLetter({ ...pdfData, signature: letter.pdf.signature });
 
         try {
-            let Attachments: any;
-            if (pdfString && !(pdfString instanceof Error)) {
-                Attachments ??= [];
-                Attachments.push({
-                    name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
-                    content: pdfString,
-                    contentType: 'application/pdf'
-                });
-            }
-            sendEmail(receiver, subject, HtmlBody, pdfString);
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id, Attachments);
+            // let Attachments: any;
+            // if (pdfString && !(pdfString instanceof Error)) {
+            //     Attachments ??= [];
+            //     Attachments.push({
+            //         name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
+            //         content: pdfString,
+            //         contentType: 'application/pdf'
+            //     });
+            // }
+            // sendEmail(receiver, subject, HtmlBody, pdfString);
+            sendEmail(receiver, subject, HtmlBody);
+            // await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id, Attachments);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
         } catch (error) {
             logger.error(
                 `Error during sendEmailFormalNotice to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -594,8 +598,8 @@ const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
 };
 
 const insertNotification = async (object: string, format: NotificationFormat, message: string, receiver: string, id?: string, attachments?: any, key?: any, type?: string) => {
-    const email = NotificationFormat.MAIL ? receiver : null;
-    const tel = NotificationFormat.SMS ? receiver : null;
+    const email = format === NotificationFormat.MAIL ? receiver : null;
+    const tel = format === NotificationFormat.SMS ? receiver : null;
     const notification = { object, format, message, email, tel, id, dates: { createdAt: moment().valueOf() }, status: 100, attachments, key };
     try {
         const { insertedId } = await notificationsCollection.insertNotifications(notification);

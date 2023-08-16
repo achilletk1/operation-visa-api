@@ -98,7 +98,9 @@ export const generateFormalNoticeLetter = async (data: any) => {
 
 export const generateFormalNoticeMail = async (data: any) => {
     try {
-        const template = handlebars.compile(templateFormalNoticeMail);
+        // const template = handlebars.compile(templateFormalNoticeMail);
+        const template = handlebars.compile(templateFormalNoticeLetter);
+        
         const html = template(data);
         return html;
     } catch (error) {

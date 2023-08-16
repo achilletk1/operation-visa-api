@@ -31,7 +31,11 @@ export const visaTransactonsProcessingService = {
             settingCollection.insertSetting({ key: 'visa_transaction_tmp_treatment_in_progress', value: true });
 
             const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
-            if (isEmpty(content)) { return; }
+            if (isEmpty(content)) {
+                const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
+                console.log('resp', resp);
+                return;
+            }
 
             let transactions = formatTransactions(content || []);
             const clientCodes = {};
@@ -80,6 +84,12 @@ export const visaTransactonsProcessingService = {
             await settingCollection.insertSetting({ key: 'start_revival_mail_in_progress', value: true });
 
             const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
+
+            if (isEmpty(travels)) {
+                const resp = await settingCollection.deleteSetting('start_revival_mail_in_progress')
+                console.log('resp', resp);
+                return;
+            }
             const letter = await lettersCollection.getLetterBy({});
             if (!letter) { return new Error('LetterNotFound'); }
 
@@ -467,7 +477,7 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                     notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                     notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                     notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'fr', get(travel, '_id').toString()),
-                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en',get(travel, '_id').toString())
+                    notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString())
                 ]);
                 logger.debug(`Exeding travel, id: ${travel?._id}`);
 

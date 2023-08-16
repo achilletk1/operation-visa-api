@@ -93,6 +93,6 @@ server.listen(config.get('port'), config.get('host'), async () => {
 // cronService.startRemoveOnpWithoutExceeding();
 // cronService.detectUsersNotJustifiedTransaction();
 // cronService.startTransactionsProcessing();
-// cronService.startRevivalMail();
+cronService.startRevivalMail();
 
 export default app;
