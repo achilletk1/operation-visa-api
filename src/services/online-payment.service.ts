@@ -230,13 +230,14 @@ export const onlinePaymentsService = {
 
             if (!adminAuth) { return new Error('Forbidden'); }
 
-            const { status, validator, statementRefs } = data;
+            const { status, validator, statementRefs, rejectReason } = data;
 
             if (isEmpty(statementRefs)) return new Error('MissingStatementRefs');
 
             const onlinePayment = await onlinePaymentsCollection.getOnlinePaymentById(id);
 
             if (!onlinePayment) { return new Error('OnlinePaymentNotFound'); }
+            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { return new Error('CannotRejectWithoutReason') }
 
             const { statements } = onlinePayment;
             let updateData: any = {};
@@ -246,6 +247,8 @@ export const onlinePaymentsService = {
                 statement.validators = isEmpty(statement.validators) ? statement.validators : [...statement.validators, validator];
             }
             updateData.statements = statements;
+            
+            updateData["rejectReason"] = rejectReason;
 
             const globalStatus = commonService.getOnpStatus(statements);
             if (onlinePayment.status !== globalStatus) { updateData.status = globalStatus; }
