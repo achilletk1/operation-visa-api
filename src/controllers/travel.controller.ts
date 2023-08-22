@@ -119,6 +119,11 @@ export const travelController = {
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(401).json(errResp);
             }
+            if (data instanceof Error && data.message === 'CannotRejectWithoutReason') {
+                const message = 'Le motif du rejet ne doit pas etre vide.';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
 
             if (data instanceof Error) {
                 const message = 'Erreur lors de la mise à jour du voyage';

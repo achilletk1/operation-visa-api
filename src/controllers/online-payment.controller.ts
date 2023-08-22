@@ -116,7 +116,11 @@ export const onlinePaymentsController = {
                 const errResp = commonService.generateErrResponse(message, data);
                 return res.status(500).json(errResp);
             }
-
+            if (data instanceof Error && data.message === 'CannotRejectWithoutReason') {
+                const message = 'Le motif du rejet ne doit pas etre vide.';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
             res.status(200).json({ message: 'travel data updated succesfully.' });
         });
         app.get('/validators-online-payment/:id', async (req: Request, res: Response) => {

@@ -252,6 +252,7 @@ export const travelService = {
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
+                proofTravel.validators = [];                
                 proofTravel.validators.push(validator);
                 proofTravel = { ...proofTravel, ...updateData }
                 tobeUpdated = { proofTravel };

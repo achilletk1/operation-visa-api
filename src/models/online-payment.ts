@@ -20,6 +20,8 @@ export interface OnlinePaymentMonth {
   validationLevel?: number;
   validators?: Validator[];
   editors?: any[];
+  rejectReason?: string;
+
 }
 
 export interface OnlinePaymentStatement {
