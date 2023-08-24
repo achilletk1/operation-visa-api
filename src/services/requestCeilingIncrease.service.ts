@@ -1,12 +1,11 @@
 import { requestCeillingIncreaseCollection } from '../collections/requestCeilingIncrease.collection';
 import { RequestCeilingIncrease, Validator } from '../models/request-ceiling-increase';
 import { notificationService } from './notification.service';
-import  httpContext from 'express-http-context';
+import httpContext from 'express-http-context';
 import { commonService } from './common.service';
 import { logger } from '../winston';
 import moment = require('moment');
 import { isEmpty } from 'lodash';
-import { User } from '../models/user';
 
 export const requestCeillingIncreaseService = {
 
@@ -53,13 +52,13 @@ export const requestCeillingIncreaseService = {
         return await requestCeillingIncreaseCollection.getRequestCeillingIncrease(fields || {}, offset || 0, limit || 40, range);
     },
 
-    assignRequestCeiling: async (id: any, dataUsers: any) => {
+    assignRequestCeiling: async (id: any, assignedUser: any) => {
         try {
-            const { userAssign, user } = dataUsers
+            const user = httpContext.get('user');
 
             if (!((user.category >= 500) && (user.category <= 600))) { return new Error('Forbidden'); }
 
-            if (!userAssign) { return new Error('AssignedUserNotProvied'); }
+            if (!assignedUser) { return new Error('AssignedUserNotProvied'); }
 
             const ceilingReq = await requestCeillingIncreaseCollection.getCeilingById(id);
 
@@ -69,7 +68,7 @@ export const requestCeillingIncreaseService = {
 
             const { _id, fname, lname } = user;
             const assigner = { _id, fname, lname };
-            const assignered = { fname: userAssign.fname, lname: userAssign.lname, email: userAssign.email, tel: userAssign.tel };
+            const assignered = { fname: assignedUser.fname, lname: assignedUser.lname, email: assignedUser.email, tel: assignedUser.tel };
             const assignment = { assigner, assignered };
 
             const data = await requestCeillingIncreaseCollection.updateCeiling(id, {
@@ -92,10 +91,11 @@ export const requestCeillingIncreaseService = {
         }
     },
 
-    RequestIncrease: async (id: string, body: { validator: any, status: number, user: User }) => {
+    RequestIncrease: async (id: string, body: { validator: any, status: number }) => {
         try {
 
-            if (![600].includes(body?.user?.category)) { return new Error('Forbidden'); }
+            const authUser = httpContext.get('user');
+            if (![600].includes(authUser?.category)) { return new Error('Forbidden'); }
             const ceiling = await requestCeillingIncreaseCollection.getCeilingById(id);
 
             if (!ceiling) { return new Error('CeilingNotFound'); }
