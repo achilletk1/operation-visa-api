@@ -25,8 +25,8 @@ export const mailService = {
     generateExportView: async (data: TemplateForm) => {
         try {
             if (!data) { return new Error('MailNotFound') }
-            let emailDataFr = await formatHelper.replaceVariables(data['fr'], {}, false);
-            let emailDataEn = await formatHelper.replaceVariables(data['en'], {}, false);
+            let emailDataFr = await formatHelper.replaceVariables(data['fr'], {}, true, false);
+            let emailDataEn = await formatHelper.replaceVariables(data['en'], {}, true, false);
 
             const pdfStringEn = await NotificationHeper.generateMailByTemplate({ ...emailDataEn, name: '[UTILISATEUR]' });
 
