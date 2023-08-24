@@ -47,7 +47,7 @@ export const notificationService = {
 
         if (!visaTemplate) { return; }
 
-        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData, true);
+        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData, true,false);
         const body = data?.sms;
         await insertNotification('', NotificationFormat.SMS, body, phone, id, null, key);
         try {

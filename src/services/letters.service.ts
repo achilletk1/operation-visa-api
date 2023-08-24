@@ -86,8 +86,8 @@ export const lettersService = {
         try {
 
             if (!letter) { return new Error('LetterNotFound') }
-            const pdfDataEn = formatHelper.replaceVariables(letter?.pdf?.en, {}, true);
-            const pdfDataFr = formatHelper.replaceVariables(letter?.pdf?.fr, {}, true);
+            const pdfDataEn = formatHelper.replaceVariables(letter?.pdf?.en, {}, false,true);
+            const pdfDataFr = formatHelper.replaceVariables(letter?.pdf?.fr, {},false, true);
 
             const pdfStringEn = await exportsHelper.generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
 

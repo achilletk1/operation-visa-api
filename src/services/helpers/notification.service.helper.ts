@@ -415,7 +415,7 @@ export const generateVisaTemplateForNotification = async (content: any, userData
         const data = formatHelper.replaceVariables(content?.email?.french, {
             ...userData, 'SYSTEM_TODAY_LONG': moment().locale('fr'),
             'SYSTEM_TODAY_SHORT': moment().format('dd/MM/YYYY'),
-        }, isTest);
+        },false, isTest);
         const temlateData = formatVisaTemplate(data);
         const template = handlebars.compile(templateVisaOpe);
         const html = template(temlateData);
