@@ -45,5 +45,5 @@
     "emailTest": "kevin.moutassi@londo-tech.com",
     "emailBank": "kevin.moutassi@londo-tech.com",
     "cronRemoveOnlinePaymentsWithExceedings": "* * * * * *",
-    "cronclientindemeure":"* * * * * *"
+    "cronclientindemeure":"*/3 */1 * * *"
 }
