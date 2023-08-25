@@ -13,7 +13,7 @@ import cron from 'node-cron';
 import moment from "moment";
 
 export const cronService = {
-    // exceding verifications, travel detections and online payment detection process
+    // Regroupement des voyages et paiements en ligne ayant dépassé. 
     startTransactionsProcessing: async (): Promise<void> => {
         const cronExpression = `${config.get('cronTransactionProcessing')}`;
 
@@ -28,7 +28,7 @@ export const cronService = {
 
     },
 
-    // formal notice letter sending and justifications revival process
+    // Envois des lettres de mise en demeurre et des mails de blocage de carte
     startRevivalMail: async (): Promise<void> => {
         const cronExpression = `${config.get('cronRevivalMail')}`;
         cron.schedule(cronExpression, async () => {
@@ -42,7 +42,7 @@ export const cronService = {
 
     },
 
-    // remove temporaries files which exeeded the expire time
+    // supprimé les fichiers temporaires
     startRemoveTemporaryFiles: async (): Promise<void> => {
         const cronExpression = `${config.get('cronDeleteTemporaryFile')}`;
         cron.schedule(cronExpression, async () => {
@@ -56,7 +56,7 @@ export const cronService = {
 
     },
 
-    // delete Travel with exceeding ceiling
+    // Supprimé les mois de paiement en ligne passé n'ayant pas dépassés le plafond sauf le mois courant
     startRemoveOnpWithoutExceeding: async (): Promise<void> => {
         const cronExpression = `${config.get('cronRemoveOnlinePaymentsWithExceedings')}`;
         cron.schedule(cronExpression, async () => {
@@ -70,8 +70,8 @@ export const cronService = {
 
     },
 
-    // detect users who have not justified their transactions outside the cemac zone and send them a letter of formal notice
-    detectUsersNotJustifiedTransaction: async (): Promise<void> => {
+    // detecté les utilisateurs en situation de blocage de carte et faire un mail à la BCI avec la liste en copie.
+    detectListOfUsersToBlocked: async (): Promise<void> => {
         cron.schedule(`${config.get('cronclientindemeure')}`, async () => {
             try {
                 const travelsExcedeed: any[] = await travelsCollection.getTravelsBy({ status: { $in: [OpeVisaStatus.EXCEDEED] } });
@@ -81,7 +81,7 @@ export const cronService = {
                 transactionsExcedeed = await getCustomerAccountToBlocked([...travelsExcedeed, ...onlinePaymentsExcedeed]);
 
                 if (!isEmpty(transactionsExcedeed)) {
-                    await notificationService.sendEmailUsersBloqued(transactionsExcedeed)
+                    await notificationService.sendEmailListOfUsersToBloqued(transactionsExcedeed)
                 }
 
             } catch (error) {

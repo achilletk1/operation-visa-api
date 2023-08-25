@@ -22,8 +22,7 @@ import { usersCollection } from "../collections/users.collection";
 
 
 export const visaTransactonsProcessingService = {
-
-
+    
     startTransactionsProcessing: async (): Promise<any> => {
         try {
             const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
@@ -110,14 +109,12 @@ export const visaTransactonsProcessingService = {
                     ]);
 
                     await travelsCollection.updateTravelsById(travel._id.toString(), { 'proofTravel.status': OpeVisaStatus.EXCEDEED, status: OpeVisaStatus.EXCEDEED });
-                    continue;
                 }
                 if (moment(currentDate).diff(firstDate, 'days') >= visaTemplate.period) {
                     await Promise.all([
                         notificationService.sendVisaTemplateEmail(userData, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
                         notificationService.sendVisaTemplateEmail(userData, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
                     ]);
-                    continue;
                 }
 
 
@@ -230,8 +227,8 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             await Promise.all([
                 notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'fr', get(onlinePayment, '_id').toString()),
                 notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'fr', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'en', get(onlinePayment, '_id').toString())
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'fr', get(onlinePayment, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'en', get(onlinePayment, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC')
             ]);
         }
         onlinePayment.transactions.push(...selectedTransactions);
@@ -252,8 +249,8 @@ const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: an
             await Promise.all([
                 notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'fr', get(onlinePayment, '_id').toString()),
                 notificationService.sendEmailVisaExceding(userData, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'fr', get(onlinePayment, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'en', get(onlinePayment, '_id').toString())
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'fr', get(onlinePayment, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac'),
+                notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'en', get(onlinePayment, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac')
             ]);
             logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
         }
@@ -380,8 +377,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
             await Promise.all([
                 notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                 notificationService.sendEmailDetectTransactions(userData, get(travel, 'user.email'), 'en', get(travel, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'fr', get(travel, '_id').toString()),
-                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'en', get(travel, '_id').toString())
+                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'fr', get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
+                notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'firstTransaction', 'en', get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC')
 
             ]);
         }
@@ -435,8 +432,8 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                     await Promise.all([
                         notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'fr', get(travel, '_id').toString()),
                         notificationService.sendEmailVisaExceding(userData, get(travel, 'user.email'), 'en', get(travel, '_id').toString()),
-                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'fr', get(travel, '_id').toString()),
-                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString())
+                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'fr', get(travel, '_id').toString(),'Dépassement de plafond sur transactions hors zone cemac'),
+                        notificationService.sendTemplateSMS(userData, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString(),'Dépassement de plafond sur transactions hors zone cemac')
                     ]);
 
                     logger.debug(`Exeding travel month, id: ${travelMonth?._id}`);
