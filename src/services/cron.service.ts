@@ -77,7 +77,7 @@ export const cronService = {
                 const travelsExcedeed: any[] = await travelsCollection.getTravelsBy({ status: { $in: [OpeVisaStatus.EXCEDEED] } });
                 const onlinePaymentsExcedeed: any[] = await onlinePaymentsCollection.getOnlinePaymentsBy({ status: { $in: [OpeVisaStatus.EXCEDEED] } });
                 let transactionsExcedeed: any = [];
-
+                if (isEmpty([...travelsExcedeed, ...onlinePaymentsExcedeed])) return;
                 transactionsExcedeed = await getCustomerAccountToBlocked([...travelsExcedeed, ...onlinePaymentsExcedeed]);
 
                 if (!isEmpty(transactionsExcedeed)) {
