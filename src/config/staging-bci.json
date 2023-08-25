@@ -48,5 +48,8 @@
     "cronRevivalMail":"*/20 0-5 * * *",
     "cronTransactionProcessing": "* * * * *",
     "cronDeleteTemporaryFile": "0 */3 * * *",
-    "cronRemoveOnlinePaymentsWithExceedings": "* * * * *"
+    "cronRemoveOnlinePaymentsWithExceedings": "* * * * *",
+    "cronclientindemeure": "0 00 1 */3 *",
+    "emailTest": "kevin.moutassi@londo-tech.com",
+    "emailBank": "kevin.moutassi@londo-tech.com"
 }
