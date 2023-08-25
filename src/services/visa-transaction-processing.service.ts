@@ -21,7 +21,6 @@ import moment from 'moment';
 
 
 export const visaTransactonsProcessingService = {
-
     startTransactionsProcessing: async (): Promise<any> => {
         try {
             const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
@@ -429,8 +428,6 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
                 await travelMonthsCollection.updateTravelMonthsById(travelMonth?._id, travelMonth);
 
             }
-
-
 
         }
 
