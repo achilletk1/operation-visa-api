@@ -594,7 +594,7 @@ async function queueNotification(type: string, data: any = null, delayUntil?: nu
 };
 
 const sendSMSFromBCIServer = async (phone?: string, body?: string) => {
-    if (!['staging-bci', 'production'].includes(config.get('env'))) { return; }
+    if (!['production'].includes(config.get('env'))) { return; }
     if (!phone || !body) { return; }
     logger.info(`insert SMS to sending in queue, to: ${phone}`);
     return queueNotification('sms', { receiver: phone, date: new Date(), body });
