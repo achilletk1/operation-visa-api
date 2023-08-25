@@ -40,7 +40,7 @@ export const notificationService = {
         }
     },
 
-    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string, id: string) => {
+    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string, id?: string,subject?:string) => {
         if (!phone) { return; }
 
         const visaTemplate = await templatesCollection.getTemplateBy({ key });
@@ -51,7 +51,10 @@ export const notificationService = {
         const body = data?.sms;
         await insertNotification('', NotificationFormat.SMS, body, phone, id, null, key);
         try {
-            return sendSMSFromBCIServer(phone, body);
+             sendSMSFromBCIServer(phone, body);
+
+            await insertNotification(subject, NotificationFormat.SMS, body, phone, id);
+
         } catch (error) {
             logger.error(`Error during send email sendToken to ${phone}. \n ${error.message} \n${error.stack}`);
             return error;
@@ -67,7 +70,7 @@ export const notificationService = {
         const receiver = `${user.email}`;
 
         try {
-            return sendEmail(receiver, subject, HtmlBody);
+             return sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(`Error during  email Token to ${user.email}. \n ${error.message} \n${error.stack}`);
             return error;
@@ -109,7 +112,7 @@ export const notificationService = {
         const subject = emailData.obj || `Opération hors de la zone CEMAC détectée`;
 
         try {
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver,id);
             await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
@@ -515,7 +518,7 @@ export const notificationService = {
         }
     },
 
-    sendEmailUsersBloqued: async (usersLocked: any[]) => {
+    sendEmailListOfUsersToBloqued: async (usersLocked: any[]) => {
         const HtmlBody = await notificationHelper.generateMailContainBlockedUser(usersLocked);
 
         const subject = `[OPERATION VISA] Liste des clients en situation de blocage de carte`;
