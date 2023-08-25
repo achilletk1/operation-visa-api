@@ -296,7 +296,7 @@ const formatTransactions = (dataArray: any[]) => {
                 currencyTrans: +element['DEVISE'] || 0,
                 amountCompens: +element['MONTANT_COMPENS'] || 0,
                 currencyCompens: element['DEVISE_COMPENS']?.replace(/\s/g, ''),
-                date: moment(`${element['DATE']?.replace(/\s/g, '')} ${element['HEURE']?.replace(/\s/g, '')}`, 'dd/MM/YYYY HH:mm:ss').valueOf(),
+                date: moment(`${element['DATE']?.replace(/\s/g, '')} ${element['HEURE']?.replace(/\s/g, '')}`, 'DD/MM/YYYY HH:mm:ss').valueOf(),
                 type: element['TYPE_TRANS'],
                 ncp: element['COMPTE']?.replace(/\s/g, ''),
                 age: element['AGENCE']?.replace(/\s/g, ''),
@@ -308,7 +308,7 @@ const formatTransactions = (dataArray: any[]) => {
                 },
                 country: element['PAYS']?.trim(),
                 category: element['CATEGORIE']?.replace(/\s/g, ''),
-                currentMonth: moment(`${element['DATE']?.replace(/\s/g, '')}`, 'dd/MM/YYYY').format('YYYYMM')?.toString(),
+                currentMonth: moment(`${element['DATE']?.replace(/\s/g, '')}`, 'DD/MM/YYYY').format('YYYYMM')?.toString(),
                 reference: '',
                 statementRef: '',
             }
