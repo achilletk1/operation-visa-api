@@ -35,14 +35,14 @@ export const visaTransactionsCeilingsService = {
         }
     },
 
-    // updateVisaTransactionsCeillingsById: async (id: any, data: any) => {
-    //     try {
-    //         return await visaTransactionsCeillingsCollection.updateVisaTransactionsCeillingsById(id, data);
-    //     } catch (error) {
-    //         logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
-    //         return error;
-    //     }
-    // }
+    updateVisaTransactionsCeillingsById: async (id: any, data: any) => {
+        try {
+            return await visaTransactionsCeillingsCollection.updateVisaTransactionsCeillingsById(id, data);
+        } catch (error) {
+            logger.error(`\nError updating visa transactions  \n${error.message}\n${error.stack}\n`);
+            return error;
+        }
+    },
     getVisaTransactionCeillingsBy: async (data: any) => {
         try {
             return await visaTransactionsCeillingsCollection.getVisaTransactionsCeilingBy(data);

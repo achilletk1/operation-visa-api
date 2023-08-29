@@ -44,7 +44,7 @@ export const visaTransactionsCeillingsCollection = {
         delete set._id;
         let query: any;
         delete set._id;
-        if (!isEmpty(set)) { query.$set = { ...set }; }
+        if (!isEmpty(set)) { query = { $set: set } }
 
         return await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
     },

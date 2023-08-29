@@ -270,13 +270,6 @@ const getOperationType = (type: string) => {
             'travel' : ''
 };
 
-const getTotal = (transactions: any[]) => {
-    if (!transactions || isEmpty(transactions)) { return 0; }
-    const totalAmountTransaction = transactions.map((elt) => elt.amount).reduce((elt, prev) => elt + prev, 0);
-
-    return totalAmountTransaction;
-};
-
 const formatTransactions = (dataArray: any[]) => {
     try {
         const transactions = dataArray.map((element: any) => {
@@ -487,11 +480,5 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
     return onlinePaymentsTransactions;
 }
 
-const getEmail = async (email: string, clientCode: string) => {
-    if (email) { return email }
-    const userFromDb = await usersCollection.getUserBy({ clientCode });
-    if (userFromDb) { return userFromDb?.email }
-
-};
 
 

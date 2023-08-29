@@ -65,7 +65,7 @@ export interface VisaTransaction {
   country?: string;
   category?: string;
   reference?: string;
-  currentMonth?: number;
+  currentMonth?: string;
   statementRef?: string;
   tel?: string;
   email?: string;

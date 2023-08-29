@@ -5,7 +5,7 @@ import { visaTransactionsCeillingsCollection } from '../collections/visa-transac
 import { travelsCollection } from '../collections/travels.collection';
 import { Attachment, OpeVisaStatus, VisaCeilingType } from '../models/visa-operations';
 import { notificationService } from './notification.service';
-import { Travel, TravelType } from '../models/travel';
+import { Travel, TravelMonth, TravelType } from '../models/travel';
 import httpContext from 'express-http-context';
 import { filesService } from './files.service';
 import { isEmpty, get } from 'lodash';
@@ -16,6 +16,7 @@ import { ObjectId } from 'mongodb';
 import { config } from '../config';
 import { decode, encode } from './helpers/url-crypt/url-crypt.service.helper';
 import * as exportHelper from './helpers/exports.helper';
+import { travelMonthsCollection } from '../collections/travel-months.collection';
 
 export const travelService = {
 
@@ -208,12 +209,7 @@ export const travelService = {
                 }
             }
 
-
-            if (adminAuth && travel.proofTravel.status === OpeVisaStatus.JUSTIFY) {
-                travel = await VerifyTravelTransactions(id, travel);
-            }
-
-            travel.editors = !isEmpty(travel.editors)?travel.editors:[];
+            travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
             travel.editors.push({
                 fullName: `${authUser.fname}${authUser.lname}`,
                 date: moment().valueOf(),
@@ -231,6 +227,10 @@ export const travelService = {
     updateTravelStepStatusById: async (id: string, data: any) => {
         try {
             const authUser = httpContext.get('user');
+            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+
+            if (!adminAuth) { return new Error('Forbidden') }
+
 
             let stepData = [];
 
@@ -238,7 +238,7 @@ export const travelService = {
 
             if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { return new Error('StepNotProvided') };
 
-            const travel = await travelsCollection.getTravelById(id);
+            let travel = await travelsCollection.getTravelById(id);
 
             if (!travel) { return new Error('TravelNotFound') }
 
@@ -252,7 +252,7 @@ export const travelService = {
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
-                proofTravel.validators = [];                
+                proofTravel.validators = [];
                 proofTravel.validators.push(validator);
                 proofTravel = { ...proofTravel, ...updateData }
                 tobeUpdated = { proofTravel };
@@ -305,7 +305,7 @@ export const travelService = {
 
                 tobeUpdated = { othersAttachements };
             }
-            travel.editors = !isEmpty(travel.editors)?travel.editors:[];
+            travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
             travel.editors.push({
                 fullName: `${authUser.fname} ${authUser.lname}`,
                 date: moment().valueOf(),
@@ -319,11 +319,16 @@ export const travelService = {
             const otherAttachmentAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
             const expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
 
-            if (travelStatus !== travel?.status && [OpeVisaStatus.JUSTIFY, OpeVisaStatus.REJECTED].includes(travelStatus)) {
-                travel.status = travelStatus;
-                await travelsCollection.updateTravelsById(id, { status });
+            travel = { ...travel, ...tobeUpdated };
+            travel.status = travelStatus;
+            travel.otherAttachmentAmount = otherAttachmentAmount;
+            travel.expenseDetailAmount = expenseDetailAmount;
+            if (step === 'proofTravel') {
+                travel = await verifyTravelTransactions(id, travel);
             }
-            return await travelsCollection.updateTravelsById(id, { ...tobeUpdated, status: travelStatus, othersAttachmentStatus: travel.othersAttachmentStatus, expenseDetailsStatus: travel.expenseDetailsStatus, otherAttachmentAmount, expenseDetailAmount, editors: travel.editors });
+
+
+            return await travelsCollection.updateTravelsById(id, travel);
         } catch (error) {
             logger.error(`\nError updating travel data  \n${error.message}\n${error.stack}\n`);
             return error;
@@ -396,8 +401,6 @@ export const travelService = {
         if (travels instanceof Error) { return travels; }
 
         return { travels, transactions };
-
-
     },
 
 
@@ -501,9 +504,9 @@ const getTravelStatus = (travel: Travel): OpeVisaStatus => {
 }
 
 
-const VerifyTravelTransactions = async (id: string, travel: Travel): Promise<any> => {
+const verifyTravelTransactions = async (id: string, travel: Travel): Promise<any> => {
 
-    const existingTravels = await travelsCollection.getTravelsBy({ _id: { $ne: new ObjectId(id) }, "user.clientCode": travel?.user?.clientCode, "proofTravel.dates.start": { $gte: travel?.proofTravel?.dates?.start }, "proofTravel.dates.end": { $gte: travel?.proofTravel?.dates?.end } });
+    const existingTravels = await travelsCollection.getTravelsBy({ _id: { $ne: new ObjectId(id) }, "user.clientCode": travel?.user?.clientCode, "proofTravel.dates.start": { $gte: travel?.proofTravel?.dates?.start }, "proofTravel.dates.end": { $lte: travel?.proofTravel?.dates?.end } });
 
     if (isEmpty(existingTravels)) { return travel; }
 
@@ -530,5 +533,43 @@ const VerifyTravelTransactions = async (id: string, travel: Travel): Promise<any
 
     await travelsCollection.deleteTravels({ _id: { $in: ids } });
 
+    const dayDiff = moment(travel.proofTravel.dates.end).diff(travel.proofTravel.dates.start, 'days');
+
+    travel.travelType = dayDiff > 30 ? TravelType.LONG_TERM_TRAVEL : TravelType.SHORT_TERM_TRAVEL;
+
+    const travelMonths: TravelMonth[] = [];
+
+    if (travel?.travelType === TravelType.LONG_TERM_TRAVEL) {
+        const monthDiff = moment(travel.proofTravel.dates.end).diff(travel.proofTravel.dates.start, 'M');
+        for (let index = 0; index < monthDiff; index++) {
+
+            const month = moment(travel.proofTravel.dates.start).add(index, 'M').format('YYYYMM').toString();
+
+            const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === month);
+
+            const expenseDetailMonth = travel?.expenseDetails.filter((elt) => moment(elt.date).format('YYYYMM').toString() === month);
+
+            if (isEmpty(transactionsMonth)) { continue; }
+
+            const travelMonth: TravelMonth = {
+                status: OpeVisaStatus.TO_COMPLETED,
+                userId: travel?.user?._id,
+                travelId: travel?._id.toString(),
+                month,
+                dates: {
+                    created: moment().valueOf(),
+                },
+                expenseDetails: expenseDetailMonth,
+                expenseDetailsStatus: OpeVisaStatus.EMPTY,
+                expenseDetailsAmount: 0,
+                transactions: transactionsMonth,
+            }
+
+            travelMonths.push(travelMonth);
+
+        }
+
+        if (!isEmpty(travelMonths)) { travelMonthsCollection.insertManyVisaTravelMonth(travelMonths) }
+    }
     return travel;
 }

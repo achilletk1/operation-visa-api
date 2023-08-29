@@ -67,4 +67,10 @@ export const travelMonthsCollection = {
         return insertedId.toString();
     },
 
+    insertManyVisaTravelMonth: async (data: TravelMonth[]): Promise<any> => {
+        const database = await getDatabase();
+        const result = await database.collection(collectionName).insertMany(data);
+        return result;
+    },
+
 }
