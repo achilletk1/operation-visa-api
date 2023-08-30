@@ -80,5 +80,44 @@ export const travelMonthsController = {
 
             res.status(200).json({ message: 'online payment data updated succesfully.' });
         });
+
+        app.put('/travel-months', async (req: Request, res: Response) => {
+
+            const data = await travelMonthsService.updateManyTravelMonths(req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'update online payment failed';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'online payment data updated succesfully.' });
+        });
+
+        app.put('/travel-months/:id/expense-details/status', async (req: Request, res: Response) => {
+            const { id } = req.params;
+
+            const data = await travelMonthsService.updateTravelMonthExpendeDetailsStatusById(id, req.body);
+
+            if (data instanceof Error && data.message === 'Forbidden') {
+                const message = 'forbidden operation';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(401).json(errResp);
+            }
+
+            if (data instanceof Error) {
+                const message = 'update online payment failed';
+                const errResp = commonService.generateErrResponse(message, data);
+                return res.status(500).json(errResp);
+            }
+
+            res.status(200).json({ message: 'online payment data updated succesfully.' });
+        });
     }
 };

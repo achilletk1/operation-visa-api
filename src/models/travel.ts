@@ -102,7 +102,7 @@ export interface TravelMonth {
     };
     expenseDetails?: ExpenseDetail[];
     expenseDetailsStatus?: OpeVisaStatus;
-    expenseDetailsAmount?: number;
+    expenseDetailAmount?: number;
     transactions?: VisaTransaction[];
 
 }

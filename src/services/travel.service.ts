@@ -561,7 +561,7 @@ const verifyTravelTransactions = async (id: string, travel: Travel): Promise<any
                 },
                 expenseDetails: expenseDetailMonth,
                 expenseDetailsStatus: OpeVisaStatus.EMPTY,
-                expenseDetailsAmount: 0,
+                expenseDetailAmount: 0,
                 transactions: transactionsMonth,
             }
 
