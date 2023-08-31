@@ -92,7 +92,7 @@ server.listen(config.get('port'), config.get('host'), async () => {
 });
 cronService.startRemoveOnpWithoutExceeding();
 cronService.startTransactionsProcessing();
-cronService.detectUsersNotJustifiedTransaction();
+// cronService.detectUsersNotJustifiedTransaction();
 cronService.detectListOfUsersToBlocked();
 cronService.startRemoveTemporaryFiles();
 cronService.startRevivalMail();
