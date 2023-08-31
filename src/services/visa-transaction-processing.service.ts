@@ -95,7 +95,7 @@ export const visaTransactonsProcessingService = {
             const visaTemplate = await templatesCollection.getTemplateBy({ key: 'transactionOutsideNotJustified' });
 
             for (const travel of travels) {
-                const firstDate = Math.min(...travel?.transactions.map((elt => elt?.date)));
+                const firstDate = Math.min(...travel?.transactions?.map((elt => elt?.date)));
                 const currentDate = moment().valueOf();
 
                 let userData: any;
