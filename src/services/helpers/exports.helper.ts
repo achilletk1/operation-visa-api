@@ -4,9 +4,10 @@ import { User } from '../../models/user';
 import { logger } from "../../winston";
 import { config } from '../../config';
 import handlebars from 'handlebars';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import moment from "moment";
 import XLSX from 'xlsx';
+import { Transaction } from 'mongodb';
 
 let templateFormalNoticeLetter: any;
 let templateExportNotification: any;
@@ -100,7 +101,7 @@ export const generateFormalNoticeMail = async (data: any) => {
     try {
         // const template = handlebars.compile(templateFormalNoticeMail);
         const template = handlebars.compile(templateFormalNoticeLetter);
-        
+
         const html = template(data);
         return html;
     } catch (error) {
@@ -148,14 +149,14 @@ export const generateOnlinePaymentExportXlsx = async (onlinePayment: any[]) => {
     let result = onlinePayment;
 
     const status = {
-        100: 'A COMPLETER', 
-        101: 'NON RENSEGNE', 
-        200: 'JUSTIFIE', 
+        100: 'A COMPLETER',
+        101: 'NON RENSEGNE',
+        200: 'JUSTIFIE',
         300: 'REJETÉ',
-        400: 'A VALIDER', 
-        500: 'HORS DELAIS', 
-        600: 'CLÔTURE', 
-        700: 'CH DE VALIDATION'         
+        400: 'A VALIDER',
+        500: 'HORS DELAIS',
+        600: 'CLÔTURE',
+        700: 'CH DE VALIDATION'
     }
     // Format Excel file columns headers;
     if (result) {
@@ -236,37 +237,58 @@ export const generateTravelsExportXlsx = async (onlinePayment: any[]) => {
     let result = onlinePayment;
 
     const status = {
-        100: 'A COMPLETER', 
-        101: 'NON RENSEGNE', 
-        200: 'JUSTIFIE', 
+        100: 'A COMPLETER',
+        101: 'NON RENSEGNE',
+        200: 'JUSTIFIE',
         300: 'REJETÉ',
-        400: 'A VALIDER', 
-        500: 'HORS DELAIS', 
-        600: 'CLÔTURE', 
-        700: 'CH DE VALIDATION'  
+        400: 'A VALIDER',
+        500: 'HORS DELAIS',
+        600: 'CLÔTURE',
+        700: 'CH DE VALIDATION'
     };
 
     const type = {
-        100: 'SHORT_TERM_TRAVEL ',
-        200: 'LONG_TERM_TRAVEL ',
+        100: 'COURTE DUREE ',
+        200: 'LONGUE DUREE ',
+    };
+
+    const isProofTravel = {
+        'true': 'Oui',
+        'false': 'Non',
     };
     // Format Excel file columns headers;
     if (result) {
         const excelData = [];
-        excelData.push(['Reférence', 'Code client', 'Nom du client', 'Date départ', 'Date retour', 'Nbre opérations', 'Total(XAF)', 'Dépassement', 'Statut', 'travel type']);
+        excelData.push(['Reférence', 'Code client', 'Nom du client', 'Email', 'Téléphone', 'Reférence du voyage',
+            'Date départ', 'Date retour', 'Nbre opérations', 'Total(XAF)', 'Plafond', 'Dépassement', 'Statut',
+            'Type de voyage', 'Continent(s)', 'Pays(s)', 'Raison', 'Status preuve de voyage', 'Ticket de transport',
+            'Visa', 'Tempon entrée', 'Tempon de sortie', 'Status état des dépenses']);
 
         result.forEach(async (travel) => {
             const elt = [
                 `${travel?.travelRef || ''}`,
                 `${travel?.user?.clientCode || ''}`,
                 `${travel?.user?.fullName || ''}`,
+                `${travel?.user?.email || ''}`,
+                `${travel?.user?.tel || ''}`,
+                `${travel?.travelRef || ''}`,
                 `${moment(travel?.proofTravel?.dates?.start).format('DD/MM/YYYY')}`,
                 `${moment(travel?.proofTravel?.dates?.end).format('DD/MM/YYYY')}`,
                 `${travel?.transactions?.length || ''}`,
-                `${travel?.transactions?.amount || ''}`,
+                `${getTransactionsAmount(travel?.transactions) || ''}`,
                 `${travel?.ceiling || ''}`,
+                `${getEccedCeilling(travel) || ''}`,
                 `${status[travel?.status]}`,
                 `${type[travel?.travelType]}`,
+                `${(travel?.proofTravel?.continents).toString() || ''}`,
+                `${ (travel?.proofTravel?.countries).map(countrie => countrie?.name).toString()  || ''}`,
+                `${travel?.proofTravel?.travelReason?.label || ''}`,
+                `${status[travel?.proofTravel?.status] || ''}`,
+                `${isProofTravel[travel?.proofTravel?.isTransportTicket] || ''}`,
+                `${isProofTravel[travel?.proofTravel?.isVisa] || ''}`,
+                `${isProofTravel[travel?.proofTravel?.isPassIn] || ''}`,
+                `${isProofTravel[travel?.proofTravel?.isPassOut] || ''}`,
+                `${isProofTravel[travel?.expenseDetailsStatus] || ''}`,
             ];
             excelData.push(elt);
         });
@@ -283,6 +305,7 @@ export const generateTravelsExportXlsx = async (onlinePayment: any[]) => {
         return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
     }
 }
+
 
 export const generateCeillingExportXlsx = async (onlinePaymentCeilling: any[]) => {
 
@@ -346,28 +369,27 @@ const getTemplateContainBlockedUserPdf = (data: any) => {
     _data.image = image;
     _data.color = color;
     _data.date = moment().format('DD/MM/YYYY');
-    _data.transactions =[];
+    _data.transactions = [];
 
     // Add client data
-    data.forEach(elt=>
+    data.forEach(elt =>
         _data.transactions.push(
             {
-                fullName : `${get(elt, 'fullName')}`,
-                clientCode : `${get(elt, 'clientCode')}`,
-                card :`${get(elt, 'card.code')}`,
-                tel : `${get(elt, 'tel','N/A')}`,
-                email :`${get(elt, 'email','N/A')}`,
-                label : `${get(elt, 'card.label')}`,
-                holder : `${get(elt, 'card.name')}`,
-                age : `${get(elt, 'age')}`,
-                ncp : `${get(elt, 'ncp')}`,
+                fullName: `${get(elt, 'fullName')}`,
+                clientCode: `${get(elt, 'clientCode')}`,
+                card: `${get(elt, 'card.code')}`,
+                tel: `${get(elt, 'tel', 'N/A')}`,
+                email: `${get(elt, 'email', 'N/A')}`,
+                label: `${get(elt, 'card.label')}`,
+                holder: `${get(elt, 'card.name')}`,
+                age: `${get(elt, 'age')}`,
+                ncp: `${get(elt, 'ncp')}`,
             }
         )
-        )
+    )
 
     return _data;
 };
-
 
 const getNumberWithSpaces = (x) => {
     if (!x) { return '0' }
@@ -383,6 +405,34 @@ export const generateVisaTransactionExportXlsx = (transactions: any[]) => {
     return XLSX.write(wb, { type: 'base64' });
 
 
+}
+
+const getTransactionsAmount = (transactions: any) => {
+    let total = 0;
+    if (!isEmpty(transactions)) {
+        for (const transaction of transactions) {
+            total = total + transaction.amount
+        }
+    }
+    return total
+}
+
+const getEccedCeilling = (travel: any) => {
+    let total = getTransactionsAmount(travel.transactions);
+    return travel.ceiling - total
+}
+
+const getCountries = (datas: any[], isContinents?: boolean) => {
+    let allDatas: string = '';
+
+    if (!isEmpty(datas)) {
+        for (const data of datas) {
+            allDatas = isContinents ? `${allDatas} , ${data}`
+                : `${allDatas} , ${data.name}`;
+        };
+    }
+
+    return allDatas
 }
 
 
