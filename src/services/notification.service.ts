@@ -40,21 +40,20 @@ export const notificationService = {
         }
     },
 
-    sendTemplateSMS: async (userData: any, phone: string, key: string, lang: string, id?: string,subject?:string) => {
+    sendTemplateSMS: async (datas: any, phone: string, key: string, lang: string, id?: string, subject?: string, total?: number) => {
         if (!phone) { return; }
-
+        const userData = formatHelper.getVariablesValue({
+            transactions: datas?.transactions, ceiling: datas?.ceiling, amount: total, lang
+        })
         const visaTemplate = await templatesCollection.getTemplateBy({ key });
 
         if (!visaTemplate) { return; }
 
-        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData, true,false);
+        let data = await formatHelper.replaceVariables(visaTemplate[lang], userData, true, false);
         const body = data?.sms;
-        await insertNotification('', NotificationFormat.SMS, body, phone, id, null, key);
         try {
-             sendSMSFromBCIServer(phone, body);
-
-            await insertNotification(subject, NotificationFormat.SMS, body, phone, id);
-
+            await insertNotification(subject, NotificationFormat.SMS, body, phone, id, '', key);
+            sendSMSFromBCIServer(phone, body);
         } catch (error) {
             logger.error(`Error during send email sendToken to ${phone}. \n ${error.message} \n${error.stack}`);
             return error;
@@ -70,27 +69,29 @@ export const notificationService = {
         const receiver = `${user.email}`;
 
         try {
-             return sendEmail(receiver, subject, HtmlBody);
+            return sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(`Error during  email Token to ${user.email}. \n ${error.message} \n${error.stack}`);
             return error;
         }
     },
 
-    sendVisaTemplateEmail: async (userData: any, receiver: string, visaTemplate: any, lang: string, id: string) => {
+    sendVisaTemplateEmail: async (datas: any, receiver: string, visaTemplate: any, lang: string, id: string) => {
         if (!receiver) { return }
+
+        const userData = formatHelper.getVariablesValue({
+            transactions: datas?.transactions, ceiling: datas?.ceiling, amount: 0, lang
+        })
 
         let emailData = await formatHelper.replaceVariables(visaTemplate[lang], userData);
 
         const HtmlBody = notificationHelper.generateMailByTemplate({ ...emailData, name: userData['NOM_CLIENT'] });
 
-        const subject = emailData.obj;
+        const subject = emailData?.obj;
 
         try {
-            sendEmail(receiver, subject, HtmlBody);
-
             await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
-
+            sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
                 `Error during sendVisaTemplateEmail to ${receiver}. \n ${error.message} \n${error.stack}`
@@ -99,10 +100,13 @@ export const notificationService = {
         }
     },
 
-    sendEmailDetectTransactions: async (userData: any, receiver: string, lang: string, id: string) => {
+    sendEmailDetectTransactions: async (datas: any, receiver: string, lang: string, id: string) => {
         logger.info(`send mail detect transaction to ${receiver}`);
         if (!receiver) { return }
 
+        const userData = formatHelper.getVariablesValue({
+            transactions: datas?.transactions, ceiling: datas?.ceiling, amount: 0, lang
+        })
         const visaTemplate = await templatesCollection.getTemplateBy({ key: 'firstTransaction' });
 
         let emailData = await formatHelper.replaceVariables(visaTemplate[lang], userData);
@@ -112,7 +116,7 @@ export const notificationService = {
         const subject = emailData.obj || `Opération hors de la zone CEMAC détectée`;
 
         try {
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver,id);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
             await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
@@ -149,7 +153,12 @@ export const notificationService = {
         }
     },
 
-    sendEmailVisaExceding: async (userData: any, receiver: string, lang: string, id: string) => {
+    sendEmailVisaExceding: async (data: any, receiver: string, lang: string, id: string, total?: number) => {
+
+        const userData = formatHelper.getVariablesValue({
+            transactions: data?.transactions, ceiling: data?.ceiling, amount: total, lang
+        })
+
         logger.info(`send mail visa exceding transaction to ${receiver}`);
         if (!receiver) { return }
 
@@ -260,8 +269,11 @@ export const notificationService = {
         }
     },
 
-    sendEmailFormalNotice: async (receiver: string, letter: Letter, userData: any, lang: string, subject: string, id: string) => {
+    sendEmailFormalNotice: async (receiver: string, letter: Letter, datas: any, lang: string, subject: string, id: string) => {
 
+        const userData = formatHelper.getVariablesValue({
+            transactions: datas?.transactions, ceiling: datas?.ceiling, amount: 0, lang
+        })
 
         // const content = {
         //     text: letter.emailText[lang]
@@ -619,8 +631,8 @@ const insertNotification = async (object: string, format: NotificationFormat, me
                 type,
             );
             attachment.fileName = attachment.name;
+            await notificationsCollection.updateNotification(insertedId.toString(), { attachments: [attachment] });
         }
-        await notificationsCollection.updateNotification(insertedId.toString(), { attachments: [attachment] });
     } catch (error) {
         logger.error(`\nError in insert notification \n${error.message}\n${error.stack}\n`);
         return error;
