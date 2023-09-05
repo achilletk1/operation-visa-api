@@ -90,10 +90,10 @@ const server = http.createServer(main);
 server.listen(config.get('port'), config.get('host'), async () => {
     logger.info(`server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
 });
-cronService.startRemoveOnpWithoutExceeding();
-cronService.startTransactionsProcessing();
-cronService.detectListOfUsersToBlocked();
-cronService.startRemoveTemporaryFiles();
-cronService.startRevivalMail();
+// cronService.startRemoveOnpWithoutExceeding();
+// cronService.startTransactionsProcessing();
+// cronService.detectListOfUsersToBlocked();
+// cronService.startRemoveTemporaryFiles();
+// cronService.startRevivalMail();
 
 export default app;
