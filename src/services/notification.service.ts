@@ -69,7 +69,7 @@ export const notificationService = {
         const receiver = `${user.email}`;
 
         try {
-            return sendEmail(receiver, subject, HtmlBody);
+             return sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(`Error during  email Token to ${user.email}. \n ${error.message} \n${error.stack}`);
             return error;
@@ -116,7 +116,7 @@ export const notificationService = {
         const subject = emailData.obj || `Opération hors de la zone CEMAC détectée`;
 
         try {
-            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver, id);
+            await insertNotification(subject, NotificationFormat.MAIL, HtmlBody, receiver,id);
             await sendEmail(receiver, subject, HtmlBody);
         } catch (error) {
             logger.error(
