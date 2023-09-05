@@ -419,20 +419,6 @@ const getTransactionsAmount = (transactions: any) => {
 
 const getEccedCeilling = (travel: any) => {
     let total = getTransactionsAmount(travel.transactions);
-    return travel.ceiling - total
+    return (total - travel.ceiling) > 0 ? (total - travel.ceiling) : 0;
 }
-
-const getCountries = (datas: any[], isContinents?: boolean) => {
-    let allDatas: string = '';
-
-    if (!isEmpty(datas)) {
-        for (const data of datas) {
-            allDatas = isContinents ? `${allDatas} , ${data}`
-                : `${allDatas} , ${data.name}`;
-        };
-    }
-
-    return allDatas
-}
-
 
