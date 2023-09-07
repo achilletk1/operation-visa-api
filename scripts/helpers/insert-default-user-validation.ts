@@ -1,31 +1,39 @@
 import { isEmpty } from 'lodash';
 import { getDatabase } from '../config';
-import moment from 'moment'
-import { ObjectId } from 'mongodb';
 
 export const inserDefaultUsersValidations = async () => {
 
+    // Fonction pour insérer les niveaux de validations par défaut des utilisateurs
     console.log('----------------------------------------');
-    console.log('INSERT DEFAULTS USERS VALIDATIONS');
+    console.log('INSERT DEFAULT USERS VALIDATIONS');
     console.log('----------------------------------------');
 
-    const db = await getDatabase();
-    const users = await db.collection('users').find({ category: { $gte: 600 }, clientCode: { $in: ['', '', ''] } }).toArray();
-    const opeValidation: any = {
-        level: 1,
-        enabled: true,
-        fullRights: false,
-    }
+    try {
+        const db = await getDatabase();
+        const users = await db.collection('users').find({ category: { $gte: 500 } }).toArray();
 
-    for (const user of users) {
-        if (user.clientCode === '') {
-            opeValidation.level = 2;
+        const defaultValidation: any = {
+            level: 1,
+            enabled: true,
+            fullRights: false,
+        };
+
+        const validators = [];
+
+        for (const user of users) {
+            if (['BCI001', 'BCI007'].includes(user?.userCode)) {
+                defaultValidation.level = 2;
+            }
+
+            defaultValidation.userId = user?._id.toString();
+            defaultValidation.email = user?.email;
+            defaultValidation.tel = user?.tel;
+
+            validators.push({...defaultValidation});
         }
-        opeValidation.userId = user?._id;
-        opeValidation.email = user?.email;
-        opeValidation.tel = user?.tel;
-        const resp = await db.collection('users').updateOne({ _id: new ObjectId(user._id.toString()) }, { $set: { userValidator: { ...opeValidation } } });
-        console.log('resp1', resp);
+        const resp = await db.collection('visa_operations_validators').insertMany(validators);
+        console.log('resp', resp);
+    } catch (error) {
+        console.error('An error occurred:', error);
     }
-
 };

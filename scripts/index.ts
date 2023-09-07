@@ -7,16 +7,18 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { config } from './config-env';
 import Confirm from 'prompt-confirm';
+import { inserDefaultUsersValidations } from './helpers/insert-default-user-validation';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    await inserDefaultVisaCeilings();
-    await inserDefaultLongTravelsTypes();
-    await inserDefaultLetter();
-    await inserDefaultPropertyType();
-    await inserDefaultSetting();
-    await insertDefaultTemplateSetting();
-    await inserDefaultVouchers();
+    // await inserDefaultVisaCeilings();
+    // await inserDefaultLongTravelsTypes();
+    // await inserDefaultLetter();
+    // await inserDefaultPropertyType();
+    // await inserDefaultSetting();
+    // await insertDefaultTemplateSetting();
+    // await inserDefaultVouchers();
+    await inserDefaultUsersValidations();
 }
 
 if (config.get('env') !== 'development') {
