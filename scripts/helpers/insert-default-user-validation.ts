@@ -29,8 +29,19 @@ export const inserDefaultUsersValidations = async () => {
             defaultValidation.email = user?.email;
             defaultValidation.tel = user?.tel;
 
-            validators.push({...defaultValidation});
+            validators.push({ ...defaultValidation });
         }
+
+        console.log('Insert default users validation  collection');
+
+        // const collectionsExists = await db.listCollections({ name: 'visa_operations_validators' }).toArray();
+        // console.log('collectionsExists', collectionsExists[0]?.name);
+
+        // if (!isEmpty(collectionsExists)) {
+        //     const respDelete = await db.collection("visa_operations_validators").drop();
+        //     console.log('response delete', respDelete);
+        // }
+
         const resp = await db.collection('visa_operations_validators').insertMany(validators);
         console.log('resp', resp);
     } catch (error) {

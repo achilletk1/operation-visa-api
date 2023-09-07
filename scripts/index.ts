@@ -11,13 +11,13 @@ import { inserDefaultUsersValidations } from './helpers/insert-default-user-vali
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    // await inserDefaultVisaCeilings();
-    // await inserDefaultLongTravelsTypes();
-    // await inserDefaultLetter();
-    // await inserDefaultPropertyType();
-    // await inserDefaultSetting();
-    // await insertDefaultTemplateSetting();
-    // await inserDefaultVouchers();
+    await inserDefaultVisaCeilings();
+    await inserDefaultLongTravelsTypes();
+    await inserDefaultLetter();
+    await inserDefaultPropertyType();
+    await inserDefaultSetting();
+    await insertDefaultTemplateSetting();
+    await inserDefaultVouchers();
     await inserDefaultUsersValidations();
 }
 
