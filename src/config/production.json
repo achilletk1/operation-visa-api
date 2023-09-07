@@ -45,10 +45,11 @@
     },
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
-    "cronRevivalMail":"*/6 * * * *",
-    "cronTransactionProcessing": "*/5 * * * *",
-    "cronDeleteTemporaryFile": "0 */5 * * *",
-    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 */1 *",
-    "cronclientindemeure": "0 00 1 */3 *"
+    "cronRevivalMail":"*/30 * * * *",
+    "cronTransactionProcessing": "*/30 * * * *",
+    "cronDeleteTemporaryFile": "0 */3 * * *",
+    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
+    "cronclientindemeure": "0 00 1 */3 *",  
+    "emailBank": "BCI-MONETIQUE@bcicongo.com"
 
 }
