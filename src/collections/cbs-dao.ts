@@ -22,7 +22,7 @@ export const cbsDAO = {
         try {
 
             options.method = 'GET';
-            options.uri = `${cbsApiUrl}/clients/data/columns`;
+            options.uri = `${cbsApiUrl}/clients/variables/system`;
 
             logger.info(`Attempt to call CBS API; getDataColumns`, methodPath, options);
             logger.debug('options query', options);
