@@ -23,9 +23,9 @@ import moment from 'moment';
 export const visaTransactonsProcessingService = {
     startTransactionsProcessing: async (): Promise<any> => {
         try {
-            const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
-            if (setting?.value === true) { console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH'); return }
-            settingCollection.insertSetting({ key: 'visa_transaction_tmp_treatment_in_progress', value: true });
+            // const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
+            // if (setting?.value === true) { console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH'); return }
+            // settingCollection.insertSetting({ key: 'visa_transaction_tmp_treatment_in_progress', value: true });
 
             const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
             if (isEmpty(content)) {
@@ -63,12 +63,12 @@ export const visaTransactonsProcessingService = {
             }
             await visaTransactionsCollection.insertTransactions(transactions);
             await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
-            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-            console.log('resp', resp);
+            // const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
+            // console.log('resp', resp);
 
         } catch (error) {
-            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-            console.log('resp', resp);
+            // const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
+            // console.log('resp', resp);
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
             return error;
         }
