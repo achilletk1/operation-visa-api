@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap');
+
+        .table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #dddddd;
+            margin-bottom: 2px !important;
+        }
+
+        .border-key {
+            border-bottom: 1px solid #dddddd;
+            border-top: 1px solid #dddddd;
+            padding: 8px;
+            font-weight: bold;
+        }
+
+        .border-value {
+            border-bottom: 1px solid #dddddd;
+            border-top: 1px solid #dddddd;
+            padding: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Verdana', sans-serif;
+            display: flex;
+            align-items: center;
+            padding: 1.25em;
+            min-height: 100vh;
+            color: #444;
+        }
+
+        .data-table {
+            width: 100%;
+            border-spacing: 0;
+            border-radius: 1em;
+            overflow: hidden;
+        }
+
+        thead {
+            visibility: hidden;
+            position: absolute;
+            width: 0;
+            height: 0;
+            line-height: 1.4;
+        }
+
+        .title {
+            background: #DC752A;
+            color: #fff;
+            text-align: left !important;
+        }
+
+        th,
+        td {
+            padding: 1em;
+        }
+
+        tr,
+        td {
+            display: block;
+            text-align: left !important;
+            padding: 1px;
+        }
+
+        td {
+            position: relative;
+        }
+
+        td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            padding-left: 1em;
+            font-weight: 600;
+            font-size: .9em;
+            text-transform: uppercase;
+        }
+
+        tr {
+            /* margin-bottom: 1.5em; */
+            border: 1px solid #ddd;
+            border-radius: 1em;
+            text-align: right;
+        }
+
+        tr:last-of-type {
+            margin-bottom: 0;
+        }
+
+        td:nth-child(n+2):nth-child(odd) {
+            background-color: #ddd;
+        }
+
+        .wth-th {
+            width: 100%;
+        }
+
+        /* .border-data {
+            border-bottom: solid 1px #f3f2f2;
+            border-top: solid 1px #f3f2f2;
+        } */
+
+        @media only screen and (min-width: 768px) {
+            .data-table {
+                max-width: 1200px;
+                margin: 0 auto;
+                border: 1px solid #ddd;
+            }
+
+            thead {
+                visibility: visible;
+                position: relative;
+            }
+
+            th {
+                text-align: left;
+                /* text-transform: uppercase; */
+                font-size: 13px;
+            }
+
+            tr {
+                display: table-row;
+                border: none;
+                border-radius: 0;
+                text-align: left;
+            }
+
+            tr:nth-child(even) {
+                background-color: #ddd;
+            }
+
+            td {
+                display: table-cell;
+            }
+
+            td::before {
+                content: none;
+            }
+
+            td:nth-child(1) {
+                background: transparent;
+                color: #444;
+                border-radius: 0;
+            }
+
+            td:nth-child(n+2):nth-child(odd) {
+                background-color: transparent;
+            }
+        }
+
+        @media all and (max-device-width: 480px) {
+            .data-table {
+                max-width: 480px;
+                margin: 0 auto;
+                border: 1px solid #ddd;
+            }
+
+            thead {
+                visibility: visible;
+                position: relative;
+            }
+
+            th {
+                text-align: left;
+                /* text-transform: uppercase; */
+                font-size: 13px;
+            }
+
+            tr {
+                display: table-row;
+                border: none;
+                border-radius: 0;
+                text-align: left;
+            }
+
+            tr:nth-child(even) {
+                background-color: #ddd;
+            }
+
+            td {
+                display: table-cell;
+            }
+
+            td::before {
+                content: none;
+            }
+
+            td:nth-child(1) {
+                background: transparent;
+                color: #444;
+                border-radius: 0;
+            }
+
+            td:nth-child(n+2):nth-child(odd) {
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div bgcolor="#F4F4F4"
+        style="margin:0;padding:0;background-color:#f4f4f4;height:100%;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:300;font-size:16px;line-height:24px;width:100%;">
+        <table width="100%" align="center" cellpadding="0" cellspacing="0" border="0"
+            style="max-width:725px;background-color:#f4f4f4;width:100%;border-collapse:collapse">
+            <tbody>
+                <tr>
+                    <td align="top">
+                        <table width="100%" align="center" cellpadding="0" cellspacing="0" border="0"
+                            style="border-collapse:collapse">
+                            <tbody>
+                                <tr>
+                                    <td valign="top" style="padding:60px" class="m_-5909769013679654532gray-border">
+                                        <table width="100%" align="center" cellpadding="0" cellspacing="0" border="0"
+                                            style="background-color:#ffffff;border-collapse:collapse;border-radius:4px">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="padding:60px" class="m_-5909769013679654532inside-pad">
+                                                        <table width="100%" align="center" cellpadding="0"
+                                                            cellspacing="0" border="0" style="border-collapse:collapse">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td align="left"
+                                                                        style="padding:0 0 42px 0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;line-height:24px;font-weight:400">
+                                                                        <a href="" target="_blank"
+                                                                            data-saferedirecturl="https://www.google.com/url?q=https://mandrillapp.com/track/click/30191028/ui8.net?p%3DeyJzIjoiQ2lPYVNhLTJsQWhZSVlBZ2o4b2ZtN0p6VURVIiwidiI6MSwicCI6IntcInVcIjozMDE5MTAyOCxcInZcIjoxLFwidXJsXCI6XCJodHRwczpcXFwvXFxcL3VpOC5uZXRcIixcImlkXCI6XCJkNmZhZTI5Y2FiZTE0MzY0OGQwOTlkYmM1NTNkOGY5ZVwiLFwidXJsX2lkc1wiOltcImQ2YWRjMzEwYTQ0NGIyM2ZmYzlkNTFiYTc4YzM5MWUwMjc5YzVlYzdcIl19In0&amp;source=gmail&amp;ust=1586697714629000&amp;usg=AFQjCNGzvPYuzJ4UGfmp6-93rUg8tJtJPg">
+                                                                            <img src="https://firebasestorage.googleapis.com/v0/b/mycimencam.appspot.com/o/logo%20(1).png?alt=media&token=cee102f2-dd42-4131-969f-999679a97c9e"
+                                                                                width="110px" height="50px"
+                                                                                class="CToWUd"></a>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td align="left"
+                                                                        style="color:#4a4a4a;padding:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:1.2;font-weight:700">
+                                                                        {{greetings}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <table width="100%" align="left" cellpadding="0" cellspacing="0"
+                                                            border="0" style="border-collapse:collapse">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td align="left"
+                                                                        style="padding:0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:12px;font-weight:100;color:#333">
+                                                                        <p
+                                                                            style="margin-bottom:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
+                                                                            Le client {{userFullName}} a effectué une
+                                                                            demande d'augmentation de plafond
+                                                                            sur le portail BCIONLINE avec les
+                                                                            informations
+                                                                            suivantes :
+                                                                        </p><br><br>
+                                                                        <table class="table"
+                                                                            style="width:100%;line-height:22px;">
+                                                                            <tr>
+                                                                                <th class="title">ATTRIBUTS</th>
+                                                                                <th class="title">VALEURS</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">RESPONSABLE</th>
+                                                                                <th class="border-value">{{assignered}}
+                                                                                </th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">TÉLÉPHONE
+                                                                                </th>
+                                                                                <th class="border-value">
+                                                                                    {{tel}}</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">EMAIL</th>
+                                                                                <th class="border-value">{{email}}</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">DATE</th>
+                                                                                <th class="border-value">{{date}}</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">HEURE</th>
+                                                                                <th class="border-value">{{hour}}</th>
+                                                                            </tr>
+                                                                        </table><br><br>
+                                                                        <p
+                                                                            style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
+                                                                            Cordialement.
+                                                                        </p><br><br>
+                                                                        <p
+                                                                            style="font-family: Helvetica, sans-serif;font-size: 100%;margin: 0;padding: 0;margin-top: 0">
+                                                                            <!--[if mso]>
+                                                                    <v:roundrect href="{{actionUrl}}" style="width:273px;height:40px;v-text-anchor:middle;" arcsize="50%" stroke="f" fillcolor="#DC752A" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word">
+                                                                        <w:anchorlock/>
+                                                                        <v:textbox inset="0,0,0,0">
+                                                                        <center>
+                                                                    <![endif]-->
+                                                                            <a href="{{actionUrl}}"
+                                                                                style="font-family: Helvetica, sans-serif;font-size:11px;margin: 0;padding: 0 24px;color: #ffffff;margin-top: 0;font-weight: bold;line-height: 40px;letter-spacing: 0.1ch;text-transform: uppercase;background-color: #DC752A;border-radius: 5000px;box-shadow: 0 8px 14px 2px #f45c2324, 0 6px 20px 5px #f45c231f, 0 8px 10px -5px #f45c2333;display: inline-block;text-align: center;text-decoration: none;white-space: nowrap;-webkit-text-size-adjust: none">
+                                                                                Aller à l'application
+                                                                            </a>
+                                                                            <!--[if mso]>
+                                                                        </center>
+                                                                        </v:textbox>
+                                                                    </v:roundrect>
+                                                                    <![endif]-->
+                                                                        </p>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

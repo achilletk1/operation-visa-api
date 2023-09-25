@@ -1,12 +1,24 @@
+import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
+import { inserDefaultPropertyType } from './helpers/insert-default-proprety-type';
+import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
+import { inserDefaultLetter } from './helpers/insert-default-notice-letter';
+import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
-import { inserDefaultTransfertTypes } from './helpers/insert-default-transfert-types';
-import * as Confirm from 'prompt-confirm';
+import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { config } from './config-env';
+import Confirm from 'prompt-confirm';
+import { inserDefaultUsersValidations } from './helpers/insert-default-user-validation';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-   await inserDefaultTransfertTypes();
-   await inserDefaultVouchers();
+    await inserDefaultVisaCeilings();
+    await inserDefaultLongTravelsTypes();
+    await inserDefaultLetter();
+    await inserDefaultPropertyType();
+    await inserDefaultSetting();
+    await insertDefaultTemplateSetting();
+    await inserDefaultVouchers();
+    await inserDefaultUsersValidations();
 }
 
 if (config.get('env') !== 'development') {
@@ -17,7 +29,7 @@ if (config.get('env') !== 'development') {
 } else {
     (async () => {
         try {
-            const answer = await new Confirm('Start reset BCIONLINE database scripts').run();
+            const answer = await new Confirm('Start reset visa operation data scripts').run();
 
             if (answer === false) { return process.exit(); }
 
@@ -32,3 +44,5 @@ if (config.get('env') !== 'development') {
 
     })()
 }
+
+

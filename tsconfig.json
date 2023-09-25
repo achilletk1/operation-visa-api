@@ -1,16 +1,25 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "outDir": "dist",
-      "sourceMap": true,
-      "noImplicitAny": false,
+    "target": "es2020",
+    "module": "commonjs",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
   },
-  "include": [
-      "src/**/*.ts", "decs.d.ts"
-  ],
-  "exclude": [
-      "node_modules",
-      "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "src/**/*.spec.ts"]
 }
+

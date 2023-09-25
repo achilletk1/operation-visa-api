@@ -1,5 +1,5 @@
-import { config } from '../config';
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
+import { config } from '../config';
 
 
 let database: Db = null;
@@ -7,7 +7,7 @@ let database: Db = null;
 export async function startDatabase() {
     const mongoDBURL = (config.get('db.auth.user') && config.get('db.auth.password'))
         ? `mongodb://${config.get('db.auth.user')}:${config.get('db.auth.password')}@${config.get('db.host')}/${config.get('db.name')}?retryWrites=true&w=majority`
-        : `mongodb://${config.get('db.host')}/${config.get('db.name')}?retryWrites=true&w=majority`;
+        : `mongodb://${config.get('db.host')}/${config.get('db.name')}`;
 
 
     const connection = await MongoClient.connect(mongoDBURL);

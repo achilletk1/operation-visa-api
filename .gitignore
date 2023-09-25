@@ -46,6 +46,7 @@ debug.log
 
 .nyc_output/
 
-
+mongo-volume/
 logs/
 /dist
+/filesrec

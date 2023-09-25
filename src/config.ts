@@ -1,4 +1,4 @@
-import * as  convict from 'convict';
+import convict from 'convict';
 
 // Define a schema
 export const config = convict({
@@ -25,6 +25,34 @@ export const config = convict({
         doc: 'Application host.',
         format: '*',
         default: 'localhost',
+    },
+    db: {
+        host: {
+            doc: 'Database host name/IP',
+            format: '*',
+            default: '127.0.0.1:27017',
+            env: 'DB_MONGO_HOST'
+        },
+        name: {
+            doc: 'Database name',
+            format: String,
+            default: '',
+            env: 'DB_MONGO_NAME'
+        },
+        auth: {
+            user: {
+                doc: 'Database user if any',
+                format: String,
+                default: '',
+                env: 'DB_MONGO_USERNAME'
+            },
+            password: {
+                doc: 'Database password if any',
+                format: String,
+                default: '',
+                env: 'DB_MONGO_PASSWORD'
+            }
+        }
     },
     dbOracle: {
         host: {
@@ -54,34 +82,6 @@ export const config = convict({
             },
         }
 
-    },
-    db: {
-        host: {
-            doc: 'Database host name/IP',
-            format: '*',
-            default: '127.0.0.1:27017',
-            env: 'DB_MONGO_HOST'
-        },
-        name: {
-            doc: 'Database name',
-            format: String,
-            default: '',
-            env: 'DB_MONGO_NAME'
-        },
-        auth: {
-            user: {
-                doc: 'Database user if any',
-                format: String,
-                default: '',
-                env: 'DB_MONGO_USERNAME'
-            },
-            password: {
-                doc: 'Database password if any',
-                format: String,
-                default: '',
-                env: 'DB_MONGO_PASSWORD'
-            }
-        }
     },
     cookieSalt: {
         doc: 'Salt to encrypt Cookies.',
@@ -156,19 +156,8 @@ export const config = convict({
     basePath: {
         doc: 'API base path.',
         format: String,
-        default: ''
-    },
-    bankEmail: {
-        doc: 'Email use for claim.',
-        format: String,
         default: '',
-        env: 'EMAIL_CLAIM'
-    },
-    cbsApiUrl: {
-        doc: 'CBS API base url.',
-        format: String,
-        default: '',
-        env: 'CBS_API_URL'
+        env: 'BASE_PATH',
     },
     pdfApiUrl: {
         doc: 'PDF API base url.',
@@ -182,25 +171,79 @@ export const config = convict({
         default: 60000,
         env: 'TIMEOUT_HTTP_REQUEST'
     },
-    bcinet: {
-        apiUrl: {
-            doc: 'BCIET API base url.',
+    londoGateway: {
+        url: {
+            doc: 'LONDO Gateway URL.',
             format: String,
             default: '',
-            env: 'BCINET_URL'
+            env: 'LONDO_GATEWAY_URL'
         },
-        login: {
-            doc: 'BCIET API Login.',
+        username: {
+            doc: 'username for Gateway authentication',
             format: String,
             default: '',
-            env: 'BCINET_LOGIN'
+            env: 'LONDO_GATEWAY_USERNAME'
         },
         password: {
-            doc: 'BCIET API password.',
+            doc: 'password for Gateway authentication',
             format: String,
             default: '',
-            env: 'BCINET_PASSWORD'
+            env: 'LONDO_GATEWAY_PASSWORD'
         },
+        timeout: {
+            doc: 'timeout request to Londo Gateway',
+            format: Number,
+            default: '',
+            env: 'LONDO_GATEWAY_TIMEOUT'
+        },
+    },
+    fileStoragePath: {
+        doc: 'the path of the directory where the files are stored',
+        format: String,
+        default: '',
+        env: 'FILE_STORAGE_PATH',
+    },
+    cbsApiUrl: {
+        doc: 'CBS API base url.',
+        format: String,
+        default: '',
+        env: 'CBS_API_URL'
+    },
+    template: {
+        image: {
+            doc: 'image that must be used as a logo on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_IMAGE',
+            arg: 'template-image'
+        },
+        color: {
+            doc: 'color that must be used as a logo on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_COLOR',
+            arg: 'template-color'
+        },
+        app: {
+            doc: 'name of the app that must be used as the model on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_APP',
+            arg: 'template-app'
+        },
+        company: {
+            doc: 'company name that must be used as a model on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_COMPANY',
+            arg: 'template-company'
+        },
+    },
+    maxFileSizeUpload: {
+        doc: 'CBS API base url.',
+        format: Number,
+        default: 5,
+        env: 'MAX_FILE_SIZE_UPLOAD'
     },
     ceilingIncreaseEmail: {
         doc: 'mail requesting a ceiling increase.',
@@ -209,38 +252,65 @@ export const config = convict({
         env: 'EMAIL_REQUESTING_CEILING_INCREASE',
         arg: 'email-requesting-ceiling-increase'
     },
-    cron: {
-        visaTransactionForNotCustomers: {
-            doc: 'Cron expression for verify visa transaction for not customers ',
-            format: String,
-            default: '',
-            env: 'DELETE_VISA_TRANSACTION_FOR_NOT_CUSTOMERS_CRON'
-        },
-
-    cronCeilindgExpression: {
-        doc: 'this cron is used to send emails for unprocessed cap requests',
+    cronRevivalMail: {
+        doc: 'cron of visa revival mail.',
         format: String,
         default: '',
-        env: 'CRON_CEILING_EXPRESSION'
+        env: 'VISA_REVIVAL_MAIL',
+        arg: 'visa-revival-mail'
     },
-    cronRemindCeilindayExpression: {
-        doc: 'day of verification of the request for an increase in the ceiling not processed',
-        format: Number,
+
+    cronTransactionProcessing: {
+        doc: 'cron of transaction processing.',
+        format: String,
         default: '',
-        env: 'CRON_CEILING_REMIND_DAY_LIMIT'
+        env: 'CRON_TRANSACTION_PROCESSING',
+        arg: 'cron-transaction-processing'
     },
-    },
-    visaTransactionFilePendingValue: {
-        doc: 'lifetime of a visa transaction file in pending status in minutes',
-        format: Number,
+    cronDeleteTemporaryFile: {
+        doc: 'cron to delete temporaries files.',
+        format: String,
         default: '',
-        env: 'VISA_TRANSACTION_FILE_PENDING_VALUE'
-    }
+        env: 'DELETE_TEMPORARY_FILES',
+        arg: 'delete-temporary-files'
+    },
+    gotenbergUrl: {
+        doc: 'GOTENBERG PDF GENERATOR URL',
+        format: String,
+        default: 'http://gotenberg:3000',
+        env: 'GOTENBERG_URL'
+    },
+    emailTest: {
+        doc: 'email test to send notification',
+        format: String,
+        default: 'kevin.moutassi@londo-tech.com',
+        env: 'EMAIL_TEST'
+    },
+    emailBank: {
+        doc: 'email bank to send notification',
+        format: String,
+        default: '',
+        env: 'EMAIL_BANK'
+    },
+    cronRemoveOnlinePaymentsWithExceedings: {
+        doc: 'cron of delete online payments With Exceedings.',
+        format: String,
+        default: '',
+        env: 'REMOVE_PAYMENTS_WITH_EXCEEDINGS',
+        arg: 'remove-travels-with_Exceedings'
+    },
+    cronclientindemeure: {
+        doc: 'cron to send mail of list of client in demeure to bank.',
+        format: String,
+        default: '',
+        env: 'CLIENT_IN_DEMEURE',
+        arg: 'client_in_demeure'
+    },
 });
 
 // Load environment dependent configuration
 const env = config.get('env');
-config.loadFile(((env === 'development') ? './src/config/' : './dist/config/') + env + '.json');
+config.loadFile('./src/config/' + env + '.json');
 
 // Perform validation
 config.validate({ allowed: 'strict' });

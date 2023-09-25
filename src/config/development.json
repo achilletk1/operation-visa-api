@@ -5,21 +5,12 @@
     "host": "localhost",
     "db": {
         "host": "127.0.0.1:27017",
-        "name": "banking-bci",
+        "name": "dbanking",
         "auth": {
             "user": "",
             "password": ""
         }
     },
-    "dbOracle": {
-        "host": "",
-        "name": "",
-        "auth": {
-            "user": "",
-            "password": ""
-        }
-    },
-
     "cookieSalt": "HZt6wi7GSLD",
     "cookieTTL": 3600000,
     "oauthSalt": "4tG9!!HZt6wi",
@@ -29,26 +20,30 @@
     "exportTTL": 1800,
     "emailTokenSalt": "5L9#8N*L&&qcX53",
     "emailTokenTTL": 9000,
-    "baseUrl": "http://localhost:3000",
-    "basePath": "/api/v1/trade-finance",
-    "bankEmail": "said.essiakou@londo.io",
-    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
-    "cbsApiUrl": "http://localhost:4000",
-    "cronCeilindgExpression": "* * 1 * *",
-    "cronRemindCeilindayExpression": 15,
+    "baseUrl": "http://localhost:3500",
+    "basePath": "/visaope/v1",
     "londoGateway": {
         "url": "https://gateway.londo-tech.com",
         "timeout": 180000
     },
     "pdfApiUrl": "http://localhost:5000",
     "timeout": 100000,
-    "bcinet": {
-        "apiUrl": "http://localhost:9000",
-        "login": "LNDBCINETADMIN",
-        "password": "LNDp@ssw0rd"
+    "fileStoragePath": "./filesrec",
+    "cbsApiUrl": "http://localhost:4000",
+    "template": {
+        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
+        "color": "#DC752A",
+        "app": "BCI MOBILE",
+        "company": "BCI"
     },
-    "cron": {
-        "visaTransactionForNotCustomers": "0 0 1 * *"
-    },
-    "visaTransactionFilePendingValue": 3
+    "maxFileSizeUpload": 5,
+    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
+    "cronRevivalMail": "* * * * * *",
+    "cronTransactionProcessing": "* * * * * *",
+    "cronDeleteTemporaryFile": "0 */3 * * *",
+    "gotenbergUrl": "http://173.255.248.184:7900",
+    "emailTest": "kevin.moutassi@londo-tech.com",
+    "emailBank": "kevin.moutassi@londo-tech.com",
+    "cronRemoveOnlinePaymentsWithExceedings": "* * * * * *",
+    "cronclientindemeure":"*/3 */1 * * *"
 }

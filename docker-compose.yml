@@ -1,0 +1,143 @@
+version: '3'
+services:
+    mongodb:
+        image: 'mongo:4.4.8'
+        restart: unless-stopped
+        volumes:
+            - ./mongo-volume:/data/db
+        ports:
+            - '27018:27017'
+    nginx:
+        image: 'londotech/dbanking-nginx:latest-op'
+        restart: unless-stopped
+        ports:
+            - '8080:80'
+    mtn-nginx:
+        image: 'londotech/dbanking-mtn-nginx:1.0.0'
+        restart: unless-stopped
+        ports:
+            - '8089:443'
+    pdf:
+        image: 'londotech/alerting-pdf:1.0.0'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+        entrypoint: npm run start:dev
+    cbs:
+        image: 'londotech/dbanking-cbs:latest-op'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+        entrypoint: npm run start:staging
+    gimac:
+        image: 'londotech/gimac-api:1.0.3'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+            - NODE_HOST=gimac
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+            - DBANKING_URL=http://api:3000
+            - CRON_A_R_EXPRESSION=* * * * *
+        ports:
+            - '5000:3000'
+        entrypoint: npm run start:dev
+    mtn:
+        image: 'londotech/mtn-api:1.0.3'
+        restart: unless-stopped
+        environment:
+            - MTN_LOGIN_ECW_VPN=bci.bank
+            - MTN_PASSWORD_ECW_VPN=A-yT99K4=x'Vyb9
+            - NODE_ENV=development
+            - NODE_HOST=mtn
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+            - DBANKING_URL=http://api:3000
+        entrypoint: npm run start:staging
+    airtel:
+        image: 'londotech/airtel-api:1.0.0'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+            - NODE_HOST=airtel
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+            - DBANKING_URL=http://api:3000
+            - TOKEN_VALIDATY_DURATION=21600
+        entrypoint: npm run start:dev
+    notif:
+        image: 'londotech/dbanking-notif-api:1.0.0'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+            - NODE_HOST=notif
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+        entrypoint: npm run start:staging
+    gotenberg:
+        image: 'gotenberg/gotenberg:7'
+        restart: unless-stopped
+    visaApi:
+        image: 'londotech/operation-visa-api:latest'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+            - NODE_HOST=visaApi
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+        entrypoint: npm run start:staging
+    visaCbs:
+        image: 'londotech/operation-visa-cbs:latest'
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=development
+            - NODE_HOST=visaCbs
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+        entrypoint: npm run start:staging
+    api:
+        image: 'londotech/dbanking-api:latest'
+        restart: unless-stopped
+        environment:
+            - MTN_LOGIN_ECW_VPN=bci.bank
+            - EMAIL_REQUESTING_CEILING_INCREASE=kevin.moutassi@londo-tech.com
+            - EMAIL_SUGGESTION=kevin.moutassi@londo-tech.com
+            - DELETE_VISA_TRANSACTION_FOR_NOT_CUSTOMERS_CRON=0  0  1  *  *
+            - VISA_TRANSACTION_FILE_PENDING_VALUE=10
+            - CRON_CEILING_EXPRESSION=00  7  *  *  1
+            - CRON_CEILING_REMIND_DAY_LIMIT=15
+            - NODE_ENV=development
+            - DB_MONGO_HOST=mongodb
+            - DB_MONGO_NAME=banking-bci
+            - CBS_API_URL=http://cbs:3000
+            - GIMAC_API_URL=http://gimac:3000
+            - PDF_API_URL=http://pdf:3000
+            - VALIDITY_DURATION=172800
+            - AIRTEL_API_URL=https://www.tstcgb.com
+            - AIRTEL_LOGIN=BCI_CONGO_01
+            - AIRTEL_PASSWORD=bCi_CG211004@_
+            - AIRTEL_CALLBACK_URL=https://bcionline.bcicongo.com/api/v1/airtel-payment/update
+            - LND_AIRTEL_API_URL=http://airtel:3000
+            - GIMAC_CLAIM_PATH=/data/gimacfiles/claims
+            - GIMAC_CLAIM_ADDRESS=kevin.moutassi@londo-tech.com
+            - EMAIL_MONETIQUE=kevin.moutassi@londo-tech.com
+            - EMAIL_CLAIM=kevin.moutassi@londo-tech.com
+            - MTN_CRON_EXPRESSION=* * * * *
+            - MTN_API_BASE_URL=https://proxy.momoapi.mtn.com
+            - MTN_SUBSCRIPTION_KEY=8f6ee4cb40504350aa7a9f7cc36bc08e
+            - MTN_USERNAME=57409f0b-a0cf-4076-a778-3b64ae13d424
+            - MTN_PASSWORD=57e5a4b4fcf742d6bb30086b3a79d05a
+            - BALANCE_ALERT_EMAIL_BCI=kevin.moutassi@londo-tech.com
+            - BALANCE_ALERT_EMAIL_BCI_CC=kevin.moutassi@londo-tech.com
+            - MINIMAL_MOBILEE_VERSION=1.0.6
+        entrypoint: npm run start:staging
+        depends_on:
+            - mongodb
+            - cbs
+    website:
+        image: 'londotech/dbanking-website:latest-op'
+        restart: unless-stopped
+        depends_on:
+            - api
+        ports:
+            - '4000:5000'
