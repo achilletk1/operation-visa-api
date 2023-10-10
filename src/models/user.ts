@@ -51,6 +51,7 @@ export interface User {
   password?: string;
   tel?: string;
   email?: string;
+  lang?: string;
   function?: string;
   enabled?: boolean;
   pwdReseted?: boolean;

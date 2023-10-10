@@ -17,7 +17,7 @@ export const insertDefaultTemplateSetting = async () => {
             label: 'Dépassement de plafond sur les transactions Hors zone CEMAC',
             desc: 'Mail de Dépassement de plafond sur les transactions hors zone CEMAC',
             fr: {
-                email: `Nous tenons à vous informer que le montant total ({{MONTANT_XAF}} XAF) des opérations hors zone CEMAC que vous avez effectués le mois de {{MOIS_DEPART}} a dépassé le plafond autorisé par la BEAC qui est de{{PLAFOND}} XAF.//
+                email: `Nous tenons à vous informer que le montant total ({{MONTANT}} XAF) des opérations hors zone CEMAC que vous avez effectués le mois de {{MOIS_DEPART}} a dépassé le plafond autorisé par la BEAC qui est de{{PLAFOND}} XAF.//
                 Nous vous prions à cet effet de nous transmettre les details de vos dépenses avec leurs justificatifs dans un délai maximum de 30 jours à compter du {{DATE}} comme le précise la circulaire
                 BEAC n°004/GR/2022. Vous pouvez le faire à distance en vous connectant à la plateforme digitale BCIONLINE : via le lien .//
                 Nous vous remercions pour votre fidélité.`,

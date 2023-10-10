@@ -37,7 +37,7 @@ const goToTheLine = (str: string, isSms?: boolean) => {
 }
 
 export const getVariablesValue = (data: { transactions: VisaTransaction[], amount: number, ceiling: number,lang: string }) => {
-    const { transactions, amount, ceiling } = data;
+    const { transactions, amount, ceiling,lang } = data;
     const transaction = transactions[0];
     const date = Math.min(...transactions.map(elt => elt?.date));
     const mapping = {
@@ -53,8 +53,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         NOM_CARTE: transaction?.card?.name || '',
         CARTE: transaction?.card?.code || '',
         PRODUIT: transaction?.card.label,
-        DATE: moment(date).locale('lang').format('DD/MM/YYYY'),
-        HEURE: moment(date).locale('flangr').format('HH:mm:ss'),
+        DATE: moment(date).locale(`${lang}`).format('DD/MM/YYYY'),
+        HEURE: moment(date).locale(`${lang}`).format('HH:mm:ss'),
         MONTANT: amount,
         DEVISE: transaction?.currencyTrans,
         MONTANT_COMPENS: transaction?.amountCompens,
@@ -66,8 +66,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
         MOIS_DEPART: visaHelper.transformDateExpression(transaction?.currentMonth.toString()),
-        DATE_COURANTE: moment().locale('lang').format('DD/MM/YYYY'),
-        DATE_COURANTE_LONG: moment().locale('lang').format('dddd, Do MMMM YYYY'),
+        DATE_COURANTE: moment().locale(`${lang}`).format('DD/MM/YYYY'),
+        DATE_COURANTE_LONG: moment().locale(`${lang}`).format('dddd, Do MMMM YYYY'),
     }
 
     return mapping;
