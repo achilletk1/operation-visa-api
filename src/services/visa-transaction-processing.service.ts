@@ -14,6 +14,7 @@ import * as formatHelper from './helpers/format.helper';
 import { Travel, TravelType } from "../models/travel";
 import { travelService } from "./travel.service";
 import { commonService } from "./common.service";
+import { QueueState } from "../class/statut";
 import { get, isEmpty } from "lodash";
 import { logger } from "../winston";
 import { ObjectId } from "mongodb";
@@ -21,54 +22,66 @@ import moment from 'moment';
 
 
 export const visaTransactonsProcessingService = {
-    startTransactionsProcessing: async (): Promise<any> => {
+    startTransactionsProcessing: async (state: any): Promise<any> => {
         try {
-            const setting = await settingCollection.getSettingsByKey('visa_transaction_tmp_treatment_in_progress');
-            if (setting?.value === true) { console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH'); return }
-            settingCollection.insertSetting({ key: 'visa_transaction_tmp_treatment_in_progress', value: true });
+            if (state.getState(`visa_transaction_tmp_treatment`) === QueueState.PENDING) {
+                state.setState(QueueState.PROCESSING, `visa_transaction_tmp_treatment`);
+                console.log('===============-==================================-==================================');
+                console.log('===============-==============  START TRAITMENT ====================-============');
+                console.log('===============-========================================================-============');
 
-            const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
-            if (isEmpty(content)) {
-                const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-                console.log('resp', resp);
-                return;
+                const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
+                if (isEmpty(content)) {
+                    state.setState(QueueState.PENDING, `visa_transaction_tmp_treatment`);
+                    console.log('===============-==================================-==================================');
+                    console.log('===============-==============  NO TRAITMENT TMP COLLECTION IS EMPTY  ====================-============');
+                    console.log('===============-========================================================-============');
+                    return;
+                }
+
+                let transactions = formatTransactions(content || []);
+                const clientCodes = {};
+                const toBeDeleted = [];
+
+                // Organize transactions by clientcodes and types
+                for (const transaction of transactions) {
+                    const cli = transaction?.clientCode.toString();
+                    const type = getOperationType(transaction?.type);
+                    if (isEmpty(clientCodes[cli])) { clientCodes[cli] = {} }
+
+                    if (isEmpty(clientCodes[cli][type])) { clientCodes[cli][type] = [] }
+
+                    clientCodes[cli][type].push(transaction);
+                    toBeDeleted.push(new ObjectId(transaction?._id.toString()));
+                }
+
+
+                // tslint:disable-next-line: forin
+                for (const cli in clientCodes) {
+                    console.log('cli', cli);
+                    // Travel traitment
+                    const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
+
+                    // Online payment traitment
+                    await onlinePaymentTreatment(cli, onlinePaymentMonthsTransactions);
+
+                }
+                await visaTransactionsCollection.insertTransactions(transactions);
+                await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
+
+                state.setState(QueueState.PENDING, `visa_transaction_tmp_treatment`);
+                console.log('===============-==================================-==================================');
+                console.log('===============-==============  END TRAITMENT ====================-============');
+                console.log('===============-========================================================-============');
+            } else {
+                console.log('===============-==============  A TRAITMENT IS IN PROCESSING ====================-============')
             }
-
-            let transactions = formatTransactions(content || []);
-            const clientCodes = {};
-            const toBeDeleted = [];
-
-            // Organize transactions by clientcodes and types
-            for (const transaction of transactions) {
-                const cli = transaction?.clientCode.toString();
-                const type = getOperationType(transaction?.type);
-                if (isEmpty(clientCodes[cli])) { clientCodes[cli] = {} }
-
-                if (isEmpty(clientCodes[cli][type])) { clientCodes[cli][type] = [] }
-
-                clientCodes[cli][type].push(transaction);
-                toBeDeleted.push(new ObjectId(transaction?._id.toString()));
-            }
-
-
-            // tslint:disable-next-line: forin
-            for (const cli in clientCodes) {
-                console.log('cli', cli);
-                // Travel traitment
-                const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
-
-                // Online payment traitment
-                await onlinePaymentTreatment(cli, onlinePaymentMonthsTransactions);
-
-            }
-            await visaTransactionsCollection.insertTransactions(transactions);
-            await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
-            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-            console.log('resp', resp);
 
         } catch (error) {
-            const resp = await settingCollection.deleteSetting('visa_transaction_tmp_treatment_in_progress')
-            console.log('resp', resp);
+            state.setState(QueueState.PENDING, `visa_transaction_tmp_treatment`);
+            console.log('===============-==================================-==================================');
+            console.log('===============-==============  ERROR DURING TRAITMENT ====================-============');
+            console.log('===============-========================================================-============');
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
             return error;
         }
@@ -76,10 +89,6 @@ export const visaTransactonsProcessingService = {
 
     startRevivalMail: async (): Promise<any> => {
         try {
-            const setting = await settingCollection.getSettingsByKey('start_revival_mail_in_progress');
-            if (setting?.value === true) { console.log('TRAITMENT IS IN PROGRESS WAITING WHEN IT WILL FINISH'); return }
-            await settingCollection.insertSetting({ key: 'start_revival_mail_in_progress', value: true });
-
             const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
 
             if (isEmpty(travels)) {
@@ -114,11 +123,8 @@ export const visaTransactonsProcessingService = {
 
 
             }
-            const resp = await settingCollection.deleteSetting('start_revival_mail_in_progress')
-            console.log('resp', resp);
+
         } catch (error) {
-            const resp = await settingCollection.deleteSetting('start_revival_mail_in_progress')
-            console.log('resp', resp);
             logger.error(`error during startRevivalMail \n${error.name} \n${error.stack}\n`);
             return error
         }
@@ -365,9 +371,9 @@ const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTra
         if (isEmpty(travel?.transactions)) {
 
             await Promise.all([
-                notificationService.sendEmailDetectTransactions(travel, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString()),
+                notificationService.sendEmailDetectTransactions({ ...travel, transactions: [...element?.transactions] }, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString()),
                 // notificationService.sendEmailDetectTransactions(travel, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString()),
-                notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'firstTransaction', `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
+                notificationService.sendTemplateSMS({ ...travel, transactions: [...element?.transactions] }, get(travel, 'user.tel'), 'firstTransaction', `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
                 // notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'firstTransaction', 'en', get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC')
 
             ]);

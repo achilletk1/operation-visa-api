@@ -53,8 +53,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         NOM_CARTE: transaction?.card?.name || '',
         CARTE: transaction?.card?.code || '',
         PRODUIT: transaction?.card.label,
-        DATE: moment(date).locale(`${lang}`).format('DD/MM/YYYY'),
-        HEURE: moment(date).locale(`${lang}`).format('HH:mm:ss'),
+        DATE: moment(date).locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
+        HEURE: moment(date).locale(`${lang|| 'fr'}`).format('HH:mm:ss'),
         MONTANT: amount,
         DEVISE: transaction?.currencyTrans,
         MONTANT_COMPENS: transaction?.amountCompens,
@@ -66,8 +66,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
         MOIS_DEPART: visaHelper.transformDateExpression(transaction?.currentMonth.toString()),
-        DATE_COURANTE: moment().locale(`${lang}`).format('DD/MM/YYYY'),
-        DATE_COURANTE_LONG: moment().locale(`${lang}`).format('dddd, Do MMMM YYYY'),
+        DATE_COURANTE: moment().locale(`${lang|| 'fr'}`).format('DD/MM/YYYY'),
+        DATE_COURANTE_LONG: moment().locale(`${lang|| 'fr'}`).format('dddd, Do MMMM YYYY'),
     }
 
     return mapping;
