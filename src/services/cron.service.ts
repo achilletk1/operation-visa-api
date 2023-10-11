@@ -6,20 +6,26 @@ import { temporaryFilesService } from "./temporary-files.service";
 import { onlinePaymentsService } from "./online-payment.service";
 import { notificationService } from "./notification.service";
 import { OpeVisaStatus } from "../models/visa-operations";
+import { State } from "../class/statut";
 import { logger } from "../winston";
 import { config } from "../config";
 import { isEmpty } from "lodash";
 import cron from 'node-cron';
 import moment from "moment";
+let state:any;
 
 export const cronService = {
+    instantiate: () => {
+        state = new State()
+    },
+
     // Regroupement des voyages et paiements en ligne ayant dépassé. 
     startTransactionsProcessing: async (): Promise<void> => {
         const cronExpression = `${config.get('cronTransactionProcessing')}`;
 
         cron.schedule(cronExpression, async () => {
             try {
-                await visaTransactonsProcessingService.startTransactionsProcessing();
+                await visaTransactonsProcessingService.startTransactionsProcessing(state);
             } catch (error) {
                 logger.error(`start transactions processing failed \n${error.stack}\n`);
                 process.exit(1);
