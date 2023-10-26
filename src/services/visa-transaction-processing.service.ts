@@ -1,4 +1,4 @@
-import { visaTransactinnsTmpCollection } from "../collections/visa_transactions_tmp.collection";
+import { visaTransactionsTmpCollection } from "../collections/visa_transactions_tmp.collection";
 import { visaTransactionsCollection } from "../collections/visa-transactions.collection";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
 import { travelMonthsCollection } from "../collections/travel-months.collection";
@@ -9,20 +9,27 @@ import { travelsCollection } from "../collections/travels.collection";
 import { onlinePaymentsService } from "./online-payment.service";
 import { OnlinePaymentMonth } from "../models/online-payment";
 import { notificationService } from './notification.service';
-import { OpeVisaStatus } from "../models/visa-operations";
-import * as formatHelper from './helpers/format.helper';
-import { Travel, TravelType } from "../models/travel";
+import { OpeVisaStatus, VisaTransaction } from "../models/visa-operations";
+import { Travel, TravelMonth, TravelType } from "../models/travel";
 import { travelService } from "./travel.service";
 import { commonService } from "./common.service";
 import { QueueState } from "../class/statut";
 import { get, isEmpty } from "lodash";
 import { logger } from "../winston";
+import {
+    generateTravelByProcessing, generateTravelMonthByProcessing, generateNotificationData,
+    checkTravelNumberOfMonths, generateOnlinePaymentMonth
+} from "./helpers/visa-operations.service.helper";
 import { ObjectId } from "mongodb";
 import moment from 'moment';
+export class VisaTransactonsProcessingService {
+    transactions: any[];
+    toBeDeleted: ObjectId[];
+    aggregatedTransactions: any[];
 
+    constructor() { }
 
-export const visaTransactonsProcessingService = {
-    startTransactionsProcessing: async (state: any): Promise<any> => {
+    async startTransactionsProcessing(state: any): Promise<any> {
         try {
             if (state.getState(`visa_transaction_tmp_treatment`) === QueueState.PENDING) {
                 state.setState(QueueState.PROCESSING, `visa_transaction_tmp_treatment`);
@@ -30,44 +37,41 @@ export const visaTransactonsProcessingService = {
                 console.log('===============-==============  START TRAITMENT ====================-============');
                 console.log('===============-========================================================-============');
 
-                const content = await visaTransactinnsTmpCollection.getAllVisaTransactionTmps();
-                if (isEmpty(content)) {
+                this.aggregatedTransactions = await visaTransactionsTmpCollection.getFormatedVisaTransactionsTmps();
+                if (isEmpty(this.aggregatedTransactions)) {
                     state.setState(QueueState.PENDING, `visa_transaction_tmp_treatment`);
-                    console.log('===============-==================================-==================================');
-                    console.log('===============-==============  NO TRAITMENT TMP COLLECTION IS EMPTY  ====================-============');
-                    console.log('===============-========================================================-============');
                     return;
                 }
+                this.transactions = [];
+                this.toBeDeleted = [];
+                for (const element of this.aggregatedTransactions) {
+                    let { _id: cli, travel, onlinepayment } = element;
 
-                let transactions = formatTransactions(content || []);
-                const clientCodes = {};
-                const toBeDeleted = [];
+                    this.transactions.push(...travel, ...onlinepayment);
 
-                // Organize transactions by clientcodes and types
-                for (const transaction of transactions) {
-                    const cli = transaction?.clientCode.toString();
-                    const type = getOperationType(transaction?.type);
-                    if (isEmpty(clientCodes[cli])) { clientCodes[cli] = {} }
-
-                    if (isEmpty(clientCodes[cli][type])) { clientCodes[cli][type] = [] }
-
-                    clientCodes[cli][type].push(transaction);
-                    toBeDeleted.push(new ObjectId(transaction?._id.toString()));
-                }
-
-
-                // tslint:disable-next-line: forin
-                for (const cli in clientCodes) {
-                    console.log('cli', cli);
                     // Travel traitment
-                    const onlinePaymentMonthsTransactions = await travelTreatment(cli, clientCodes[cli]['travel'], clientCodes[cli]['onlinepayment']);
-
+                    const transactionsGroupedByTravel = await this.travelDataGroupedByCli(cli, travel);
                     // Online payment traitment
-                    await onlinePaymentTreatment(cli, onlinePaymentMonthsTransactions);
+                    const transactionsGroupedByOnlinePayment = await this.onlinePaymentGroupedByCli(cli, onlinepayment);
 
+                    await this.travelTreatment(cli, transactionsGroupedByTravel);
+                    await this.onlinePaymentTreatment(cli, transactionsGroupedByOnlinePayment);
                 }
-                await visaTransactionsCollection.insertTransactions(transactions);
-                await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(toBeDeleted);
+
+                this.toBeDeleted = this.transactions.map((elt) => new ObjectId(elt._id.toString()));
+
+                //TODO verify if visa transactions collection is not used and delete this instruction
+                await Promise.all([
+                    visaTransactionsCollection.insertTransactions(this.transactions),
+                    visaTransactionsTmpCollection.deleteManyVisaTransactionsTmpById(this.toBeDeleted),
+                    this.sendNotifications(),
+                ])
+
+                await Promise.all([
+                    travelsCollection.updateManyTravels({ notifications: { $exists: true } }, null, { notifications: true }),
+                    onlinePaymentsCollection.updateManyOnlinePayments({ notifications: { $exists: true } }, null, { notifications: true }),
+
+                ])
 
                 state.setState(QueueState.PENDING, `visa_transaction_tmp_treatment`);
                 console.log('===============-==================================-==================================');
@@ -85,9 +89,9 @@ export const visaTransactonsProcessingService = {
             logger.error(`error during startTransactionTraitment \n${error.name} \n${error.stack}\n`);
             return error;
         }
-    },
+    }
 
-    startRevivalMail: async (): Promise<any> => {
+    async startRevivalMail(): Promise<any> {
         try {
             const travels = await travelsCollection.getTravelsBy({ 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } });
 
@@ -130,341 +134,241 @@ export const visaTransactonsProcessingService = {
         }
     }
 
-};
+    private async travelDataGroupedByCli(cli: string, travelTransactions: any[]): Promise<any> {
 
-const travelTreatment = async (cli: string, travelTransactions: any[], onlinePaymentsTransactions: any[]): Promise<any[]> => {
+        let currentIndex = 0
+        const transactionsGroupedByTravel: { transactions: any[], travelId?: string }[] = [];
 
-    if (!travelTransactions) { return onlinePaymentsTransactions; }
-    let currentIndex = 0
-    const transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[] = [];
+        // sort transactions by date in ascending order
+        travelTransactions = travelTransactions.sort((a, b) => {
+            return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+        });
+        for (const transaction of travelTransactions) {
 
-    // sort transactions by date in ascending order
-    travelTransactions = travelTransactions.sort((a, b) => {
-        return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
-    });
-    for (const transaction of travelTransactions) {
+            // find travel which dates matchs with the current transaction date
+            let travel = await travelsCollection.getTravelsForPocessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
 
-        // find travel which dates matchs with the current transaction date
-        let travel = await travelsCollection.getTravelBy({ 'user.clientCode': cli, "proofTravel.dates.start": { $lte: transaction?.date }, "proofTravel.dates.end": { $gte: transaction?.date } });
+            if (!travel || isEmpty(travel)) {
 
-        if (!travel || isEmpty(travel)) {
+                //Insert the first transaction and continue
+                if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
+                    transactionsGroupedByTravel[currentIndex] = { transactions: [transaction] }
+                    continue;
+                }
 
-            //Insert the first transaction and continue
-            if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
-                transactionsGroupedByTravel[currentIndex] = { transactions: [transaction] }
+                // get the first date of the current transactions Grouped By Travel's transactions
+                const firstDate = Math.min(...transactionsGroupedByTravel[currentIndex]?.transactions.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf())));
+                const maxDate = moment(firstDate).endOf('month').valueOf();
+
+                // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
+                if (transaction?.date > maxDate) {
+                    currentIndex++;
+                }
+
+                // verify if current transactions Grouped By Travel is empty
+                if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
+
+                transactionsGroupedByTravel[currentIndex]?.transactions?.push(transaction);
+
                 continue;
+
             }
 
-            // get the first date of the current transactions Grouped By Travel's transactions
-            const firstDate = Math.min(...transactionsGroupedByTravel[currentIndex]?.transactions.map((elt => elt?.date)));
-            const maxDate = moment(firstDate).endOf('month').valueOf();
-
-            // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
-            if (transaction?.date > maxDate || !!transactionsGroupedByTravel[currentIndex]?.travel) {
+            if (!transactionsGroupedByTravel[currentIndex]?.travelId || transactionsGroupedByTravel[currentIndex]?.travelId !== travel?._id.toString()) {
                 currentIndex++;
             }
 
-            // verify if current transactions Grouped By Travel is empty
             if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
 
-            transactionsGroupedByTravel[currentIndex]?.transactions?.push(transaction);
+            transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
 
-            continue;
-
+            transactionsGroupedByTravel[currentIndex].travelId = travel?._id.toString();
         }
-
-        if (!transactionsGroupedByTravel[currentIndex]?.travel || transactionsGroupedByTravel[currentIndex]?.travel?._id !== travel?._id) {
-            currentIndex++;
-        }
-
-        if (isEmpty(transactionsGroupedByTravel[currentIndex])) { transactionsGroupedByTravel[currentIndex] = { transactions: [] } }
-
-        transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
-
-        transactionsGroupedByTravel[currentIndex].travel = travel;
-
+        return transactionsGroupedByTravel;
     }
 
-    return await insertTransactionsInTravels(cli, transactionsGroupedByTravel, onlinePaymentsTransactions);
+    private async onlinePaymentGroupedByCli(cli: string, onlinepaymentTransactions: any[]): Promise<any> {
+        if (!onlinepaymentTransactions) { return onlinepaymentTransactions; }
 
-}
+        const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))];
 
-const onlinePaymentTreatment = async (cli: string, onlinepaymentTransactions: any[]) => {
-    if (!onlinepaymentTransactions) { return onlinepaymentTransactions; }
+        const transactionsGroupedByOnlinePayment: { month: string, transactions: any[], travelId?: string, onlinePaymentId?: string }[] = [];
 
-    const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date).format('YYYYMM')))];
+        for (const month of months) {
+            let onlinePayment: any;
+            const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
+            const firstDate = moment(month, 'YYYYMM').startOf('month').valueOf();
+            const travel = await travelsCollection.getTravelsForPocessing({ cli, date: moment(firstDate, 'DD/MM/YYYY HH:mm:ss').valueOf(), travelType: TravelType.LONG_TERM_TRAVEL });
 
-    for (const month of months) {
-
-        const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
-
-        let onlinePayment: OnlinePaymentMonth = await onlinePaymentsCollection.getOnlinePaymentBy({ 'user.clientCode': cli, currentMonth: +month });
-
-        if (!onlinePayment) {
-            onlinePayment = {
-                user: {
-                    clientCode: cli,
-                    fullName: selectedTransactions[0].fullName,
-                    email: selectedTransactions[0].email,
-                    tel: selectedTransactions[0].tel,
-                    lang: selectedTransactions[0]?.lang
-                },
-                currentMonth: +month,
-                status: OpeVisaStatus.EMPTY,
-                dates: {},
-                amounts: 0,
-                statementAmounts: 0,
-                ceiling: 0,
-                statements: [],
-                transactions: [],
+            if (isEmpty(travel)) {
+                onlinePayment = await onlinePaymentsCollection.getOnlinePaymentBy({ 'user.clientCode': cli, currentMonth: month });
             }
-            onlinePayment = await onlinePaymentsService.insertOnlinePayment(onlinePayment);
-        }
-        const totalAmount = commonService.getTotal(selectedTransactions);
 
-
-        // if (isEmpty(onlinePayment?.transactions)) {
-        //     await Promise.all([
-        //         notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'fr', get(onlinePayment, '_id').toString()),
-        //         notificationService.sendEmailDetectTransactions(userData, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString()),
-        //         notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'fr', get(onlinePayment, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
-        //         notificationService.sendTemplateSMS(userData, get(onlinePayment, 'user.tel'), 'firstTransaction', 'en', get(onlinePayment, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC')
-        //     ]);
-        // }
-        onlinePayment.transactions.push(...selectedTransactions);
-
-        onlinePayment.dates.updated = moment().valueOf();
-
-        onlinePayment.amounts = totalAmount;
-        onlinePayment.statementAmounts = commonService.getTotal(onlinePayment?.statements, 'statement');
-
-        const statut = commonService.getOnpStatementStepStatus(onlinePayment, 'onp');
-
-        if (onlinePayment.status !== statut) {
-            onlinePayment.status = statut;
+            transactionsGroupedByOnlinePayment.push({ transactions: selectedTransactions, onlinePaymentId: onlinePayment?._id.toString() || null, travelId: travel?._id.toString() || null, month });
         }
 
-        if (+totalAmount > +onlinePayment?.ceiling) {
-            await Promise.all([
-                notificationService.sendEmailVisaExceding(onlinePayment, get(onlinePayment, 'user.email'), `${get(onlinePayment, 'user.lang')}`, get(onlinePayment, '_id').toString(), totalAmount),
-                // notificationService.sendEmailVisaExceding(onlinePayment, get(onlinePayment, 'user.email'), 'en', get(onlinePayment, '_id').toString(), totalAmount),
-                notificationService.sendTemplateSMS(onlinePayment, get(onlinePayment, 'user.tel'), 'ceilingOverrun', `${get(onlinePayment, 'user.lang')}`, get(onlinePayment, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac', totalAmount),
-                // notificationService.sendTemplateSMS(onlinePayment, get(onlinePayment, 'user.tel'), 'ceilingOverrun', 'en', get(onlinePayment, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac', totalAmount)
-            ]);
-            logger.debug(`Exeding online payment, id: ${onlinePayment._id}`);
-        }
-
-        await onlinePaymentsCollection.updateOnlinePaymentsById(onlinePayment?._id, onlinePayment);
+        return transactionsGroupedByOnlinePayment;
     }
 
-}
+    private async travelTreatment(cli: string, transactionsGroupedByTravel: any[]) {
+        for (const element of transactionsGroupedByTravel) {
+            if (isEmpty(element?.transactions)) { return }
+            const dates = element?.transactions.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
+            const firstDate = moment(Math.min(...dates)).startOf('day').valueOf();
+            const lastDate = moment(firstDate).add('days', 30).endOf('days').valueOf();
+
+            let travel: Travel;
+            const toBeUpdated: any = { notifications: [] };
+            if (!element?.travelId) {
+                travel = generateTravelByProcessing(cli, element?.transactions[0], { start: firstDate, end: lastDate });
+            }
+
+            travel = element?.travelId ? await travelService.getTravelById(element?.travelId) : await travelService.insertTravelFromSystem(travel);
+            if (travel instanceof Error) { continue }
+            travel.notifications = [];
 
 
-const getOperationType = (type: string) => {
-    return type === 'PAIEMENT INTERNET' ? 'onlinepayment'
-        : ['RETRAIT DAB', 'PAIEMENT TPE'].includes(type) ?
-            'travel' : ''
+            if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
+                travel.transactions = isEmpty(travel?.transactions) ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
+                toBeUpdated.notifications = verifyExcedingOnTravel(travel, +travel?.ceiling);
+                const totalAmount = commonService.getTotal(travel?.transactions);
+                if (travel?.transactions?.length === element?.transactions?.length) { // to detect first transaction
+                    toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
+                    toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "SMS", 'firstTransaction'));
+                }
+
+                toBeUpdated.transactions = element.transactions;
+            }
+
+            if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
+                const months = [...new Set(element.transactions.map((elt) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))] as string[];
+                for (const month of months) {
+                    const selectedTransactions = element.transactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
+
+                    const travelMonth = await getOrCreateTravelMonth(travel, month);
+
+                    toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start); // in case of new month creation check the number of months in the long term travel
+                    await updateTravelMonth(travelMonth, selectedTransactions, toBeUpdated, travel);
+                }
+
+            }
+
+            await updateTravel(travel, toBeUpdated);
+        }
+    }
+
+    private async onlinePaymentTreatment(cli: string, transactionsGroupedByOnlinePayment: any[]) {
+        for (const element of transactionsGroupedByOnlinePayment) {
+            let onlinePayment: OnlinePaymentMonth;
+            let travel: Travel;
+            const toBeUpdated: any = { notifications: [] };
+
+            const { month } = element;
+            if (element.travelId) {
+                travel = await travelsCollection.getTravelById(element.travelId);
+                const travelMonth = await getOrCreateTravelMonth(travel, month);
+                await updateTravelMonth(travelMonth, element.transactions, toBeUpdated, travel);
+                await updateTravel(travel, toBeUpdated);
+                continue;
+            }
+
+            if (!element.onlinePaymentId) {
+                onlinePayment = generateOnlinePaymentMonth(cli, element.transactions[0], month);
+            }
+
+            onlinePayment = element.onlinePaymentId ? await onlinePaymentsCollection.getOnlinePaymentById(element.onlinePaymentId) : await onlinePaymentsService.insertOnlinePayment(onlinePayment)
+
+            onlinePayment.transactions.push(element.transactions);
+
+            toBeUpdated.notifications = verifyExcedingOnTravel(travel, +travel?.ceiling);
+            if (isEmpty(toBeUpdated.notifications)) {
+                delete toBeUpdated.notifications;
+            }
+
+            await onlinePaymentsCollection.updateOnlinePaymentsById(onlinePayment?._id, { ...toBeUpdated });
+        }
+    }
+
+    private async sendNotifications() {
+
+        const travelDataNotifications = await travelsCollection.getTravelNotifications();
+        const onlinePaymentDataNotifications = await onlinePaymentsCollection.getOnlinePaymentNotifications();
+
+        const notifications = [...travelDataNotifications, ...onlinePaymentDataNotifications];
+
+        for (const notification of notifications) {
+            if (notification.type === 'SMS') {
+                await sendSMSNotifications(notification);
+            }
+            if (notification.type === 'EMAIL') {
+                await sendEmailNotifications(notification);
+            }
+        }
+
+    }
 };
 
-const formatTransactions = (dataArray: any[]) => {
-    try {
-        const transactions = dataArray.map((element: any) => {
-            return {
-                _id: element?._id,
-                clientCode: element['CLIENT']?.toString()?.replace(/\s/g, ''),
-                fullName: element['NOM_CLIENT']?.toString()?.trim(),
-                manager: {
-                    code: element['CODE_GESTIONNAIRE']?.replace(/\s/g, ''),
-                    name: element['NOM_GESTIONNAIRE']?.replace(/\s/g, '')
-                },
-                lang: element['CODE_LANGUE_CLIENT']?.trim() === '001' ? 'fr' : 'en',
-                tel: element['TELEPHONE_CLIENT']?.toString()?.replace(/\s/g, ''),
-                email: element['EMAIL_CLIENT']?.toString()?.replace(/\s/g, ''),
-                beneficiary: element['ACQUEREUR']?.replace(/\s/g, ''),
-                amount: +element['MONTANT_XAF'] || 0,
-                amountTrans: +element['MONTANT'] || 0,
-                currencyTrans: +element['DEVISE'] || 0,
-                amountCompens: +element['MONTANT_COMPENS'] || 0,
-                currencyCompens: element['DEVISE_COMPENS']?.replace(/\s/g, ''),
-                date: moment(`${element['DATE']?.replace(/\s/g, '')} ${element['HEURE']?.replace(/\s/g, '')}`, 'DD/MM/YYYY HH:mm:ss').valueOf(),
-                type: element['TYPE_TRANS'],
-                ncp: element['COMPTE']?.replace(/\s/g, ''),
-                age: element['AGENCE']?.replace(/\s/g, ''),
-                cha: element['CHAPITRE']?.toString()?.replace(/\s/g, ''),
-                card: {
-                    name: element['NOM_CARTE']?.replace(/\s/g, ''),
-                    code: element['CARTE']?.replace(/\s/g, ''),
-                    label: element['PRODUIT']?.replace(/\s/g, ''),
-                },
-                country: element['PAYS']?.trim(),
-                category: element['CATEGORIE']?.replace(/\s/g, ''),
-                currentMonth: moment(`${element['DATE']?.replace(/\s/g, '')}`, 'DD/MM/YYYY').format('YYYYMM')?.toString(),
-                reference: '',
-                statementRef: '',
-            }
-        });
+const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
+    const totalAmount = commonService.getTotal(data?.transactions);
+    if (totalAmount > ceiling) {
+        data.status = [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.VALIDATION_CHAIN].includes(data?.status) ? data?.status : OpeVisaStatus.EXCEDEED;
+        const userData = travel ? travel : data;
 
-        return transactions;
-    } catch (error) {
-        logger.error(`error during formatTransactions \n${error.name} \n${error.stack}\n`);
-        return error;
+        // TODO send increase notification after status change to exceeded
+        logger.debug(`Exeding data, id: ${data?._id}`);
+        return [
+            generateNotificationData({ ...userData, totalAmount }, "EMAIL", 'ceilingOverrun'),
+            generateNotificationData({ ...userData, totalAmount }, "SMS", 'ceilingOverrun'),
+        ];
     }
+
+    return [];
 }
 
-const insertTransactionsInTravels = async (cli: string, transactionsGroupedByTravel: { transactions: any[], travel?: Travel }[], onlinePaymentsTransactions: any[]) => {
-    for (const element of transactionsGroupedByTravel) {
+const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
+    let travelMonth = travelMonthsCollection.getTravelMonthBy({ travelId: travel?._id, month: month }) as TravelMonth;
 
-        if (isEmpty(element?.transactions)) { return }
-        const dates = element?.transactions.map((elt => elt?.date));
-        const firstDate = Math.min(...dates);
-        const lastDate = Math.max(...dates);
-
-        let travel: Travel = element?.travel;
-        if (travel) { travel.transactions = !isEmpty(travel?.transactions) && !isEmpty(travel) ? travel?.transactions : []; }
-
-        if (!travel) {
-            travel = {
-                status: OpeVisaStatus.TO_COMPLETED,
-                user: {
-                    clientCode: cli,
-                    fullName: element?.transactions[0]?.fullName,
-                    email: element?.transactions[0]?.email,
-                    tel: element?.transactions[0]?.tel,
-                    lang: element?.transactions[0]?.lang
-                },
-                travelRef: '',
-                travelType: TravelType.SHORT_TERM_TRAVEL,
-                ceiling: 0,
-                dates: {
-                    created: moment().valueOf(),
-                },
-                proofTravel: {
-                    continents: [],
-                    countries: [],
-                    dates: {
-                        start: firstDate,
-                        end: lastDate,
-                    },
-                    status: OpeVisaStatus.TO_COMPLETED,
-                    travelReason: {},
-                    isTransportTicket: false,
-                    isVisa: false,
-                    isPassOut: true,
-                    isPassIn: true,
-                    proofTravelAttachs: [],
-                    validators: []
-                },
-                expenseDetails: [],
-                expenseDetailsStatus: OpeVisaStatus.EMPTY,
-                expenseDetailAmount: 0,
-                othersAttachements: [],
-                otherAttachmentAmount: 0,
-                othersAttachmentStatus: OpeVisaStatus.EMPTY,
-                transactions: []
-            };
-
-            travel = await travelService.insertTravelFromSystem(travel);
-
-            if (travel instanceof Error) { continue }
-        }
-
-        if (isEmpty(travel?.transactions)) {
-
-            await Promise.all([
-                notificationService.sendEmailDetectTransactions({ ...travel, transactions: [...element?.transactions] }, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString()),
-                // notificationService.sendEmailDetectTransactions(travel, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString()),
-                notificationService.sendTemplateSMS({ ...travel, transactions: [...element?.transactions] }, get(travel, 'user.tel'), 'firstTransaction', `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC'),
-                // notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'firstTransaction', 'en', get(travel, '_id').toString(), 'Détection d\'une transaction  Hors zone CEMAC')
-
-            ]);
-        }
-
-        if (travel?.travelType === TravelType.SHORT_TERM_TRAVEL) { travel?.transactions.push(...element?.transactions); }
-
-
-        if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
-            const mergedTransactions = [...element.transactions, ...onlinePaymentsTransactions];
-            const months = mergedTransactions.map((elt) => moment(elt?.date).format('YYYYMM')).filter((item, pos, self) => self.indexOf(item) === pos);
-            for (const month of months) {
-                const selectedTransactions = element.transactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
-                const selectedTransactionsOnlinePayment = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') === month);
-                onlinePaymentsTransactions = onlinePaymentsTransactions.filter(elt => moment(elt?.date).format('YYYYMM') !== month);
-                selectedTransactions.push(...selectedTransactionsOnlinePayment);
-                let travelMonth = await travelMonthsCollection.getTravelMonthBy({ travelId: travel?._id, month });
-
-                if (travelMonth) { travelMonth.transactions.push(...selectedTransactions) }
-
-                if (!travelMonth) {
-                    travelMonth = {
-                        status: OpeVisaStatus.TO_COMPLETED,
-                        userId: travel?.user?._id,
-                        clientCode: travel?.user?.clientCode,
-                        travelId: travel?._id,
-                        month,
-                        dates: {
-                            created: moment().valueOf(),
-                        },
-                        expenseDetails: [],
-                        expenseDetailsStatus: OpeVisaStatus.EMPTY,
-                        expenseDetailAmount: 0,
-                        transactions: selectedTransactions
-
-                    }
-
-                    const insertedId = await travelMonthsCollection.insertVisaTravelMonth(travelMonth);
-
-                    travelMonth._id = insertedId;
-                }
-                travelMonth.dates.updated = moment().valueOf();
-
-                const totalAmount = commonService.getTotal(travelMonth?.transactions);
-                travelMonth.expenseDetailAmount = commonService.getTotal(travelMonth?.transactions, 'stepAmount');
-                travelMonth.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travelMonth, 'month');
-
-                if (totalAmount > travel?.ceiling) {
-                    await Promise.all([
-                        notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), totalAmount),
-                        // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 'en', get(travel, '_id').toString(), totalAmount),
-                        notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'ceilingOverrun', `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac', totalAmount),
-                        // notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString(), 'Dépassement de plafond sur transactions hors zone cemac', totalAmount)
-                    ]);
-
-                    logger.debug(`Exeding travel month, id: ${travelMonth?._id}`);
-                }
-
-                await travelMonthsCollection.updateTravelMonthsById(travelMonth?._id, travelMonth);
-
-            }
-
-        }
-
-        const totalAmount = commonService.getTotal(travel?.transactions);
-
-        travel.expenseDetailAmount = commonService.getTotal(travel.expenseDetails, 'stepAmount');
-        travel.expenseDetailsStatus = commonService.getOnpStatementStepStatus(travel, 'expenseDetail');
-
-        travel.otherAttachmentAmount = commonService.getTotal(travel.othersAttachements, 'stepAmount');
-        travel.othersAttachmentStatus = commonService.getOnpStatementStepStatus(travel, 'othersAttachs');
-
-        travelsCollection.updateTravelsById(get(travel, '_id').toString().toString(), travel);
-
-        if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
-            if (totalAmount > +travel?.ceiling) {
-
-
-                await Promise.all([
-                    notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), totalAmount),
-                    // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 'en', get(travel, '_id').toString(), totalAmount),
-                    notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'ceilingOverrun', `${get(travel, 'user.lang')}`, get(travel, '_id').toString(), 'Dépassement de plafond sur les transactions Hors zone CEMAC', totalAmount),
-                    // notificationService.sendTemplateSMS(travel, get(travel, 'user.tel'), 'ceilingOverrun', 'en', get(travel, '_id').toString(), 'Dépassement de plafond sur les transactions Hors zone CEMAC', totalAmount)
-                ]);
-                logger.debug(`Exeding travel, id: ${travel?._id}`);
-
-            }
-        }
+    if (isEmpty(travelMonth)) {
+        travelMonth = generateTravelMonthByProcessing(travel?._id.toString(), travel?.user?._id, month);
+        const insertedId = await travelMonthsCollection.insertVisaTravelMonth(travelMonth);
+        travelMonth._id = insertedId;
     }
-    return onlinePaymentsTransactions;
+    return travelMonth;
 }
+
+
+const updateTravelMonth = async (travelMonth: TravelMonth, transactions: VisaTransaction[], toBeUpdated: any, travel: Travel) => {
+    travelMonth.transactions.push(...transactions);
+    toBeUpdated.notifications = verifyExcedingOnTravel(travelMonth, +travel?.ceiling, travel);
+    await travelMonthsCollection.updateTravelMonthsById(travelMonth?._id, { transactions: travelMonth?.transactions, "dates.updated": moment().valueOf() });
+
+}
+
+const updateTravel = async (travel: Travel, toBeUpdated: any) => {
+    toBeUpdated['dates.updated'] = moment().valueOf();
+    await travelsCollection.updateTravelsById(get(travel, '_id').toString(), { ...toBeUpdated });
+}
+
+const sendEmailNotifications = async (notification: any) => {
+    const { data, lang, receiver, id, key } = notification.data;
+
+    if (key === 'firstTransaction') {
+        await notificationService.sendEmailDetectTransactions(data, receiver, lang, id);
+    }
+
+    if (key === 'ceilingOverrun') {
+        await notificationService.sendEmailVisaExceding(data, receiver, lang, id);
+    }
+
+
+}
+
+const sendSMSNotifications = async (notification: any) => {
+    const { data, lang, id, phone, key, subject } = notification.data;
+    await notificationService.sendTemplateSMS(data, phone, key, lang, id, subject);
+}
+
+
 
 
 

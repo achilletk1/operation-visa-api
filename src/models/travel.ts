@@ -77,6 +77,7 @@ export interface Travel {
         rejectReason?: string;
         validators?: Validator[];
         isEdit?: boolean;
+        nbrefOfMonth?: number;
     };
     expenseDetails?: ExpenseDetail[];
     expenseDetailsStatus?: OpeVisaStatus;
@@ -88,6 +89,7 @@ export interface Travel {
     validators?: Validator[];
     editors?: any[];
     validationLevel?: number;
+    notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
 }
 
 export interface TravelMonth {

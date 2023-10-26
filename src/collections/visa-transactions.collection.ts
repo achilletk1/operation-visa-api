@@ -24,6 +24,7 @@ export const visaTransactionsCollection = {
     },
 
     insertTransactions: async (data: any[]): Promise<any> => {
+        if (isEmpty(data)) { return }
         const database = await getDatabase();
         return await database.collection(collectionName).insertMany(data);
     },

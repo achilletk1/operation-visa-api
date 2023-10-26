@@ -25,7 +25,7 @@ export const onlinePaymentsService = {
 
             if (!user) { return new Error('UserNotFound'); }
 
-            const currentMonth = +moment(onlinepaymentStatement.date).format('YYYYMM');
+            const currentMonth = moment(onlinepaymentStatement.date).format('YYYYMM');
 
             let onlinePayment: OnlinePaymentMonth;
             let result: any;

@@ -46,6 +46,7 @@ export interface VisaTransaction {
     code?: string;
     name?: string
   };
+  lang?: string;
   beneficiary?: string;
   amount?: number;
   amountTrans?: number;
@@ -117,24 +118,6 @@ export enum OpeVisaStatus {
   VALIDATION_CHAIN = 700
 
 }
-export interface Chat {
-  _id?: string;
-  operationId?: string; // online payment ID or Travel ID
-  type?: number;  // 100: travel, 200: online payment;
-  messages?: ChatMessage[];
-}
-
-export interface ChatMessage {
-  type?: string;
-  message?: string;
-  reply?: string;
-  sender?: string;
-  date?: string;
-  files?: any[];
-  quote?: string;
-  avatar?: string;
-}
-
 export enum OperationType {
   ELECTRONIC_PAYMENT_TERMINAL = 100,
   ATN_WITHDRAWAL = 200,

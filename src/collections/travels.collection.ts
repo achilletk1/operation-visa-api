@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { Travel, TravelType } from "../models/travel";
 import { getDatabase } from "./config";
 import { AverageTimeJustifyTravelData, generateConsolidateData, statusOperation } from "./helpers/reporting.collection.helper";
+import { travelsForPocessingQuery, getNotficationsQuery } from "./helpers/visa-travel.collection.helper";
 
 const collectionName = 'visa_operations_travels';
 
@@ -91,7 +92,7 @@ export const travelsCollection = {
         const database = await getDatabase();
 
         let query = [];
-        let matchValue: any = { };
+        let matchValue: any = {};
         // let matchDate = {};
 
         const { travelType } = params
@@ -100,7 +101,7 @@ export const travelsCollection = {
         // if (param.start && param.end) { query.push({ $match: { 'dates.created': { $gte: param.start, $lte: param.end } } }); }
 
         if (+travelType) {
-            matchValue['$match'] ={}
+            matchValue['$match'] = {}
             matchValue['$match'].travelType = +travelType;
         }
         if (matchValue['$match']) { query.unshift(matchValue); }
@@ -141,6 +142,25 @@ export const travelsCollection = {
         const result = await database.collection(collectionName).deleteMany(field);
         return result
     },
+    getTravelsForPocessing: async (filters: any): Promise<any> => {
+        const { cli, date, travelType } = filters;
+        const database = await getDatabase();
+        const data = await database.collection(collectionName).aggregate(travelsForPocessingQuery(date, cli, travelType)).toArray();
+        return data[0];
+    },
 
+    getTravelNotifications: async () => {
+        const database = await getDatabase();
+        const data = await database.collection(collectionName).aggregate(getNotficationsQuery).toArray();
+        return data[0]?.notifications || [];
+    },
 
+    updateManyTravels: async (filter: any, set: any, unset?: any): Promise<any> => {
+        const database = await getDatabase();
+        const query: any = {};
+        if (!isEmpty(set)) { query.$set = { ...set } }
+        if (!isEmpty(unset)) { query.$unset = { ...unset } }
+        const result = await database.collection(collectionName).updateMany(filter, query);
+        return result;
+    },
 }

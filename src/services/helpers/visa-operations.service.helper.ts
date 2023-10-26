@@ -1,12 +1,14 @@
-import { visaTransactinnsTmpCollection } from '../../collections/visa_transactions_tmp.collection';
+import { visaTransactionsTmpCollection } from '../../collections/visa_transactions_tmp.collection';
 import { visaOperationsCollection } from '../../collections/visa-operations.collection';
 import { settingsFilesCollection } from '../../collections/settings-files.collection';
 import { travelMonthsCollection } from '../../collections/travel-months.collection';
 import { travelsCollection } from '../../collections/travels.collection';
-import { OpeVisaStatus } from '../../models/visa-operations';
+import { OpeVisaStatus, VisaTransaction } from '../../models/visa-operations';
 import { ObjectId } from 'mongodb';
 import moment = require('moment');
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
+import { Travel, TravelMonth, TravelType } from '../../models/travel';
+import { OnlinePaymentMonth } from '../../models/online-payment';
 
 export const getTransactionType = (type: string) => {
     const data = {
@@ -269,7 +271,7 @@ export const verifyIfisInLongTermTravel = async (transactions = []): Promise<any
     insertTransactions = insertTransactions.map(elt => new ObjectId(elt?._id.toString())) || [];
     console.log('inserted transactions', insertTransactions);
     if (!isEmpty(insertTransactions)) {
-        const result = await visaTransactinnsTmpCollection.deleteManyVisaTransactionsTmpById(insertTransactions);
+        const result = await visaTransactionsTmpCollection.deleteManyVisaTransactionsTmpById(insertTransactions);
         console.log('deleted result', result);
     }
 
@@ -321,4 +323,141 @@ const groupTransactionsByMonths = (transactions: any[], clis: any) => {
     }
 
     return transactionGroupByMonths;
+}
+
+
+export const generateTravelByProcessing = (cli: string, transaction: VisaTransaction, dates: any): Travel => {
+    return {
+        status: OpeVisaStatus.TO_COMPLETED,
+        user: {
+            clientCode: cli,
+            fullName: transaction?.fullName,
+            email: transaction?.email,
+            tel: transaction?.tel,
+            lang: transaction?.lang
+        },
+        travelRef: '',
+        travelType: TravelType.SHORT_TERM_TRAVEL,
+        ceiling: 0,
+        dates: {
+            created: moment().valueOf(),
+        },
+        proofTravel: {
+            continents: [],
+            countries: [],
+            dates: {
+                start: dates.start,
+                end: dates.end,
+            },
+            status: OpeVisaStatus.TO_COMPLETED,
+            travelReason: {},
+            isTransportTicket: false,
+            isVisa: false,
+            isPassOut: true,
+            isPassIn: true,
+            proofTravelAttachs: [],
+            validators: []
+        },
+        expenseDetails: [],
+        expenseDetailsStatus: OpeVisaStatus.EMPTY,
+        expenseDetailAmount: 0,
+        othersAttachements: [],
+        otherAttachmentAmount: 0,
+        othersAttachmentStatus: OpeVisaStatus.EMPTY,
+        transactions: []
+    }
+}
+
+export const generateTravelMonthByProcessing = (travelId: string, userId: string, month: string): TravelMonth => {
+    return {
+        status: OpeVisaStatus.TO_COMPLETED,
+        userId,
+        travelId,
+        month,
+        dates: {
+            created: moment().valueOf(),
+        },
+        expenseDetails: [],
+        expenseDetailsStatus: OpeVisaStatus.EMPTY,
+        expenseDetailAmount: 0,
+        transactions: []
+
+    }
+}
+
+export const generateOnlinePaymentMonth = (clientCode: string, transaction: VisaTransaction, month: string): OnlinePaymentMonth => {
+    return {
+        user: {
+            clientCode,
+            fullName: transaction.fullName,
+            email: transaction.email,
+            tel: transaction.tel,
+            lang: transaction?.lang
+        },
+        currentMonth: month,
+        status: OpeVisaStatus.EMPTY,
+        dates: {},
+        amounts: 0,
+        statementAmounts: 0,
+        ceiling: 0,
+        statements: [],
+        transactions: [],
+    }
+}
+export const generateNotificationData = (data: any, type: 'SMS' | 'EMAIL', template: string) => {
+    const baseData = {
+        data: { transactions: data.transactions, ceiling: data.ceiling, amount: data.totalAmount },
+        lang: get(data, 'user.lang'),
+        id: get(data, '_id').toString(),
+        key: template,
+    }
+    if (template === 'firstTransaction' && type === 'EMAIL') {
+        return {
+            data: {
+                ...baseData,
+                receiver: get(data, 'user.email'),
+            },
+            type,
+        }
+    }
+
+    if (template === 'firstTransaction' && type === 'SMS') {
+        return {
+            data: {
+                ...baseData,
+                phone: get(data, 'user.tel'),
+                subject: 'Détection d\'une transaction  Hors zone CEMAC',
+            },
+            type,
+        }
+    }
+
+    if (template === 'ceilingOverrun' && type === 'EMAIL') {
+        return {
+            data: {
+                ...baseData,
+                receiver: get(data, 'user.email'),
+            },
+            type,
+        }
+    }
+
+
+    if (template === 'ceilingOverrun' && type === 'SMS') {
+        return {
+            data: {
+                ...baseData,
+                phone: get(data, 'user.tel'),
+                key: "firstTransaction",
+                subject: 'Dépassement de plafond sur transactions hors zone cemac',
+            },
+            type,
+        }
+    }
+
+}
+
+export const checkTravelNumberOfMonths = (month: string, nbrefOfMonth: number, firstDate: number) => {
+    const nbMonths = moment(month, 'YYYYMM').diff(moment(firstDate).startOf('months'), 'months') + 1;
+    return nbMonths > nbrefOfMonth ? nbMonths : nbrefOfMonth;
 }
