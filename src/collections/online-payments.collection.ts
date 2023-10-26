@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { OnlinePaymentMonth } from "../models/online-payment";
 import { getDatabase } from "./config";
 import { AverageTimeJustifyTravelData, generateConsolidateData, statusOperation } from "./helpers/reporting.collection.helper";
+import { getNotficationsQuery } from "./helpers/visa-travel.collection.helper";
 
 const collectionName = 'visa_operations_online_payments';
 
@@ -22,7 +23,7 @@ export const onlinePaymentsCollection = {
     getOnlinePaymentBy: async (fields: any): Promise<any> => {
         const database = await getDatabase();
         return await database.collection(collectionName).findOne(fields);
-    },    
+    },
 
     updateOnlinePaymentsById: async (id: string, set: OnlinePaymentMonth) => {
         const database = await getDatabase();
@@ -33,7 +34,7 @@ export const onlinePaymentsCollection = {
             query.$set = { ...set };
         }
 
-        const result =  await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
+        const result = await database.collection(collectionName).updateOne({ _id: new ObjectId(id.toString()) }, query);
         return result;
     },
 
@@ -45,7 +46,7 @@ export const onlinePaymentsCollection = {
 
     },
 
-      
+
     getStatusOperationOnlinePaymentReport: async (params: any) => {
         const database = await getDatabase();
 
@@ -105,13 +106,13 @@ export const onlinePaymentsCollection = {
             delete params?.end;
             delete params?.start;
         }
-        
+
         query = { ...query, ...params }
-        
-        if(offset && limit){
+
+        if (offset && limit) {
             const startIndex = (offset - 1) * limit;
             const total = await database.collection(collectionName).find(query).count();
-            const data = await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).skip(startIndex).limit(limit ||40).toArray();
+            const data = await database.collection(collectionName).find(query).sort({ 'dates.created': -1 }).skip(startIndex).limit(limit || 40).toArray();
             return { data, total };
         }
         return await database.collection(collectionName).find(query).toArray();
@@ -131,6 +132,21 @@ export const onlinePaymentsCollection = {
     deleteOnlinePayment: async (id: string) => {
         const database = await getDatabase();
         return await database.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
+    },
+
+    getOnlinePaymentNotifications: async () => {
+        const database = await getDatabase();
+        const data = await database.collection(collectionName).aggregate(getNotficationsQuery).toArray();
+        return data[0]?.notifications || [];
+    },
+
+    updateManyOnlinePayments: async (filter: any, set: any, unset?: any): Promise<any> => {
+        const database = await getDatabase();
+        const query: any = {};
+        if (!isEmpty(set)) { query.$set = { ...set } }
+        if (!isEmpty(unset)) { query.$unset = { ...unset } }
+        const result = await database.collection(collectionName).updateMany(filter, query);
+        return result;
     },
 
 }

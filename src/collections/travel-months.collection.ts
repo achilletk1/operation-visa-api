@@ -23,7 +23,7 @@ export const travelMonthsCollection = {
         return await database.collection(collectionName).findOne(fields);
     },
 
-    updateTravelMonthsById: async (id: string, set: TravelMonth) => {
+    updateTravelMonthsById: async (id: string, set: any) => {
         const database = await getDatabase();
         delete set._id;
         const query = { $set: {} };

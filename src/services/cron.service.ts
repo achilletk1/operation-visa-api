@@ -1,4 +1,4 @@
-import { visaTransactonsProcessingService } from "./visa-transaction-processing.service";
+import { VisaTransactonsProcessingService } from "./visa-transaction-processing.service";
 import { onlinePaymentsCollection } from "../collections/online-payments.collection";
 import { templatesCollection } from "../collections/templates.collection";
 import { travelsCollection } from "../collections/travels.collection";
@@ -12,11 +12,13 @@ import { config } from "../config";
 import { isEmpty } from "lodash";
 import cron from 'node-cron';
 import moment from "moment";
-let state:any;
-
+let state: any;
+let visaTransactonsProcessingService: VisaTransactonsProcessingService;
 export const cronService = {
     instantiate: () => {
-        state = new State()
+        state = new State();
+        visaTransactonsProcessingService = new VisaTransactonsProcessingService()
+
     },
 
     // Regroupement des voyages et paiements en ligne ayant dépassé. 

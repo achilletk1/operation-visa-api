@@ -5,7 +5,7 @@
     "host": "localhost",
     "db": {
         "host": "127.0.0.1:27017",
-        "name": "dbanking",
+        "name": "banking-bci",
         "auth": {
             "user": "",
             "password": ""
@@ -39,7 +39,7 @@
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "cronRevivalMail": "3 * * * *",
-    "cronTransactionProcessing": "3 * * * * *",
+    "cronTransactionProcessing": "* * * * * *",
     "cronDeleteTemporaryFile": "0 */3 * * *",
     "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
     "cronclientindemeure":"*/3 */1 * * *",

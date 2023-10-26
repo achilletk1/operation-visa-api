@@ -4,7 +4,7 @@ import { Attachment, ExpenseCategory, OpeVisaStatus, Validator, VisaTransaction 
 export interface OnlinePaymentMonth {
   _id?: any;
   user?: User;
-  currentMonth?: number;
+  currentMonth?: string;
   status?: OpeVisaStatus;
   dates?: {
     created?: number;
@@ -21,7 +21,7 @@ export interface OnlinePaymentMonth {
   validators?: Validator[];
   editors?: any[];
   rejectReason?: string;
-
+  notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
 }
 
 export interface OnlinePaymentStatement {
