@@ -261,7 +261,7 @@ export class VisaTransactonsProcessingService {
         for (const element of transactionsGroupedByOnlinePayment) {
             let onlinePayment: OnlinePaymentMonth;
             let travel: Travel;
-            const toBeUpdated: any = { notifications: [] };
+            const toBeUpdated: any = { notifications: [], transactions: [] };
 
             const { month } = element;
             if (element.travelId) {
@@ -278,7 +278,7 @@ export class VisaTransactonsProcessingService {
 
             onlinePayment = element.onlinePaymentId ? await onlinePaymentsCollection.getOnlinePaymentById(element.onlinePaymentId) : await onlinePaymentsService.insertOnlinePayment(onlinePayment)
 
-            onlinePayment.transactions.push(element.transactions);
+            toBeUpdated.transactions.push(...element.transactions);
 
             toBeUpdated.notifications = verifyExcedingOnTravel(travel, +travel?.ceiling);
             if (isEmpty(toBeUpdated.notifications)) {
