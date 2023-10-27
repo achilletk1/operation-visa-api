@@ -359,16 +359,9 @@ const sendEmailNotifications = async (notification: any) => {
     if (key === 'ceilingOverrun') {
         await notificationService.sendEmailVisaExceding(data, receiver, lang, id);
     }
-
-
 }
 
 const sendSMSNotifications = async (notification: any) => {
     const { data, lang, id, phone, key, subject } = notification.data;
     await notificationService.sendTemplateSMS(data, phone, key, lang, id, subject);
 }
-
-
-
-
-

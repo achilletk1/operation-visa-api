@@ -36,10 +36,10 @@ const goToTheLine = (str: string, isSms?: boolean) => {
     return str.includes(reg) ? isSms ? str.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str.split(reg).join('<br>')) : str;
 }
 
-export const getVariablesValue = (data: { transactions: VisaTransaction[], amount: number, ceiling: number,lang: string }) => {
-    const { transactions, amount, ceiling,lang } = data;
+export const getVariablesValue = (data: { transactions: VisaTransaction[], amount: number, ceiling: number, lang: string }) => {
+    const { transactions, amount, ceiling, lang } = data;
     const transaction = transactions[0];
-    const date = Math.min(...transactions.map(elt => elt?.date));
+    const date = Math.min(...transactions.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
     const mapping = {
         AGENCE: transaction?.age || 'Agence Inconnu',
         COMPTE: transaction?.ncp || 'Compte Inconnu',
@@ -54,7 +54,7 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         CARTE: transaction?.card?.code || '',
         PRODUIT: transaction?.card.label,
         DATE: moment(date).locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
-        HEURE: moment(date).locale(`${lang|| 'fr'}`).format('HH:mm:ss'),
+        HEURE: moment(date).locale(`${lang || 'fr'}`).format('HH:mm:ss'),
         MONTANT: amount,
         DEVISE: transaction?.currencyTrans,
         MONTANT_COMPENS: transaction?.amountCompens,
@@ -66,8 +66,8 @@ export const getVariablesValue = (data: { transactions: VisaTransaction[], amoun
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
         MOIS_DEPART: visaHelper.transformDateExpression(transaction?.currentMonth.toString()),
-        DATE_COURANTE: moment().locale(`${lang|| 'fr'}`).format('DD/MM/YYYY'),
-        DATE_COURANTE_LONG: moment().locale(`${lang|| 'fr'}`).format('dddd, Do MMMM YYYY'),
+        DATE_COURANTE: moment().locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
+        DATE_COURANTE_LONG: moment().locale(`${lang || 'fr'}`).format('dddd, Do MMMM YYYY'),
     }
 
     return mapping;

@@ -442,13 +442,11 @@ export const generateNotificationData = (data: any, type: 'SMS' | 'EMAIL', templ
         }
     }
 
-
     if (template === 'ceilingOverrun' && type === 'SMS') {
         return {
             data: {
                 ...baseData,
                 phone: get(data, 'user.tel'),
-                key: "firstTransaction",
                 subject: 'Dépassement de plafond sur transactions hors zone cemac',
             },
             type,
