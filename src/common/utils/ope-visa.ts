@@ -1,0 +1,105 @@
+import { OnlinePaymentStatement } from "models/online-payment";
+import { OpeVisaStatus } from "modules/visa-operations";
+import { isEmpty } from "lodash";
+
+export function getTotal(transactions: any[], type?: string | 'stepAmount') {
+    if (!transactions || isEmpty(transactions)) { return 0; }
+
+    if (type === 'stepAmount') { transactions = transactions.filter(elt => [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(elt.status)) }
+
+    const totalAmountTransaction = transactions.map((elt) => +elt.amount).reduce((elt, prev) => elt + prev, 0);
+
+    return totalAmountTransaction;
+};
+
+export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') {
+    if (!data) { throw new Error('OnlinePaymentNotDefined'); }
+    let array = []; let total: number = 0;
+    if (step === 'onp') {
+        if (isEmpty(data?.statements)) { return OpeVisaStatus.EMPTY };
+        array = data?.statements;
+        total = data?.statementAmounts;
+    }
+    if (step === 'month') {
+        if (isEmpty(data?.expenseDetails)) { return OpeVisaStatus.EMPTY };
+        array = data?.expenseDetails;
+        total = data?.expenseDetailsAmount;
+    }
+    if (step === 'othersAttachs') {
+        if (isEmpty(data?.othersAttachements)) { return OpeVisaStatus.EMPTY };
+        array = data?.othersAttachements;
+        total = data?.otherAttachmentAmount;
+    }
+    if (step === 'expenseDetail') {
+        if (isEmpty(data?.expenseDetails)) { return OpeVisaStatus.EMPTY };
+        array = data?.expenseDetails;
+        total = data?.expenseDetailsAmount;
+    }
+
+    let status = array.map((elt: any) => +elt?.status);
+
+    // renvoi le statut à compléter
+    if (status.includes(OpeVisaStatus.TO_COMPLETED)
+        && !status.includes(OpeVisaStatus.REJECTED)
+        && !status.includes(OpeVisaStatus.EXCEDEED)) {
+        return OpeVisaStatus.TO_COMPLETED
+    }
+
+    // renvoi le statut à valider
+    if (status.includes(OpeVisaStatus.TO_VALIDATED)
+        && !status.includes(OpeVisaStatus.TO_COMPLETED)
+        && !status.includes(OpeVisaStatus.EMPTY)
+        && !status.includes(OpeVisaStatus.REJECTED)
+        && !status.includes(OpeVisaStatus.EXCEDEED)
+    ) {
+        return OpeVisaStatus.TO_VALIDATED;
+    }
+
+    // renvoi le statut rejeté
+    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
+
+    // renvoi le statut justifié
+    if (status.includes(OpeVisaStatus.JUSTIFY)
+        && !status.includes(OpeVisaStatus.TO_COMPLETED)
+        && !status.includes(OpeVisaStatus.EMPTY)
+        && !status.includes(OpeVisaStatus.REJECTED)
+        && !status.includes(OpeVisaStatus.TO_VALIDATED)
+        && !status.includes(OpeVisaStatus.EXCEDEED)
+        && !status.includes(OpeVisaStatus.CLOSED)) {
+        return OpeVisaStatus.JUSTIFY;
+    }
+
+    // renvoi le statut hors délais
+    if (status.includes(500)) { return OpeVisaStatus.EXCEDEED; }
+
+    return OpeVisaStatus.TO_COMPLETED;
+};
+
+export function getOnpStatus(statements: OnlinePaymentStatement[]) {
+    if (isEmpty(statements)) { return OpeVisaStatus.EMPTY; }
+    const statusList = statements.map(elt => elt?.status);
+    if (statusList.includes(OpeVisaStatus.REJECTED)) { return OpeVisaStatus.REJECTED; }
+    if (statusList.includes(OpeVisaStatus.TO_COMPLETED)) { return OpeVisaStatus.TO_COMPLETED; }
+    if (statusList.every(e => e === OpeVisaStatus.TO_VALIDATED)) { return OpeVisaStatus.TO_VALIDATED; }
+    if (statusList.every(e => e === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+    return OpeVisaStatus.TO_COMPLETED;
+};
+
+export const getStatementByStatus = (statement: any[]) => {
+    const tabStatus = [100, 200, 300, 400]
+    let data = []
+    for (const iterator of tabStatus) {
+        const found = statement.filter(v => {
+            return v._id === iterator
+        }).map((elt) => elt.valueResult);
+        let valueResult = 0;
+        if (!isEmpty(found)) {
+            valueResult = found.reduce((u, v) => u + v)
+        }
+        data.push({ _id: iterator,valueResult: valueResult });;
+
+    }
+
+    return data;
+};
+
