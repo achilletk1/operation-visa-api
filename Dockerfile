@@ -1,49 +1,44 @@
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+# https://docs.docker.com/build/building/multi-stage/
+
 FROM node:16-alpine
 
 COPY package*.json /tmp/
 
-RUN cd /tmp && npm install --only=production --unsafe-perm=true && npm i -g typescript
-
 COPY tsconfig.json /tmp/
+
+RUN cd /tmp && npm install && npm install copyfiles
 
 COPY src /tmp/src
 
 COPY scripts /tmp/scripts
 
-RUN cd /tmp && tsc -p .
+RUN cd /tmp && npm run build
+
 
 
 FROM node:16-alpine
 
-RUN mkdir -p /usr/src/dbanking 
+COPY package*.json /tmp/
 
-COPY --from=0 /tmp/package*.json /usr/src/dbanking/
+RUN cd /tmp && npm install --omit=dev --unsafe-perm=true
 
-COPY --from=0 /tmp/node_modules /usr/src/dbanking/node_modules
 
-COPY --from=0 /tmp/dist/ /usr/src/dbanking/
 
-COPY src/upload-folder /usr/src/dbanking/src/upload-folder
+FROM node:16-alpine
 
-COPY src/services/helpers/oauth/schema.proto /usr/src/dbanking/src/services/helpers/oauth/
+RUN mkdir -p /usr/src/ope-visa
 
-COPY src/services/helpers/url-crypt/url-crypt.proto /usr/src/dbanking/src/services/helpers/url-crypt/
+COPY --from=1 /tmp/node_modules /usr/src/ope-visa/node_modules
 
-COPY src/config /usr/src/dbanking/src/config
+COPY --from=0 /tmp/dist/ /usr/src/ope-visa/
 
-COPY src/services/helpers/templates /usr/src/dbanking/src/services/helpers/templates
+COPY --from=0 /tmp/package*.json /usr/src/ope-visa/
 
-COPY .gitignore /usr/src/dbanking/.gitignore
+# RUN ls -l /usr/src/ope-visa/
 
-COPY Dockerfile /usr/src/dbanking/Dockerfile
-
-COPY tsconfig.json /usr/src/dbanking/tsconfig.json
-
-RUN ls -l /usr/src/dbanking/src
-
-WORKDIR  /usr/src/dbanking
+WORKDIR  /usr/src/ope-visa
 
 EXPOSE 3000
 
 CMD ["npm", "run", "start:staging-bci"]
-

@@ -1,0 +1,55 @@
+{
+    "env": "production",
+    "ip": "127.0.0.1",
+    "port": 3000,
+    "host": "visaApi",
+    "db": {
+        "host": "127.0.0.1:27017",
+        "name": "bcionline",
+        "auth": {
+            "user": "",
+            "password": ""
+        }
+    },
+    "dbOracle": {
+        "host": "10.100.203.171",
+        "name": "BCIRCO",
+        "auth": {
+            "user": "svc_efacture",
+            "password": "lndE-F@cture2020"
+        }
+    },
+    "cookieSalt": "3RKuQbJ73U",
+    "cookieTTL": 900000,
+    "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
+    "oauthTTL": 930,
+    "saltRounds": 10,
+    "exportSalt": "D@^wkTVOtx77cg7MALT^VNW2gEo9mu5a#yoVpFTOxtpv79uJ65",
+    "exportTTL": 900,
+    "emailTokenSalt": "dPpjRo8O!1%HOD4uOB6D",
+    "emailTokenTTL": 900,
+    "baseUrl": "https://bcionline.bcicongo.com",
+    "basePath": "/visaope/v1",
+    "londoGateway": {
+        "url": "https://alert01.intra.bci/api/v1",
+        "timeout": 180000
+    },
+    "pdfApiUrl": "http://pdf:5000",
+    "timeout": 110000,
+    "cbsApiUrl": "https://cbs:3000",
+    "template": {
+        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
+        "color": "#DC752A",
+        "app": "BCI MOBILE",
+        "company": "BCI"
+    },
+    "maxFileSizeUpload": 5,
+    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
+    "cronRevivalMail":"*/30 * * * *",
+    "cronTransactionProcessing": "*/3 * * * *",
+    "cronDeleteTemporaryFile": "0 */3 * * *",
+    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
+    "cronclientindemeure": "0 00 1 */3 *",  
+    "emailBank": "BCI-MONETIQUE@bcicongo.com"
+
+}
