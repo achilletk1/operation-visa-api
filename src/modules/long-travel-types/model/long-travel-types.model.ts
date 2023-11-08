@@ -1,4 +1,4 @@
-import { Voucher } from "modules/voucher";
+import { Voucher } from "modules/vouchers";
 
 export interface LongTravelType {
     _id?: string;

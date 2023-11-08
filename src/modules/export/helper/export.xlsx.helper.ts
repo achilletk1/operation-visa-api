@@ -1,8 +1,10 @@
 import { OpeVisaStatus } from 'modules/visa-operations';
-import { Travel } from 'modules/travel';
-import { isEmpty } from 'lodash';
+import { ExpenseDetail, OthersAttachement, Travel } from 'modules/travel';
+import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import XLSX from 'xlsx';
+import { OnlinePaymentStatement } from 'modules/online-payment';
+import { getExpenseCategoryLabel, getOperationTypeLabel, getStatuslabel } from 'common/utils';
 
 export function generateVisaTransactionExportXlsx(transactions: any[]) {
     const ws = XLSX.utils.json_to_sheet(transactions);
@@ -209,6 +211,67 @@ export function generateTravelsExportXlsx(travel: Travel[]) {
         return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
     }
 };
+
+export const generateExpenseDetailsExportXlsx = async (result: ExpenseDetail[] | OthersAttachement[] | OnlinePaymentStatement[], type: 'expenseDetails' | 'othersAttachements' | 'onlinePayment') => {
+
+    const excelDataHeader:any = ['Référence', 'Date Achat/Dépense', 'Libellé/Obejet Dépense', 'Statut', 'Montant',];
+
+    const additonalHeader:any = {
+        expenseDetails: ['Devise', 'Type', 'Catégorie'],
+        othersAttachements: ['Devise', 'Type'],
+        onlinePayment: ['Commentaire', 'Nature'],
+    };
+
+    excelDataHeader.push(...additonalHeader[type]);
+
+    excelDataHeader.push('Nombre de document importés');
+    // Format Excel file columns headers;import { OperationType } from 'modules/visa-operations';
+
+    if (Object.keys(result).length) {
+        const excelData:any = [];
+        excelData.push(excelDataHeader);
+
+        const rows = result.map((elt: ExpenseDetail | OthersAttachement | OnlinePaymentStatement) => {
+
+            const row:any = [
+                `${get(elt, 'ref') || get(elt, 'statementRef') || ''}`,
+                `${moment(elt?.date).format('DD/MM/YYYY')}`,
+                `${get(elt, 'label') || get(elt, 'object') || ''}`,
+                `${getStatuslabel(elt?.status || '') || ''}`,
+                `${elt?.amount || ''}`,
+            ];
+
+            const additonalRow = {
+                expenseDetails: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${getOperationTypeLabel(get(elt, 'type', ''))}`, `${getExpenseCategoryLabel(get(elt, 'expenceCategory.label', ''))}`],
+                othersAttachements: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${getOperationTypeLabel(get(elt, 'type', ''))}`],
+                onlinePayment: [`${get(elt, 'comment') || ''}`, `${get(elt, 'nature.label') || ''}`],
+            };
+
+            row.push(...additonalRow[type]);
+            row.push(`${elt?.attachments?.length || 0}`);
+            return row;
+        });
+        excelData.push(...rows);
+
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 23 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `ceilling_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'array', bookSST: true, compression: true });
+    }
+};
+
+const getCurrencies = (currency: { code: any[] }) => {
+    if (isEmpty(currency.code)) { return ''; }
+    if (typeof currency.code === 'string') { return currency.code }
+
+    return (currency?.code || [])?.reduce((previous, current) => current + ', ' + previous);
+}
 
 const getEccedCeilling = (travel: any) => {
     let total = getTransactionsAmount(travel.transactions);

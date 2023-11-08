@@ -29,11 +29,11 @@ export class LettersService extends CrudService<Letter> {
             const pdfDataEn = replaceVariables(letter?.pdf?.en, {}, false,true);
             const pdfDataFr = replaceVariables(letter?.pdf?.fr, {},false, true);
 
-            const pdfStringEn = await generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
+            const pdfStringEn: any = await generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
 
             if (pdfStringEn instanceof Error) { return pdfStringEn; }
 
-            const pdfStringFr = await generateFormalNoticeLetter({ ...pdfDataFr, signature: letter?.pdf?.signature });
+            const pdfStringFr: any = await generateFormalNoticeLetter({ ...pdfDataFr, signature: letter?.pdf?.signature });
 
             if (pdfStringFr instanceof Error) { return pdfStringFr; }
 

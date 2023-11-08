@@ -6,7 +6,7 @@ import { CrudService } from './crud.service';
 export class BaseController implements controllerInterface {
 
 
-  constructor(protected service?: CrudService, Service?: any, Repository?: any) {
+  constructor(protected service?: CrudService<any>, Service?: any, Repository?: any) {
     this.service = service || new Service(new Repository());
   }
 

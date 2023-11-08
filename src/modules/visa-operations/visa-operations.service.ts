@@ -16,7 +16,7 @@ import { QueueState } from "common/helpers";
 import { CrudService } from "common/base";
 import { getTotal } from "common/utils";
 import { OpeVisaStatus } from "./enum";
-import { get, isEmpty } from "lodash";
+import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 import moment from "moment";
 

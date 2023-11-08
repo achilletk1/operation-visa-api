@@ -1,5 +1,5 @@
-import { Attachment, ExpenseCategory, Validator, VisaTransaction } from "models/visa-operations";
-import { OpeVisaStatus } from "modules/visa-operations";
+import { Attachment, ExpenseCategory, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { VisaTransaction } from "modules/visa-transactions";
 import { User } from "modules/users";
 
 export class OnlinePaymentMonth {
@@ -40,4 +40,3 @@ export class OnlinePaymentStatement {
     expenseCategory?: ExpenseCategory;
     isEdit?: boolean;
 }
-

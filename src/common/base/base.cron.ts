@@ -1,4 +1,4 @@
-import { isProd, isDev, isStaging, isStagingBci } from 'common/helpers';
+import { isProd, isDev, isStaging, isStagingBci } from '../helpers';
 import { CronInterface } from '../interfaces';
 import { logger } from "winston-config";
 import { config } from 'convict-config';

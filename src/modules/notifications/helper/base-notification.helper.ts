@@ -1,4 +1,5 @@
 import { VisaTransaction } from "modules/visa-transactions";
+import { getYearMonthLabel } from "common/helpers";
 import handlebars from "handlebars";
 import moment from "moment";
 
@@ -64,21 +65,12 @@ const getVariablesValue = (data: { transactions: VisaTransaction[], amount: numb
         PAYS: transaction?.country,
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
-        MOIS_DEPART: transformDateExpression(String(transaction?.currentMonth?.toString())),
+        MOIS_DEPART: getYearMonthLabel(transaction?.currentMonth || '', 'both'),
         DATE_COURANTE: moment().locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
         DATE_COURANTE_LONG: moment().locale(`${lang || 'fr'}`).format('dddd, Do MMMM YYYY'),
     }
 
     return mapping;
-}
-
-export const transformDateExpression = (str: string): string => {
-    if (!str) { return '' }
-    str = str.toString();
-    const months = { '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril', '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août', '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre' };
-    const month = str.slice(str.length - 2) as '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12';
-    const year = str.slice(0, str.length - 2);
-    return `${months[month]} ${year}`;
 }
 
 const formatContent = (str: string, values: any, isTest?: boolean): string => {

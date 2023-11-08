@@ -1,6 +1,6 @@
-import { Attachment, ExpenseCategory, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { Attachment, ExpenseCategory, OperationType, OpeVisaStatus, Validator } from "modules/visa-operations";
 import { VisaTransaction } from "modules/visa-transactions";
-import { OperationType, TravelType } from "../enum";
+import { TravelType } from "../enum";
 import { User } from "modules/users";
 
 export class ExpenseDetail {

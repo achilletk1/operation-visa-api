@@ -30,6 +30,11 @@ export function deleteDirectory(path: string) {
     catch (error) { throw error; }
 }
 
+export function createDirectory(path: string) {
+    try { mkdirSync(`${config.get('fileStoragePath')}/${path}`, { recursive: true }); }
+    catch (error) { throw error; }
+}
+
 const removeSpace = (str: string) => {
     if (!str) { return; }
     return str.replace(/\s/g, '');

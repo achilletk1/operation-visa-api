@@ -179,7 +179,7 @@ export class ValidationsService extends CrudService<UserValidator> {
 
     private hasGaps(data: number[]) {
         if (!data.includes(1)) { return true }
-    
+
         if (data == null || data.length === 0) return false;
 
         if (data[data.length - 1] - data[0] + 1 !== data.length) return true;
@@ -189,17 +189,17 @@ export class ValidationsService extends CrudService<UserValidator> {
 
         return false;
     }
-    
+
     private validationListHasGap(validationLevelList: any[], newLevel: number) {
         validationLevelList = validationLevelList.map(elt => elt.level).sort();
         // insert level to update
         validationLevelList.push(newLevel);
-    
+
         // remove duplicates levels
         validationLevelList = [...new Set(validationLevelList)];
         // control validation gap
         const isGaps = this.hasGaps(validationLevelList);
-    
+
         return isGaps;
     }
 

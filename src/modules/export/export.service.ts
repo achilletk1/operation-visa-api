@@ -1,13 +1,16 @@
-import { generateVisaTransactionExportXlsx, generateCeillingExportXlsx, generateOnlineOperationsExportXlsx, generateOnlinePaymentExportXlsx, generateTravelsExportXlsx } from "./helper/export.xlsx.helper";
-import { getExtensionByContentType, generateNotificationExportPdf, getContentTypeByExtension} from "./helper/export.pdf.helper";
-import { BaseService, parseNumberFields, readFile, timeout } from "common";
+import { generateVisaTransactionExportXlsx, generateCeillingExportXlsx, generateOnlineOperationsExportXlsx, generateOnlinePaymentExportXlsx, generateTravelsExportXlsx, generateExpenseDetailsExportXlsx } from "./helper/export.xlsx.helper";
+import { getExtensionByContentType, generateNotificationExportPdf, getContentTypeByExtension, generateDeclarationFolderExportPdf } from "./helper/export.pdf.helper";
+import { generateOperationZippedFolder, getFileNamesTree } from "./helper/export.zip.helper";
 import { FilesController } from 'modules/visa-transactions-files/files';
-import { OnlinePaymentController } from "modules/online-payment";
+import { OnlinePaymentController, OnlinePaymentStatement } from "modules/online-payment";
 import { NotificationsController } from "modules/notifications";
-import { TravelController } from 'modules/travel';
+import { parseNumberFields, timeout } from "common/helpers";
+import { ExpenseDetail, TravelController } from 'modules/travel';
+import { camelCase, get, isEmpty } from "lodash";
 import { UsersController } from "modules/users";
+import { BaseService } from "common/base";
+import { readFile } from "common/utils";
 import { config } from "convict-config";
-import { isEmpty } from "lodash";
 import crypt from 'url-crypt';
 import moment from "moment";
 
@@ -372,6 +375,87 @@ export class ExportService extends BaseService {
             const fileName = `${label}`;
 
             return { contentType: `${format}`, fileContent: buffer, fileName };
+        } catch (error) { throw error; }
+    }
+
+    async generateDeclarationFolderExportLinks(type: string, _id: string) {
+        try {
+            if (!['travel', 'onlinePayment'].includes(type)) { throw Error('BadExportType'); }
+
+            const data = type === 'travel'
+                ? await TravelController.travelService.findOne({ filter: { _id } })
+                : type === 'onlinePayment'
+                    ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }) : null;
+            if (!data) { throw Error('DataNotFound'); }
+
+            const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
+
+            const options = { ttl, id: _id, type };
+
+            const code = cryptObj(options);
+
+            const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/declaration`
+
+            return {
+                link: `${basePath}/${code}`
+            }
+        } catch (error) { throw error; }
+    }
+
+    async generateDeclarationFolderExporData(code: string): Promise<any> {
+        try {
+            let options;
+
+            try {
+                options = decryptObj(code);
+            } catch (error) { throw Error('BadExportCode'); }
+
+            const { ttl, id } = options;
+            const type: 'travel' | 'onlinePayment' = options.type;
+
+            if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+
+            const data = type === 'travel'
+                ? await TravelController.travelService.findOne({ filter: { _id: id } })
+                : type === 'onlinePayment'
+                    ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } }) : null;
+
+            if (!data) { throw Error('DataNotFound'); }
+
+            const folder = getFileNamesTree(data, type);
+
+            const declarationRecapPdf: any = await generateDeclarationFolderExportPdf(data, type);
+
+            folder.push({ content: declarationRecapPdf, label: 'Recap_Declaration', type: 'file', contentType: 'application/pdf' });
+            const dataTosendToExcel = {
+                'travel': {
+                    type: 'expenseDetails',
+                    expenseDetails: get(data, 'expenseDetails', []) as ExpenseDetail[],
+                    name: 'Voyage'
+                },
+                'onlinePayment': {
+                    type: 'onlinePayment',
+                    expenseDetails: get(data, 'statements', []) as OnlinePaymentStatement[],
+                    name: 'Paiement_en_ligne'
+                }
+            }
+            const excelExpenseDetailsBuffer = await generateExpenseDetailsExportXlsx(dataTosendToExcel[type].expenseDetails, dataTosendToExcel[type].type as 'onlinePayment' | 'expenseDetails' | 'othersAttachements');
+            if (excelExpenseDetailsBuffer) {
+                const excelExpenseDetailsData = Buffer.from(excelExpenseDetailsBuffer);
+                folder.push({ content: excelExpenseDetailsData, label: 'Etat dépenses', type: 'file', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            }
+
+            if (type === 'travel' && !isEmpty(get(data, 'othersAttachements'))) {
+                const excelOthersAttachementsBuffer = await generateExpenseDetailsExportXlsx(get(data, 'othersAttachements', []), 'othersAttachements');
+                const excelOthersAttachementsData = Buffer.from(excelOthersAttachementsBuffer);
+                folder.push({ content: excelOthersAttachementsData, label: 'Autres Justifs', type: 'file', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            }
+
+            const zip = generateOperationZippedFolder(folder as any);
+
+            const fileName = `${dataTosendToExcel[type].name}_${camelCase(data?.user?.fullName)}_${id}.zip`
+            return { fileContent: zip, fileName, contentType: 'application/zip, application/octet-stream' };
         } catch (error) { throw error; }
     }
 

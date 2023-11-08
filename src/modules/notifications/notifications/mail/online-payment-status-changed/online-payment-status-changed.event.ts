@@ -1,5 +1,6 @@
-import { getStatusExpression, transformDateExpression } from "modules/notifications";
+import { getStatusExpression } from "modules/notifications";
 import { OnlinePaymentMonth } from "modules/online-payment";
+import { getYearMonthLabel } from "common/helpers";
 
 export class OnlinePaymentStatusChangedEvent implements OnlinePaymentStatusChangedMailData {
     name!: string;
@@ -14,8 +15,8 @@ export class OnlinePaymentStatusChangedEvent implements OnlinePaymentStatusChang
         this.name = onlinePayment?.user?.fullName || '';
         this.receiver = onlinePayment?.user?.email || '';
         this.status = getStatusExpression(onlinePayment?.status);
-        this.date = transformDateExpression(String(onlinePayment?.currentMonth)) || '';
-        this.ceiling = String(onlinePayment?.ceiling) || '';
+        this.date = getYearMonthLabel(onlinePayment?.currentMonth || '', 'both') || '';
+        this.ceiling = onlinePayment?.ceiling?.toString() || '';
     }
 }
 

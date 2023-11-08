@@ -1,5 +1,5 @@
-import { OnlinePaymentStatement } from "models/online-payment";
-import { OpeVisaStatus } from "modules/visa-operations";
+import { ExpenseCategory, OperationType, OpeVisaStatus } from "modules/visa-operations";
+import { OnlinePaymentStatement } from "modules/online-payment";
 import { isEmpty } from "lodash";
 
 export function getTotal(transactions: any[], type?: string | 'stepAmount') {
@@ -96,10 +96,40 @@ export const getStatementByStatus = (statement: any[]) => {
         if (!isEmpty(found)) {
             valueResult = found.reduce((u, v) => u + v)
         }
-        data.push({ _id: iterator,valueResult: valueResult });;
+        data.push({ _id: iterator, valueResult: valueResult });;
 
     }
 
     return data;
 };
 
+
+export const getStatuslabel = (status: OpeVisaStatus | '') => {
+    switch (status) {
+        case OpeVisaStatus.TO_COMPLETED: return 'A compléter';
+        case OpeVisaStatus.TO_VALIDATED: return 'A valider';
+        case OpeVisaStatus.JUSTIFY: return 'Justifié';
+        case OpeVisaStatus.REJECTED: return 'Rejeté';
+        case OpeVisaStatus.EXCEDEED: return 'Hors délais';
+        case OpeVisaStatus.VALIDATION_CHAIN: return 'En cours de validation';
+        case OpeVisaStatus.CLOSED: return 'Clôturé';
+        default: return 'A compléter';
+    }
+};
+
+export const getExpenseCategoryLabel = (category: ExpenseCategory | '') => {
+    switch (category) {
+        case ExpenseCategory.IMPORT_OF_GOODS: return 'Importations de biens';
+        case ExpenseCategory.IMPORT_OF_SERVICES: return 'Importations de services';
+        default: return 'Autres';
+    }
+};
+
+export const getOperationTypeLabel = (operationType: OperationType | '') => {
+    switch (operationType) {
+        case OperationType.ATN_WITHDRAWAL: return 'Retrait GAB';
+        case OperationType.ELECTRONIC_PAYMENT_TERMINAL: return 'Paiement TPE';
+        case OperationType.ONLINE_PAYMENT: return 'Paiement en ligne';
+        default: return 'Autres';
+    }
+};

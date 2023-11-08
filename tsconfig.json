@@ -12,7 +12,6 @@
       "modules/*": ["modules/*"],
       "loaders/*": ["loaders/*"],
       "url-crypt": ["url-crypt"],
-      "services/*": ["services/*"],
       "database/*": ["database/*"],
       "convict-config": ["convict-config"],
       "winston-config": ["winston-config"]

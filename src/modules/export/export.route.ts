@@ -39,4 +39,8 @@ router.get('/visa-transactions-files/:id', exportController.generateVisaTransact
 
 router.get('/visa-transactions-files/:id/:code', exportController.generateVisaTransactionsFilesExporData);
 
+router.get('/declaration/:type/:id', exportController.generateDeclarationFolderExportLinks);
+
+router.get('/declaration/:code', exportController.generateDeclarationFolderExporData);
+
 export const exportRoute = router;

@@ -98,13 +98,25 @@ export class ExportController {
     }
 
     async generateVisaTransactionsFilesExportLinks(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await ExportController.exportService.generateVisaTransactionsFilesExportLinks(req.params.id as any, req.body)); }
+        try { res.send(await ExportController.exportService.generateVisaTransactionsFilesExportLinks(req.params.id as string, req.body)); }
         catch (error) { next(error); }
     }
 
     async generateVisaTransactionsFilesExporData(req: Request, res: Response, next: NextFunction) {
         try {
             const data = await ExportController.exportService.generateVisaTransactionsFilesExporData(req.params.id as string, req.params.code as string);
+            responseWithAttachment(res, data.contentType, data.fileName, data.fileContent);
+        } catch (error) { next(error); }
+    }
+
+    async generateDeclarationFolderExportLinks(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await ExportController.exportService.generateDeclarationFolderExportLinks(req.params.type as string, req.params.id as string)); }
+        catch (error) { next(error); }
+    }
+
+    async generateDeclarationFolderExporData(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = await ExportController.exportService.generateDeclarationFolderExporData(req.params.code as string);
             responseWithAttachment(res, data.contentType, data.fileName, data.fileContent);
         } catch (error) { next(error); }
     }

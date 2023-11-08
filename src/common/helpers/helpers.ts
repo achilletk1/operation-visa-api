@@ -198,6 +198,17 @@ export function formatNumber(strNumber: string | number): string {
   return strNumber;
 };
 
+export function getYearMonthLabel(str: string, type: 'year' | 'month' | 'both'): string {
+  if (!str) { return ''; }
+  str = str.toString();
+  const months = { '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril', '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août', '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre' };
+  const month = str?.slice(str.length - 2) as '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12';
+  const year = str?.slice(0, str.length - 2);
+
+  const data: { year: string; month: string; both: string; } = { year, month: months[month], both: `${months[month]} ${year}` };
+  return data[type];
+};
+
 declare type ObjectType<T> = {
   [key: string]: T
 }

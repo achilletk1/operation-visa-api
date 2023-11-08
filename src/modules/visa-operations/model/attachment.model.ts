@@ -1,4 +1,4 @@
-import { TemporaryFile } from "models/settings";
+import { TemporaryFile } from "modules/temporary-files";
 
 export class Attachment {
     label?: string; // setting file name in backoffice
