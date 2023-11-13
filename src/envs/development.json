@@ -5,7 +5,7 @@
     "host": "localhost",
     "db": {
         "host": "127.0.0.1:27017",
-        "name": "banking-bci",
+        "name": "dbanking",
         "auth": {
             "user": "",
             "password": ""
@@ -35,6 +35,13 @@
         "color": "#DC752A",
         "app": "BCI MOBILE",
         "company": "BCI"
+    },
+    "activeDirectory": {
+        "adminDn": "cn=achille TACHUM,cn=Users,dc=ucac,dc=icam",
+        "url": "ldap://ucac.icam",
+        "adminPassword": "Admin2020",
+        "groupName": "Bicec_AlertingSMS",
+        "groupVerification": true
     },
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",

@@ -1,5 +1,13 @@
 import { UserCategory } from "../enum";
 
+export enum visaOpecategory {
+    CODIR = 100,
+    CHEF_DE_REGION = 200,
+    GESTIONNAIRE = 300,
+    CHEF_AGENCE = 400,
+    AGENT_DE_BANQUE = 500,
+    EXTERNE = 600
+}
 export class User {
     _id!: string;
     userCode?: string;
@@ -33,6 +41,9 @@ export class User {
         joinValidation?: boolean;
         enabled?: boolean
     };
+    editors?: Editor[];
+    visaOpecategory?: visaOpecategory;
+    created_at?: number;
 
     constructor(userCode: string, fname: string) {
         this.userCode = userCode;
@@ -91,3 +102,7 @@ export interface CeilingInfors {
     amount?: number;
 }
 
+export interface Editor {
+    _id?: string;
+    date: number;
+}

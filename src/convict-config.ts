@@ -306,6 +306,38 @@ export const config = convict({
         env: 'CLIENT_IN_DEMEURE',
         arg: 'client_in_demeure'
     },
+    activeDirectory: {
+        adminPassword: {
+            doc: 'Password Admin in AD.',
+            format: String,
+            default: '',
+            env: 'ADMIN_PASSWORD_ACTIVE_DIRECTORY'
+        },
+        adminDn: {
+            doc: 'Distinguished Name Admin in AD.',
+            format: String,
+            default: '',
+            env: 'ADMIN_DN_ACTIVE_DIRECTORY'
+        },
+        url: {
+            doc: 'Active Directory Address.',
+            format: String,
+            default: '',
+            env: 'URL_ACTIVE_DIRECTORY'
+        },
+        groupName: {
+            doc: 'BCI SANGO Users Group Name in AD.',
+            format: String,
+            default: '',
+            env: 'GROUP_NAME_ACTIVE_DIRECTORY'
+        },
+        groupVerification: {
+            doc: 'BCI SANGO Users Group Activate Group vérification.',
+            format: Boolean,
+            default: false,
+            env: 'GROUP_NAME_VERIFICATION'
+        },
+    },
 });
 
 // Load environment dependent configuration

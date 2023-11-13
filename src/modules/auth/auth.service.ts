@@ -1,4 +1,5 @@
 import { BaseService, getRandomString, isDevOrStag, isStagingBci } from "common";
+import { getLdapUser } from "common/helpers/ldap.helpers";
 import { UsersController } from "modules/users";
 import { get, isEmpty, isString } from "lodash";
 import { create, refresh } from "./helper";
@@ -23,24 +24,24 @@ export class AuthService extends BaseService {
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
             if (isEmpty(user)) { throw Error('UserNotFound'); }
-
-            const pwdOk = bcrypt.compare(password, String(user?.password));
-
-            if (!pwdOk) { throw Error('BadPassword'); }
-
             if (!user.enabled) { throw Error('disableUser'); }
 
-            const otp = {
-                value: getRandomString(6, true),
-                expiresAt: moment().add(20, 'minutes').valueOf()
+            const idapUser = await getLdapUser(userCode, password);
+
+            if (idapUser) {
+                const otp = {
+                    value: getRandomString(6, true),
+                    expiresAt: moment().add(20, 'minutes').valueOf()
+                }
+
+                await UsersController.usersService.update({ _id: user._id }, { otp });
+
+                if (isDevOrStag) { return otp }
+                this.logger.info(`sends authentication Token by email and SMS to user`);
+
+                if (isStagingBci) { return otp; }
             }
 
-            await UsersController.usersService.update({ _id: user._id }, { otp });
-
-            if (isDevOrStag) { return otp }
-            this.logger.info(`sends authentication Token by email and SMS to user`);
-
-            if (isStagingBci) { return otp; }
         } catch (error) { throw error; }
     }
 

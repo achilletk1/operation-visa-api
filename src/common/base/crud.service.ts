@@ -20,7 +20,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
 
   async create(data: T | any): Promise<QueryResult> {
     try {
-      data.enable ??= true;
+      data.enabled ??= true;
       data.created_at ??= moment().valueOf();
 
       const newDocument = await this.baseRepository.create(data as globalThis.Document);

@@ -3,6 +3,7 @@ import { JwtPayload, verify } from 'jsonwebtoken';
 import httpContext from 'express-http-context';
 import { logger } from 'winston-config';
 import { config } from 'convict-config';
+import { log } from 'handlebars';
 
 export const whiteList: { path: string, method?: string }[] = [
     { path: '/auth', method: 'POST' },
@@ -40,8 +41,9 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
         delete payloadata.exp;
         delete payloadata.iat;
         const user = payloadata.payload;
+        
         httpContext.set('user', user);
-
+        
         next();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

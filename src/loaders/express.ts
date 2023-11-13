@@ -1,4 +1,4 @@
-import { ErrorHandler, responseHeaders } from "common/middelwares";
+import { ErrorHandler, oauthVerification, responseHeaders } from "common/middelwares";
 import { logger, morganOption } from "winston-config";
 import { json, urlencoded } from 'body-parser';
 import httpContext from 'express-http-context';
@@ -43,7 +43,7 @@ export class ExpressLoader {
 
         // Apply middlewares
         app.use(httpContext.middleware);
-        // app.use(oauthVerification);
+        app.use(oauthVerification);
         app.use(responseHeaders);
 
         // Pass app to routes

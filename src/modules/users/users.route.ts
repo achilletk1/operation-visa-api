@@ -5,11 +5,17 @@ import express from 'express';
 const router = express.Router();
 export const usersController = new UsersController();
 
-// router.post('/', validateCreateUserMiddleware, usersController.create);
+router.post('/', validateCreateUserMiddleware, usersController.createUsers);
+
+router.post('/update', usersController.updateUserById);
 
 router.get('/', usersController.getUsers);
 
-router.get('/all', usersController.getUsers);
+router.get('/verify-ldap', usersController.verifyLdapUser);
+
+router.get('/export', usersController.generateUsersExportLinks);
+
+router.get('/export/:code', usersController.generateUsersExporData);
 
 router.get('/one', usersController.getUserBy);
 

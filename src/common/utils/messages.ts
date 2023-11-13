@@ -31,14 +31,22 @@ export const errorMsg = {
         statusNotProvided: "Valid status not provided",
         userNotProvided: "Valid user not provided",
         errorOnCreation: "Valid user not provided",
-    }
+    },
+    BAD_ADMIN_PW: 'bad admin password',
+    BAD_CREDENTIALS: 'Bad credentials',
+    USER_NOT_FOUND: 'User not found',
+    BAD_PASSWORD: 'Bad password',
+    NOT_USER_FOUND: 'user not found or usernameAttribute is wrong',
+    UNAUTHORIZED_GROUP: 'User is not a member of authorized group',
+    NO_RIGHTS: 'User access rights disabled',
+    USER_DISABLED: 'User disabled'
 };
 
 export const respMsg = {
     CREATED: "Data created successfully",
-	UPDATED: "Update successfully",
-	DELETED: "Delete successfully",
-	SUCCESS_OPERATION: "Operation completed successfully",
-	USER_CREATED: "User created successfully",
-	PASSWORD_RESET: "Password reset successfully",
+    UPDATED: "Update successfully",
+    DELETED: "Delete successfully",
+    SUCCESS_OPERATION: "Operation completed successfully",
+    USER_CREATED: "User created successfully",
+    PASSWORD_RESET: "Password reset successfully",
 };

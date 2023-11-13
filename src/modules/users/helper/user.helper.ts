@@ -1,4 +1,6 @@
 import moment from "moment";
+import XLSX from 'xlsx';
+
 
 export function formatUserFilters(fields: any) {
     const { start, end, provider, ncp, category, status, walletList } = fields;
@@ -36,3 +38,50 @@ export function formatUserFilters(fields: any) {
 
     return fields;
 };
+
+export function generateUsersExportXlsx(users: any[]) {
+
+    let result = users;
+
+    const categories: any = {
+        100: 'CODIR', 200: 'CHEF DE REGION', 300: 'GESTIONNAIRE',
+        400: 'CHEF AGENCE', 500: 'AGENT DE BANQUE', 600: 'EXTERNE'
+    };
+
+    const enabled: any = {
+        true: 'ACTIF',
+        false: 'INACTIF',
+    };
+    // Format Excel file columns headers;
+    if (result) {
+        const excelData = [];
+        excelData.push(['Identifiant', 'Nom du client', 'Email', 'Téléphone', 'Catégorie', 'date de création', 'Status']);
+
+        result.forEach(async (user) => {
+            const elt = [
+                `${user?.userCode || 'N/A'}`,
+                `${user?.fullName || 'N/A'}`,
+                `${user?.email || 'N/A'}`,
+                `${user?.tel || 'N/A'}`,
+                `${categories[user.visaOpecategory] || 'N/A'}`,
+                `${moment(user?.created_at).format('DD/MM/YYYY')}`,
+                `${enabled[user?.enabled] || 'N/A'}`,
+            ];
+            excelData.push(elt);
+        });
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+
+        // Set Excel file columns width;
+        ws['!cols'] = [];
+        for (const iterator of excelData[0]) {
+            ws['!cols'].push({ wch: 23 })
+        }
+        XLSX.utils.book_append_sheet(wb, ws, `users_${new Date().getTime()}`);
+        return XLSX.write(wb, { type: 'base64' });
+
+    }
+
+}
+
