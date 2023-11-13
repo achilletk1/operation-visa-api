@@ -5,12 +5,12 @@ import express from 'express';
 const router = express.Router();
 export const reportingController = new ReportingController();
 
-router.post('/consolidate', reportingController.getConsolidateData);
+router.get('/consolidate', reportingController.getConsolidateData);
 
-router.post('/statusOperations', reportingController.getStatusOperation);
+router.get('/statusOperations', reportingController.getStatusOperation);
 
-router.post('/getAverageTimeJustify', reportingController.getAverageTimeJustify);
+router.get('/getAverageTimeJustify', reportingController.getAverageTimeJustify);
 
-router.post('/chart', reportingController.getChartData);
+router.get('/chart', reportingController.getChartData);
 
 export const reportingRoute = router;

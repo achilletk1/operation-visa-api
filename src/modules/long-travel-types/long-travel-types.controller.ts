@@ -23,6 +23,11 @@ export class LongTravelTypesController {
         catch (error) { next(error); }
     }
 
+    async deleteById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await LongTravelTypesController.longTravelTypesService.deleteOne({ _id: req.params.id })); }
+        catch (error) { next(error); }
+    }
+
     async insertLongTravelTypes(req: Request, res: Response, next: NextFunction) {
         try { res.send(await LongTravelTypesController.longTravelTypesService.insertLongTravelTypes(req.body as LongTravelType)); }
         catch (error) { next(error); }

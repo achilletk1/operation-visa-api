@@ -32,4 +32,14 @@ export class TemplatesController {
         catch (error) { next(error); }
     }
 
+    async getVariables(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TemplatesController.variablesService.findAll(req.query as any)); }
+        catch (error) { next(error); }
+    }
+
+    async insertVariables(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TemplatesController.variablesService.create(req.body as any)); }
+        catch (error) { next(error); }
+    }
+
 }

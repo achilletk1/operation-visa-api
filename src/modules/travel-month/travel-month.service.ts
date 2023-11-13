@@ -22,7 +22,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
     async getTravelMonths(filters: any) {
         try {
             this.formatFilters(filters);
-            return await TravelMonthController.travelMonthService.findAll(filters);
+            return await TravelMonthController.travelMonthService.findAll({ filter: filters });
         } catch (error) { throw error; }
     }
 

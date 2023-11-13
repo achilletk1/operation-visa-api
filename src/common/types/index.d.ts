@@ -4,10 +4,6 @@ declare type ObjectType<T> = {
     [key: string]: T
 }
 
-declare type ObjectType<T> = {
-    [key: string]: T
-}
-
 declare type QueryOptions = {
     filter?: QueryFilter,
     projection?: QueryProjection,
@@ -75,7 +71,7 @@ declare type DataNotMigrate = {
         message: string;
         stack: string;
     };
-    data: unknown; 
+    data: unknown;
 }
 
 
@@ -88,9 +84,9 @@ declare type FilterParam = (PaginationParam & SortingParam & 'projection') exten
 
 declare type TemplateData = ObjectType<string | number>
 
-declare type getAllResult = {
-    data: ObjectType<unknown>[],
-    count: number
+declare type getAllResult<T> = {
+    data: T[],
+    total: number
 }
 
 declare type Tonnage = {

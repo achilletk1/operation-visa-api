@@ -12,9 +12,9 @@ const routes = (app: Express) => {
 
   app.use( "/users", usersRoute);
 
-  app.use( "/travel", travelRoute);
-
   app.use( "/export", exportRoute);
+  
+  app.use( "/travels", travelRoute);
 
   app.use( "/senders", sendersRoute);
 
@@ -52,7 +52,7 @@ const routes = (app: Express) => {
 
   app.use( "/visa-transactions-ceilings", visaTransactionsCeilingsRoute);
 
-  app.use( "/property-and-services-types", propertyAndServicesTypesRoute);
+  app.use( "/properties-and-services-types", propertyAndServicesTypesRoute);
 
 };
 

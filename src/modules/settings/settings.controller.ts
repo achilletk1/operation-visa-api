@@ -9,7 +9,7 @@ export class SettingsController {
     constructor() { SettingsController.settingsService = new SettingsService(); }
 
     async findOneByKey(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await SettingsController.settingsService.findOne({ filter: { _id: req.params.key } })); }
+        try { res.send(await SettingsController.settingsService.findOne({ filter: { key: req.params.key }, projection: { dateCreated: 0, dateUpdated: 0, users: 0 } })); }
         catch (error) { next(error); }
     }
 
@@ -19,7 +19,7 @@ export class SettingsController {
     }
 
     async getMaxFileSizeUpload(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.status(200).json(config.get("maxFileSizeUpload")); }
+        try { res.status(200).send({ maxUpladFileSize: config.get("maxFileSizeUpload") }); }
         catch (error) { next(error); }
     }
 

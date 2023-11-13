@@ -33,14 +33,14 @@ export const extractSortingData = (query: QueryOptions): QueryOptions => {
 export const extractProjectionData = (query: QueryOptions): QueryOptions => {
   setParam('projection', query);
 
-  if (typeof query.projection == 'string')
+  if (typeof query?.projection == 'string')
     query.projection = setProjection(query.projection as unknown as string);
 
   return query;
 }
 
 function setParam(param: FilterParam, query: QueryOptions) {
-  if (query.filter && `${param}` in query.filter) {
+  if (query?.filter && `${param}` in query.filter) {
     query[`${param}`] = query.filter[param];
     delete query.filter[param];
   }
@@ -56,8 +56,8 @@ export const setResponse = (status: number, message: string, data?: unknown): Qu
 
 export const rangeData = (query: any): any => {
   const { start, end } = query?.filter;
-  delete query.filter.start;
-  delete query.filter.end;
+  delete query?.filter?.start;
+  delete query?.filter?.end;
   if (start && end) query.filter['created_at'] = { $gte: moment(start, 'YYYY-MM-DD').startOf('day').valueOf(), $lte: moment(end, 'YYYY-MM-DD').endOf('day').valueOf() };
 
   return query

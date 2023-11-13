@@ -28,13 +28,13 @@ export class LettersController {
         catch (error) { next(error); }
     }
 
-    async getLettersVariables(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await LettersController.lettersService.getLettersVariables()); }
+    async generateExportView(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await LettersController.lettersService.generateExportView(req.body as Letter)); }
         catch (error) { next(error); }
     }
 
-    async generateExportView(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await LettersController.lettersService.generateExportView(req.body as Letter)); }
+    async getLettersVariables(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await LettersController.lettersService.getLettersVariables()); }
         catch (error) { next(error); }
     }
 

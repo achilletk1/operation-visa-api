@@ -5,7 +5,7 @@ import { TravelType } from "./enum";
 
 export class TravelRepository extends BaseRepository {
 
-    constructor() { super(); }
+    constructor() { super(); this.collectionName = 'visa_operations_travels'; }
 
     async getTravelReport(params: { status: any, start: number, end: number, travelType?: any }) {
         return await this.findAllAggregate(generateConsolidateData(params));

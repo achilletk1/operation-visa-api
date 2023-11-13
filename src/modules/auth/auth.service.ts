@@ -1,8 +1,9 @@
+import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { BaseService, getRandomString, isDevOrStag, isStagingBci } from "common";
 import { getLdapUser } from "common/helpers/ldap.helpers";
 import { UsersController } from "modules/users";
 import { get, isEmpty, isString } from "lodash";
-import { create, refresh } from "./helper";
+import httpContext from 'express-http-context';
 import { config } from "convict-config";
 import bcrypt from 'bcrypt';
 import moment from "moment";
@@ -104,6 +105,16 @@ export class AuthService extends BaseService {
             await UsersController.usersService.update({ _id: user._id }, { password, pwdReseted: true });
 
             return {};
+        } catch (error) { throw error; }
+    }
+
+    getAuthorizations() {
+        try {
+            const profile = getUserProfile(httpContext.get('user'));
+            if (!profile) { throw Error('Forbidden'); }
+
+            const authorizations = getAuthorizationsByProfile(profile);
+            return authorizations;
         } catch (error) { throw error; }
     }
 

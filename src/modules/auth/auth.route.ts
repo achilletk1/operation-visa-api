@@ -13,4 +13,6 @@ router.post('/verify-otp', authController.verifyOtp);
 
 router.post('/reset-default-pwd', authController.resetFirstPassword);
 
+router.get('/authorizations', authController.getAuthorizations);
+
 export const authRoute = router;

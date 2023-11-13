@@ -27,5 +27,10 @@ export class AuthController {
         catch (error) { next(error); }
     }
 
+    async getAuthorizations(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await AuthController.authService.getAuthorizations()); }
+        catch (error) { next(error); }
+    }
+
 
 }

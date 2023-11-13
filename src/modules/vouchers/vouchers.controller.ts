@@ -27,4 +27,9 @@ export class VouchersController {
         catch (error) { next(error); }
     }
 
+    async deleteById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await VouchersController.vouchersService.deleteOne({ _id: req.params.id })); }
+        catch (error) { next(error); }
+    }
+
 }

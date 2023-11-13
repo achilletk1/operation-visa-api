@@ -48,7 +48,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async findAll(query: QueryOptions): Promise<getAllResult<T>> {
+  async findAll(query?: QueryOptions): Promise<getAllResult<T>> {
     try {
       query = convertParams(query || {});
       query = extractPaginationData(query);
@@ -57,9 +57,9 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
       query = rangeData(query);
 
       const data = (await this.baseRepository.findAll(query || {}) || []) as unknown as T[];
-      const count = await this.count(query?.filter || {}) || 0;
+      const total = await this.count(query?.filter || {}) || 0;
 
-      return { data, count };
+      return { data, total };
 
     } catch (error) { throw error; }
   }
@@ -160,13 +160,13 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     };
   }
 
-  async getDataToExport(code: string): Promise<Error | getAllResult<T>> {
+  async getDataToExport(code: string): Promise<getAllResult<T>> {
 
     let options;
 
     try {
       options = URLCrypt.decryptObj(code);
-    } catch (error) { return new Error('BadExportCode'); }
+    } catch (error) { throw Error('BadExportCode'); }
 
     const { start, end, ttl } = options;
     delete options.start;
@@ -174,7 +174,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     delete options.ttl;
     delete options.format;
 
-    if ((new Date()).getTime() >= ttl) { return new Error('ExportLinkExpired'); }
+    if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
 
     const range = (start && end) ? { start, end } : '';
 
@@ -202,7 +202,7 @@ declare type QueryProjection = ObjectType<number>
 
 declare type getAllResult<T> = {
   data: T[],
-  count: number
+  total: number
 }
 
 declare type QueryResult = {

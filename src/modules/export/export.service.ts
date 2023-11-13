@@ -157,7 +157,7 @@ export class ExportService extends BaseService {
 
         const code = cryptObj(options);
 
-        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/payment-operations`
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/payment-operations-code`
 
         return { link: `${basePath}/${code}` };
     }
@@ -196,7 +196,7 @@ export class ExportService extends BaseService {
 
         const code = cryptObj(options);
 
-        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/ceilling`
+        const basePath = `${config.get('baseUrl')}${config.get('basePath')}/export/ceilling-code`
 
         return { link: `${basePath}/${code}` };
     }

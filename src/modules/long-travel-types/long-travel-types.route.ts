@@ -12,10 +12,12 @@ router.get('/', longTravelTypesController.findAll);
 
 router.get('/all', longTravelTypesController.findAll);
 
-router.get('/:id', longTravelTypesController.findOneById);
+router.get('/not-customer/all', longTravelTypesController.findAll);
 
 router.put('/:id', longTravelTypesController.updateById);
 
-router.get('/not-customer/all', longTravelTypesController.findAll);
+router.get('/:id', longTravelTypesController.findOneById);
+
+router.delete('/:id', longTravelTypesController.deleteById);
 
 export const longTravelTypesRoute = router;

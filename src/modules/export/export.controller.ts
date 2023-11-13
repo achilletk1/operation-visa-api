@@ -50,7 +50,7 @@ export class ExportController {
     }
 
     async generateOnlinePaymentOperationsExportLinks(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await ExportController.exportService.generateOnlinePaymentOperationsExportLinks(req.query as any)); }
+        try { res.send(await ExportController.exportService.generateOnlinePaymentOperationsExportLinks(req.params.id as any)); }
         catch (error) { next(error); }
     }
 
@@ -62,7 +62,7 @@ export class ExportController {
     }
 
     async generateTravelsCeillingExportLinks(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await ExportController.exportService.generateTravelsCeillingExportLinks(req.query as any)); }
+        try { res.send(await ExportController.exportService.generateTravelsCeillingExportLinks(req.params.id as any)); }
         catch (error) { next(error); }
     }
 

@@ -10,14 +10,14 @@ router.get('/', travelController.getTravels);
 
 router.get('/all', travelController.getTravels);
 
+router.get('/validators/:id', travelController.getValidationsTravel);
+
+router.put('/steps/status/:id', travelController.updateTravelStepStatusById);
+
+router.get('/transactions/range', travelController.getTravelRangesTransactions);
+
 router.get('/:id', travelController.findOneById);
 
 router.put('/:id', travelController.updateTravelById);
-
-router.put('/:id/steps/status', travelController.updateTravelStepStatusById);
-
-router.get('/:id/validators', travelController.updateTravelById);
-
-router.get('/transactions/range', travelController.getTravelRangesTransactions);
 
 export const travelRoute = router;

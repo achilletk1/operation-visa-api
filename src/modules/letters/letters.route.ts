@@ -10,12 +10,12 @@ router.get('/', lettersController.findAll);
 
 router.get('/all', lettersController.findAll);
 
-router.get('/:id', lettersController.findOneById);
-
-router.put('/:id', lettersController.updateById);
-
 router.post('/view', lettersController.generateExportView);
 
 router.get('/variables', lettersController.getLettersVariables);
+
+router.get('/:id', lettersController.findOneById);
+
+router.put('/:id', lettersController.updateById);
 
 export const lettersRoute = router;

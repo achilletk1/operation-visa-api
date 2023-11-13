@@ -10,12 +10,12 @@ router.get('/', travelMonthController.getTravelMonths);
 
 router.get('/all', travelMonthController.getTravelMonths);
 
+router.put('/', travelMonthController.updateManyTravelMonths);
+
+router.put('/expense-details/status/:id', travelMonthController.updateTravelMonthExpendeDetailsStatusById);
+
 router.get('/:id', travelMonthController.findOneById);
 
 router.put('/:id', travelMonthController.updateTravelMonthsById);
-
-router.put('/', travelMonthController.updateManyTravelMonths);
-
-router.put('/:id/expense-details/status', travelMonthController.updateTravelMonthExpendeDetailsStatusById);
 
 export const travelMonthRoute = router;

@@ -27,7 +27,7 @@ export class ValidationsController {
         catch (error) { next(error); }
     }
 
-    async insertvalidation(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async insertValidation(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await ValidationsController.validationsService.insertvalidation(req.params.id as string, req.body)); }
         catch (error) { next(error); }
     }

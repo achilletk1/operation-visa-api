@@ -14,4 +14,6 @@ router.get('/:id', vouchersController.findOneById);
 
 router.put('/:id', vouchersController.updateVoucherById);
 
+router.delete('/:id', vouchersController.deleteById);
+
 export const vouchersRoute = router;

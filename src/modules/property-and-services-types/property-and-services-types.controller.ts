@@ -18,6 +18,11 @@ export class PropertyAndServicesTypesController {
         catch (error) { next(error); }
     }
 
+    async deleteById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await PropertyAndServicesTypesController.propertyAndServicesTypesService.deleteOne({  _id: req.params.id })); }
+        catch (error) { next(error); }
+    }
+
     async insertPropertyAndServicesTypes(req: Request, res: Response, next: NextFunction) {
         try { res.send(await PropertyAndServicesTypesController.propertyAndServicesTypesService.insertPropertyAndServicesTypes(req.body as PropertyAndServicesType)); }
         catch (error) { next(error); }

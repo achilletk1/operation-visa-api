@@ -6,13 +6,9 @@ export const requestCeilingIncreaseController = new RequestCeilingIncreaseContro
 
 // router.post('/', requestCeilingIncreaseController.create);
 
-// router.get('/', requestCeilingIncreaseController.findAll);
+router.get('/', requestCeilingIncreaseController.findAll);
 
 router.get('/all', requestCeilingIncreaseController.findAll);
-
-router.get('/:id', requestCeilingIncreaseController.findOneById);
-
-router.put('/:id', requestCeilingIncreaseController.updateById);
 
 router.put('/', requestCeilingIncreaseController.getRequestCeillingIncrease);
 
@@ -21,5 +17,9 @@ router.put('/', requestCeilingIncreaseController.insertRequestCeilling);
 router.put('/validate-request/:id', requestCeilingIncreaseController.requestIncrease);
 
 router.put('/validate-request/:id/assign', requestCeilingIncreaseController.assignRequestCeiling);
+
+router.get('/:id', requestCeilingIncreaseController.findOneById);
+
+router.put('/:id', requestCeilingIncreaseController.updateById);
 
 export const requestCeilingIncreaseRoute = router;

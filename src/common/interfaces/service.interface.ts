@@ -2,19 +2,27 @@ import { Document, WithId } from "mongodb";
 
 export interface ServiceInterface<T> {
 
-    create(data: Document | T): Promise<QueryResult>
+    create(data: Document | T): Promise<QueryResult>;
 
-    findAll(query?: QueryOptions): Promise<getAllResult<T>>
+    createMany(data: Document[] | T[]): Promise<QueryResult>;
 
-    findOne(query: QueryOptions): Promise<T | WithId<Document> | QueryResult>
+    findAll(query?: QueryOptions): Promise<getAllResult<T>>;
+
+    findOne(query: QueryOptions): Promise<T | WithId<Document> | QueryResult>;
 
     count(query: QueryFilter): Promise<number | QueryResult>;
 
     update(filter: QueryFilter, data: Document): Promise<QueryResult>;
 
+    updateMany(filter: QueryFilter, data: Document, unsetData: Document): Promise<QueryResult>;
+
+    deleteOne(filter: QueryFilter): Promise<QueryResult>;
+
+    deleteMany(filter: QueryFilter): Promise<QueryResult>;
+
     generateExportLinks(filters: QueryFilter, link: string): Promise<{ xlsxPath: string, pdfPath: string }>;
 
-    getDataToExport(code: string): Promise<Error | getAllResult<T>>
+    getDataToExport(code: string): Promise<Error | getAllResult<T>>;
 
 }
 
@@ -33,13 +41,13 @@ declare type QueryOptions = {
     way?: 1 | -1,
 }
 
-declare type QueryFilter = ObjectType<unknown>
+export declare type QueryFilter = ObjectType<unknown>
 
 declare type QueryProjection = ObjectType<number>
 
 declare type getAllResult<T> = {
     data: T[],
-    count: number
+    total: number
 }
 
 declare type QueryResult = {

@@ -12,9 +12,11 @@ router.get('/', propertyAndServicesTypesController.findAll);
 
 router.get('/all', propertyAndServicesTypesController.findAll);
 
+// router.put('/:id', propertyAndServicesTypesController.updateById);
+
 router.get('/:id', propertyAndServicesTypesController.findOneById);
 
-// router.put('/:id', propertyAndServicesTypesController.updateById);
+router.delete('/:id', propertyAndServicesTypesController.deleteById);
 
 router.put('/:id', propertyAndServicesTypesController.updatePropertyAndServicesTypesById);
 

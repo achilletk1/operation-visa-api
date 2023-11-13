@@ -19,8 +19,8 @@ router.get('/export/:code', usersController.generateUsersExporData);
 
 router.get('/one', usersController.getUserBy);
 
-router.get('/:id', usersController.findOneById);
-
 router.get('/visa-operations/all', usersController.getUserByOperations);
+
+router.get('/:id', usersController.findOneById);
 
 export const usersRoute = router;
