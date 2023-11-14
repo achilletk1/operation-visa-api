@@ -24,6 +24,7 @@ export const inserDefaultSetting = async () => {
       maxUpladFileSize: 5,
       data: { value: 40 },
       dateUpdated: [],
+      enabled: true,
       users: []
     },
     {
@@ -33,6 +34,7 @@ export const inserDefaultSetting = async () => {
       maxUpladFileSize: 5,
       data: { value: 3 },
       dateUpdated: [],
+      enabled: true,
       users: []
     },
     {
@@ -42,6 +44,7 @@ export const inserDefaultSetting = async () => {
       data: { value: 40 },
       maxUpladFileSize: 5,
       dateUpdated: [],
+      enabled: true,
       users: []
     },
     {
@@ -50,6 +53,7 @@ export const inserDefaultSetting = async () => {
       dateCreated: moment().valueOf(),
       maxUpladFileSize: 5,
       dateUpdated: [],
+      enabled: true,
       users: []
     },
     {
@@ -58,6 +62,7 @@ export const inserDefaultSetting = async () => {
       dateCreated: moment().valueOf(),
       maxUpladFileSize: 5,
       dateUpdated: [],
+      enabled: true,
       users: []
     }
   ]
