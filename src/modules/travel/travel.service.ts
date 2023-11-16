@@ -1,3 +1,4 @@
+import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
 import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
@@ -12,11 +13,16 @@ import { UsersController } from 'modules/users';
 import httpContext from 'express-http-context';
 import generateId from 'generate-unique-id';
 import { CrudService } from "common/base";
+import { timeout } from "common/helpers";
+import { config } from "convict-config";
 import { get, isEmpty } from "lodash";
 import { TravelType } from "./enum";
 import { ObjectId } from "mongodb";
-import { Travel } from "./model";
+import { Travel } from "./model"
+import crypt from 'url-crypt';;
 import moment from "moment";
+
+const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
 export class TravelService extends CrudService<Travel> {
 
@@ -68,7 +74,7 @@ export class TravelService extends CrudService<Travel> {
     async getTravelRangesTransactions(fields: any): Promise<any> {
         try {
             const { transactionQuery, travelQuery } = this.formatRangeFilters(fields);
-            const transactions = await VisaTransactionsController.visaTransactionsService.findAll({ filter: transactionQuery});
+            const transactions = await VisaTransactionsController.visaTransactionsService.findAll({ filter: transactionQuery });
 
             if (transactions instanceof Error) { return transactions; }
 
@@ -328,9 +334,9 @@ export class TravelService extends CrudService<Travel> {
     private async verifyTravelTransactions(id: string, travel: Travel): Promise<any> {
 
         const existingTravels = await TravelController.travelService.findAll({ filter: { _id: { $ne: new ObjectId(id) }, "user.clientCode": travel?.user?.clientCode, "proofTravel.dates.start": { $gte: travel?.proofTravel?.dates?.start }, "proofTravel.dates.end": { $lte: travel?.proofTravel?.dates?.end } } });
-    
+
         if (isEmpty(existingTravels)) { return travel; }
-    
+
         const ids = [];
         for (const data of existingTravels?.data) {
             travel.proofTravel.continents.push(...data.proofTravel.continents);
@@ -343,35 +349,35 @@ export class TravelService extends CrudService<Travel> {
             travel.transactions.push(...data?.transactions);
             ids.push(new ObjectId(data._id.toString()));
         }
-    
+
         travel.proofTravel.continents = [...new Set(travel?.proofTravel?.continents)];
         const countries: any[] = [];
         (travel?.proofTravel?.countries || []).forEach((elt) => {
             if (!countries.find((e) => e.name === elt?.name)) { countries.push(elt) }
         });
-    
+
         travel.proofTravel.countries = countries;
-    
+
         await TravelController.travelService.deleteMany({ _id: { $in: ids } });
-    
+
         const dayDiff = moment(travel?.proofTravel?.dates?.end).diff(travel?.proofTravel?.dates?.start, 'days');
-    
+
         travel.travelType = dayDiff > 30 ? TravelType.LONG_TERM_TRAVEL : TravelType.SHORT_TERM_TRAVEL;
-    
+
         const travelMonths: TravelMonth[] = [];
-    
+
         if (travel?.travelType === TravelType.LONG_TERM_TRAVEL) {
             const monthDiff = moment(travel.proofTravel.dates.end).diff(travel.proofTravel.dates.start, 'M');
             for (let index = 0; index < monthDiff; index++) {
-    
+
                 const month = moment(travel.proofTravel.dates.start).add(index, 'M').format('YYYYMM').toString();
-    
+
                 const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === month);
-    
+
                 const expenseDetailMonth = travel?.expenseDetails.filter((elt) => moment(elt.date).format('YYYYMM').toString() === month);
-    
+
                 if (isEmpty(transactionsMonth)) { continue; }
-    
+
                 const travelMonth: TravelMonth = {
                     status: OpeVisaStatus.TO_COMPLETED,
                     userId: travel?.user?._id,
@@ -385,11 +391,11 @@ export class TravelService extends CrudService<Travel> {
                     expenseDetailAmount: 0,
                     transactions: transactionsMonth,
                 }
-    
+
                 travelMonths.push(travelMonth);
-    
+
             }
-    
+
             if (!isEmpty(travelMonths)) { await TravelMonthController.travelMonthService.insertManyVisaTravelMonth(travelMonths) }
         }
         return travel;
@@ -464,4 +470,61 @@ export class TravelService extends CrudService<Travel> {
         catch (error) { throw error; }
     }
 
+    async sendLinkNotification(data: any) {
+
+        try {
+            const travel = await this.baseRepository.findOne({ filter: { _id: data.id } });
+
+            if (isEmpty(travel)) { return new Error('TravelNotFound') }
+
+            if (travel) {
+                notificationEmmiter.emit('travel-justify-link', new TravelJustifyLinkEvent(travel, data.link));
+            }
+        } catch (error) { throw error; }
+    }
+
+    async generateQueryLink(id: any, resetLink?: 'conserve' | 'reset') {
+        try {
+            const travel: any = await this.baseRepository.findOne({ filter: { _id: id } });
+            if (!travel) { return new Error('travelNotFound') };
+            timeout(5000);
+
+            if (travel?.link) {
+                const code = decryptObj(travel?.link);
+                const { ttl } = code;
+                if ((new Date()).getTime() >= ttl) { return await this.getLink(id) };
+
+                if (resetLink === 'reset') { return await this.getLink(id) };
+
+                if (resetLink === 'conserve') {
+                    // const link = `/visa-operations/client/ept-and-atm-withdrawal/receipts?query=${code}`;
+                    return travel?.link
+                };
+
+                return new Error('validLink')
+            }
+
+
+            const link = await this.getLink(id);
+
+            return { link }
+        } catch (error) { throw error; }
+    }
+
+    private async getLink(id: string) {
+        const ttl = moment().add(config.get('clientLinkTTL'), 'seconds').valueOf();
+
+        const options = { ttl, id };
+        const code = cryptObj(options);
+
+        const basePath = `/visa-operations/client/ept-and-atm-withdrawal/receipts`;
+        const link = `${basePath}?query=${code}`;
+        await TravelController.travelService.update({ _id: id }, { link: link });
+        return link
+    }
+
 }
+
+
+
+

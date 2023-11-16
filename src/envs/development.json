@@ -18,6 +18,7 @@
     "saltRounds": 5,
     "exportSalt": "SzxWhsPnj!k@#7yIe7Wa^PA4t0W3MLue6j&bPe@Vtg#8gE0UyI",
     "exportTTL": 1800,
+    "clientLinkTTL": 1800,
     "emailTokenSalt": "5L9#8N*L&&qcX53",
     "emailTokenTTL": 9000,
     "baseUrl": "http://localhost:3500",

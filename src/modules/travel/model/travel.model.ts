@@ -85,4 +85,5 @@ export class Travel {
     editors?: any[];
     validationLevel?: number;
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
+    link?: string;
 }
