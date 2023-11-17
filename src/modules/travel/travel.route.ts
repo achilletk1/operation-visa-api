@@ -20,4 +20,9 @@ router.get('/:id', travelController.findOneById);
 
 router.put('/:id', travelController.updateTravelById);
 
+router.get('/query/generate/:id', travelController.generateQueryLink);
+
+router.post('/notify/link', travelController.sendLinkNotification);
+
+
 export const travelRoute = router;

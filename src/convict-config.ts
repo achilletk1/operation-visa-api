@@ -153,6 +153,13 @@ export const config = convict({
         env: 'EXPORT_TTL',
         arg: 'export-ttl'
     },
+    clientLinkTTL: {
+        doc: 'justify travel time to live.',
+        format: Number, // in seconds
+        default: 0,
+        env: 'JUSTIFY_TRAVEL_TTL',
+        arg: 'justify-travel-ttl'
+    },
     basePath: {
         doc: 'API base path.',
         format: String,

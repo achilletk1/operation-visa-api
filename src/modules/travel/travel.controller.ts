@@ -42,4 +42,14 @@ export class TravelController {
         catch (error) { next(error); }
     }
 
+    async generateQueryLink(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TravelController.travelService.generateQueryLink( req.params.id )); }
+        catch (error) { next(error); }
+    }
+
+
+    async sendLinkNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TravelController.travelService.sendLinkNotification(req.body)); }
+        catch (error) { next(error); }
+    }
 }
