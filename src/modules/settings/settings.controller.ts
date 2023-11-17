@@ -23,4 +23,9 @@ export class SettingsController {
         catch (error) { next(error); }
     }
 
+    async getSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await SettingsController.settingsService.getSettings(req.query)); }
+        catch (error) { next(error); }
+    }
+
 }

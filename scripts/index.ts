@@ -15,8 +15,8 @@ const runScripts = async () => {
     // await inserDefaultLongTravelsTypes();
     // await inserDefaultLetter();
     // await inserDefaultPropertyType();
-    // await inserDefaultSetting();
-    await insertDefaultTemplateSetting();
+    await inserDefaultSetting();
+    // await insertDefaultTemplateSetting();
     // await inserDefaultVouchers();
     // await inserDefaultUsersValidations();
 }

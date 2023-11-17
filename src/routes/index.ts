@@ -3,7 +3,7 @@ import {
   usersRoute, authRoute, travelRoute, exportRoute, sendersRoute, lettersRoute, vouchersRoute, settingsRoute,
   reportingRoute, downloadsRoute, templatesRoute, validationsRoute, travelMonthRoute, notificationsRoute,
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
-  visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute
+  visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute, validationLevelSettingsRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -53,6 +53,8 @@ const routes = (app: Express) => {
   app.use( "/visa-transactions-ceilings", visaTransactionsCeilingsRoute);
 
   app.use( "/properties-and-services-types", propertyAndServicesTypesRoute);
+  
+  app.use( "/validation-level-settings", validationLevelSettingsRoute);
 
 };
 

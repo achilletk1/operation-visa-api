@@ -11,3 +11,4 @@ declare module 'url-crypt' {
     export default crypt;
 }
 
+declare module 'prompt-confirm';
