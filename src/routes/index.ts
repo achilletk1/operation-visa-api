@@ -59,6 +59,8 @@ const routes = (app: Express) => {
 
   app.use( "/importers", importersRoute);
 
+  app.use( "/importers", importersRoute);
+
 };
 
 export default routes;
