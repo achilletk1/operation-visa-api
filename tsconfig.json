@@ -39,6 +39,7 @@
     // "allowSyntheticDefaultImports": true,
   },
   "include": ["src/**/*", "scripts/**/*", "decs.d.ts", "url-crypt.d.ts",  "convict-config.ts", "winston-config.ts"],
-  "exclude": ["node_modules", "src/**/*.spec.ts"]
+  "exclude": ["node_modules", "src/**/*.spec.ts"],
+
 }
 

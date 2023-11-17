@@ -35,4 +35,13 @@ export class SettingsService extends CrudService<Setting> {
         } catch (error) { throw error; }
     }
 
+
+    async getSettings(filters: any) {
+        try {
+            const authUser = httpContext.get('user');
+            if (authUser?.category < 500) { return new Error('Forbidden'); }
+            return await SettingsController.settingsService.findAll({ filter: filters });
+        } catch (error) { throw error; }
+    }
+
 }

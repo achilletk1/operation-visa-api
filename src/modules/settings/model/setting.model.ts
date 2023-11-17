@@ -7,5 +7,10 @@ export class Setting {
     dateCreated?: number;
     dateUpdated!: number[];
     users!: User[];
-    value?: any
+    data?:{
+        value?: string;
+        operator?: any;
+    }
+    label?: string;
+    enabled? : boolean;
 }
