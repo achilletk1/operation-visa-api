@@ -1,7 +1,6 @@
 
-import { config } from './config-env';
-import Confirm from 'prompt-confirm';
 import { dropTestCollections } from './tests/drop-test-collections';
+import readline from 'readline';
 
 const runScripts = async () => {
     // SCRIPTS to execute
@@ -10,28 +9,25 @@ const runScripts = async () => {
  
 }
 
-if (config.get('env') !== 'development') {
-    (async () => {
-        await runScripts();
-        process.exit();
-    })()
-} else {
-    (async () => {
-        try {
-            const answer = await new Confirm('Start reset visa operation data scripts').run();
+(async () => {
+    try {
+        const prompt = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-            if (answer === false) { return process.exit(); }
+        console.log('* Start drop visa operation collections scripts');
+        console.log(`Like: \n'visa_transactions_tmp'\n'visa_transactions_replica'\n'visa_transactions'\n'visa_transactions'\n'visa_operations_travels'\n'visa_operations_travel_months'\n'visa_operations_online_payments'\n'queue'\n'notifications'`);
 
-            await runScripts()
+        prompt.question('* Voulez-vous continuer? (y/n): ', async (answer) => {
+            if (['y', 'yes', 'Y', 'YES'].includes(answer)) await runScripts();
 
+            prompt.close();
+        });
+
+        prompt.on('close', () => {
             process.exit();
+        });
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 
-        } catch (error) {
-            console.log(error);
-            process.exit(1);
-        }
-
-    })()
-}
-
-
+})()

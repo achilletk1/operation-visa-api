@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash';
 import { getDatabase } from '../config';
 
 export const inserDefaultUsersValidations = async () => {

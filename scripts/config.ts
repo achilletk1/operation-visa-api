@@ -1,6 +1,5 @@
+import { config } from '../src/convict-config';
 import { MongoClient, Db } from 'mongodb';
-import { config } from './config-env';
-
 
 let database: Db;
 

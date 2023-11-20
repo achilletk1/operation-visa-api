@@ -55,7 +55,7 @@ export const setResponse = (status: number, message: string, data?: unknown): Qu
 }
 
 export const rangeData = (query: any): any => {
-  const { start, end } = query?.filter;
+  const { start, end } = query?.filter || {};
   delete query?.filter?.start;
   delete query?.filter?.end;
   if (start && end) query.filter['created_at'] = { $gte: moment(start, 'YYYY-MM-DD').startOf('day').valueOf(), $lte: moment(end, 'YYYY-MM-DD').endOf('day').valueOf() };

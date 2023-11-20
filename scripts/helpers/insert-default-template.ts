@@ -39,7 +39,7 @@ export const insertDefaultTemplateSetting = async () => {
             sendType: 200,
             enabled: true,
             period: 0,
-            date: {
+            dates: {
                 created: moment().valueOf(),
             }
         },
@@ -78,7 +78,7 @@ export const insertDefaultTemplateSetting = async () => {
             sendType: 200,
             enabled: true,
             period: 0,
-            date: {
+            dates: {
                 created: moment().valueOf(),
             }
         },
@@ -113,7 +113,7 @@ export const insertDefaultTemplateSetting = async () => {
             sendType: 200,
             period: 38,
             enabled: true,
-            date: {
+            dates: {
                 created: moment().valueOf(),
             }
         }

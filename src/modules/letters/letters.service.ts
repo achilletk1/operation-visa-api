@@ -26,8 +26,8 @@ export class LettersService extends CrudService<Letter> {
         try {
 
             if (!letter) { return new Error('LetterNotFound') }
-            const pdfDataEn = replaceVariables(letter?.pdf?.en, {}, false,true);
-            const pdfDataFr = replaceVariables(letter?.pdf?.fr, {},false, true);
+            const pdfDataEn = replaceVariables(letter?.pdf?.en, {}, false, true);
+            const pdfDataFr = replaceVariables(letter?.pdf?.fr, {}, false, true);
 
             const pdfStringEn: any = await generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
 

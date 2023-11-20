@@ -46,7 +46,7 @@ export class ReportingService extends BaseService {
                 await OnlinePaymentController.onlinePaymentService.getAverageTimeJustifyOnlinePaymentReport({ status, start, end });
             const dateTime = new Date(data[0]?.time);
 
-            return `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s`;
+            return { averageTime: `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s`};
         } catch (error) { throw error; }
     }
 
