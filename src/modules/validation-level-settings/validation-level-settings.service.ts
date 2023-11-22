@@ -1,8 +1,9 @@
 
 import { ValidationLevelSettingsRepository } from "./validation-level-settings.repository";
 import { ValidationLevelSettingsController } from './validation-level-settings.controller';
-import { CrudService } from "common/base";
 import { LevelValidation } from "./model/level-validation.model";
+// import httpContext from 'express-http-context';
+import { CrudService } from "common/base";
 
 export class ValidationLevelSettingsService extends CrudService<LevelValidation> {
 
@@ -35,13 +36,13 @@ export class ValidationLevelSettingsService extends CrudService<LevelValidation>
         } catch (error) { throw error; }
     }
 
-    // private formatUserFilters(fields: any) {
-    //     let { offset, limit } = fields;
-    //     if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
+    private formatUserFilters(fields: any) {
+        // let { offset, limit } = fields;
+        // if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
     
-    //     delete fields.offset;
-    //     delete fields.limit;
-    // };
+        // delete fields.offset;
+        // delete fields.limit;
+    };
 
 }
 

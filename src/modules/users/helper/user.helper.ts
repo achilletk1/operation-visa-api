@@ -1,14 +1,15 @@
+import { isEmpty } from 'lodash';
 import moment from "moment";
 import XLSX from 'xlsx';
 
 
 export function formatUserFilters(fields: any) {
     const { start, end, provider, ncp, category, status, walletList } = fields;
-    let { offset, limit } = fields;
-    if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
+    // let { offset, limit } = fields;
+    // if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
 
-    delete fields.offset;
-    delete fields.limit;
+    // delete fields.offset;
+    // delete fields.limit;
     delete fields.start;
     delete fields.end;
 
@@ -16,6 +17,7 @@ export function formatUserFilters(fields: any) {
 
     const range = (start && end) ? { start: moment(start).startOf('day').valueOf(), end: moment(end).endOf('day').valueOf() } :
         undefined;
+    if (range) fields['dates.createdt'] = { $gte: range?.start, $lte: range?.end };
 
     if (walletList) {
         // revoir en combinaison de 3 (ncp, status, provider)
@@ -35,6 +37,10 @@ export function formatUserFilters(fields: any) {
         delete fields.status;
         delete fields.ncp;
     }
+
+    if (fields?.nameFilter) {} // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
+
+    if (isEmpty(fields)) fields = { enabled: true };
 
     return fields;
 };

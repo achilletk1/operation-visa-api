@@ -90,7 +90,7 @@ export class ExportService extends BaseService {
         const data = readFile(path);
         const buffer = Buffer.from(data, 'base64');
         const extension = getExtensionByContentType(contentType)
-        const name = `export_${new Date().getTime()}-${fileName}.${extension}`;
+        const name = `export_${new Date().getTime()}-${fileName || ''}.${extension}`;
 
         return { contentType, fileContent: buffer, fileName: name };
     }
@@ -98,11 +98,11 @@ export class ExportService extends BaseService {
     async generateOnlinePaymentExportLinks(fields: any) {
         delete fields.action;
         parseNumberFields(fields);
-        delete fields.name;
-        delete fields.status;
-        delete fields.clientCode;
-        delete fields.offset;
-        delete fields.limit;
+        // delete fields.name;
+        // delete fields.status;
+        // delete fields.clientCode;
+        // delete fields.offset;
+        // delete fields.limit;
         delete fields.ttl;
 
         const payments = await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy({ ...fields });
@@ -126,11 +126,11 @@ export class ExportService extends BaseService {
         } catch (error) { throw Error('BadExportCode'); }
 
         const { ttl } = options;
-        delete options.name;
-        delete options.status;
-        delete options.clientCode;
-        delete options.offset;
-        delete options.limit;
+        // delete options.name;
+        // delete options.status;
+        // delete options.clientCode;
+        // delete options.offset;
+        // delete options.limit;
         delete options.ttl;
 
         options = { ...options }
@@ -266,14 +266,16 @@ export class ExportService extends BaseService {
 
             parseNumberFields(query);
             const { offset, limit, start, end } = query;
-            delete query.offset;
-            delete query.limit;
+            // delete query.offset;
+            // delete query.limit;
             delete query.start;
             delete query.end;
 
-            const range = (start && end) ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() } :
-                { start: moment().startOf('month').valueOf(), end: moment().endOf('month').valueOf() };
-            const { data } = await NotificationsController.notificationsService.findAll({ filter: { ...(query || {}), ...range }, });
+            const range = (start && end)
+                ? { start: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), end: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() }
+                : { start: moment().startOf('month').valueOf(), end: moment().endOf('month').valueOf() };
+            query['dates.createdAt'] = { $gte: range?.start, $lte: range?.end };
+            const { data } = await NotificationsController.notificationsService.findAll({ filter: { ...(query || {}) } });
 
             if (!data || isEmpty(data)) {
                 this.logger.info(`notification not found, ${this.constructor.name}.getNotifications()`);

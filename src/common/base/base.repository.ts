@@ -30,7 +30,7 @@ export class BaseRepository implements RepositoryInterface {
       .find(query?.filter ?? {})
       .project(query?.projection ?? {})
       .sort(query?.sort ?? '_id', query?.way ?? -1)
-      .skip(query?.offset ?? 0)
+      .skip(((query?.offset || 1) - 1) * (query?.limit || 0) ?? 0)
       .limit(query?.limit ?? 0)
       .toArray();
     } catch (error) { throw error; }
