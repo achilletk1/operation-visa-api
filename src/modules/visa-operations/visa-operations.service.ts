@@ -157,7 +157,7 @@ export class VisaOperationsService extends CrudService<any> {
 
             if (!travel || isEmpty(travel)) {
 
-                //Insert the first transaction and continue
+                // Insert the first transaction and continue
                 if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
                     transactionsGroupedByTravel[currentIndex] = { transactions: [transaction] }
                     continue;
