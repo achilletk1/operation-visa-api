@@ -27,6 +27,8 @@ COPY scripts /tmp/dist/scripts
 
 COPY src /tmp/dist/src
 
+COPY package*.json /tmp/
+
 RUN cd /tmp && npm run copy-files
 
 
