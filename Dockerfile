@@ -1,19 +1,34 @@
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 # https://docs.docker.com/build/building/multi-stage/
 
+# FROM node:16-alpine
+
+# COPY package*.json /tmp/
+
+# COPY tsconfig.json /tmp/
+
+# RUN cd /tmp && npm install && npm install copyfiles
+
+# COPY src /tmp/src
+
+# COPY scripts /tmp/scripts
+
+# RUN cd /tmp && npm run build
+
 FROM node:16-alpine
 
-COPY package*.json /tmp/
+RUN cd /tmp && npm install copyfiles
 
-COPY tsconfig.json /tmp/
+COPY package*.json /tmp/dist/
 
-RUN cd /tmp && npm install && npm install copyfiles
+COPY tsconfig.json /tmp/dist/
 
-COPY src /tmp/src
+COPY scripts /tmp/dist/scripts
 
-COPY scripts /tmp/scripts
+COPY src /tmp/dist/src
 
-RUN cd /tmp && npm run build
+RUN cd /tmp && npm run copy-files
+
 
 
 
@@ -31,7 +46,7 @@ RUN mkdir -p /usr/src/ope-visa
 
 COPY --from=1 /tmp/node_modules /usr/src/ope-visa/node_modules
 
-COPY --from=0 /tmp/dist/ /usr/src/ope-visa/
+COPY --from=0 /tmp/dist/ /usr/src/ope-visa/src
 
 COPY --from=0 /tmp/package*.json /usr/src/ope-visa/
 
