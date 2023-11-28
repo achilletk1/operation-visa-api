@@ -1,4 +1,4 @@
-import { getDatabase } from '../config';
+import { getDatabase } from '../../src/database/mongodb';
 
 export const dropTestCollections = async () => {
 

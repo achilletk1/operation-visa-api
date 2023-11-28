@@ -1,4 +1,4 @@
-import { getDatabase } from 'database/mongodb';
+import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
 
 export const inserDefaultLetter = async () => {

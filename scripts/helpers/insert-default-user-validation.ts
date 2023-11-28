@@ -1,4 +1,4 @@
-import { getDatabase } from 'database/mongodb';
+import { getDatabase } from '../../src/database/mongodb';
 
 export const inserDefaultUsersValidations = async () => {
 

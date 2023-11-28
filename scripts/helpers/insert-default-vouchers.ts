@@ -1,4 +1,4 @@
-import { getDatabase } from 'database/mongodb';
+import { getDatabase } from '../../src/database/mongodb';
 import { ObjectId } from 'mongodb';
 import { isEmpty } from 'lodash';
 import moment from 'moment'

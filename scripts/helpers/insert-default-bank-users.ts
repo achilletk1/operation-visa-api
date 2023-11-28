@@ -1,4 +1,4 @@
-import { getDatabase } from 'database/mongodb';
+import { getDatabase } from '../../src/database/mongodb';
 import { config } from 'convict-config';
 import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
