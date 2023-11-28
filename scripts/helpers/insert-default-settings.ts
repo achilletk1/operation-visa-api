@@ -1,4 +1,4 @@
-import { getDatabase } from '../config';
+import { getDatabase } from 'database/mongodb';
 import moment from 'moment'
 
 export const inserDefaultSetting = async () => {

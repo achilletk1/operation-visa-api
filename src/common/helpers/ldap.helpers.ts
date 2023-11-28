@@ -11,7 +11,7 @@ let ldapOptions: any = {
     adminDn: `${config.get('activeDirectory.adminDn')}`,
     adminPassword: `${config.get('activeDirectory.adminPassword')}`,
     userPassword: null,
-    userSearchBase: 'dc=intra,dc=bci',
+    userSearchBase: 'dc=intra,dc=bicec',
     usernameAttribute: 'sAMAccountName',
     username: null
 };

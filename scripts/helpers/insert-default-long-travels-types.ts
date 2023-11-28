@@ -1,4 +1,4 @@
-import { getDatabase } from '../config';
+import { getDatabase } from 'database/mongodb';
 import { isEmpty } from 'lodash';
 import moment from 'moment'
 

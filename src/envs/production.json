@@ -28,7 +28,7 @@
     "exportTTL": 900,
     "emailTokenSalt": "dPpjRo8O!1%HOD4uOB6D",
     "emailTokenTTL": 900,
-    "baseUrl": "https://bcionline.bcicongo.com",
+    "baseUrl": "https://fly-banking.bicec.com",
     "basePath": "/visaope/v1",
     "londoGateway": {
         "url": "https://alert01.intra.bci/api/v1",
@@ -40,16 +40,23 @@
     "template": {
         "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
         "color": "#DC752A",
-        "app": "BCI MOBILE",
-        "company": "BCI"
+        "app": "FLY BANKING",
+        "company": "BICEC"
+    },
+    "activeDirectory": {
+        "adminDn": "cn=alerting_sms,ou=BICEC_SIEGE,dc=intra,dc=bicec",
+        "url": "ldap://intra.bicec",
+        "adminPassword": "OB6(198CJy68QgJ]d$.g",
+        "groupName": "Bicec_AlertingSMS",
+        "groupVerification": false
     },
     "maxFileSizeUpload": 5,
-    "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
+    "ceilingIncreaseEmail": "achille.tachum@londo-tech.com",
     "cronRevivalMail":"*/30 * * * *",
     "cronTransactionProcessing": "*/3 * * * *",
     "cronDeleteTemporaryFile": "0 */3 * * *",
     "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
     "cronclientindemeure": "0 00 1 */3 *",  
-    "emailBank": "BCI-MONETIQUE@bcicongo.com"
+    "emailBank": "achille.tachum@londo-tech.com"
 
 }

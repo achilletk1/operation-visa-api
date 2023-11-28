@@ -4,20 +4,22 @@ import { inserDefaultPropertyType } from './helpers/insert-default-proprety-type
 import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
 import { inserDefaultLetter } from './helpers/insert-default-notice-letter';
 import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
+import { inserDefaultBankUsers } from './helpers/insert-default-bank-users';
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import readline from 'readline';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    // await inserDefaultVisaCeilings();
-    // await inserDefaultLongTravelsTypes();
-    // await inserDefaultLetter();
-    // await inserDefaultPropertyType();
+    await inserDefaultVisaCeilings();
+    await inserDefaultLongTravelsTypes();
+    await inserDefaultLetter();
+    await inserDefaultPropertyType();
     await inserDefaultSetting();
-    // await insertDefaultTemplateSetting();
-    // await inserDefaultVouchers();
-    // await inserDefaultUsersValidations();
+    await insertDefaultTemplateSetting();
+    await inserDefaultVouchers();
+    await inserDefaultUsersValidations();
+    await inserDefaultBankUsers();
 }
 
 (async () => {
