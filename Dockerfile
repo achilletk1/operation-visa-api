@@ -17,7 +17,7 @@
 
 FROM node:16-alpine
 
-RUN cd /tmp && npm install && npm install copyfiles
+RUN cd /tmp && npm install copyfiles
 
 COPY package*.json /tmp/dist/
 
