@@ -3,7 +3,7 @@ import { logger } from "winston-config";
 import { config } from "convict-config";
 import { errorMsg } from "common/utils";
 
-const ldapAuthOptions: any = {
+let ldapOptions: any = {
     ldapOpts: {
         url: `${config.get('activeDirectory.url')}`,
         tlsOptions: { rejectUnauthorized: false }
@@ -16,26 +16,12 @@ const ldapAuthOptions: any = {
     username: null
 };
 
-const ldapExistsOptions: any = {
-    ldapOpts: {
-        url: `${config.get('activeDirectory.url')}`,
-        tlsOptions: { rejectUnauthorized: false }
-    },
-    userDn: 'sAMAccountName=XXXXXXXX,dc=intra,dc=bicec',
-    verifyUserExists: true,
-    userSearchBase: 'dc=intra,dc=bicec',
-    usernameAttribute: 'sAMAccountName',
-    username: null,
-};
-
 export async function getLdapUser(userCode: any, password?: any) {
-
-    let ldapOptions = (password) ? ldapAuthOptions : ldapExistsOptions;
 
     ldapOptions.username = `${userCode}`;
 
     if (password) { ldapOptions.userPassword = `${password}`; }
-    else { ldapOptions.userDn = ldapOptions.userDn.replace('XXXXXXXX', `${userCode}`); }
+    else { ldapOptions.verifyUserExists = true; }
 
     let response = { givenName: 'John', sn: 'Doe', mobile: '23794345214', memberOf: null, mail: '' };
 
