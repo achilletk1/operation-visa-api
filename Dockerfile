@@ -48,7 +48,7 @@ RUN mkdir -p /usr/src/ope-visa
 
 COPY --from=1 /tmp/node_modules /usr/src/ope-visa/node_modules
 
-COPY --from=0 /tmp/dist/ /usr/src/ope-visa/src
+COPY --from=0 /tmp/dist/ /usr/src/ope-visa/
 
 COPY package*.json /usr/src/ope-visa/
 
