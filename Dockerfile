@@ -34,11 +34,11 @@ RUN cd /tmp && npm run copy-files
 
 
 
-FROM node:16-alpine
+# FROM node:16-alpine
 
-COPY package*.json /tmp/
+# COPY package*.json /tmp/
 
-RUN cd /tmp && npm install --omit=dev --unsafe-perm=true
+# RUN cd /tmp && npm install --omit=dev --unsafe-perm=true
 
 
 
