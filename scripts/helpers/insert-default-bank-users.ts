@@ -1,5 +1,5 @@
 import { getDatabase } from '../../src/database/mongodb';
-import { config } from 'convict-config';
+import { config } from '../../src/convict-config';
 import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 

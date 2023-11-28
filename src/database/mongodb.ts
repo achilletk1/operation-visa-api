@@ -1,5 +1,5 @@
 import { MongoClient, Db, MongoClientOptions, Collection } from 'mongodb';
-import { config } from 'convict-config';
+import { config } from '../convict-config';
 
 const { host, name, auth } = config.get('db');
 const { user, password } = auth;

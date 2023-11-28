@@ -17,7 +17,7 @@
 
 FROM node:16-alpine
 
-RUN cd /tmp && npm install copyfiles
+RUN cd /tmp && npm install && npm install copyfiles
 
 COPY package*.json /tmp/dist/
 
@@ -46,7 +46,8 @@ FROM node:16-alpine
 
 RUN mkdir -p /usr/src/ope-visa
 
-COPY --from=1 /tmp/node_modules /usr/src/ope-visa/node_modules
+# COPY --from=1 /tmp/node_modules /usr/src/ope-visa/node_modules
+COPY --from=0 /tmp/node_modules /usr/src/ope-visa/node_modules
 
 COPY --from=0 /tmp/dist/ /usr/src/ope-visa/
 
