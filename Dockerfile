@@ -17,7 +17,9 @@
 
 FROM node:16-alpine
 
-RUN cd /tmp && npm install copyfiles
+COPY package*.json /tmp/
+
+RUN cd /tmp && npm install && npm install copyfiles
 
 COPY package*.json /tmp/dist/
 
@@ -27,9 +29,7 @@ COPY scripts /tmp/dist/scripts
 
 COPY src /tmp/dist/src
 
-COPY package*.json /tmp/
-
-RUN cd /tmp && npm install && npm run copy-files
+RUN cd /tmp && npm run copy-files
 
 
 
