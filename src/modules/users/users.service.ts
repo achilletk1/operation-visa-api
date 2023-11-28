@@ -77,7 +77,11 @@ export class UsersService extends CrudService<User> {
                 user.enabled = true;
                 user.fullName = `${user.fname} ${user.lname}`;
                 user.visaOpecategory = category;
+                user.category = 600;
                 user.created_at = moment().valueOf();
+                user.option = 3;
+                user.gender = '';
+                user.pwdReseted = true;
                 user.editors.push({ _id: `${authUser._id}`, date: moment().valueOf() })
 
                 const result = await UsersController.usersService.create(user);

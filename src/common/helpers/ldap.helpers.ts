@@ -79,8 +79,8 @@ export async function getLdapUser(userCode: any, password?: any) {
     }
 
     const user = {
-        userCode, fname: `${response.givenName}`, lname: `${response.sn}`,
-        tel: `${response.mobile}`, email: response?.mail
+        userCode, fname: response.givenName, lname: response.sn,
+        tel: response.mobile, email: response?.mail
     };
 
     return user;
