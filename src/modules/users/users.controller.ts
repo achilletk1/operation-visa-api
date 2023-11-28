@@ -8,12 +8,12 @@ export class UsersController {
     constructor() { UsersController.usersService = new UsersService(); }
 
     async findAll(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await UsersController.usersService.findAll({ filter: req.query, projection: { password: 1, otp: 1 } })); }
+        try { res.send(await UsersController.usersService.findAll({ filter: req.query, projection: { password: 0, otp: 0 } })); }
         catch (error) { next(error); }
     }
 
     async findOneById(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await UsersController.usersService.findOne({ filter: { _id: req.params.id }, projection: { password: 1, otp: 1 } })); }
+        try { res.send(await UsersController.usersService.findOne({ filter: { _id: req.params.id }, projection: { password: 0, otp: 0 } })); }
         catch (error) { next(error); }
     }
 

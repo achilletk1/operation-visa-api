@@ -37,7 +37,7 @@ export class UsersService extends CrudService<User> {
             const isAdminCreation = filters?.isAdminCreation;
             delete filters.isUserCreation;
             delete filters.isAdminCreation;
-            let user = await UsersController.usersService.findOne({ filter: filters, projection: { password: 1, otp: 1 } });
+            let user = await UsersController.usersService.findOne({ filter: filters, projection: { password: 0, otp: 0 } });
             // if (!user) { return ''; }
             // logger.debug(`user: ${JSON.stringify(user)}`)
             if (!isEmpty(isUserCreation) || !isEmpty(isAdminCreation)) {
@@ -47,7 +47,7 @@ export class UsersService extends CrudService<User> {
                 if (!isEmpty(isAdminCreation) && Number(user?.category) < 499) {
                     filters.category = { '$in': [600, 601, 602, 603, 604, 500] };
                 }
-                user = await UsersController.usersService.findOne({ filter: filters, projection: { password: 1, otp: 1 } });
+                user = await UsersController.usersService.findOne({ filter: filters, projection: { password: 0, otp: 0 } });
             }
             return user;
         } catch (error) { throw error; }
@@ -127,7 +127,7 @@ export class UsersService extends CrudService<User> {
             delete filters.action;
             delete filters.ttl;
 
-            const users = await UsersController.usersService.findAll({ filter: filters, projection: { password: 1, otp: 1 } });
+            const users = await UsersController.usersService.findAll({ filter: filters, projection: { password: 0, otp: 0 } });
             if (isEmpty(users?.data)) { return new Error('usersNotFound'); }
 
             const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
