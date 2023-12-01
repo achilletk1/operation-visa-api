@@ -7,6 +7,6 @@ export class TravelStatusChangedMailNotification extends BaseMailNotification<Tr
     constructor(notificationData: TravelStatusChangedEvent) {
         super('travel-status-changed', notificationData, QueuePriority.HIGH);
 
-        this.subject = `Mise à jour de la déclaration de voyage hors zone CEMAC`;
+        this.subject = `Mise à jour de la déclaration de voyage hors CEMAC`;
     }
 }

@@ -8,6 +8,6 @@ export class TravelJustifyLinkMailNotification extends BaseMailNotification<Trav
     constructor(notificationData: TravelJustifyLinkEvent) {
         super('travel-justify-link', notificationData, QueuePriority.HIGH);
 
-        this.subject = `Lien de justification de voyage hors zone CEMAC`;
+        this.subject = `Lien de justification de voyage hors CEMAC`;
     }
 }

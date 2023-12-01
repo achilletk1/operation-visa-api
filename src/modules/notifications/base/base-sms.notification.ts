@@ -5,8 +5,8 @@ import { config } from "convict-config";
 
 export class BaseSmsNotification<T> extends QueueService {
 
-    protected appName = config.get('template.app');
-    protected company = config.get('template.company');
+    protected appName = config.get('appName') || config.get('template.app');
+    protected company = config.get('clientName') || config.get('template.company');
 
     constructor(
         public phone: string,

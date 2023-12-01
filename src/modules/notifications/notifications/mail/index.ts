@@ -1,5 +1,7 @@
 export * from './users';
 
+export * from './auth-token';
+
 export * from './valid-ceiling';
 
 export * from './visa-exceding';

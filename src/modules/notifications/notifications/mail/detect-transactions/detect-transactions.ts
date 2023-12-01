@@ -7,6 +7,6 @@ export class DetectTransactionsMailNotification extends BaseMailNotification<Det
     constructor(notificationData: DetectTransactionsEvent) {
         super('visa-mail', notificationData, QueuePriority.HIGH, undefined, 'ceilingOverrun');
 
-        this.subject = `Dépassement de plafond sur les transactions Hors zone CEMAC`; // If subjet are setted in template, it must be erase this subject
+        this.subject = `Dépassement de plafond sur les transactions Hors CEMAC`; // If subjet are setted in template, it must be erase this subject
     }
 }

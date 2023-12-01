@@ -9,6 +9,8 @@ router.post('/', validateCreateUserMiddleware, usersController.createUsers);
 
 router.post('/update', usersController.updateUserById);
 
+router.put('/reset-pwrd', usersController.ResetPwrd);
+
 router.get('/', usersController.getUsers);
 
 router.get('/verify-ldap', usersController.verifyLdapUser);

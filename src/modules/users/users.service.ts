@@ -9,6 +9,7 @@ import { CrudService } from "common/base";
 import { config } from "convict-config";
 import { isEmpty } from "lodash";
 import { User } from "./model";
+import { hash } from "bcrypt";
 import moment from "moment";
 
 export class UsersService extends CrudService<User> {
@@ -153,6 +154,26 @@ export class UsersService extends CrudService<User> {
         const buffer = Buffer.from(excelArrayBuffer, 'base64');
 
         return { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileContent: buffer };
+    }
+
+    async ResetPwrd(_id: string) {
+        const AuthUser = httpContext.get('user');
+        if (AuthUser?.category !== 600) { throw Error('Forbidden'); }
+
+        try {
+            const user = await UsersController.usersService.findOne({ filter: { _id } });
+            if (!user) throw Error('UserNotFound');
+            const passwordClear = '000000'/*getRandomString(6)*/;
+            const password = await hash(passwordClear, config.get('saltRounds'));
+            await UsersController.usersService.update({ _id }, { password });
+            await UsersController.usersService.updateDeleteFeild({ _id }, { pwdReseted: false });
+            // TODO send notifications
+            await Promise.all([
+                // notificationService.sendEmailPwdReseted(user, passwordClear),
+                // notificationService.sendPwdResetedSMS(user, passwordClear)
+            ]);
+            return {};
+        } catch (error) { throw(error); }
     }
 
 }

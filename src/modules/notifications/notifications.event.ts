@@ -15,6 +15,7 @@ import { RejectCeilingEvent, RejectCeilingMailNotification } from './notificatio
 import { VisaExcedingEvent, VisaExcedingMailNotification } from './notifications/mail/visa-exceding';
 import { ValidCeilingEvent, ValidCeilingMailNotification } from './notifications/mail/valid-ceiling';
 import { FormalNoticeEvent, FormalNoticeMailNotification } from './notifications/mail/formal-notice';
+import { AuthTokenEmailEvent, AuthTokenEmailNotification } from './notifications/mail/auth-token';
 import { TemplateSmsEvent, TemplateSmsNotification } from './notifications/sms/template';
 import { TokenSmsEvent, TokenSmsNotification } from './notifications/sms/token';
 import events from 'events';
@@ -91,6 +92,11 @@ notificationEmmiter.on('list-of-users-to-bloqued-mail', async (data: ListOfUsers
     await data.generateAttachments();
     await (new ListOfUsersToBloquedMailNotification(data)).sendNotification();
 });
+
+notificationEmmiter.on('auth-token-email', async (data: AuthTokenEmailEvent) => {
+    await (new AuthTokenEmailNotification(data)).sendNotification();
+});
+
 
 notificationEmmiter.on('token-sms', async (data: TokenSmsEvent) => {
     await (new TokenSmsNotification(data)).sendNotification();

@@ -25,6 +25,10 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
 
   protected templateData!: TemplateData;
 
+  protected appName = config.get('appName') || config.get('template.app');
+
+  protected company = config.get('clientName') || config.get('template.company');
+
   constructor(
     protected templateName: string,
     protected eventData: T,
@@ -40,14 +44,14 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
       actionUrl: config.get('baseUrl') + '/home',
       image: config.get('template.image'),
       color: config.get('template.color'),
-      app: config.get('template.app'),
-      company: config.get('template.company'),
+      app: this.appName,
+      company: this.company,
     };
     this.logger.info(`send mail ${this.keyNotification || this.templateName} to ${get(this.eventData, 'receiver', null)}`);
   }
 
   private loadTemplate(filename: string): string {
-    return readFileSync(path.join(__dirname, '..', 'templates', filename + '.template.html'), { encoding: 'utf8', flag: 'r' });
+    return readFileSync(path.join(__dirname, 'templates', filename + '.template.html'), { encoding: 'utf8', flag: 'r' });
   }
 
   private getNotificationBody(): string {

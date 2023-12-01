@@ -46,6 +46,11 @@ export class UsersController {
         try { res.send(await UsersController.usersService.updateUser(req.body)); }
         catch (error) { next(error); }
     }
+
+    async ResetPwrd(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await UsersController.usersService.ResetPwrd(req.body?.userId)); }
+        catch (error) { next(error); }
+    }
     
     async generateUsersExportLinks(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await UsersController.usersService.generateUsersExportLinks(req.query)); }

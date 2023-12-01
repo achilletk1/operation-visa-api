@@ -1,5 +1,6 @@
-import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd } from "common";
+import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
+import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { getLdapUser } from "common/helpers/ldap.helpers";
 import { UsersController } from "modules/users";
 import { get, isEmpty, isString } from "lodash";
@@ -42,6 +43,8 @@ export class AuthService extends BaseService {
                 await UsersController.usersService.update({ _id: user._id }, { otp });
 
                 if (isDevOrStag) { return otp }
+                notificationEmmiter.emit('auth-token-mail', new AuthTokenEmailEvent(user, get(otp, 'value')));
+                notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'tel', '')));
                 this.logger.info(`sends authentication Token by email and SMS to user`);
 
                 if (isStagingBci) { return otp; }

@@ -23,6 +23,7 @@ export interface VisaExcedingMailData {
     lang: 'fr' | 'en';
     amount: number;
     ceiling: string;
+    receiver: string;
     civility: string;
     transactions: any;
 }

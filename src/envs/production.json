@@ -38,7 +38,7 @@
     "timeout": 110000,
     "cbsApiUrl": "https://cbs:3000",
     "template": {
-        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-small.png?alt=media&token=f0488831-44ad-4ecf-a81e-38c42bfd7abd",
+        "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-bicec.jpg?alt=media&token=2231b3f3-0040-49f2-801b-0c665197884f",
         "color": "#DC752A",
         "app": "FLY BANKING",
         "company": "BICEC"

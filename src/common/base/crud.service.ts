@@ -103,6 +103,21 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
+  async updateDeleteFeild(filter: QueryFilter, data: Document): Promise<QueryResult> {
+    try {
+      const existVerify = await this.baseRepository.findOne({ filter });
+      if (!existVerify) throw new Error(errorMsg.NOT_FOUND);
+      delete data?._id;
+
+      const updatedDocument = await this.baseRepository.updateDeleteFeild(filter, data);
+
+      if (!updatedDocument.acknowledged)
+        throw new Error(errorMsg.ON_UPDATE);
+
+      return setResponse(200, respMsg.UPDATED);
+    } catch (error) { throw error; }
+  }
+
   async updateMany(filter: QueryFilter, data: Document, unsetData: Document): Promise<QueryResult> {
     try {
       const existVerify = await this.baseRepository.findOne({ filter });

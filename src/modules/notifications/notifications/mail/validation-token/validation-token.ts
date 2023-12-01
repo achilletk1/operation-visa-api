@@ -7,6 +7,6 @@ export class ValidationTokenMailNotification extends BaseMailNotification<Valida
     constructor(notificationData: ValidationTokenEvent) {
         super('validation-token', notificationData, QueuePriority.HIGH);
 
-        this.subject = `Mot de passe temporaire BCI MOBILE BCI`;
+        this.subject = `Mot de passe temporaire ${this.appName} ${this.company}`;
     }
 }

@@ -83,6 +83,20 @@ export const config = convict({
         }
 
     },
+    appName: {
+        doc: 'Application name',
+        format: String,
+        default: 'FLY BANKING',
+        env: 'APP_NAME',
+        arg: 'APP_NAME'
+    },
+    clientName: {
+        doc: 'Client application name',
+        format: String,
+        default: 'BCI',
+        env: 'CLIENT_NAME',
+        arg: 'CLIENT_NAME'
+    },
     cookieSalt: {
         doc: 'Salt to encrypt Cookies.',
         format: String,

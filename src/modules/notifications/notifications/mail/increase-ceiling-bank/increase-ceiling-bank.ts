@@ -7,6 +7,6 @@ export class IncreaseCeilingBankMailNotification extends BaseMailNotification<In
     constructor(notificationData: IncreaseCeilingBankEvent) {
         super('increase-ceiling-bank', notificationData, QueuePriority.HIGH);
 
-        this.subject = `Nouvelle demande d'augmentation de plafond enregistrée sur le portail BCI MOBILE`;
+        this.subject = `Nouvelle demande d'augmentation de plafond enregistrée sur le portail ${this.appName}`;
     }
 }
