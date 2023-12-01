@@ -43,7 +43,7 @@ export class AuthService extends BaseService {
                 await UsersController.usersService.update({ _id: user._id }, { otp });
 
                 if (isDevOrStag) { return otp }
-                notificationEmmiter.emit('auth-token-mail', new AuthTokenEmailEvent(user, get(otp, 'value')));
+                notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(otp, 'value')));
                 notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'tel', '')));
                 this.logger.info(`sends authentication Token by email and SMS to user`);
 

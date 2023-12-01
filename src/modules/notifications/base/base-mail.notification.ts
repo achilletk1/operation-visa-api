@@ -84,11 +84,11 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
       subject: this.subject,
       receiver: !isDevOrStag ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),
       body: (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody(),
-      cc: !isDevOrStag ? String(get(this.eventData, 'cc', '')) : config.get('emailTest'),
+      cc: !isDevOrStag ? String(get(this.eventData, 'cc', '')) : '',
       attachments: get(this.eventData, 'attachments', []) as MailAttachment[],
       date: new Date(),
     };
-    if (!!queueData.body || !queueData.receiver) { return null; }
+    if (!queueData.body || !queueData.receiver) { return null; }
 
     try {
       if (this.keyNotification) return await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, queueData.receiver, (this.eventData as any)?.id, queueData.attachments, (this.eventData as any)?.key, (this.eventData as any)?.type);
