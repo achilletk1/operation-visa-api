@@ -1,6 +1,6 @@
 import { NotificationFormat, NotificationsType } from "../enum";
+import { isDevOrStag } from 'common/helpers';
 import { QueueService } from './base-queue';
-import { isProd } from 'common/helpers';
 import { config } from "convict-config";
 
 export class BaseSmsNotification<T> extends QueueService {
@@ -20,7 +20,7 @@ export class BaseSmsNotification<T> extends QueueService {
     }
 
     async sendNotification() {
-        if (!isProd || !this.phone || !this.body) { return null; }
+        if (isDevOrStag || !this.phone || !this.body) { return null; }
 
         try {
             if (this.keyNotification) return await this.insertNotification('', NotificationFormat.MAIL, this.body, this.phone, this.id, '', this.key);

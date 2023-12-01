@@ -4,8 +4,8 @@ import { MailNotificationInterface } from 'common/interfaces';
 import { MailAttachment } from 'modules/notifications/model';
 import { TemplatesController } from 'modules/templates';
 import { QueueData, TemplateData } from 'common/types';
-import { isDevOrStag, isProd } from 'common/helpers';
 import { LettersController } from 'modules/letters';
+import { isDevOrStag } from 'common/helpers';
 import { QueueService } from './base-queue';
 import { config } from 'convict-config';
 import handlebars from 'handlebars';
@@ -78,17 +78,17 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
   }
 
   async sendNotification() {
-    if (!isDevOrStag) { return null; }
+    if (isDevOrStag) { return null; }
 
     const queueData: QueueData = {
       subject: this.subject,
-      receiver: isProd ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),
+      receiver: !isDevOrStag ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),
       body: (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody(),
-      cc: isProd ? String(get(this.eventData, 'cc', '')) : config.get('emailTest'),
+      cc: !isDevOrStag ? String(get(this.eventData, 'cc', '')) : config.get('emailTest'),
       attachments: get(this.eventData, 'attachments', []) as MailAttachment[],
       date: new Date(),
     };
-    if (!!queueData.body) { return null; }
+    if (!!queueData.body || !queueData.receiver) { return null; }
 
     try {
       if (this.keyNotification) return await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, queueData.receiver, (this.eventData as any)?.id, queueData.attachments, (this.eventData as any)?.key, (this.eventData as any)?.type);
