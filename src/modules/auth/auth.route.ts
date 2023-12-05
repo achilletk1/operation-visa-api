@@ -11,6 +11,8 @@ router.post('/verify-credentials', authController.verifyCredentials);
 
 router.post('/verify-otp', authController.verifyOtp);
 
+router.post('/verify-credentials/user', authController.verifyCredentialsUser);
+
 router.post('/reset-default-pwd', authController.resetFirstPassword);
 
 router.get('/authorizations', authController.getAuthorizations);
