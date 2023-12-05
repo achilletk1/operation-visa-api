@@ -10,6 +10,7 @@ export const whiteList: { path: string, method?: string }[] = [
     { path: '/downloads', method: 'GET' },
     { path: '/status', method: 'GET' },
     { path: '/auth/verify-credentials', method: 'POST' },
+    { path: '/auth/verify-credentials/users', method: 'POST' },
     { path: '/auth/verify-otp', method: 'POST' },
     { path: '/auth/reset-default-pwd', method: 'POST' },
     { path: '/auth/reset-default-pwd', method: 'GET' },
