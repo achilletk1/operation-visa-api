@@ -9,6 +9,9 @@ import httpContext from 'express-http-context';
 import { config } from "convict-config";
 import bcrypt from 'bcrypt';
 import moment from "moment";
+import crypt from "url-crypt";
+import { UsersOtpEvent } from "modules/notifications/notifications/mail/users-otp";
+const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
 export class AuthService extends BaseService {
 
@@ -119,11 +122,48 @@ export class AuthService extends BaseService {
             return {};
         } catch (error) { throw error; }
     }
+    
+    async verifyCredentialsUser(credentials: any) {
+        try {
+            const { userCode } = credentials;
+
+            const user = await  UsersController.usersService.findOne({ filter: { userCode } })
+        
+            if (!user) {  throw new Error('UserNotFound'); }
+                        
+            if (!user.enabled) { return new Error('disableUser'); }
+        
+            const token = {
+                value: getRandomString(6, true),
+                expiresAt: moment().add(20, 'minutes').valueOf()
+            }
+        
+            try {
+                user.otp = token;
+                await UsersController.usersService.updateUser(user);
+    
+                if (isDevOrStag) { return token }
+
+                notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')));
+                notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'tel', '')));
+                this.logger.info(`sends authentication Token by email and SMS to user`);
+
+                if (isStagingBci) { return token; }
+
+                if (['staging-bci'].includes(config.get('env'))) { return token ; }
+                return {};
+            } catch (error:any) {
+                return error;
+            }
+
+        } catch (error) { throw error; }
+    }
+
 
     getAuthorizations() {
         try {
-            const profile = getUserProfile(httpContext.get('user'));
-            if (!profile) { throw Error('Forbidden'); }
+            let profile = getUserProfile(httpContext.get('user'));
+            if (!profile) { throw Error('Forbidden') }
 
             const authorizations = getAuthorizationsByProfile(profile);
             return authorizations;

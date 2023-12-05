@@ -22,6 +22,12 @@ export class AuthController {
         catch (error) { next(error); }
     }
 
+
+    async verifyCredentialsUser(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await AuthController.authService.verifyCredentialsUser(req.body as any)); }
+        catch (error) { next(error); }
+    }
+
     async resetFirstPassword(req: Request, res: Response, next: NextFunction) {
         try { res.send(await AuthController.authService.resetFirstPassword(req.body as any)); }
         catch (error) { next(error); }
