@@ -1,4 +1,4 @@
-import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd } from "common";
+import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd, errorMsg } from "common";
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { getLdapUser } from "common/helpers/ldap.helpers";
@@ -126,9 +126,9 @@ export class AuthService extends BaseService {
 
             const user = await  UsersController.usersService.findOne({ filter: { userCode } })
         
-            if (!user) {  throw new Error('UserNotFound'); }
+            if (!user) {  throw new Error(errorMsg.USER_NOT_FOUND); }
                         
-            if (!user.enabled) { return new Error('disableUser'); }
+            if (!user.enabled) { return new Error(errorMsg.USER_DISABLED); }
         
             const token = {
                 value: getRandomString(6, true),
@@ -136,8 +136,7 @@ export class AuthService extends BaseService {
             }
         
             try {
-                user.otp = token;
-                await UsersController.usersService.updateUser(user);
+                await UsersController.usersService.update({ _id: user._id }, { otp:token });
     
                 if (isDevOrStag) { return token }
 

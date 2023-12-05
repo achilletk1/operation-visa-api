@@ -115,7 +115,6 @@ export class UsersService extends CrudService<User> {
                 date: moment()?.valueOf(),
             });
 
-            userDatas.enabled = !userDatas?.enabled;
             userDatas.fullName = `${userDatas?.fname} ${userDatas?.lname}`;
 
             const result = await UsersController.usersService.update({ _id: userDatas?._id }, userDatas);
