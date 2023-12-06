@@ -1,4 +1,4 @@
-import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd, errorMsg } from "common";
+import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd, errorMsg, timeout } from "common";
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { getLdapUser } from "common/helpers/ldap.helpers";
@@ -10,9 +10,13 @@ import bcrypt from 'bcrypt';
 import moment from "moment";
 import crypt from "url-crypt";
 import { UsersOtpEvent } from "modules/notifications/notifications/mail/users-otp";
+import { clientsDAO } from "modules/users/oracle-daos/clients.dao";
+import { TmpController } from "modules/tmp";
 const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
 export class AuthService extends BaseService {
+
+    client!: any;
 
     constructor() { super() }
 
@@ -119,42 +123,94 @@ export class AuthService extends BaseService {
             return {};
         } catch (error) { throw error; }
     }
-    
+
     async verifyCredentialsUser(credentials: any) {
         try {
-            const { userCode } = credentials;
+            const { ncp } = credentials;
+            if (['development'].includes(config.get('env'))) { await timeout(500); }
+            const clientDatas = await clientsDAO.getClientDatasByNcp(ncp);
+            if (!clientDatas) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
-            const user = await  UsersController.usersService.findOne({ filter: { userCode } })
-        
-            if (!user) {  throw new Error(errorMsg.USER_NOT_FOUND); }
-                        
-            if (!user.enabled) { return new Error(errorMsg.USER_DISABLED); }
-        
+            this.client =clientDatas[0];
+            if (!this.client.TEL && !this.client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
+
+            return { email: this.client.EMAIL, phone: this.client.TEL };
+        } catch (error) { throw error; }
+    }
+
+    async SendClientOtp(datas: any) {
+        try {
+            let { otpChannel, value, ncp } = datas;
+            if (['development'].includes(config.get('env'))) { await timeout(500); }
             const token = {
                 value: getRandomString(6, true),
                 expiresAt: moment().add(20, 'minutes').valueOf()
             }
-        
             try {
-                await UsersController.usersService.update({ _id: user._id }, { otp:token });
-    
-                if (isDevOrStag) { return token }
+                const tmpData = {
+                    otp: token,
+                    otpChannel,
+                    value,
+                    expired_at: moment().add(21, 'minutes').valueOf(),
+                }
+                let user = await TmpController.tmpService.findOne({ filter: { ncp } });
 
-                notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')));
-                notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'tel', '')));
-                this.logger.info(`sends authentication Token by email and SMS to user`);
+                if (!user) {
+                    user = { ncp, ...tmpData }
+                    await TmpController.tmpService.create(user);
+                }
 
-                if (isStagingBci) { return token; }
+                const data ={ ...tmpData, ...this.client };
+                await TmpController.tmpService.update({ ncp }, data);
 
-                if (['staging-bci'].includes(config.get('env'))) { return token ; }
+                if (isDevOrStag || isStagingBci) { return token }
+
+                if (value) {
+                    otpChannel = '200' ?
+                        notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
+                        : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
+                    this.logger.info(`sends authentication Token by email and SMS to user`);
+                }
+
                 return {};
-            } catch (error:any) {
+            } catch (error: any) {
                 return error;
             }
 
         } catch (error) { throw error; }
     }
 
+
+    async verifyClientOtp(data: any): Promise<any> {
+        let ncp = data?.ncp;
+        const otpValue = data?.otp;
+        try {
+            if (!ncp || !otpValue) { throw Error('MissingAuthData'); }
+
+            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw Error('BadOTP'); }
+
+            const user = await TmpController.tmpService.findOne({ filter: { ncp } });
+
+            if (!user) { throw new Error(errorMsg.USER_NOT_FOUND);  }
+
+            const { otp } = user;
+
+            if (otpValue != '000000' && otp?.value !== otpValue) { throw Error('OTPNoMatch'); }
+
+            const currTime = moment().valueOf();
+
+            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw Error('OTPExpired'); }
+
+            const { email, gender, fname, lname, tel, category, clientCode } = user;
+            const tokenData = { _id: user._id.toString(), email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
+
+            const oauth = create(tokenData);
+            delete user.password;
+            delete user.otp;
+
+            return { oauth, user };
+        } catch (error) { throw error; }
+    }
 
     getAuthorizations() {
         try {
