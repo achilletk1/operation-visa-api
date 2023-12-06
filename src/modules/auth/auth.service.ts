@@ -131,7 +131,7 @@ export class AuthService extends BaseService {
             const clientDatas = await clientsDAO.getClientDatasByNcp(ncp);
             if (isEmpty(clientDatas)) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
-            this.client =clientDatas[0];
+            this.client = clientDatas[0];
             if (!this.client.TEL && !this.client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
 
             return { email: this.client.EMAIL, phone: this.client.TEL };
@@ -153,15 +153,17 @@ export class AuthService extends BaseService {
                     value,
                     expired_at: moment().add(21, 'minutes').valueOf(),
                 }
-                let user = await TmpController.tmpService.findOne({ filter: { ncp } });
+                const {data: users} = await TmpController.tmpService.findAll();
+
+                let user = users.find(user => user.ncp === ncp)
 
                 if (!user) {
                     user = { ncp, ...tmpData }
                     await TmpController.tmpService.create(user);
                 }
 
-                const data ={ ...tmpData, ...this.client };
-                await TmpController.tmpService.update({ ncp }, data);
+                const tmpUser = { ...tmpData, ...this.client };
+                await TmpController.tmpService.update({ ncp }, tmpUser);
 
                 if (isDevOrStag || isStagingBci) { return token }
 
@@ -191,7 +193,7 @@ export class AuthService extends BaseService {
 
             const user = await TmpController.tmpService.findOne({ filter: { ncp } });
 
-            if (!user) { throw new Error(errorMsg.USER_NOT_FOUND);  }
+            if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
             const { otp } = user;
 
