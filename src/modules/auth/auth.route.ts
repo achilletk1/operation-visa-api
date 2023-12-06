@@ -13,6 +13,10 @@ router.post('/verify-otp', authController.verifyOtp);
 
 router.post('/verify-credentials/user', authController.verifyCredentialsUser);
 
+router.post('/send-client-otp', authController.SendClientOtp);
+
+router.post('/verify-client-otp', authController.verifyClientOtp);
+
 router.post('/reset-default-pwd', authController.resetFirstPassword);
 
 router.get('/authorizations', authController.getAuthorizations);
