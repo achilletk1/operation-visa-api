@@ -132,7 +132,7 @@ export class AuthService extends BaseService {
             const { ncp } = credentials;
             if (['development'].includes(config.get('env'))) { await timeout(500); }
             const clientDatas = await clientsDAO.getClientDatasByNcp(ncp);
-            if (!clientDatas) { throw new Error(errorMsg.USER_NOT_FOUND); }
+            if (isEmpty(clientDatas)) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
             this.client =clientDatas[0];
             if (!this.client.TEL && !this.client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
