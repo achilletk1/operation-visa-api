@@ -239,7 +239,7 @@ export class TravelService extends CrudService<Travel> {
 
             let travel = await TravelController.travelService.findOne({ filter: { _id } }) as Travel;
 
-            if (!travel) { throw Error('TravelNotFound') }
+            if (!travel) { throw Error('TravelNotFound'); }
 
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw Error('CannotRejectWithoutReason') }
 
@@ -428,7 +428,7 @@ export class TravelService extends CrudService<Travel> {
             transactionQuery = { date: { $gte: +start } };
             travelQuery = { "proofTravel.dates.start": { $gte: +start } };
         }
-        if (start) {
+        if (end) {
             transactionQuery.date['$lte'] = +end;
             travelQuery = { ...travelQuery, "proofTravel.dates.end": { $lte: +end } };
         }
@@ -517,7 +517,7 @@ export class TravelService extends CrudService<Travel> {
         const options = { ttl, id };
         const code = cryptObj(options);
 
-        const basePath = `/visa-operations/client/ept-and-atm-withdrawal/receipts`;
+        const basePath = `/ept-and-atm-withdrawal/receipts`;
         const link = `${basePath}?query=${code}`;
         await TravelController.travelService.update({ _id: id }, { link: link });
         return link

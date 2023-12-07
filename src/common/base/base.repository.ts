@@ -116,7 +116,7 @@ export class BaseRepository implements RepositoryInterface {
   }
 
   private setMongoId(filter: QueryFilter={}): void {
-    if ('_id' in filter)
+    if ('_id' in filter && filter?._id?.toString()?.length === 24)
       filter._id = new ObjectId(filter?._id?.toString());
   }
 }
