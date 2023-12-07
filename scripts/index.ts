@@ -26,19 +26,21 @@ const runScripts = async () => {
 
 (async () => {
     try {
-        const prompt = readline.createInterface({ input: process.stdin, output: process.stdout });
+        // const prompt = readline.createInterface({ input: process.stdin, output: process.stdout });
 
         console.log('* Start reset visa operation data scripts');
+        await runScripts();
+        process.exit();
 
-        prompt.question('* Voulez-vous continuer? (y/n): ', async (answer) => {
-            if (['y', 'yes', 'Y', 'YES'].includes(answer)) await runScripts();
+        // prompt.question('* Voulez-vous continuer? (y/n): ', async (answer) => {
+        //     if (['y', 'yes', 'Y', 'YES'].includes(answer)) await runScripts();
 
-            prompt.close();
-        });
+        //     prompt.close();
+        // });
 
-        prompt.on('close', () => {
-            process.exit();
-        });
+        // prompt.on('close', () => {
+        //     process.exit();
+        // });
     } catch (error) {
         console.log(error);
         process.exit(1);
