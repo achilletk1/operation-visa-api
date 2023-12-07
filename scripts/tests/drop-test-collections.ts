@@ -12,7 +12,8 @@ export const dropTestCollections = async () => {
     const respDelete = await db.collection("settings").deleteMany({ key: { $in: ['visa_transaction_tmp_treatment_in_progress', 'start_revival_mail_in_progress', 'get_internet_pay_transactions_in_progress', 'get_tpe_gab_transactions_in_progress'] } });
     console.log('settings delete', respDelete);
 
-    const collections = ['visa_transactions_tmp', 'visa_transactions_replica', 'visa_transactions', 'visa_transactions', 'visa_operations_travels', 'visa_operations_travel_months', 'visa_operations_online_payments', 'queue', 'notifications']
+    // const collections = ['visa_transactions_tmp', 'visa_transactions_replica', 'visa_transactions', 'visa_transactions', 'visa_operations_travels', 'visa_operations_travel_months', 'visa_operations_online_payments', 'queue', 'notifications']
+    const collections = ['settings'];
 
     await Promise.all(collections.map(async (collection) => {
         try {

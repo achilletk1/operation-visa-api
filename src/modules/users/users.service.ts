@@ -76,7 +76,7 @@ export class UsersService extends CrudService<User> {
                 user.editors = [];
                 // Add user datas
                 user.enabled = true;
-                user.fullName = `${user.fname} ${user.lname}`;
+                user.fullName = user.fullName || `${user.fname} ${user.lname}`;
                 user.visaOpecategory = category;
                 user.category = 600;
                 user.created_at = moment().valueOf();
@@ -115,8 +115,9 @@ export class UsersService extends CrudService<User> {
                 date: moment()?.valueOf(),
             });
 
-            userDatas.enabled = !userDatas?.enabled;
+            // userDatas.enabled = !userDatas?.enabled;
             userDatas.fullName = `${userDatas?.fname} ${userDatas?.lname}`;
+            userDatas.updated_at = moment().valueOf();
 
             const result = await UsersController.usersService.update({ _id: userDatas?._id }, userDatas);
             return result;

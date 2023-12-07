@@ -11,7 +11,7 @@ export class OnlinePaymentStatusChangedEvent implements OnlinePaymentStatusChang
     civility!: string;
 
     constructor(onlinePayment: OnlinePaymentMonth) {
-        this.civility = onlinePayment?.user?.sex === 'F' ? 'Mme' : ((onlinePayment?.user?.sex === 'M') ? 'M.' : 'M./Mme');
+        this.civility = onlinePayment?.user?.gender?.toUpperCase() === 'F' ? 'Mme' : ((onlinePayment?.user?.gender?.toUpperCase() === 'M') ? 'M.' : 'M./Mme');
         this.name = onlinePayment?.user?.fullName || '';
         this.receiver = onlinePayment?.user?.email || '';
         this.status = getStatusExpression(onlinePayment?.status);

@@ -2,6 +2,7 @@ import { SettingsRepository } from "./settings.repository";
 import { SettingsController } from './settings.controller';
 import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
+import { User } from "modules/users";
 import { Setting } from "./model";
 import { isEmpty } from "lodash";
 import moment from "moment";
@@ -15,32 +16,28 @@ export class SettingsService extends CrudService<Setting> {
         super(SettingsService.settingsRepository);
     }
 
-    async updateSettingById(_id: string, setting: Setting) {
+    async updateSettingByIdOrKey(_id: string, setting: Partial<Setting>, byKey: boolean = false) {
         try {
-            const authUser = httpContext.get('user');
-            setting.users = isEmpty(setting?.users) ? [] : setting?.users;
-            setting.dateUpdated = isEmpty(setting?.dateUpdated) ? [] : setting?.dateUpdated;
+            const opts = byKey ? { key: _id } : { _id };
+            const currSetting = await SettingsController.settingsService.findOne({ filter: opts });
 
-            if (setting.dateUpdated.length >= 10) {
-                let index = 0;
-                let value = setting.dateUpdated.reduce(function (pre, cur, i) {
-                    return cur < pre ? ((index = i) && cur) : pre;
-                });
-                setting.dateUpdated[index] = moment().valueOf();
-                setting.users[index] = authUser;
-            }
-            setting.users.push(authUser);
-            setting.dateUpdated.push(moment().valueOf());
-            return await SettingsController.settingsService.update({ _id }, setting);
+            const authUser = httpContext.get('user') as User;
+
+            currSetting.updated_at = isEmpty(currSetting?.updated_at) ? [] : currSetting?.updated_at;
+            currSetting.updated_at.unshift({ user: { _id: authUser._id, fullName: authUser.fullName }, date: moment().valueOf() });
+
+            if (currSetting.updated_at.length >= 10) { currSetting.updated_at.pop(); }
+
+            return await SettingsController.settingsService.update(opts, { data: setting.data, updated_at: currSetting.updated_at });
         } catch (error) { throw error; }
     }
 
 
-    async getSettings(filters: any) {
+    async getSettings(filter: any) {
         try {
             const authUser = httpContext.get('user');
             if (authUser?.category < 500) { return new Error('Forbidden'); }
-            return await SettingsController.settingsService.findAll({ filter: filters });
+            return await SettingsController.settingsService.findAll({ filter });
         } catch (error) { throw error; }
     }
 

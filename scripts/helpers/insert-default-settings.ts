@@ -12,58 +12,31 @@ export const inserDefaultSetting = async () => {
   const Settings = [
     {
       key: 'max_upload_file_size',
-      maxUpladFileSize: 5,
-      dateCreated: moment().valueOf(),
-      dateUpdated: [],
-      users: []
-    },
-    {
-      key: 'service_parameter',
-      label: 'parametrage de service',
-      dateCreated: moment().valueOf(),
-      maxUpladFileSize: 5,
-      data: { value: 40 },
-      dateUpdated: [],
-      enabled: true,
-      users: []
-    },
-    {
-      key: 'validation_level',
-      label: 'parametrage du niveau de validation',
-      dateCreated: moment().valueOf(),
-      maxUpladFileSize: 5,
-      data: { value: 3 },
-      dateUpdated: [],
-      enabled: true,
-      users: []
+      label: 'Taille maximale des fichier à importer',
+      created_at: moment().valueOf(),
+      updated_at: [],
+      data: 5
     },
     {
       key: 'ttl_value',
-      label: 'parametrage du TTL',
-      dateCreated: moment().valueOf(),
-      data: { value: 40 },
-      maxUpladFileSize: 5,
-      dateUpdated: [],
-      enabled: true,
-      users: []
+      label: 'Parametrage du TTL',
+      created_at: moment().valueOf(),
+      updated_at: [],
+      data: 40
     },
     {
       key: 'otp_status',
-      label: 'parametrage OTP' ,
-      dateCreated: moment().valueOf(),
-      maxUpladFileSize: 5,
-      dateUpdated: [],
-      enabled: true,
-      users: []
+      label: "Parametrage globale de l'authentification avec OTP",
+      created_at: moment().valueOf(),
+      updated_at: [],
+      data: true
     },
     {
       key: 'mail_gateway',
-      label: 'parametrage de la paserelle de mail',
-      dateCreated: moment().valueOf(),
-      maxUpladFileSize: 5,
-      dateUpdated: [],
-      enabled: true,
-      users: []
+      label: 'Parametrage de la paserelle de mail',
+      created_at: moment().valueOf(),
+      updated_at: [],
+      data: 10
     }
   ]
   console.log('insert default max size file  collection');

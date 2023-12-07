@@ -8,6 +8,8 @@ router.get('/', settingsController.getSettings);
 
 router.get('/:key', settingsController.findOneByKey);
 
+router.put('/key/:key', settingsController.updateSettingByKey);
+
 router.put('/:id', settingsController.updateSettingById);
 
 export const settingsRoute = router;

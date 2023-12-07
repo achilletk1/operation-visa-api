@@ -51,7 +51,7 @@
     "cronDeleteTemporaryFile": "0 */3 * * *",
     "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
     "cronclientindemeure":"*/3 */1 * * *",
-    "gotenbergUrl": "http://173.255.248.184:7900",
+    "gotenbergUrl": "http://143.42.97.18:7900",
     "emailTest": "kevin.moutassi@londo-tech.com",
     "emailBank": "kevin.moutassi@londo-tech.com"
 }

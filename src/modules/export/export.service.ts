@@ -58,7 +58,7 @@ export class ExportService extends BaseService {
         try {
             const { path } = query;
             const data = readFile(path);
-            return data;
+            return { data };
         } catch (error) { throw error; }
     }
 

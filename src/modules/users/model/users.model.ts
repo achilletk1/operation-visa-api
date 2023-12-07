@@ -23,18 +23,10 @@ export class User {
     enabled?: boolean;
     pwdReseted?: boolean;
     clientCode?: string;
-    ncp?: string;
-    code?: string;
     otp?: { value: string, expiresAt?: number };
     ceiling?: CeilingInfors[]; // infors ceilings
     option?: number;
-    commissionProfil?: string;
-    walletAirtel?: Wallet;
-    walletGIMAC?: Wallet;
-    walletMTN?: Wallet;
-    isNotSubscriber?: boolean;
-    sex?: 'M' | 'F';
-    gender?: string;
+    gender?: 'm' | 'f' | string;
     visaOpValidation?: {
         level?: number;
         fullRigth?: boolean;
@@ -44,6 +36,8 @@ export class User {
     editors?: Editor[];
     visaOpecategory?: visaOpecategory;
     created_at?: number;
+    updated_at?: number;
+    otp2fa?: boolean;
 
     constructor(userCode: string, fname: string) {
         this.userCode = userCode;

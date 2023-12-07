@@ -7,19 +7,21 @@ import { inserDefaultVisaCeilings } from './helpers/insert-default-ceiling';
 import { inserDefaultBankUsers } from './helpers/insert-default-bank-users';
 import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
+import { dropTestCollections } from './tests/drop-test-collections';
 import readline from 'readline';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    await inserDefaultVisaCeilings();
-    await inserDefaultLongTravelsTypes();
-    await inserDefaultLetter();
-    await inserDefaultPropertyType();
+    await dropTestCollections();
+    // await inserDefaultVisaCeilings();
+    // await inserDefaultLongTravelsTypes();
+    // await inserDefaultLetter();
+    // await inserDefaultPropertyType();
     await inserDefaultSetting();
-    await insertDefaultTemplateSetting();
-    await inserDefaultVouchers();
-    await inserDefaultUsersValidations();
-    await inserDefaultBankUsers();
+    // await insertDefaultTemplateSetting();
+    // await inserDefaultVouchers();
+    // await inserDefaultUsersValidations();
+    // await inserDefaultBankUsers();
 }
 
 (async () => {

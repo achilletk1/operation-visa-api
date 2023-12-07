@@ -13,8 +13,13 @@ export class SettingsController {
         catch (error) { next(error); }
     }
 
+    async updateSettingByKey(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await SettingsController.settingsService.updateSettingByIdOrKey(req.params.key as string, req.body, true)); }
+        catch (error) { next(error); }
+    }
+
     async updateSettingById(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await SettingsController.settingsService.updateSettingById(req.params.id as string, req.body)); }
+        try { res.send(await SettingsController.settingsService.updateSettingByIdOrKey(req.params.id as string, req.body, false)); }
         catch (error) { next(error); }
     }
 

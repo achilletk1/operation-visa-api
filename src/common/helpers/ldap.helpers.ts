@@ -23,7 +23,7 @@ export async function getLdapUser(userCode: any, password?: any) {
     if (password) { ldapOptions.userPassword = `${password}`; }
     else { ldapOptions.verifyUserExists = true; }
 
-    let response = { givenName: 'John', sn: 'Doe', mobile: '23794345214', memberOf: null, mail: '' };
+    let response = { givenName: 'John', sn: 'Doe', mobile: '237699000000', memberOf: null, mail: 'john.doe@londo-tech.com', displayName: 'Doe John' };
 
     if (['production', 'staging-bci'].includes(config.get('env'))) {
         try {
@@ -80,7 +80,7 @@ export async function getLdapUser(userCode: any, password?: any) {
 
     const user = {
         userCode, fname: response.givenName, lname: response.sn,
-        tel: response.mobile, email: response?.mail
+        tel: response.mobile, email: response?.mail, fullName: response.displayName
     };
 
     return user;
