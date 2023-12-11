@@ -37,7 +37,7 @@ export class TravelService extends CrudService<Travel> {
 
     async getTravels(filters: any) {
         try {
-            this.formatFilters(filters);
+          this.formatFilters(filters);
             return await TravelController.travelService.findAll(filters);
         } catch (error) { throw error; }
     }
