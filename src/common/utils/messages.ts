@@ -39,7 +39,8 @@ export const errorMsg = {
     NOT_USER_FOUND: 'user not found or usernameAttribute is wrong',
     UNAUTHORIZED_GROUP: 'User is not a member of authorized group',
     NO_RIGHTS: 'User access rights disabled',
-    USER_DISABLED: 'User disabled'
+    USER_DISABLED: 'User disabled',
+    MISSING_USER_DATA: 'Missing user data'
 };
 
 export const respMsg = {
