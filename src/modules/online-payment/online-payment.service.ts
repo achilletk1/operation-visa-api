@@ -24,6 +24,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async getOnlinePaymentsBy(filter: any) {
         try {
             this.formatFilters(filter);
+            if (filter?.start && filter?.end) filter['dates.created'] = { $gte: moment(filter?.start, 'YYYY-MM-DD').startOf('day').valueOf(), $lte: moment(filter?.end, 'YYYY-MM-DD').endOf('day').valueOf() };
+            delete filter?.start;
+            delete filter?.end;
             return await OnlinePaymentController.onlinePaymentService.findAll({ filter });
         } catch (error) { throw error; }
     }
