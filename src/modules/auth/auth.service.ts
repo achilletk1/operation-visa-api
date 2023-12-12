@@ -153,9 +153,10 @@ export class AuthService extends BaseService {
                     value,
                     expired_at: moment().add(21, 'minutes').valueOf(),
                 }
-                const {data: users} = await TmpController.tmpService.findAll();
+                // const {data: users} = await TmpController.tmpService.findAll();
+                // let user = users.find(user => user.ncp === ncp)
+                let user:any = this.findUser(ncp);
 
-                let user = users.find(user => user.ncp === ncp)
 
                 if (!user) {
                     user = { ncp, ...tmpData }
@@ -224,4 +225,9 @@ export class AuthService extends BaseService {
         } catch (error) { throw error; }
     }
 
+    async findUser(filter: any): Promise<any> {
+        try {
+            return await TmpController.tmpService.findOne({ filter: { filter } });
+        } catch (error) { return false }
+    }
 }
