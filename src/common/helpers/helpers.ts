@@ -152,6 +152,7 @@ export const convertParams = (query: QueryOptions): QueryOptions => {
       if (['true'].includes(query.filter[key])) { query.filter[key] = true; }
       if (query.filter[key] === 'false') { query.filter[key] = false; }
       if (RegExp(/[a-z]/i).test(query.filter[key])) { continue; }
+      if (key === 'user.clientCode') { continue; }
       query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
     }
   }

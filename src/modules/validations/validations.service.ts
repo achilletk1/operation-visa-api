@@ -42,7 +42,7 @@ export class ValidationsService extends CrudService<UserValidator> {
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { throw Error('Forbidden'); }
 
-            const data: any = await ValidationsController.validationsService.getMaxValidationLevel();
+            const data: any = await ValidationsService.validationsRepository.getMaxValidationLevel();
 
             return { level: data[0]?.level || 0 };
         } catch (error) { throw error; }
@@ -86,7 +86,7 @@ export class ValidationsService extends CrudService<UserValidator> {
 
 
             const opts = { filter: { userId: { $ne: userId }, enabled: true }, projection: { _id: 0, level: 1 } };
-            const validationsLevelList = await ValidationsController.validationsService.findAll(opts) as unknown as any[];
+            const validationsLevelList = (await ValidationsController.validationsService.findAll(opts))?.data;
             const isGapInValidation = this.validationListHasGap(validationsLevelList, Number(userValidator?.level));
             if (isGapInValidation) { throw Error('ValidationLevelGap'); }
 

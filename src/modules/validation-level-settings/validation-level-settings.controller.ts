@@ -8,12 +8,12 @@ export class ValidationLevelSettingsController {
     constructor() { ValidationLevelSettingsController.levelValidateService = new ValidationLevelSettingsService(); }
 
     async insertValidationLevelSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ValidationLevelSettingsController.levelValidateService.insertValidationLevelSettings(req.body)); }
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.create(req.body)); }
         catch (error) { next(error); }
     }
 
     async getValidationLevelSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ValidationLevelSettingsController.levelValidateService.getValidationLevelSettings({ filter: req.query })); }
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.findAll({ filter: req.query })); }
         catch (error) { next(error); }
     }
 
@@ -23,7 +23,7 @@ export class ValidationLevelSettingsController {
     }
 
     async updateValidationLevelSettingsById(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ValidationLevelSettingsController.levelValidateService.updateValidationLevelSettingsById(req.params.id, req.body)); }
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.update({ _id: req.params.id }, req.body)); }
         catch (error) { next(error); }
     }
 

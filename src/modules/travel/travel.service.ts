@@ -1,7 +1,7 @@
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
 import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
-import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
+import { notificationEmmiter, TravelDeclarationEvent, TravelStatusChangedEvent } from 'modules/notifications';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
@@ -21,6 +21,7 @@ import { ObjectId } from "mongodb";
 import { Travel } from "./model"
 import crypt from 'url-crypt';;
 import moment from "moment";
+import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 
 const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
@@ -233,29 +234,49 @@ export class TravelService extends CrudService<Travel> {
 
             let stepData = [];
 
-            const { status, step, rejectReason, validator, references } = data;
+            const { status, step, rejectReason, validator, references, signature } = data;
 
             if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { throw Error('StepNotProvided') };
 
-            let travel = await TravelController.travelService.findOne({ filter: { _id } }) as Travel;
+            let travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if (!travel) { throw Error('TravelNotFound'); }
+            
+            const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
+
+            const validationLevelNumber = await ValidationLevelSettingsController.levelValidateService.count({});
 
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw Error('CannotRejectWithoutReason') }
 
             let updateData: any, tobeUpdated: any;
 
-            updateData = { status };
+            // updateData = { status };
 
-            if (status === OpeVisaStatus.REJECTED) { updateData = { ...updateData, rejectReason } }
+            if (status === OpeVisaStatus.REJECTED) { updateData = { status, rejectReason } }
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
                 proofTravel.validators = [];
-                proofTravel.validators.push(validator);
-                proofTravel = { ...proofTravel, ...updateData }
+                proofTravel.validators.push({
+                    _id: validator._id,
+                    fullName: `${user.fname} ${user.lname}`,
+                    userCode: user?.userCode,
+                    signature,
+                    date: moment().valueOf(),
+                    status,
+                    level: validator.level
+                });
+                if (rejectReason) { proofTravel.validators[proofTravel.validators.length - 1].rejectReason = rejectReason; }
+
+                if (validator.fullRights || validator.level === validationLevelNumber || status === OpeVisaStatus.REJECTED) {
+                    proofTravel = { ...proofTravel, ...updateData };
+                    travel.proofTravel = proofTravel;
+                    // TODO generate this notification
+                    // notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(travel as Travel, 'reject', 'proofTravel', +validator.level === 1 ? 'frontoffice' :'backoffice'))
+                }
+                // TODO notify next level
                 tobeUpdated = { proofTravel };
-                travel.proofTravel.status = status;
+
                 stepData.push('Preuve de voyage');
             }
 
@@ -323,9 +344,8 @@ export class TravelService extends CrudService<Travel> {
             travel.otherAttachmentAmount = otherAttachmentAmount;
             travel.expenseDetailAmount = expenseDetailAmount;
             if (step === 'proofTravel') {
-                travel = await this.verifyTravelTransactions(_id, travel);
+                // travel = await this.verifyTravelTransactions(_id, travel);
             }
-
 
             return await TravelController.travelService.update({ _id }, travel);
         } catch (error) { throw error; }
@@ -339,8 +359,8 @@ export class TravelService extends CrudService<Travel> {
 
         const ids = [];
         for (const data of existingTravels?.data) {
-            travel.proofTravel.continents.push(...data.proofTravel.continents);
-            travel.proofTravel.countries.push(...data.proofTravel.countries);
+            // travel.proofTravel.continents.push(...data.proofTravel.continents);
+            // travel.proofTravel.countries.push(...data.proofTravel.countries);
             travel.proofTravel.proofTravelAttachs.push(...data.proofTravel.proofTravelAttachs);
             if (data.proofTravel.isTransportTicket) { travel.proofTravel.isTransportTicket = true; }
             if (data.proofTravel.isVisa) { travel.proofTravel.isVisa = true; }
@@ -350,13 +370,13 @@ export class TravelService extends CrudService<Travel> {
             ids.push(new ObjectId(data._id.toString()));
         }
 
-        travel.proofTravel.continents = [...new Set(travel?.proofTravel?.continents)];
+        // travel.proofTravel.continents = [...new Set(travel?.proofTravel?.continents)];
         const countries: any[] = [];
-        (travel?.proofTravel?.countries || []).forEach((elt) => {
-            if (!countries.find((e) => e.name === elt?.name)) { countries.push(elt) }
-        });
+        // (travel?.proofTravel?.countries || []).forEach((elt) => {
+        //     if (!countries.find((e) => e.name === elt?.name)) { countries.push(elt) }
+        // });
 
-        travel.proofTravel.countries = countries;
+        // travel.proofTravel.countries = countries;
 
         await TravelController.travelService.deleteMany({ _id: { $in: ids } });
 

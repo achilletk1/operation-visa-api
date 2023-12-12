@@ -25,11 +25,11 @@ export function getTravelStatus(travel: Travel): OpeVisaStatus {
 
     if (!travel) { throw new Error('TravelNotDefined'); }
     const amount = getTotal(travel?.transactions || []);
-    let status = Number(travel?.ceiling) < amount ? [travel?.proofTravel?.status, travel?.expenseDetailsStatus] : [travel?.proofTravel?.status];
+    let status = travel?.ceiling && +travel?.ceiling < amount ? [travel?.proofTravel?.status, travel?.expenseDetailsStatus] : [travel?.proofTravel?.status];
 
     if (status.every(elt => elt === OpeVisaStatus.EMPTY)) { return OpeVisaStatus.EMPTY; }
 
-    if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+    if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.JUSTIFY; }
 
     if (status.every(elt => elt === OpeVisaStatus.CLOSED)) { return OpeVisaStatus.CLOSED; }
 

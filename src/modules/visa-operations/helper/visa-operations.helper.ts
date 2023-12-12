@@ -11,7 +11,7 @@ import { get, isEmpty } from "lodash";
 import moment from "moment";
 
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
-    const totalAmount = getTotal(data?.transactions as VisaTransaction[]);
+    const totalAmount = getTotal(data?.transactions || []);
     if (totalAmount > ceiling) {
         data.status = [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.VALIDATION_CHAIN].includes(Number(data?.status)) ? data?.status : OpeVisaStatus.EXCEDEED;
         const userData = travel ? travel : data;
@@ -28,7 +28,7 @@ export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymen
 }
 
 export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
-    let travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { travelId: travel?._id, month: month } }) as TravelMonth;
+    let travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { travelId: travel?._id, month: month } });
 
     if (isEmpty(travelMonth)) {
         travelMonth = generateTravelMonthByProcessing(travel?._id.toString(), String(travel?.user?._id), month);

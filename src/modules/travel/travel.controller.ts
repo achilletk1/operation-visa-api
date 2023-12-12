@@ -13,7 +13,7 @@ export class TravelController {
     }
 
     async getTravels(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await TravelController.travelService.getTravels(req.query )); }
+        try { res.send(await TravelController.travelService.getTravels({ filter: req.query })); }
         catch (error) { next(error); }
     }
 

@@ -4,10 +4,7 @@ import { BaseRepository } from "common/base";
 
 export class OnlinePaymentRepository extends BaseRepository {
 
-    constructor() {
-        super();
-        this.collectionName = 'visa_operations_online_payments';
-    }
+    constructor() { super(); this.collectionName = 'visa_operations_online_payments'; }
 
     async getOnlinePaymentReport(params: { status: any, start: number, end: number }) {
         return await this.findAllAggregate(generateConsolidateData(params));

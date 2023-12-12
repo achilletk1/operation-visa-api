@@ -2,6 +2,6 @@ import { BaseRepository } from "common/base";
 
 export class VisaTransactionsRepository extends BaseRepository {
 
-    constructor() { super(); }
+    constructor() { super(); this.collectionName = 'visa_transactions'; }
 
 }

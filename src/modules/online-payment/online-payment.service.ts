@@ -59,7 +59,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinepaymentStatement.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
             onlinepaymentStatement.status = OpeVisaStatus.TO_VALIDATED;
 
-            onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { currentMonth, 'user._id': userId } }) as unknown as OnlinePaymentMonth;
+            onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { currentMonth, 'user._id': userId } });
 
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: 200 } });
             if (!ceiling) { throw Error('CeilingNotFound'); }
@@ -83,7 +83,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                     transactions: [],
                     editors: [],
                 }
-                result = await OnlinePaymentController.onlinePaymentService.create(onlinePayment as any);
+                result = await OnlinePaymentController.onlinePaymentService.create(onlinePayment);
                 onlinePayment._id = result;
             }
             const id = get(onlinePayment, '_id');
@@ -133,7 +133,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePayment.dates.created = moment().valueOf();
             onlinePayment.ceiling = get(ceiling, 'value', 0);
 
-            const insertedId = await OnlinePaymentController.onlinePaymentService.create(onlinePayment as any);
+            const insertedId = await OnlinePaymentController.onlinePaymentService.create(onlinePayment);
             onlinePayment._id = insertedId;
 
             return onlinePayment;

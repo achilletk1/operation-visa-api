@@ -46,12 +46,12 @@ export class Travel {
         updated?: number;
     };
     proofTravel!: {
-        continents: string[];
-        countries: {
-            name: string;
-            continent: string;
-            currency?: any;
-        }[];
+        // continents: string[];
+        // countries: {
+        //     name: string;
+        //     continent: string;
+        //     currency?: any;
+        // }[];
         dates: {
             start: number;
             end?: number;

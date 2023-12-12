@@ -208,8 +208,8 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
                 overrun: (amount - (travel?.ceiling || 0)) > 0 ? (amount - (travel?.ceiling || 0)) : 0,
                 ceiling: travel.ceiling,
                 nbreOutOfTime: exceeddays >= 0 ? exceeddays : 0,
-                continents: travel.proofTravel.continents,
-                countries: travel.proofTravel.countries,
+                // continents: travel.proofTravel.continents,
+                // countries: travel.proofTravel.countries,
                 travelType: travel.travelType === TravelType.SHORT_TERM_TRAVEL ? 'VOYAGE DE COURTE DUREE' : 'VOYAGE DE LONGUE DUREE',
             }
 
