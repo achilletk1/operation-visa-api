@@ -15,6 +15,8 @@ router.get('/', usersController.getUsers);
 
 router.get('/verify-ldap', usersController.verifyLdapUser);
 
+router.get('/verify-cbs', usersController.verifyCbsUser);
+
 router.get('/export', usersController.generateUsersExportLinks);
 
 router.get('/export/:code', usersController.generateUsersExporData);

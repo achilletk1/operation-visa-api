@@ -1,7 +1,8 @@
+import { isEmpty, isString } from 'lodash';
 import { config } from 'convict-config';
+import { logger } from 'winston-config';
 import handlebars from 'handlebars';
 import { Response } from 'express';
-import { isString } from 'lodash';
 import moment from 'moment';
 
 export const isProd = ['production'].includes(config.get('env'));
@@ -170,6 +171,21 @@ export function responseWithAttachment(res: Response, contentType: string, fileN
 };
 
 export function timeout(ms: number) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+export function removeSpacesFromResultSet(resultSet: any) {
+  const obj: any = {};
+  try {
+    // tslint:disable-next-line: forin
+    for (const key in resultSet) {
+      if (!resultSet.hasOwnProperty(key)) { break; }
+      obj[key] = (typeof resultSet[key] === 'string')
+        ? resultSet[key].trim().replace(/[�]/g, '°')
+        : resultSet[key];
+    }
+  } catch (error) { logger.error('failed to remove spaces from resultset', { error }); }
+
+  return isEmpty(obj) ? resultSet : obj;
+}
 
 export enum QueueState {
   PENDING = 'PENDING',

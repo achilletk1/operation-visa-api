@@ -7,7 +7,9 @@ const classPath = 'oracle-daos.clients';
 
 
 export const clientsDAO = {
+
     getClientDatasByNcp: async (ncp: any, age?: string, clc?: string) => {
+    
         const methodPath = `${classPath}.getClientDatasByNcp()`;
         try {
             logger.info(`init get client data by ncp: ${ncp}`);

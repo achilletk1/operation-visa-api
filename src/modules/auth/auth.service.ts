@@ -6,14 +6,11 @@ import { User, UsersController } from "modules/users";
 import { SettingsController } from 'modules/settings';
 import { get, isEmpty, isString } from "lodash";
 import httpContext from 'express-http-context';
+import { TmpController } from "modules/tmp";
+import { CbsController } from "modules/cbs";
 import { config } from "convict-config";
 import bcrypt from 'bcrypt';
 import moment from "moment";
-import crypt from "url-crypt";
-import { UsersOtpEvent } from "modules/notifications/notifications/mail/users-otp";
-import { clientsDAO } from "modules/users/oracle-daos/clients.dao";
-import { TmpController } from "modules/tmp";
-const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
 export class AuthService extends BaseService {
 
@@ -131,7 +128,7 @@ export class AuthService extends BaseService {
         try {
             const { ncp } = credentials;
             if (['development'].includes(config.get('env'))) { await timeout(500); }
-            const clientDatas = await clientsDAO.getClientDatasByNcp(ncp);
+            const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             if (isEmpty(clientDatas)) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
             this.client = clientDatas[0];

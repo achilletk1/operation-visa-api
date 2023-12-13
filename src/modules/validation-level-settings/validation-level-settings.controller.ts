@@ -17,6 +17,11 @@ export class ValidationLevelSettingsController {
         catch (error) { next(error); }
     }
 
+    async getUserLevelById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.getUserLevelById(req.params.id)); }
+        catch (error) { next(error); }
+    }
+
     async findOneById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await ValidationLevelSettingsController.levelValidateService.findOne({ filter: { _id: req.params.id } })); }
         catch (error) { next(error); }

@@ -31,6 +31,8 @@ export function getTravelStatus(travel: Travel): OpeVisaStatus {
 
     if (status.every(elt => elt === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.JUSTIFY; }
 
+    if (status.every(elt => elt === OpeVisaStatus.VALIDATION_CHAIN)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+
     if (status.every(elt => elt === OpeVisaStatus.CLOSED)) { return OpeVisaStatus.CLOSED; }
 
     if (status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.EXCEDEED; }

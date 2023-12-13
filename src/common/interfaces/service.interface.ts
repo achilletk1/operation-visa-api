@@ -41,7 +41,7 @@ declare type QueryOptions = {
     way?: 1 | -1,
 }
 
-export declare type QueryFilter = ObjectType<unknown>
+declare type QueryFilter = ObjectType<unknown>
 
 declare type QueryProjection = ObjectType<number>
 

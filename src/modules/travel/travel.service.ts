@@ -49,20 +49,20 @@ export class TravelService extends CrudService<Travel> {
             const travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if ('validators' in travel?.proofTravel) {
-                travel?.proofTravel?.validators.forEach((elt: any) => { elt.status = travel?.proofTravel?.status, elt.step = 'Preuve de voyage' })
+                travel?.proofTravel?.validators.forEach((elt: any) => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
                 validators.push(...travel?.proofTravel?.validators)
             }
 
             travel?.expenseDetails?.forEach((expense: any) => {
                 if ('validators' in expense) {
-                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status, elt.step = 'Etat détaillé des dépenses' });
+                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status; elt.step = 'Etat détaillé des dépenses' });
                     validators.push(...expense.validators)
                 }
             })
 
             travel?.othersAttachements?.forEach((expense: any) => {
                 if ('validators' in expense) {
-                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status, elt.step = 'Autres justificatifs' });
+                    expense?.validators.forEach((elt: any) => { elt.status = expense?.status; elt.step = 'Autres justificatifs' });
                     validators.push(...expense.validators)
                 }
             })
@@ -250,13 +250,13 @@ export class TravelService extends CrudService<Travel> {
 
             let updateData: any, tobeUpdated: any;
 
-            // updateData = { status };
+            updateData = { status };
 
             if (status === OpeVisaStatus.REJECTED) { updateData = { status, rejectReason } }
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
-                proofTravel.validators = [];
+                proofTravel.validators = isEmpty(proofTravel.validators) ? [] : proofTravel.validators;
                 proofTravel.validators.push({
                     _id: validator._id,
                     fullName: `${user.fname} ${user.lname}`,
@@ -268,13 +268,15 @@ export class TravelService extends CrudService<Travel> {
                 });
                 if (rejectReason) { proofTravel.validators[proofTravel.validators.length - 1].rejectReason = rejectReason; }
 
-                if (validator.fullRights || validator.level === validationLevelNumber || status === OpeVisaStatus.REJECTED) {
-                    proofTravel = { ...proofTravel, ...updateData };
-                    travel.proofTravel = proofTravel;
-                    // TODO generate this notification
-                    // notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(travel as Travel, 'reject', 'proofTravel', +validator.level === 1 ? 'frontoffice' :'backoffice'))
+                if (!validator.fullRights && validator.level !== validationLevelNumber && status !== OpeVisaStatus.REJECTED) {
+                    updateData.status = OpeVisaStatus.VALIDATION_CHAIN;
                 }
-                // TODO notify next level
+                proofTravel = { ...proofTravel, ...updateData };
+                travel.proofTravel = proofTravel;
+                // TODO generate this notification
+                // notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(travel as Travel, 'reject', 'proofTravel', +validator.level === 1 ? 'frontoffice' :'backoffice'))
+                
+                // TODO notify next level if validator.level !== validationLevelNumber
                 tobeUpdated = { proofTravel };
 
                 stepData.push('Preuve de voyage');

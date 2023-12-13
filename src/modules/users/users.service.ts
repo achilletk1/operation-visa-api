@@ -5,6 +5,7 @@ import { UsersRepository } from "./users.repository";
 import { UsersController } from './users.controller';
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
+import { CbsController } from "modules/cbs";
 import { CrudService } from "common/base";
 import { config } from "convict-config";
 import { isEmpty } from "lodash";
@@ -102,7 +103,19 @@ export class UsersService extends CrudService<User> {
             const { userCode } = filters;
             const user = await getLdapUser(userCode);
 
-            return { user }
+            return { user };
+        } catch (error) { throw error; }
+    }
+
+    async verifyCbsUser(filters: any) {
+        try {
+            const authUser = httpContext.get('user');
+            if (authUser.category < 500) { return new Error('Forbidden'); }
+
+            const { clientCode } = filters;
+            const user = await CbsController.cbsService.getUserDataByCode(clientCode);
+
+            return { user };
         } catch (error) { throw error; }
     }
 

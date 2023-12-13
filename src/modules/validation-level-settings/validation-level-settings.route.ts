@@ -10,4 +10,6 @@ router.put('/:id', levelValidateService.updateValidationLevelSettingsById);
 
 router.get('/', levelValidateService.getValidationLevelSettings);
 
+router.get('/user-level-by-id/:id', levelValidateService.getUserLevelById);
+
 export const validationLevelSettingsRoute = router;

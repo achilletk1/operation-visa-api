@@ -37,6 +37,11 @@ export class UsersController {
         catch (error) { next(error); }
     }
 
+    async verifyCbsUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await UsersController.usersService.verifyCbsUser(req.query)); }
+        catch (error) { next(error); }
+    }
+
     async createUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await UsersController.usersService.createUser(req.body)); }
         catch (error) { next(error); }
