@@ -12,7 +12,7 @@ router.get('/all', requestCeilingIncreaseController.findAll);
 
 router.put('/', requestCeilingIncreaseController.getRequestCeillingIncrease);
 
-router.put('/', requestCeilingIncreaseController.insertRequestCeilling);
+router.post('/', requestCeilingIncreaseController.insertRequestCeilling);
 
 router.put('/validate-request/:id', requestCeilingIncreaseController.requestIncrease);
 

@@ -46,6 +46,25 @@ export const clientsDAO = {
         }
     },
 
+    getClientAccountDataByCli: async (cli: any) => {
+        const methodPath = `${classPath}.getClientDataByCli()`;
+        try {
+
+            logger.info(`init get client data by cli: ${cli}`, { methodPath });
+
+            if (isDevOrStag) { return await helper.getMockClientData(cli); }
+
+            const query = `select nomrest, nom, pre, nrc, nidf, nid, vid, sext from bank.bkcli where cli = '${cli}'`;
+
+            const result = await executeQuery(query);
+
+            return result;
+        } catch (error: any) {
+            logger.error(`Failed to get client data by cli ${cli}`, { error, stack: error.stack, methodPath });
+            throw error;
+        }
+    },
+
     getClientAccountsWithBalance: async (cli: any) => {
         const methodPath = `${classPath}.getClientAccountsWithBalance()`;
         try {
