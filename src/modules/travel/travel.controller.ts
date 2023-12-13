@@ -43,7 +43,7 @@ export class TravelController {
     }
 
     async generateQueryLink(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await TravelController.travelService.generateQueryLink( req.params.id )); }
+        try { res.send(await TravelController.travelService.generateQueryLink(req.params.id)); }
         catch (error) { next(error); }
     }
 

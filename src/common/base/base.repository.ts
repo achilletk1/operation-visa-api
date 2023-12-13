@@ -25,14 +25,13 @@ export class BaseRepository implements RepositoryInterface {
 
   async findAll(query?: QueryOptions): Promise<Document[]> {
     try {
-      console.log('this.collectionName: ', this.collectionName);
       return (await this.getCollection())
-      .find(query?.filter ?? {})
-      .project(query?.projection ?? {})
-      .sort(query?.sort ?? '_id', query?.way ?? -1)
-      .skip(((query?.offset || 1) - 1) * (query?.limit || 0) ?? 0)
-      .limit(query?.limit ?? 0)
-      .toArray();
+        .find(query?.filter ?? {})
+        .project(query?.projection ?? {})
+        .sort(query?.sort ?? '_id', query?.way ?? -1)
+        .skip(((query?.offset || 1) - 1) * (query?.limit || 0))
+        .limit(query?.limit ?? 0)
+        .toArray();
     } catch (error) { throw error; }
   }
 
@@ -47,7 +46,7 @@ export class BaseRepository implements RepositoryInterface {
       console.log('this.collectionName: ', this.collectionName);
 
       this.setMongoId(query.filter || {});
-  
+
       return (await this.getCollection()).findOne(query.filter || {}, { projection: query.projection ?? {} });
     } catch (error) { throw error; }
   }
@@ -61,7 +60,7 @@ export class BaseRepository implements RepositoryInterface {
   async update(filter: QueryFilter, document: Document): Promise<UpdateResult> {
     try {
       this.setMongoId(filter);
-  
+
       return (await this.getCollection()).updateOne(filter, { $set: document });
     } catch (error) { throw error; }
   }
@@ -69,7 +68,7 @@ export class BaseRepository implements RepositoryInterface {
   async updateMany(filter: QueryFilter, setDocument: Document, unsetDocument: Document): Promise<UpdateResult> {
     try {
       this.setMongoId(filter);
-  
+
       const updateFilter = {};
       if (!isEmpty(setDocument)) updateFilter.$set = setDocument;
       if (!isEmpty(unsetDocument)) updateFilter.$unset = unsetDocument;
@@ -80,7 +79,7 @@ export class BaseRepository implements RepositoryInterface {
   async updateDeleteFeild(filter: QueryFilter, document: Document): Promise<UpdateResult> {
     try {
       this.setMongoId(filter);
-  
+
       return (await this.getCollection()).updateOne(filter, { $unset: document });
     } catch (error) { throw error; }
   }
@@ -88,7 +87,7 @@ export class BaseRepository implements RepositoryInterface {
   async deleteOne(filter: QueryFilter): Promise<DeleteResult> {
     try {
       this.setMongoId(filter);
-  
+
       return (await this.getCollection()).deleteOne(filter);
     } catch (error) { throw error; }
   }
@@ -96,7 +95,7 @@ export class BaseRepository implements RepositoryInterface {
   async deleteMany(filter: QueryFilter): Promise<DeleteResult> {
     try {
       this.setMongoId(filter);
-  
+
       return (await this.getCollection()).deleteMany(filter);
     } catch (error) { throw error; }
   }
@@ -115,7 +114,7 @@ export class BaseRepository implements RepositoryInterface {
     return name;
   }
 
-  private setMongoId(filter: QueryFilter={}): void {
+  private setMongoId(filter: QueryFilter = {}): void {
     if ('_id' in filter && filter?._id?.toString()?.length === 24)
       filter._id = new ObjectId(filter?._id?.toString());
   }
@@ -127,7 +126,7 @@ declare type ObjectType<T> = {
 }
 
 export declare type QueryOptions = {
-  filter?: QueryFilter,
+  filter: QueryFilter,
   projection?: QueryProjection,
   limit?: number,
   offset?: number,
@@ -137,4 +136,4 @@ export declare type QueryOptions = {
 
 export declare type QueryFilter = ObjectType<any>
 
-export declare type QueryProjection = ObjectType<number>
+export declare type QueryProjection = ObjectType<0 | 1>
