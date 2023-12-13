@@ -16,5 +16,11 @@ export class CbsController {
         try { res.send(await CbsController.cbsService.getUserCbsDatasByNcp(req.params?.ncp, req.query?.age as any, req.query?.clc as any)); }
         catch (error) { next(error); }
     }
+    
+    async getUserCbsAccountsDatas(req: Request, res: Response, next: NextFunction) {
+        // if (!code) { return res.status(403).json({ message: 'no code provided' }); }
+        try { res.send(await CbsController.cbsService.getUserCbsAccountsDatas(req.body)); }
+        catch (error) { next(error); }
+    }
 
 }
