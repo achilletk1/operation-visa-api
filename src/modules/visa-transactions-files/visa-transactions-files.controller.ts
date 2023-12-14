@@ -22,4 +22,9 @@ export class VisaTransactionsFilesController {
         catch (error) { next(error); }
     }
 
+    async getVisaTransationsFilesLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send((await VisaTransactionsFilesController.visaTransactionsFilesService.findAll({ projection: { label: 1, _id: 0 } }))?.data); }
+        catch (error) { next(error); }
+    }
+
 }

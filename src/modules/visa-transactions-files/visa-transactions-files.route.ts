@@ -6,6 +6,8 @@ export const visaTransactionsFilesController = new VisaTransactionsFilesControll
 
 router.get('/', visaTransactionsFilesController.findAll);
 
+router.get('/labels', visaTransactionsFilesController.getVisaTransationsFilesLabels);
+
 router.get('/:id', visaTransactionsFilesController.findOneById);
 
 export const visaTransactionsFilesRoute = router;
