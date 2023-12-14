@@ -42,7 +42,7 @@ export class AuthService extends BaseService {
             if (idapUser) {
 
                 const setting = await SettingsController.settingsService.findOne({ filter: { key: 'otp_status' } });
-    
+
                 // check if 2FA is disable Globally
                 if (!setting.data) { return this.generateAuthToken(user); }
 
@@ -153,9 +153,10 @@ export class AuthService extends BaseService {
                     value,
                     expired_at: moment().add(21, 'minutes').valueOf(),
                 }
-                const {data: users} = await TmpController.tmpService.findAll();
+                // const {data: users} = await TmpController.tmpService.findAll();
+                // let user = users.find(user => user.ncp === ncp)
+                let user: any = this.findUser(ncp);
 
-                let user = users.find(user => user.ncp === ncp)
 
                 if (!user) {
                     user = { ncp, ...tmpData }
@@ -233,9 +234,14 @@ export class AuthService extends BaseService {
             const oauth = create(tokenData);
             delete user.password;
             delete user.otp;
-    
+
             return { oauth, user };
         } catch (error) { throw error; }
     }
 
+    async findUser(filter: any): Promise<any> {
+        try {
+            return await TmpController.tmpService.findOne({ filter: { filter } });
+        } catch (error) { return false }
+    }
 }

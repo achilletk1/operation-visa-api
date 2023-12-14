@@ -7,13 +7,14 @@ import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
 import { getTravelStatus, saveAttachmentTravel } from "./helper";
+import { CrudService, QueryOptions } from "common/base";
 import { TravelRepository } from "./travel.repository";
 import { TravelController } from './travel.controller';
 import { parseNumberFields } from "common/helpers";
 import { UsersController } from 'modules/users';
 import httpContext from 'express-http-context';
 import generateId from 'generate-unique-id';
-import { CrudService } from "common/base";
+import { QueryFilter } from "common/types";
 import { timeout } from "common/helpers";
 import { config } from "convict-config";
 import { get, isEmpty } from "lodash";
@@ -36,10 +37,10 @@ export class TravelService extends CrudService<Travel> {
 
     // async findAll(query: QueryOptions) { return super.findAll(query) as unknown as { data: Travel[]; count: number; }; }
 
-    async getTravels(filters: any) {
+    async getTravels(query: QueryOptions) {
         try {
-          this.formatFilters(filters);
-            return await TravelController.travelService.findAll(filters);
+            query.filter = this.formatFilters(query.filter);
+            return await TravelController.travelService.findAll(query);
         } catch (error) { throw error; }
     }
 
@@ -241,7 +242,7 @@ export class TravelService extends CrudService<Travel> {
             let travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if (!travel) { throw Error('TravelNotFound'); }
-            
+
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             const validationLevelNumber = await ValidationLevelSettingsController.levelValidateService.count({});
@@ -275,7 +276,7 @@ export class TravelService extends CrudService<Travel> {
                 travel.proofTravel = proofTravel;
                 // TODO generate this notification
                 // notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(travel as Travel, 'reject', 'proofTravel', +validator.level === 1 ? 'frontoffice' :'backoffice'))
-                
+
                 // TODO notify next level if validator.level !== validationLevelNumber
                 tobeUpdated = { proofTravel };
 
@@ -423,21 +424,23 @@ export class TravelService extends CrudService<Travel> {
         return travel;
     }
 
-    private formatFilters(filters: any) {
-        const { clientCode, userId, name } = filters;
+    private formatFilters(filter: QueryFilter): QueryFilter {
+        const { clientCode, userId, name } = filter;
 
         if (userId) {
-            delete filters.userId;
-            filters['user._id'] = userId;
+            delete filter.userId;
+            filter['user._id'] = userId;
         }
         if (clientCode) {
-            delete filters.clientCode;
-            filters['user.clientCode'] = clientCode;
+            delete filter.clientCode;
+            filter['user.clientCode'] = clientCode;
         }
         if (name) {
-            delete filters.name;
-            filters['user.fullName'] = name;
+            delete filter.name;
+            filter['user.fullName'] = name;
         }
+
+        return filter;
     }
 
     private formatRangeFilters(filters: any) {

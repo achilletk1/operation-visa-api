@@ -80,9 +80,9 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async count(query: QueryFilter): Promise<number> {
+  async count(filter: QueryFilter): Promise<number> {
     try {
-      const numberOfDocuments = await this.baseRepository.count(query);
+      const numberOfDocuments = await this.baseRepository.count(filter);
 
       return numberOfDocuments;
     } catch (error) { throw error; }
