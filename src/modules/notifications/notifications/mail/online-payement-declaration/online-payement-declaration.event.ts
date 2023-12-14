@@ -9,7 +9,7 @@ export class OnlinePayementDeclarationEvent implements OnlinePayementDeclaration
     civility!: string;
 
     constructor(onlinePayement: OnlinePaymentMonth) {
-        this.civility = onlinePayement?.user?.sex === 'F' ? 'Mme' : ((onlinePayement?.user?.sex === 'M') ? 'M.' : 'M./Mme');
+        this.civility = onlinePayement?.user?.gender === 'F' ? 'Mme' : ((onlinePayement?.user?.gender === 'M') ? 'M.' : 'M./Mme');
         this.name = onlinePayement?.user?.fullName || '';
         this.receiver = onlinePayement?.user?.email || '';
         this.ceiling = String(onlinePayement?.ceiling) || '';

@@ -9,7 +9,7 @@ export enum visaOpecategory {
     EXTERNE = 600
 }
 export class User {
-    _id!: string;
+    _id?: string;
     userCode?: string;
     category?: UserCategory;
     fname?: string;
@@ -19,13 +19,13 @@ export class User {
     tel?: string;
     email?: string;
     lang?: string;
+    age?: { label?: string; code?: string; };
     function?: string;
     enabled?: boolean;
     pwdReseted?: boolean;
     clientCode?: string;
     otp?: { value: string, expiresAt?: number };
     ceiling?: CeilingInfors[]; // infors ceilings
-    option?: number;
     gender?: 'm' | 'f' | string;
     visaOpValidation?: {
         level?: number;
@@ -44,10 +44,10 @@ export class User {
         this.fname = fname;
     }
 
-    isValid() {
-        // Validate user data here
-        return this.fname && this.userCode;
-    }
+    // isValid() {
+    //     // Validate user data here
+    //     return this.fname && this.userCode;
+    // }
 }
 
 export class Wallet {
@@ -99,4 +99,5 @@ export interface CeilingInfors {
 export interface Editor {
     _id?: string;
     date: number;
+    fullName?: string;
 }

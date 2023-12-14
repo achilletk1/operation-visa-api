@@ -42,8 +42,8 @@ export class UsersController {
         catch (error) { next(error); }
     }
 
-    async createUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await UsersController.usersService.createUser(req.body)); }
+    async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await UsersController.usersService.createUser(req.body, req.query.scope as any)); }
         catch (error) { next(error); }
     }
 

@@ -6,7 +6,7 @@ export class UserValidator {
     email?: string;
     fname?: string;
     lname?: string;
-    sex?: 'M' | 'F';
+    gender?: 'M' | 'F';
     tel?: string;
     fullRights?: boolean;
     dates!: {

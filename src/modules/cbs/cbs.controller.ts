@@ -8,7 +8,7 @@ export class CbsController {
     constructor() { CbsController.cbsService = new CbsService(); }
 
     async getUserDataByCode(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await CbsController.cbsService.getUserDataByCode(req.params?.cli)); }
+        try { res.send(await CbsController.cbsService.getUserDataByCode(req.params?.cli, req.query?.scope as any)); }
         catch (error) { next(error); }
     }
 

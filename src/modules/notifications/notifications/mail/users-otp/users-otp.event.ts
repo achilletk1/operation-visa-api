@@ -9,7 +9,7 @@ export class UsersOtpEvent implements UsersOtpMailData {
     actionUrl: string = config.get('baseUrl') + '/home';
 
     constructor(user: User) {
-        this.civility = user?.sex === 'F' ? 'Mme' : ((user?.sex === 'M') ? 'M.' : 'M./Mme');
+        this.civility = user?.gender === 'F' ? 'Mme' : ((user?.gender === 'M') ? 'M.' : 'M./Mme');
         this.name = user?.fullName || '';
         this.receiver = user?.email || '';
         this.otp = user?.otp?.value || '';

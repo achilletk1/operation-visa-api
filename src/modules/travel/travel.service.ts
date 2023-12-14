@@ -1,7 +1,8 @@
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
+import { notificationEmmiter, TravelDeclarationEvent, TravelStatusChangedEvent } from 'modules/notifications';
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
 import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
-import { notificationEmmiter, TravelDeclarationEvent, TravelStatusChangedEvent } from 'modules/notifications';
+import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
@@ -21,7 +22,6 @@ import { ObjectId } from "mongodb";
 import { Travel } from "./model"
 import crypt from 'url-crypt';;
 import moment from "moment";
-import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 
 const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
@@ -140,7 +140,7 @@ export class TravelService extends CrudService<Travel> {
             const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode') } });
 
             if (user) {
-                travel.user._id = user?._id.toString();
+                travel.user._id = user?._id?.toString();
                 travel.user.fullName = `${user?.fname} ${user?.lname}`;
                 travel.user.email = user?.email;
             }
@@ -546,7 +546,3 @@ export class TravelService extends CrudService<Travel> {
     }
 
 }
-
-
-
-

@@ -12,11 +12,11 @@ export class CbsService extends BaseService {
 
     constructor() { super() }
 
-    async getUserDataByCode(code: any) {
+    async getUserDataByCode(code: any, scope: 'back-office' | 'front-office' = 'front-office', includeAccounts: boolean = false) {
         if (isDev) { await timeout(500); }
 
         try {
-            let client = await clientsDAO.getClientDataByCli(code);
+            let client = await clientsDAO.getClientDataByCli(code, scope);
 
             if (!client || client?.length === 0) { throw new Error('ClientNotFound'); }
 
@@ -24,7 +24,13 @@ export class CbsService extends BaseService {
                 client = removeSpacesFromResultSet(get(client, `[0]`, null));
             }
 
-            return client;
+            let accounts: any;
+
+            if ([true, 'true'].includes(includeAccounts)) {
+                accounts = await clientsDAO.getClientAccountsWithBalance(code);
+            }
+
+            return { client, accounts };
         } catch (error: any) {
             logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
             throw error;

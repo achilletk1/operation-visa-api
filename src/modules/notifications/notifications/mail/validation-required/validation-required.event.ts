@@ -19,7 +19,7 @@ export class ValidationRequiredEvent implements ValidationRequiredMailData {
         this.date = moment().format('DD/MM/YYYY');
         this.subject = 'Validation requise pour' + this.type;
         this.name = (user?.fname || '') + ' ' + (user?.lname || '');
-        this.civility = user?.sex === 'F' ? 'Mme' : ((user?.sex === 'M') ? 'M.' : 'M./Mme');
+        this.civility = user?.gender === 'F' ? 'Mme' : ((user?.gender === 'M') ? 'M.' : 'M./Mme');
         this.type = type === 'travel' ? 'Déclaration de voyage hors zone CEMAC' : 'Déclaration de paiement en ligne';
     }
 }

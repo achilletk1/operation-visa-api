@@ -61,37 +61,52 @@ export class UsersService extends CrudService<User> {
         } catch (error) { throw error; }
     }
 
-    async createUser(userDatas: User) {
+    async createUser(createData: User, scope: 'back-office' | 'front-office') {
         try {
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { return new Error('Forbidden'); }
 
-            const { userCode, category } = userDatas;
-            const existingUser = await this.baseRepository.findOne({ filter: { userCode: userCode } });
+            const filter: any = { clientCode: createData.clientCode };
+            if (scope === 'back-office') { filter.userCode = createData.userCode; }
+
+            const existingUser = await this.baseRepository.findOne({ filter });
 
             if (!isEmpty(existingUser)) { return new Error('UserAllreadyExist') }
+            let user: User = {};
 
-            let user: any = await getLdapUser(userCode);
-
-            if (user) {
-                user.editors = [];
-                // Add user datas
-                user.enabled = true;
-                user.fullName = user.fullName || `${user.fname} ${user.lname}`;
-                user.visaOpecategory = category;
-                user.category = 600;
-                user.created_at = moment().valueOf();
-                user.option = 3;
-                user.gender = '';
-                user.pwdReseted = true;
-                user.editors.push({ _id: `${authUser._id}`, date: moment().valueOf() })
-
-                const result = await UsersController.usersService.create(user);
-
-                notificationEmmiter.emit('users', new UsersEvent({ ...user }));
-
-                return { _id: result };
+            if (scope === 'back-office') {
+                const userLdap: any = await getLdapUser(createData.userCode);
+                user = {
+                    ...user,
+                    lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
+                    userCode: userLdap.userCode, email: userLdap.email, tel: userLdap.tel,
+                    gender: '', lang: 'fr', category: 600,
+                    visaOpecategory: createData.visaOpecategory, otp2fa: createData.otp2fa,
+                };
             }
+
+            if (scope === 'front-office') {
+                const userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client;
+                user = {
+                    ...user,
+                    lname: userCbs.NOM, fname: userCbs.PRE, fullName: userCbs.NOMREST, email: userCbs.EMAIL,
+                    tel: userCbs.TEL, gender: userCbs.SEXT, lang: userCbs.LANG !== '001' ? 'en' : 'fr',
+                    age: { label: userCbs.LIBELLE_AGENCE, code: userCbs.AGE },
+                    category: createData.category,
+                };
+            }
+
+            user.clientCode = createData.clientCode;
+            user.enabled = createData.enabled;
+            user.editors = [];
+            user.pwdReseted = true;
+            user.editors.push({ _id: authUser._id, date: moment().valueOf(), fullName: authUser.fullName })
+
+            const result = await UsersController.usersService.create(user);
+
+            notificationEmmiter.emit('users', new UsersEvent(user));
+
+            return { _id: result };
         } catch (error) { throw error; }
     }
 
@@ -112,8 +127,8 @@ export class UsersService extends CrudService<User> {
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { return new Error('Forbidden'); }
 
-            const { clientCode } = filters;
-            const user = await CbsController.cbsService.getUserDataByCode(clientCode);
+            const { clientCode, scope } = filters;
+            const user = (await CbsController.cbsService.getUserDataByCode(clientCode, scope))?.client;
 
             return { user };
         } catch (error) { throw error; }

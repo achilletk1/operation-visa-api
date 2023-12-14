@@ -80,7 +80,7 @@ export async function getLdapUser(userCode: any, password?: any) {
 
     const user = {
         userCode, fname: response.givenName, lname: response.sn,
-        tel: response.mobile, email: response?.mail, fullName: response.displayName
+        tel: response.mobile, email: response?.mail, fullName: response.displayName || `${response.sn} ${response.givenName}`
     };
 
     return user;

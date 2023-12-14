@@ -7,7 +7,7 @@ const classPath = 'oracle-daos.clients';
 
 export const clientsDAO = {
 
-    getClientDataByCli: async (cli: any) => {
+    getClientDataByCli: async (cli: any, scope: 'back-office' | 'front-office') => {
         const methodPath = `${classPath}.getClientDataByCli()`;
         try {
 
@@ -15,17 +15,27 @@ export const clientsDAO = {
 
             if (isDevOrStag) { return await helper.getMockClientData(cli); }
 
-            const query = `
-            select
-                p.nomrest, p.nom, p.pre, p.nrc, p.nidf, p.nid, p.vid, p.sext, p.age, p.lang, 
-                a.cli, a.ges, a.cge as "code_gestionnaire",
-                a.cuti as "code_utilisateur",
-                a.lib as "noms_complet",
-                a.puti as "code_profil",
-                (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) "libelle_du_profil",
-                (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) "libelle_agence"
-            from infoc.bkcli p, evuti a
-            where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
+            const query = (scope === 'front-office')
+                ? ` select
+                        trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
+                        (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                    from infoc.bkcli p
+                    where p.cli = '${cli}'`
+                : ` select
+                        trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                        a.ges,
+                        a.cge as "code_gestionnaire",
+                        a.puti as "code_profil",
+                        a.cuti as "code_utilisateur",
+                        trim(a.lib) as "noms_complet",
+                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) "libelle_du_profil",
+                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) "libelle_agence",
+                        (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                    from infoc.bkcli p, evuti a
+                    where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
 
             const result = await executeQuery(query);
 

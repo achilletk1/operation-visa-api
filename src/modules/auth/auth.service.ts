@@ -228,7 +228,7 @@ export class AuthService extends BaseService {
         try {
             const fullName = user?.fullName || `${user.lname || ''} ${user.fname || ''}`
             const { email, gender, fname, lname, tel, category, clientCode, userCode, _id } = user;
-            const tokenData = { _id: _id.toString(), email, userCode, gender, fname, lname, tel, category, clientCode, fullName };
+            const tokenData = { _id: _id?.toString() || '', email, userCode, gender, fname, lname, tel, category, clientCode, fullName };
     
             const oauth = create(tokenData);
             delete user.password;
