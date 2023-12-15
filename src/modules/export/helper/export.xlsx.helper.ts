@@ -1,10 +1,10 @@
-import { OpeVisaStatus } from 'modules/visa-operations';
+import { getExpenseCategoryLabel, getOperationTypeLabel, getStatuslabel } from 'common/utils';
 import { ExpenseDetail, OthersAttachement, Travel } from 'modules/travel';
+import { OnlinePaymentStatement } from 'modules/online-payment';
+import { OpeVisaStatus } from 'modules/visa-operations';
 import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import XLSX from 'xlsx';
-import { OnlinePaymentStatement } from 'modules/online-payment';
-import { getExpenseCategoryLabel, getOperationTypeLabel, getStatuslabel } from 'common/utils';
 
 export function generateVisaTransactionExportXlsx(transactions: any[]) {
     const ws = XLSX.utils.json_to_sheet(transactions);
@@ -186,8 +186,8 @@ export function generateTravelsExportXlsx(travel: Travel[]) {
                 `${getEccedCeilling(travel) || ''}`,
                 `${status[travel?.status]}`,
                 `${type[travel?.travelType]}`,
-                `${(travel?.proofTravel?.continents).toString() || ''}`,
-                `${ (travel?.proofTravel?.countries).map(countrie => countrie?.name).toString()  || ''}`,
+                // `${(travel?.proofTravel?.continents).toString() || ''}`,
+                // `${ (travel?.proofTravel?.countries).map(countrie => countrie?.name).toString()  || ''}`,
                 `${travel?.proofTravel?.travelReason?.label || ''}`,
                 `${status[travel?.proofTravel?.status] || ''}`,
                 `${travel?.proofTravel?.isTransportTicket ? 'Oui' : 'Non' }`,

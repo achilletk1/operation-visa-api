@@ -27,4 +27,39 @@ export class VisaTransactionsFilesController {
         catch (error) { next(error); }
     }
 
+    async verifyTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.verifyTransactionFiles(req.body)); }
+        catch (error) { next(error); }
+    }
+
+    async confirmTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.confirmTransactionFiles(req.params.id));
+            const traitment = await VisaTransactionsFilesController.visaTransactionsFilesService.startTraitment(req.params.id);
+            if (traitment instanceof Error) {
+                await VisaTransactionsFilesController.visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
+            }
+        } catch (error) { next(error); }
+    }
+
+    async restartConfirmTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.restartConfirmTransactionFiles(req.params.id));
+            const traitment = await VisaTransactionsFilesController.visaTransactionsFilesService.restartTraitment(req.params.id);
+            if (traitment instanceof Error) {
+                await VisaTransactionsFilesController.visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
+            }
+        } catch (error) { next(error); }
+    }
+
+    async abortTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.abortTransactionFiles(req.params.id)); }
+        catch (error) { next(error); }
+    }
+
+    async getTransactionFilesDataArray(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.getTransactionFilesDataArray(req.params.id)); }
+        catch (error) { next(error); }
+    }
+
 }

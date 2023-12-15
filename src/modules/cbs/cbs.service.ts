@@ -43,11 +43,12 @@ export class CbsService extends BaseService {
             if (isDev) { await timeout(500); }
 
             const client = await clientsDAO.getClientDatasByNcp(ncp, age, clc);
+
+            const result = removeSpacesFromResultSet(client[0] || {});
+
             if (scope === 'client') { return client; }
 
             if (client?.length === 0) { throw new Error('ClientNotFound'); }
-
-            const result = removeSpacesFromResultSet(client[0]);
 
             let accounts = await clientsDAO.getClientAccountsWithBalance(result?.CLI);
 

@@ -4,6 +4,7 @@ import { logger } from 'winston-config';
 import handlebars from 'handlebars';
 import { Response } from 'express';
 import moment from 'moment';
+import XLSX from 'xlsx';
 
 export const isProd = ['production'].includes(config.get('env'));
 
@@ -224,6 +225,13 @@ export function getYearMonthLabel(str: string, type: 'year' | 'month' | 'both'):
 
   const data: { year: string; month: string; both: string; } = { year, month: months[month], both: `${months[month]} ${year}` };
   return data[type];
+};
+
+export function excelToJson(content: any) {
+  const wb = XLSX.read(content);
+  const sheetNames = wb.SheetNames;
+
+  return XLSX.utils.sheet_to_json(wb.Sheets[sheetNames[0]], { raw: true });
 };
 
 declare type ObjectType<T> = {

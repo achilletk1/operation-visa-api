@@ -13,7 +13,7 @@ router.post('/verify-otp', authController.verifyOtp);
 
 router.post('/verify-credentials/user', authController.verifyCredentialsUser);
 
-router.post('/send-client-otp', authController.SendClientOtp);
+router.post('/send-client-otp', authController.sendClientOtp);
 
 router.post('/verify-client-otp', authController.verifyClientOtp);
 

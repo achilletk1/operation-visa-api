@@ -11,10 +11,11 @@ import { CbsController } from "modules/cbs";
 import { config } from "convict-config";
 import bcrypt from 'bcrypt';
 import moment from "moment";
+import { isDev } from 'common/helpers';
 
 export class AuthService extends BaseService {
 
-    client!: any;
+    // client!: any;
 
     constructor() { super() }
 
@@ -131,58 +132,54 @@ export class AuthService extends BaseService {
             const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             if (isEmpty(clientDatas)) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
-            this.client = clientDatas[0];
-            if (!this.client.TEL && !this.client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
+            const client = clientDatas[0];
+            if (!client.TEL && !client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
 
-            return { email: this.client.EMAIL, phone: this.client.TEL };
+            return { email: client.EMAIL, phone: client.TEL };
         } catch (error) { throw error; }
     }
 
-    async SendClientOtp(datas: any) {
+    async sendClientOtp(datas: any) {
         try {
             let { otpChannel, value, ncp } = datas;
-            if (['development'].includes(config.get('env'))) { await timeout(500); }
+            if (isDev) { await timeout(500); }
+
             const token = {
                 value: getRandomString(6, true),
                 expiresAt: moment().add(20, 'minutes').valueOf()
-            }
-            try {
-                const tmpData = {
-                    otp: token,
-                    otpChannel,
-                    value,
-                    expired_at: moment().add(21, 'minutes').valueOf(),
-                }
-                // const {data: users} = await TmpController.tmpService.findAll();
-                // let user = users.find(user => user.ncp === ncp)
-                let user: any = this.findUser(ncp);
+            };
 
+            const tmpData = {
+                otp: token,
+                otpChannel,
+                value,
+                expired_at: moment().add(21, 'minutes').valueOf(),
+            };
+            // const {data: users} = await TmpController.tmpService.findAll();
+            // let user = users.find(user => user.ncp === ncp)
+            let user
+            try { user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User; } catch (e) {}
 
-                if (!user) {
-                    user = { ncp, ...tmpData }
-                    await TmpController.tmpService.create(user);
-                }
-
-                const tmpUser = { ...tmpData, ...this.client };
-                await TmpController.tmpService.update({ ncp }, tmpUser);
-
-                if (isDevOrStag || isStagingBci) { return token }
-
-                if (value) {
-                    otpChannel = '200' ?
-                        notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
-                        : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
-                    this.logger.info(`sends authentication Token by email and SMS to user`);
-                }
-
-                return {};
-            } catch (error: any) {
-                return error;
+            if (!user) {
+                const clientData = (await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client') || [])[0];
+                user = { ncp, ...clientData };
+                await TmpController.tmpService.create(user);
             }
 
+            await TmpController.tmpService.update({ ncp }, { ...tmpData });
+
+            if (isDevOrStag || isStagingBci) { return token }
+
+            if (value) {
+                otpChannel = '200' ?
+                    notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
+                    : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
+                this.logger.info(`sends authentication Token by email and SMS to user`);
+            }
+
+            return {};
         } catch (error) { throw error; }
     }
-
 
     async verifyClientOtp(data: any): Promise<any> {
         let ncp = data?.ncp;
@@ -192,7 +189,7 @@ export class AuthService extends BaseService {
 
             if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw Error('BadOTP'); }
 
-            const user = await TmpController.tmpService.findOne({ filter: { ncp } });
+            const user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User;
 
             if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
@@ -205,7 +202,7 @@ export class AuthService extends BaseService {
             if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw Error('OTPExpired'); }
 
             const { email, gender, fname, lname, tel, category, clientCode } = user;
-            const tokenData = { _id: user._id.toString(), email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
+            const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
 
             const oauth = create(tokenData);
             delete user.password;
@@ -230,7 +227,7 @@ export class AuthService extends BaseService {
             const fullName = user?.fullName || `${user.lname || ''} ${user.fname || ''}`
             const { email, gender, fname, lname, tel, category, clientCode, userCode, _id } = user;
             const tokenData = { _id: _id?.toString() || '', email, userCode, gender, fname, lname, tel, category, clientCode, fullName };
-    
+
             const oauth = create(tokenData);
             delete user.password;
             delete user.otp;
@@ -239,9 +236,4 @@ export class AuthService extends BaseService {
         } catch (error) { throw error; }
     }
 
-    async findUser(filter: any): Promise<any> {
-        try {
-            return await TmpController.tmpService.findOne({ filter: { filter } });
-        } catch (error) { return false }
-    }
 }

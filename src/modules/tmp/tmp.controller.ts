@@ -22,6 +22,4 @@ export class TmpController {
         catch (error) { next(error); }
     }
 
-
-
 }

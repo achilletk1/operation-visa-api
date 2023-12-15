@@ -28,8 +28,8 @@ export class AuthController {
         catch (error) { next(error); }
     }
 
-    async SendClientOtp(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await AuthController.authService.SendClientOtp(req.body as any)); }
+    async sendClientOtp(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await AuthController.authService.sendClientOtp(req.body as any)); }
         catch (error) { next(error); }
     }
 

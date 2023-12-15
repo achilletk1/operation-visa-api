@@ -1,11 +1,9 @@
 import { getCbsUserVariables } from "common/utils/coreBanking";
-import { generateFormalNoticeLetter } from "modules/export";
-import { replaceVariables } from "common/helpers";
-import { CrudService } from "common/base";
-import { Letter } from "./model";
 import { TmpRepository } from "./tmp.repository";
+import { CrudService } from "common/base";
+import { TmpData } from "./model";
 
-export class TmpService extends CrudService<Letter> {
+export class TmpService extends CrudService<TmpData> {
 
     static tmpRepository: TmpRepository;
 

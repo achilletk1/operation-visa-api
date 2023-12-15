@@ -1,4 +1,4 @@
-export interface TmpController {
+export interface TmpData {
     _id?: any;
     email?:string;
     gender?:string;

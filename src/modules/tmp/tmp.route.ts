@@ -8,4 +8,4 @@ router.get('/:id', tmpController.findOneById);
 
 router.put('/:id', tmpController.updateById);
 
-export const lettersRoute = router;
+export const tmpRoute = router;

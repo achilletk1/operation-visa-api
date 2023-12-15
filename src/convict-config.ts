@@ -359,6 +359,12 @@ export const config = convict({
             env: 'GROUP_NAME_VERIFICATION'
         },
     },
+    visaTransactionFilePendingValue: {
+        doc: 'lifetime of a visa transaction file in pending status in minutes',
+        format: Number,
+        default: 3,
+        env: 'VISA_TRANSACTION_FILE_PENDING_VALUE'
+    },
 });
 
 // Load environment dependent configuration

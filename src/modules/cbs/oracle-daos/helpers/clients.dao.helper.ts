@@ -325,6 +325,43 @@ export const helper = {
                 CHA: '372100',
                 CLI: '70017185'
             },
+            '37207012337': {
+                NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
+                NOM: 'MOUTASSI NZOGUE',
+                PRE: 'Kevin Armel',
+                NRC: 'GWB5O3RPI4WWUCJ/DV    ',
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                AGE: '01400   ',
+                CLC: '19 ',
+                CIVILITY: 'Congolaise',
+                ADDRESS: 'Kinshasa ',
+                TEL: '242068207839 ',
+                POB: 'DOUALA ',
+                DOB: '11/04/1995',
+                IDTYPE: 'CNI',
+                IDNUM: '002589634785',
+                CLI: '00000000',
+                CHA: '372100',
+            },
+            '37307012338': {
+                NOMREST: 'TACHUM KAMGA Achille',
+                NOM: 'TACHUM KAMGA',
+                PRE: 'Achille',
+                NRC: 'GWB5O3RPI4WWUCJ/DV    ',
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                AGE: '01400   ',
+                NCP: '37207027067',
+                CLC: '19 ',
+                CIVILITY: 'Camerounaise',
+                ADDRESS: 'Ange rafael ',
+                TEL: '242068207839 ',
+                POB: 'Kinshasa ',
+                DOB: '11/04/1988',
+                IDTYPE: 'PASSEPORT',
+                IDNUM: '00258963',
+                CHA: '372100',
+                CLI: '70017185'
+            },
         }
 
         const result = mapping[ncp] ? [mapping[ncp]] : [];
