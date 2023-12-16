@@ -4,19 +4,19 @@ import { User } from "modules/users";
 
 export class OnlinePaymentMonth {
     _id?: any;
-    user!: Partial<User>;
-    currentMonth?: string;
-    status!: OpeVisaStatus;
-    dates!: {
+    user?: Partial<User>;
+    currentMonth?: number;
+    status?: OpeVisaStatus;
+    dates?: {
         created?: number;
         updated?: number;
     };
     amounts?: number;
     ceiling?: number;
-    statements!: OnlinePaymentStatement[];
-    statementAmounts?: number;
+    //statements!: OnlinePaymentStatement[];
+   // statementAmounts?: number;
     othersAttachements?: any[];
-    othersAttachmentStatus?: OpeVisaStatus;
+  //  othersAttachmentStatus?: OpeVisaStatus;
     transactions?: VisaTransaction[];
     validationLevel?: number;
     validators?: Validator[];
@@ -29,7 +29,7 @@ export class OnlinePaymentStatement {
     fullName?: string;
     label?: string;
     date?: number;
-    amount!: number;
+    amount?: number;
     nature?: any;
     statementRef?: string;
     comment?: string;
