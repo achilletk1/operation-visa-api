@@ -31,4 +31,5 @@ export interface VisaTransaction {
     statementRef?: string;
     tel?: string;
     email?: string;
+    attachments?: any[]
 }

@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, unlinkSync, readFileSync, rmSync } from 'fs';
+import { mkdirSync, writeFileSync, unlinkSync, readFileSync, rmSync,existsSync } from 'fs';
 import { config } from 'convict-config';
 
 export function writeFile(content: any, path: string, filename: string) {
@@ -11,9 +11,11 @@ export function writeFile(content: any, path: string, filename: string) {
 }
 
 export function readFile(path: string) {
+    if(!existsSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`))  return null
     try { return readFileSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`, { encoding: 'base64' }); }
     catch (error) { throw error; }
 }
+
 
 export function readAnyFile(path: string) {
     try { return readFileSync(path, { encoding: 'base64' }); }
