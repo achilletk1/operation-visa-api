@@ -4,6 +4,8 @@ import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
 import { get } from "lodash";
+import { helper } from "./oracle-daos/helpers";
+
 
 export class CbsService extends BaseService {
 
@@ -83,6 +85,33 @@ export class CbsService extends BaseService {
             return response;
         } catch (error: any) {
             logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);
+            throw error;
+        }
+    }
+
+    async getUserCbsAccountsDatas(datas: any) {
+        if (isDev) { await timeout(500); }
+
+        const { code, includeAccounts, isChaFilter } = datas;
+
+        try {
+
+            let client = await clientsDAO.getClientAccountDataByCli(code);
+
+            if (!client || client?.length === 0) { throw new Error('ClientNotFound'); }
+
+            if (client && client instanceof Array) {
+                client = removeSpacesFromResultSet(get(client, `[0]`, null));
+            }
+
+            let accounts: any;
+            if ([true, 'true'].includes(includeAccounts)) { accounts = await clientsDAO.getClientAccountsWithBalance(code) };
+            if ([true, 'true'].includes(isChaFilter)) { accounts = accounts.filter((elt: any) => ['371', '372'].includes(elt?.CHA.slice(0, 3))); }
+            if (!accounts || accounts?.length === 0) { throw new Error('AccountNotFound'); }
+
+            return { client, accounts };
+        } catch (error: any) {
+            logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
             throw error;
         }
     }

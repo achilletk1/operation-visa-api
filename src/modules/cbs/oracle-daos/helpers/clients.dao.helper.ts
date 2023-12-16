@@ -9,7 +9,7 @@ export const helper = {
         logger.info(`mock data used from ${methodPath}`);
 
         const mapping: any = {
-            '70053102': {
+            '37207027067': {
                 NOMREST: 'BRALICO',
                 NRC: 'AZERTYUIOPLKJHGF    ',
                 NIDF: '23456789IURTYUHGE   ',
@@ -303,7 +303,7 @@ export const helper = {
                 DOB: '11/04/1995',
                 IDTYPE: 'CNI',
                 IDNUM: '002589634785',
-                CLI: '00000000',
+                CLI: '37207027067',
                 CHA: '372100',
             },
             '37307027068': {
