@@ -33,7 +33,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
             const resultat = ceilingsTab?.data.find((elm: any) => elm?.account?.ncp === ceiling?.account?.ncp &&
                 elm?.status === ceiling?.status && elm.desiredCeiling.type === ceiling?.desiredCeiling?.type)
 
-            if (resultat) { throw Error('ApplicationNotProcessed'); }
+            if (resultat) { throw new Error('ApplicationNotProcessed'); }
 
             await RequestCeilingIncreaseController.requestCeilingIncreaseService.create(ceiling);
 
@@ -51,15 +51,15 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
         try {
             const user = httpContext.get('user');
 
-            if (!((user.category >= 500) && (user.category <= 600))) { throw Error('Forbidden'); }
+            if (!((user.category >= 500) && (user.category <= 600))) { throw new Error('Forbidden'); }
 
-            if (!assignedUser) { throw Error('AssignedUserNotProvied'); }
+            if (!assignedUser) { throw new Error('AssignedUserNotProvied'); }
 
             const ceilingReq = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id: id } });
 
-            if (isEmpty(ceilingReq)) { throw Error('CeilingNotFound'); }
+            if (isEmpty(ceilingReq)) { throw new Error('CeilingNotFound'); }
 
-            if (Number(ceilingReq.status) >= 400) { throw Error('AlreadyAssigned'); }
+            if (Number(ceilingReq.status) >= 400) { throw new Error('AlreadyAssigned'); }
 
             const { _id, fname, lname } = user;
             const assigner = { _id, fname, lname };
@@ -90,13 +90,13 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
             const authUser = httpContext.get('user');
 
-            if (![600].includes(authUser?.category)) { throw Error('Forbidden'); }
+            if (![600].includes(authUser?.category)) { throw new Error('Forbidden'); }
 
             const ceiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id } });
 
-            if (!ceiling) { throw Error('CeilingNotFound'); }
+            if (!ceiling) { throw new Error('CeilingNotFound'); }
 
-            if ([200, 300].includes(Number(ceiling?.status))) { throw Error('AllReadyValidate'); }
+            if ([200, 300].includes(Number(ceiling?.status))) { throw new Error('AllReadyValidate'); }
 
             ceiling.validator = body.validator;
             ceiling.status = body.status;

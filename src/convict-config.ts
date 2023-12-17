@@ -273,28 +273,6 @@ export const config = convict({
         env: 'EMAIL_REQUESTING_CEILING_INCREASE',
         arg: 'email-requesting-ceiling-increase'
     },
-    cronRevivalMail: {
-        doc: 'cron of visa revival mail.',
-        format: String,
-        default: '',
-        env: 'VISA_REVIVAL_MAIL',
-        arg: 'visa-revival-mail'
-    },
-
-    cronTransactionProcessing: {
-        doc: 'cron of transaction processing.',
-        format: String,
-        default: '',
-        env: 'CRON_TRANSACTION_PROCESSING',
-        arg: 'cron-transaction-processing'
-    },
-    cronDeleteTemporaryFile: {
-        doc: 'cron to delete temporaries files.',
-        format: String,
-        default: '',
-        env: 'DELETE_TEMPORARY_FILES',
-        arg: 'delete-temporary-files'
-    },
     gotenbergUrl: {
         doc: 'GOTENBERG PDF GENERATOR URL',
         format: String,
@@ -312,20 +290,6 @@ export const config = convict({
         format: String,
         default: '',
         env: 'EMAIL_BANK'
-    },
-    cronRemoveOnlinePaymentsWithExceedings: {
-        doc: 'cron of delete online payments With Exceedings.',
-        format: String,
-        default: '',
-        env: 'REMOVE_PAYMENTS_WITH_EXCEEDINGS',
-        arg: 'remove-travels-with_Exceedings'
-    },
-    cronclientindemeure: {
-        doc: 'cron to send mail of list of client in demeure to bank.',
-        format: String,
-        default: '',
-        env: 'CLIENT_IN_DEMEURE',
-        arg: 'client_in_demeure'
     },
     activeDirectory: {
         adminPassword: {
@@ -364,6 +328,43 @@ export const config = convict({
         format: Number,
         default: 3,
         env: 'VISA_TRANSACTION_FILE_PENDING_VALUE'
+    },
+    crons: {
+        revivalMail: {
+            doc: 'cron of visa revival mail.',
+            format: String,
+            default: '',
+            env: 'VISA_REVIVAL_MAIL',
+            arg: 'visa-revival-mail'
+        },
+        transactionProcessing: {
+            doc: 'cron of transaction processing.',
+            format: String,
+            default: '',
+            env: 'CRON_TRANSACTION_PROCESSING',
+            arg: 'cron-transaction-processing'
+        },
+        deleteTemporaryFile: {
+            doc: 'cron to delete temporaries files.',
+            format: String,
+            default: '',
+            env: 'DELETE_TEMPORARY_FILES',
+            arg: 'delete-temporary-files'
+        },
+        removeOnlinePaymentsWithExceedings: {
+            doc: 'cron of delete online payments With Exceedings.',
+            format: String,
+            default: '',
+            env: 'REMOVE_PAYMENTS_WITH_EXCEEDINGS',
+            arg: 'remove-travels-with_Exceedings'
+        },
+        clientInDemeure: {
+            doc: 'cron to send mail of list of client in demeure to bank.',
+            format: String,
+            default: '',
+            env: 'CLIENT_IN_DEMEURE',
+            arg: 'client_in_demeure'
+        },
     },
 });
 

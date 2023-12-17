@@ -35,8 +35,8 @@ export class AuthService extends BaseService {
 
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
-            if (isEmpty(user)) { throw Error('UserNotFound'); }
-            if (!user.enabled) { throw Error('disableUser'); }
+            if (isEmpty(user)) { throw new Error('UserNotFound'); }
+            if (!user.enabled) { throw new Error('disableUser'); }
 
             const idapUser = await getLdapUser(userCode, password);
 
@@ -72,23 +72,23 @@ export class AuthService extends BaseService {
         let userCode = data?.userCode;
         const otpValue = data?.otp;
         try {
-            if (!userCode || !otpValue) { throw Error('MissingAuthData'); }
+            if (!userCode || !otpValue) { throw new Error('MissingAuthData'); }
 
-            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw Error('BadOTP'); }
+            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw new Error('BadOTP'); }
 
             if (userCode === 'LND001'/* && !isProd*/) { userCode = (await UsersController.usersService.findOne({ filter: { category: 600, pwdReseted: true } }))?.userCode; }
 
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
-            if (!user) { throw Error('UserNotFound'); }
+            if (!user) { throw new Error('UserNotFound'); }
 
             const { otp } = user;
 
-            if (otpValue != '000000' && otp?.value !== otpValue) { throw Error('OTPNoMatch'); }
+            if (otpValue != '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
 
             const currTime = moment().valueOf();
 
-            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw Error('OTPExpired'); }
+            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
             return this.generateAuthToken(user);
         } catch (error) { throw error; }
@@ -97,25 +97,25 @@ export class AuthService extends BaseService {
     async resetFirstPassword(data: any) {
         const { userCode, currentPwd, newPwd, confirmPwd } = data;
         try {
-            if (!userCode || !currentPwd || !newPwd || !confirmPwd) { throw Error('EmailOrPasswordNotProvided'); }
+            if (!userCode || !currentPwd || !newPwd || !confirmPwd) { throw new Error('EmailOrPasswordNotProvided'); }
 
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
             if (!user) {
                 this.logger.info('Error User not found in database');
-                throw Error('UserNotFound');
+                throw new Error('UserNotFound');
             }
 
             const match = await bcrypt.compare(currentPwd, String(user?.password));
 
             if (!match) {
                 this.logger.info('Error reset password failed at password comparison');
-                throw Error('FailedResetPassword');
+                throw new Error('FailedResetPassword');
             }
 
-            if (newPwd !== confirmPwd) throw Error('PasswordsProvidedAreDifferent');
+            if (newPwd !== confirmPwd) throw new Error('PasswordsProvidedAreDifferent');
 
-            if (newPwd === currentPwd) throw Error('Passwordalreadyused');
+            if (newPwd === currentPwd) throw new Error('Passwordalreadyused');
 
             const password = await bcrypt.hash(`${newPwd}`, config.get('saltRounds'));
 
@@ -185,9 +185,9 @@ export class AuthService extends BaseService {
         let ncp = data?.ncp;
         const otpValue = data?.otp;
         try {
-            if (!ncp || !otpValue) { throw Error('MissingAuthData'); }
+            if (!ncp || !otpValue) { throw new Error('MissingAuthData'); }
 
-            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw Error('BadOTP'); }
+            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw new Error('BadOTP'); }
 
             const user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User;
 
@@ -195,11 +195,11 @@ export class AuthService extends BaseService {
 
             const { otp } = user;
 
-            if (otpValue != '000000' && otp?.value !== otpValue) { throw Error('OTPNoMatch'); }
+            if (otpValue != '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
 
             const currTime = moment().valueOf();
 
-            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw Error('OTPExpired'); }
+            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
             const { email, gender, fname, lname, tel, category, clientCode } = user;
             const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
@@ -215,7 +215,7 @@ export class AuthService extends BaseService {
     getAuthorizations() {
         try {
             let profile = getUserProfile(httpContext.get('user'));
-            if (!profile) { throw Error('Forbidden') }
+            if (!profile) { throw new Error('Forbidden') }
 
             const authorizations = getAuthorizationsByProfile(profile);
             return authorizations;

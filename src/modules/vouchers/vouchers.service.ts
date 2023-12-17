@@ -16,7 +16,7 @@ export class VouchersService extends CrudService<Voucher> {
         try {
             const vourchers = await VouchersController.vouchersService.findAll({});
             const foundIndex = vourchers?.data?.findIndex((e) => e.label === data.label);
-            if (foundIndex > -1) { throw Error('VourcherAlreadyExist'); }
+            if (foundIndex > -1) { throw new Error('VourcherAlreadyExist'); }
             return await VouchersController.vouchersService.create(data);
         } catch (error) { throw error;}
     }
@@ -25,7 +25,7 @@ export class VouchersService extends CrudService<Voucher> {
         try {
             const vourchers = await VouchersController.vouchersService.findAll({});
             const foundIndex = vourchers?.data?.findIndex((e) => e.label === data.label && e?._id?.toString() !== _id);
-            if (foundIndex > -1) { throw Error('VourcherAlreadyExist') }
+            if (foundIndex > -1) { throw new Error('VourcherAlreadyExist') }
             return await VouchersController.vouchersService.update({ _id }, data);
         } catch (error) { throw error;}
     }

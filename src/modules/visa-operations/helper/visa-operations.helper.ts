@@ -28,7 +28,8 @@ export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymen
 }
 
 export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
-    let travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { travelId: travel?._id, month: month } });
+    let travelMonth;
+    try { travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { travelId: travel?._id, month: month } }); } catch(e) {}
 
     if (isEmpty(travelMonth)) {
         travelMonth = generateTravelMonthByProcessing(travel?._id.toString(), String(travel?.user?._id), month);

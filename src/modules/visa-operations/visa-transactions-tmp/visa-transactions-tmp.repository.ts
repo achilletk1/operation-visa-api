@@ -5,7 +5,7 @@ export class VisaTransactionsTmpRepository extends BaseRepository {
 
     constructor() { super(); this.collectionName = 'visa_transactions_tmp'; }
 
-    async getFormatedVisaTransactionsTmps(): Promise<any> {
+    async getFormatedVisaTransactionsTmps() {
         return await this.findAllAggregate(formatedVisaTransactionsTmps);
     }
 }

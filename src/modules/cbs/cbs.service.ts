@@ -4,8 +4,6 @@ import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
 import { get } from "lodash";
-import { helper } from "./oracle-daos/helpers";
-
 
 export class CbsService extends BaseService {
 

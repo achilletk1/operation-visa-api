@@ -93,7 +93,7 @@ export class TravelService extends CrudService<Travel> {
         try {
             const existingTravels = await TravelController.travelService.findAll({ filter: { 'user._id': get(travel, 'user._id'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel?.dates?.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel?.dates?.end } }] } });
 
-            if (!isEmpty(existingTravels?.data)) { throw Error('TravelExistingInThisDateRange') }
+            if (!isEmpty(existingTravels?.data)) { throw new Error('TravelExistingInThisDateRange') }
             // Set travel status to TO_VALIDATED
             travel.status = OpeVisaStatus.TO_COMPLETED;
 
@@ -231,23 +231,23 @@ export class TravelService extends CrudService<Travel> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (!adminAuth) { throw Error('Forbidden') }
+            if (!adminAuth) { throw new Error('Forbidden') }
 
             let stepData = [];
 
             const { status, step, rejectReason, validator, references, signature } = data;
 
-            if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { throw Error('StepNotProvided') };
+            if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { throw new Error('StepNotProvided') };
 
             let travel = await TravelController.travelService.findOne({ filter: { _id } });
 
-            if (!travel) { throw Error('TravelNotFound'); }
+            if (!travel) { throw new Error('TravelNotFound'); }
 
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             const validationLevelNumber = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw Error('CannotRejectWithoutReason') }
+            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             let updateData: any, tobeUpdated: any;
 
@@ -284,7 +284,7 @@ export class TravelService extends CrudService<Travel> {
             }
 
             if (step === 'expenseDetails') {
-                if (!references) { throw Error('ReferenceNotProvided'); }
+                if (!references) { throw new Error('ReferenceNotProvided'); }
 
                 const { expenseDetails } = travel;
 
@@ -294,7 +294,7 @@ export class TravelService extends CrudService<Travel> {
 
                     const expenseDetailIndex = expenseDetails.findIndex((elt: any) => elt.ref === expenseDetailRef) || -1;
 
-                    if (expenseDetailIndex && expenseDetailIndex < 0) { throw Error('BadReference'); }
+                    if (expenseDetailIndex && expenseDetailIndex < 0) { throw new Error('BadReference'); }
 
                     expenseDetails[expenseDetailIndex].validators.push(validator);
 
@@ -307,7 +307,7 @@ export class TravelService extends CrudService<Travel> {
             }
 
             if (step === 'othersAttachements') {
-                if (!references) { throw Error('ReferenceNotProvided'); }
+                if (!references) { throw new Error('ReferenceNotProvided'); }
 
                 const { othersAttachements } = travel;
 
@@ -317,7 +317,7 @@ export class TravelService extends CrudService<Travel> {
 
                     const expenseDetailIndex = othersAttachements.findIndex((elt: any) => elt.ref === expenseDetailRef);
 
-                    if (expenseDetailIndex < 0) { throw Error('BadReference') }
+                    if (expenseDetailIndex < 0) { throw new Error('BadReference') }
 
                     othersAttachements[expenseDetailIndex].validators.push(validator);
 

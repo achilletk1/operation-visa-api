@@ -40,11 +40,11 @@ export class ExportService extends BaseService {
 
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { end, start, ttl, clientCode } = options;
 
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
         const transaction: any[] = []; // TODO get transactions for reporting
         const data = generateVisaTransactionExportXlsx(transaction);
         const buffer = Buffer.from(data, 'base64');
@@ -81,11 +81,11 @@ export class ExportService extends BaseService {
 
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { ttl, path, contentType, fileName } = options;
 
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
         const data = readFile(path);
         const buffer = Buffer.from(data, 'base64');
@@ -106,7 +106,7 @@ export class ExportService extends BaseService {
         delete fields.ttl;
 
         const payments = await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy({ ...fields });
-        if (isEmpty(payments?.data)) { throw Error('OnlinePaymentNotFound'); }
+        if (isEmpty(payments?.data)) { throw new Error('OnlinePaymentNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -123,7 +123,7 @@ export class ExportService extends BaseService {
         let options;
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { ttl } = options;
         // delete options.name;
@@ -134,7 +134,7 @@ export class ExportService extends BaseService {
         delete options.ttl;
 
         options = { ...options }
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
         const payments = await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy(options);
 
@@ -149,7 +149,7 @@ export class ExportService extends BaseService {
 
     async generateOnlinePaymentOperationsExportLinks(operationId: string) {
         const payments = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: operationId } });
-        if (isEmpty(payments?.transactions)) { throw Error('MonthOnlineOperationsNotFound'); }
+        if (isEmpty(payments?.transactions)) { throw new Error('MonthOnlineOperationsNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -166,16 +166,16 @@ export class ExportService extends BaseService {
         let options;
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { ttl } = options;
 
         options = { ...options }
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
         const operations = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: options.operationId } });
 
-        if (isEmpty(operations)) { throw Error('TransactionNotFound'); }
+        if (isEmpty(operations)) { throw new Error('TransactionNotFound'); }
 
         let data;
         const excelArrayBuffer = await generateOnlineOperationsExportXlsx(operations);
@@ -188,7 +188,7 @@ export class ExportService extends BaseService {
 
     async generateTravelsCeillingExportLinks(travelId: string) {
         const travle = await TravelController.travelService.findOne({ filter: { _id: travelId } });
-        if (isEmpty(travle?.transactions)) { throw Error('OnlineCeillingNotFound'); }
+        if (isEmpty(travle?.transactions)) { throw new Error('OnlineCeillingNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -205,14 +205,14 @@ export class ExportService extends BaseService {
         let options;
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { ttl } = options;
         // delete options.travelId
         // delete options.ttl;
 
         options = { ...options }
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
         const travel: any = await TravelController.travelService.findOne({ filter: { _id: options?.travelId } });
 
@@ -228,7 +228,7 @@ export class ExportService extends BaseService {
     async generateNotificationExportLinks(userId: string, query: any) {
 
         const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
-        if (!user || isEmpty(user)) { throw Error('UserNotFound'); }
+        if (!user || isEmpty(user)) { throw new Error('UserNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -254,15 +254,15 @@ export class ExportService extends BaseService {
 
             try {
                 options = decryptObj(code);
-            } catch (error) { throw Error('BadExportCode'); }
+            } catch (error) { throw new Error('BadExportCode'); }
 
             const { format, query, userId, ttl } = options;
 
-            if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
-            if (id !== userId) { throw Error('Forbbiden'); }
+            if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
+            if (id !== userId) { throw new Error('Forbbiden'); }
 
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
-            if (!user) { throw Error('UserNotFound'); }
+            if (!user) { throw new Error('UserNotFound'); }
 
             parseNumberFields(query);
             const { offset, limit, start, end } = query;
@@ -279,7 +279,7 @@ export class ExportService extends BaseService {
 
             if (!data || isEmpty(data)) {
                 this.logger.info(`notification not found, ${this.constructor.name}.getNotifications()`);
-                throw Error('NotificationNotFound');
+                throw new Error('NotificationNotFound');
             }
             let result: any;
 
@@ -300,7 +300,7 @@ export class ExportService extends BaseService {
         delete fields.ttl;
 
         const travels = await TravelController.travelService.findAll({ filter: fields });
-        if (isEmpty(travels?.data)) { throw Error('travelsNotFound'); }
+        if (isEmpty(travels?.data)) { throw new Error('travelsNotFound'); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -319,13 +319,13 @@ export class ExportService extends BaseService {
         let options;
         try {
             options = decryptObj(code);
-        } catch (error) { throw Error('BadExportCode'); }
+        } catch (error) { throw new Error('BadExportCode'); }
 
         const { ttl } = options;
         delete options.ttl;
 
         options = { ...options }
-        if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+        if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
         const travels = await TravelController.travelService.findAll({ filter: options });
 
@@ -343,7 +343,7 @@ export class ExportService extends BaseService {
             const { key, label } = data
 
             const file = await FilesController.filesService.findOne({ filter: { key } });
-            if (!file) { throw Error('Forbbiden'); }
+            if (!file) { throw new Error('Forbbiden'); }
 
             const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -365,11 +365,11 @@ export class ExportService extends BaseService {
 
             try {
                 options = decryptObj(code);
-            } catch (error) { throw Error('BadExportCode'); }
+            } catch (error) { throw new Error('BadExportCode'); }
 
             const { key, ttl, label } = options;
 
-            if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+            if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
             const datas = await FilesController.filesService.findOne({ filter: { key } });
             const buffer = Buffer.from(datas?.value, 'base64');
@@ -382,13 +382,13 @@ export class ExportService extends BaseService {
 
     async generateDeclarationFolderExportLinks(type: string, _id: string) {
         try {
-            if (!['travel', 'onlinePayment'].includes(type)) { throw Error('BadExportType'); }
+            if (!['travel', 'onlinePayment'].includes(type)) { throw new Error('BadExportType'); }
 
             const data = type === 'travel'
                 ? await TravelController.travelService.findOne({ filter: { _id } })
                 : type === 'onlinePayment'
                     ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }) : null;
-            if (!data) { throw Error('DataNotFound'); }
+            if (!data) { throw new Error('DataNotFound'); }
 
             const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -410,19 +410,19 @@ export class ExportService extends BaseService {
 
             try {
                 options = decryptObj(code);
-            } catch (error) { throw Error('BadExportCode'); }
+            } catch (error) { throw new Error('BadExportCode'); }
 
             const { ttl, id } = options;
             const type: 'travel' | 'onlinePayment' = options.type;
 
-            if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+            if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
             const data = type === 'travel'
                 ? await TravelController.travelService.findOne({ filter: { _id: id } })
                 : type === 'onlinePayment'
                     ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } }) : null;
 
-            if (!data) { throw Error('DataNotFound'); }
+            if (!data) { throw new Error('DataNotFound'); }
 
             const folder = getFileNamesTree(data, type);
 

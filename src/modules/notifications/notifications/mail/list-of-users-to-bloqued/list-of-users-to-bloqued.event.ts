@@ -1,6 +1,6 @@
 import { generatePdfContainBlockedUser } from 'modules/export';
 import { MailAttachment } from 'modules/notifications/model';
-import { isProd } from 'common/helpers';
+import { VisaTransaction } from 'modules/visa-transactions';
 import { config } from "convict-config";
 import { logger } from 'winston-config';
 import moment from "moment";
@@ -12,7 +12,7 @@ export class ListOfUsersToBloquedEvent implements ListOfUsersToBloquedMailData {
     greetings!: string;
     attachments: MailAttachment[] = [];
 
-    constructor(public usersList: any[]) {
+    constructor(public usersList: VisaTransaction[]) {
         this.greetings = `Bonjour`;
         this.date = moment().format('DD/MM/YYYY');
         this.receiver = config.get('emailBank');

@@ -15,7 +15,7 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<unknown>
 
-declare type QueryProjection = ObjectType<number>
+declare type QueryProjection = ObjectType<0 | 1>
 
 declare type DataId = string | number;
 

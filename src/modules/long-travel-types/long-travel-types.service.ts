@@ -16,7 +16,7 @@ export class LongTravelTypesService extends CrudService<LongTravelType> {
     async insertLongTravelTypes(data: LongTravelType) {
         try {
             const subTypes = await LongTravelTypesController.longTravelTypesService.findOne({ filter: { label: data?.label } });
-            if (subTypes) { throw Error('DataAlreadyExist') }
+            if (subTypes) { throw new Error('DataAlreadyExist') }
             data.dates = {created : moment().valueOf()};
             return await LongTravelTypesController.longTravelTypesService.create(data as Document);
         } catch (error) { throw error; }

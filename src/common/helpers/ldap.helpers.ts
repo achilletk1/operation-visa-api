@@ -31,8 +31,8 @@ export async function getLdapUser(userCode: any, password?: any) {
             response = await authenticate(ldapOptions);
             console.log('LDAP authentification response', response);
             if (config.get('activeDirectory.groupVerification')) {
-                if (!response.memberOf) { throw Error('UnauthorizedGroup'); }
-                if (!verifyGroupMember(response)) { throw Error('UnauthorizedGroup'); }
+                if (!response.memberOf) { throw new Error('UnauthorizedGroup'); }
+                if (!verifyGroupMember(response)) { throw new Error('UnauthorizedGroup'); }
             }
 
         } catch (error: any) {
@@ -52,8 +52,8 @@ export async function getLdapUser(userCode: any, password?: any) {
 
             response = await authenticate(ldapOptions);
             console.log('ldap user : ', response);
-            if (!response.memberOf) { throw Error('UnauthorizedGroup'); }
-            if (!verifyGroupMember(response)) { throw Error('UnauthorizedGroup'); }
+            if (!response.memberOf) { throw new Error('UnauthorizedGroup'); }
+            if (!verifyGroupMember(response)) { throw new Error('UnauthorizedGroup'); }
         } catch (error: any) {
             logger.debug(`\n error : ${JSON.stringify(error)} \n stack : ${error.stack}\n message : ${error.admin}`);
             throw error;

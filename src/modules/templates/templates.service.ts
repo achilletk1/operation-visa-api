@@ -16,7 +16,7 @@ export class TemplatesService extends CrudService<TemplateForm> {
         try {
             const vourchers = await TemplatesController.templatesService.findAll({});
             const foundIndex = vourchers?.data.findIndex((e) => e.label === data.label && e._id.toString() !== _id);
-            if (foundIndex > -1) { throw Error('VourcherAlreadyExist'); }
+            if (foundIndex > -1) { throw new Error('VourcherAlreadyExist'); }
             return await TemplatesController.templatesService.update({ _id }, data);
         } catch (error) { throw error; }
     }

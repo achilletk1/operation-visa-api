@@ -16,8 +16,6 @@ router.post('/import/verify', visaTransactionsFilesController.verifyTransactionF
 
 router.put('/import/confirm/:id', visaTransactionsFilesController.confirmTransactionFiles);
 
-router.put('/import/restart/:id', visaTransactionsFilesController.restartConfirmTransactionFiles);
-
 router.delete('/import/abort/:id', visaTransactionsFilesController.abortTransactionFiles);
 
 export const visaTransactionsFilesRoute = router;

@@ -52,11 +52,13 @@
     },
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "achille.tachum@londo-tech.com",
-    "cronRevivalMail":"*/30 * * * *",
-    "cronTransactionProcessing": "*/3 * * * *",
-    "cronDeleteTemporaryFile": "0 */3 * * *",
-    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
-    "cronclientindemeure": "0 00 1 */3 *",  
+    "crons": {
+        "revivalMail":"*/30 * * * *",
+        "transactionProcessing": "*/3 * * * *",
+        "deleteTemporaryFile": "0 */3 * * *",
+        "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
+        "clientInDemeure": "0 00 1 */3 *"
+    },
     "emailBank": "achille.tachum@londo-tech.com"
 
 }

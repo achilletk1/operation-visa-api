@@ -48,11 +48,26 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         } catch (error) { throw error; }
     }
 
+    async removeOnlinePaymentsWithExceedings() {
+        try {
+            const onlinePaymentsMonths = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { currentMonth: { $lt: +moment().subtract(1, 'month').format('YYYYMM') } } }))?.data;
+    
+            for (const onlinePaymentsMonth of onlinePaymentsMonths) {
+                const total = getTotal(onlinePaymentsMonth?.transactions || []);
+                if (onlinePaymentsMonth?.ceiling && total < onlinePaymentsMonth?.ceiling) {
+                    await OnlinePaymentController.onlinePaymentService.deleteOne({ _id: onlinePaymentsMonth?._id });
+                }
+            }
+        } catch (e: any) {
+            this.logger.error(`Error during excution removeOnlinePaymentsWithExceedings cron \n ${e.stack}\n`);
+        }
+    }
+
     async insertOnlinePaymentStatement(userId: string, onlinepaymentStatement: OnlinePaymentStatement): Promise<any> {
         try {
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
 
-            if (!user) { throw Error('UserNotFound'); }
+            if (!user) { throw new Error('UserNotFound'); }
 
             const currentMonth = moment(onlinepaymentStatement.date).format('YYYYMM');
 
@@ -65,13 +80,13 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { currentMonth, 'user._id': userId } });
 
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: 200 } });
-            if (!ceiling) { throw Error('CeilingNotFound'); }
+            if (!ceiling) { throw new Error('CeilingNotFound'); }
 
             if (!onlinePayment) {
                 onlinePayment = {
                     user: {
                         email: get(user, 'email'),
-                        _id: get(user, '_id').toString(),
+                        _id: get(user, '_id')?.toString(),
                         clientCode: get(user, 'clientCode'),
                         fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
                     },
@@ -128,7 +143,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             if (user) {
                 onlinePayment.user.fullName = `${get(user, 'fname')} ${get(user, 'lname')}`;
-                onlinePayment.user._id = user?._id.toString();
+                onlinePayment.user._id = user?._id?.toString() || '';
             }
 
             onlinePayment.status = OpeVisaStatus.TO_COMPLETED;
@@ -150,7 +165,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             const actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
 
-            if (!actualOninePayment) { throw Error('OnlinePayment'); }
+            if (!actualOninePayment) { throw new Error('OnlinePayment'); }
 
             for (let statement of data.statements) {
                 if (statement?.status && !adminAuth && statement?.isEdit) { delete statement.status; }
@@ -200,16 +215,16 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (!adminAuth) { throw Error('Forbidden'); }
+            if (!adminAuth) { throw new Error('Forbidden'); }
 
             const { status, validator, statementRefs, rejectReason } = data;
 
-            if (isEmpty(statementRefs)) throw Error('MissingStatementRefs');
+            if (isEmpty(statementRefs)) throw new Error('MissingStatementRefs');
 
             const onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
 
-            if (!onlinePayment) { throw Error('OnlinePaymentNotFound'); }
-            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw Error('CannotRejectWithoutReason') }
+            if (!onlinePayment) { throw new Error('OnlinePaymentNotFound'); }
+            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             const { statements } = onlinePayment;
             let updateData: any = {};

@@ -126,7 +126,7 @@ declare type ObjectType<T> = {
 }
 
 export declare type QueryOptions = {
-  filter: QueryFilter,
+  filter?: QueryFilter,
   projection?: QueryProjection,
   limit?: number,
   offset?: number,

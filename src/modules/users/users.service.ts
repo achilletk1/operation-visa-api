@@ -187,11 +187,11 @@ export class UsersService extends CrudService<User> {
 
     async ResetPwrd(_id: string) {
         const AuthUser = httpContext.get('user');
-        if (AuthUser?.category !== 600) { throw Error('Forbidden'); }
+        if (AuthUser?.category !== 600) { throw new Error('Forbidden'); }
 
         try {
             const user = await UsersController.usersService.findOne({ filter: { _id } });
-            if (!user) throw Error('UserNotFound');
+            if (!user) throw new Error('UserNotFound');
             const passwordClear = '000000'/*getRandomString(6)*/;
             const password = await hash(passwordClear, config.get('saltRounds'));
             await UsersController.usersService.update({ _id }, { password });

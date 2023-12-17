@@ -33,7 +33,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             const actualTravelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { _id }});
 
-            if (!actualTravelMonth) { throw Error('TravelMonthNotFound'); }
+            if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
 
             if (!isEmpty(travelMonth.expenseDetails)) {
                 for (let expenseDetail of (travelMonth?.expenseDetails || [])) {
@@ -57,12 +57,12 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (isEmpty(travelMonths)) { throw Error('TravelMonthsNotFound') }
+            if (isEmpty(travelMonths)) { throw new Error('TravelMonthsNotFound') }
 
             await Promise.all(travelMonths.map(async (travelMonth) => {
                 const _id = get(travelMonth, '_id');
                 const actualTravelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { _id }});
-                if (!actualTravelMonth) { throw Error('TravelMonthNotFound'); }
+                if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
 
                 if (!isEmpty(travelMonth.expenseDetails)) {
                     for (let expenseDetail of travelMonth.expenseDetails) {
@@ -88,19 +88,19 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (!adminAuth) { throw Error('Forbidden'); }
+            if (!adminAuth) { throw new Error('Forbidden'); }
             const { status, rejectReason, validator, references } = data;
 
 
             let travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: {_id }});
 
-            if (!travelMonth) { throw Error('TravelMonthNotFound'); }
+            if (!travelMonth) { throw new Error('TravelMonthNotFound'); }
 
             const travel = await TravelController.travelService.findOne({ filter: { _id: travelMonth?.travelId }});
 
-            if (!travel) { throw Error('TravelNotFound'); }
+            if (!travel) { throw new Error('TravelNotFound'); }
 
-            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw Error('CannotRejectWithoutReason') }
+            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             let updateData: any, tobeUpdated: any;
 
@@ -108,7 +108,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             if (status === OpeVisaStatus.REJECTED) { updateData = { ...updateData, rejectReason } }
 
-            if (!references) { throw Error('ReferenceNotProvided'); }
+            if (!references) { throw new Error('ReferenceNotProvided'); }
 
             const { expenseDetails } = travelMonth;
 
@@ -116,7 +116,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
                 const expenseDetailIndex = expenseDetails.findIndex((elt: any) => elt.ref === expenseDetailRef);
 
-                if (expenseDetailIndex < 0) { throw Error('BadReference'); }
+                if (expenseDetailIndex < 0) { throw new Error('BadReference'); }
 
                 expenseDetails[expenseDetailIndex].validators.push(validator);
 

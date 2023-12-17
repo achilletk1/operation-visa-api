@@ -24,7 +24,7 @@ export class ValidationsService extends CrudService<UserValidator> {
     async getUserValidatorById(userId: string) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
             return await ValidationsController.validationsService.findOne({ filter: { userId } });
         } catch (error) { throw error; }
     }
@@ -32,7 +32,7 @@ export class ValidationsService extends CrudService<UserValidator> {
     async getUserValidators(filter: any) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
             return await ValidationsController.validationsService.findAll({ filter });
         } catch (error) { throw error; }
     }
@@ -40,7 +40,7 @@ export class ValidationsService extends CrudService<UserValidator> {
     async getMaxValidationLevel() {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
 
             const data: any = await ValidationsService.validationsRepository.getMaxValidationLevel();
 
@@ -51,9 +51,9 @@ export class ValidationsService extends CrudService<UserValidator> {
     async getValidationOtp(userId: string) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
 
-            if (userId !== get(authUser, '_id')) { throw Error('UserNotMatch'); }
+            if (userId !== get(authUser, '_id')) { throw new Error('UserNotMatch'); }
             const otp = {
                 value: getRandomString(6, true),
                 expiresAt: moment().add(20, 'minutes').valueOf()
@@ -76,19 +76,19 @@ export class ValidationsService extends CrudService<UserValidator> {
     async insertUserValidator(userValidator: UserValidator) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
 
             const { userId } = userValidator;
             const user = await UsersController.usersService.findOne({ filter: { userId } });
 
-            if (!user) { throw Error('UserNotFoud') }
+            if (!user) { throw new Error('UserNotFoud') }
             const validatorExist = await ValidationsController.validationsService.findOne({ filter: { _id: userId } });
 
 
             const opts = { filter: { userId: { $ne: userId }, enabled: true }, projection: { _id: 0, level: 1 } };
             const validationsLevelList = (await ValidationsController.validationsService.findAll(opts))?.data;
             const isGapInValidation = this.validationListHasGap(validationsLevelList, Number(userValidator?.level));
-            if (isGapInValidation) { throw Error('ValidationLevelGap'); }
+            if (isGapInValidation) { throw new Error('ValidationLevelGap'); }
 
             userValidator.dates = !validatorExist ? { created: moment().valueOf() } : { ...userValidator.dates, updated: moment().valueOf() };
             const result = !validatorExist
@@ -100,35 +100,35 @@ export class ValidationsService extends CrudService<UserValidator> {
     async insertvalidation(id: string, fields: any) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { throw Error('Forbidden'); }
+            if (authUser.category < 500) { throw new Error('Forbidden'); }
 
             const { userId, type, otp, signature, status, rejectReason } = fields;
 
-            if (userId !== get(authUser, '_id')) { throw Error('UserNotMatch'); }
+            if (userId !== get(authUser, '_id')) { throw new Error('UserNotMatch'); }
 
             let data: Travel | OnlinePaymentMonth | null;
 
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
 
-            if (!otp) { throw Error('OTPNotFound'); }
+            if (!otp) { throw new Error('OTPNotFound'); }
 
-            if (otp !== user?.otp?.value) { throw Error('OTPNoMatch'); }
+            if (otp !== user?.otp?.value) { throw new Error('OTPNoMatch'); }
             let level: number;
 
             const currTime = moment().valueOf();
 
-            if (Number(user?.otp?.expiresAt) <= currTime) { throw Error('OTPExpired'); }
+            if (Number(user?.otp?.expiresAt) <= currTime) { throw new Error('OTPExpired'); }
 
             data = type === 'travel'
                 ? await TravelController.travelService.findOne({ filter: { _id: id } })
                 : type === 'onlinePayment'
                     ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } })
                     : null;
-            if (!data) { throw Error('DataNotFound'); }
+            if (!data) { throw new Error('DataNotFound'); }
 
             const userValidator: UserValidator = await ValidationsController.validationsService.findOne({ filter: { userId } });
             level = data?.validationLevel ? data?.validationLevel + 1 : 1;
-            if (!userValidator || !userValidator?.enabled || userValidator?.level !== level) { throw Error('ValidationForbidden') }
+            if (!userValidator || !userValidator?.enabled || userValidator?.level !== level) { throw new Error('ValidationForbidden') }
 
             const validator: Validator = {
                 _id: userId,

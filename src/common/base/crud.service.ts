@@ -51,9 +51,9 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
   async findAll(query?: QueryOptions): Promise<getAllResult<T>> {
     try {
       query = convertParams(query || {});
-      query = extractPaginationData(query);
-      query = extractSortingData(query);
-      query = extractProjectionData(query);
+      query = extractPaginationData(query || {});
+      query = extractSortingData(query || {});
+      query = extractProjectionData(query || {});
       query = rangeData(query);
 
       const data = (await this.baseRepository.findAll(query || {}) || []) as unknown as T[];
@@ -181,7 +181,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
 
     try {
       options = URLCrypt.decryptObj(code);
-    } catch (error) { throw Error('BadExportCode'); }
+    } catch (error) { throw new Error('BadExportCode'); }
 
     const { start, end, ttl } = options;
     delete options.start;
@@ -189,7 +189,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     delete options.ttl;
     delete options.format;
 
-    if ((new Date()).getTime() >= ttl) { throw Error('ExportLinkExpired'); }
+    if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
     const range = (start && end) ? { start, end } : '';
 
@@ -213,7 +213,7 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<any>
 
-declare type QueryProjection = ObjectType<number>
+declare type QueryProjection = ObjectType<0 | 1>
 
 declare type getAllResult<T> = {
   data: T[],

@@ -33,23 +33,8 @@ export class VisaTransactionsFilesController {
     }
 
     async confirmTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.confirmTransactionFiles(req.params.id));
-            const traitment = await VisaTransactionsFilesController.visaTransactionsFilesService.startTraitment(req.params.id);
-            if (traitment instanceof Error) {
-                await VisaTransactionsFilesController.visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
-            }
-        } catch (error) { next(error); }
-    }
-
-    async restartConfirmTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.restartConfirmTransactionFiles(req.params.id));
-            const traitment = await VisaTransactionsFilesController.visaTransactionsFilesService.restartTraitment(req.params.id);
-            if (traitment instanceof Error) {
-                await VisaTransactionsFilesController.visaTransactionsFilesService.sendPostTransactionFileThreadError(req.params.id);
-            }
-        } catch (error) { next(error); }
+        try { res.send(await VisaTransactionsFilesController.visaTransactionsFilesService.confirmTransactionFiles(req.params.id)); }
+        catch (error) { next(error); }
     }
 
     async abortTransactionFiles(req: Request, res: Response, next: NextFunction): Promise<void> {

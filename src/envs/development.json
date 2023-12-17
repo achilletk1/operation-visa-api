@@ -46,11 +46,13 @@
     },
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
-    "cronRevivalMail": "3 * * * *",
-    "cronTransactionProcessing": "* * * * * *",
-    "cronDeleteTemporaryFile": "0 */3 * * *",
-    "cronRemoveOnlinePaymentsWithExceedings": "0 00 2 * *",
-    "cronclientindemeure":"*/3 */1 * * *",
+    "crons": {
+        "revivalMail": "3 * * * *",
+        "transactionProcessing": "* * * * * *",
+        "deleteTemporaryFile": "0 */3 * * *",
+        "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
+        "clientInDemeure":"*/3 */1 * * *"
+    },
     "gotenbergUrl": "http://143.42.97.18:7900",
     "emailTest": "kevin.moutassi@londo-tech.com",
     "emailBank": "kevin.moutassi@londo-tech.com"

@@ -43,15 +43,16 @@ export async function ErrorHandler(err: Error | any, req: Request, res: Response
     });
 }
 
-function formatErrorResponseMsg(err: Error | { index: string; type: string; name: string; message: string; stack?: string; }) {
+function formatErrorResponseMsg(err: Error | { index: string; type: string; column: string; name: string; message: string; stack?: string; }) {
     const { message } = err; let details: any; let title: any; const errResp: any = {};
-    if (message === 'Forbbiden') { details = `Vous n'êtes pas autorisé à  effectuer cette opération`; title = 'Non autorisé' }
-    if (message === 'IncorrectFileName') { details = `Le nom du fichier que vous avez importé est incorrect`; title = 'Nom du fichier incorrect' }
-    if (message === 'FileAlreadyExist') { details = `Le fichier que vous avez importé existe déjà`; title = 'Fichier existant' }
-    if (message === 'FileIsEmpty') { details = `Le fichier que vous avez importé est vide`; title = 'Fichier vide' }
-    if (message === 'IncorrectFileColumn' && 'index' in err) { details = `Le fichier que vous avez importé ne contient pas la colonne ${err.index} qui est attendue`; title = 'Colonnes incorrectes' }
-    if (message === 'IncorrectFileMonth' && 'index' in err) { details = `La champ "DATE" de la ligne ${err.index} ne correspond pas au mois du fichier`; title = 'Ligne de fichier incorrecte' }
-    if (message === 'IncorrectFileType' && 'index' in err) { details = `Le champ "NATURE" de la ligne ${err.index} (${err.type}) ne correspond pas aux valeurs attendu, veuillez le remplacer par une nature de transaction connu`; title = 'Type de transaction incorrecte' }
+    if (message === 'Forbbiden') { details = `Vous n'êtes pas autorisé à  effectuer cette opération`; title = 'Non autorisé'; }
+    if (message === 'IncorrectFileName') { details = `Le nom du fichier que vous avez importé est incorrect`; title = 'Nom du fichier incorrect'; }
+    if (message === 'FileAlreadyExist') { details = `Le fichier que vous avez importé existe déjà`; title = 'Fichier existant'; }
+    if (message === 'FileIsEmpty') { details = `Le fichier que vous avez importé est vide`; title = 'Fichier vide'; }
+    if (message === 'IncorrectFileColumn' && 'index' in err) { details = `Le fichier que vous avez importé ne contient pas la colonne ${err.index} qui est attendue`; title = 'Colonnes incorrectes'; }
+    if (message === 'IncorrectFileMonth' && 'index' in err) { details = `La champ "DATE" de la ligne ${err.index} ne correspond pas au mois du fichier`; title = 'Ligne de fichier incorrecte'; }
+    if (message === 'IncorrectFileType' && 'index' in err) { details = `Le champ "NATURE" de la ligne ${err.index} (${err.type}) ne correspond pas aux valeurs attendu, veuillez le remplacer par une nature de transaction connu`; title = 'Type de transaction incorrecte'; }
+    if (message === 'IncorrectFileData' && 'index' in err) { details = `Le champ "${err.column}" de la ligne ${err.index} (${err.type}) est vide, veuillez remplir ce champ s'il vous plaît`; title = 'Cellule obligatoire vide'; }
 
 
     if (details) { errResp.details = details; }
