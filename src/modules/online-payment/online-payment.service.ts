@@ -150,7 +150,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             const actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
 
-            if (!actualOninePayment) { throw Error('OnlinePayment'); }
+            if (!actualOninePayment) { 
+                throw Error('OnlinePayment');
+             }
 
             for (let statement of data.statements) {
                 if (statement?.status && !adminAuth && statement?.isEdit) { delete statement.status; }
@@ -185,7 +187,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             data.editors = !isEmpty(data.editors) ? data.editors : [];
             data?.editors?.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
+                fullName: `${authUser?.fname}${authUser?.lname}`,
                 date: moment().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })

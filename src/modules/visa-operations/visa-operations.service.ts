@@ -1,7 +1,8 @@
 import {
     generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth,
     updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications,
-    sendEmailNotifications
+    sendEmailNotifications,
+    markExceedTransaction
 } from "./helper";
 import { FormalNoticeEvent, notificationEmmiter, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
@@ -101,7 +102,7 @@ export class VisaOperationsService extends CrudService<any> {
             const travels = await TravelController.travelService.findAll({ filter: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } } });
 
             if (isEmpty(travels?.data)) {
-                return await SettingsController.settingsService.deleteOne({ key: 'start_revival_mail_in_progress'});
+                return await SettingsController.settingsService.deleteOne({ key: 'start_revival_mail_in_progress' });
             }
 
             const letter = await LettersController.lettersService.findOne({});
@@ -234,7 +235,6 @@ export class VisaOperationsService extends CrudService<any> {
             if (travel instanceof Error) { continue }
             travel.notifications = [];
 
-
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
                 travel.transactions = isEmpty(travel?.transactions) ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
                 toBeUpdated.notifications = verifyExcedingOnTravel(travel, +Number(travel?.ceiling));
@@ -245,13 +245,15 @@ export class VisaOperationsService extends CrudService<any> {
                 }
 
                 toBeUpdated.transactions = element.transactions;
+                toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(travel?.ceiling));
             }
 
             if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
                 const months = [...new Set(element.transactions.map((elt: any) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))] as string[];
                 for (const month of months) {
-                    const selectedTransactions = element.transactions.filter((elt: any) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
-
+                    let selectedTransactions = element.transactions.filter((elt: any) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
+                    selectedTransactions = markExceedTransaction(selectedTransactions, +Number(travel?.ceiling));
+                    
                     const travelMonth = await getOrCreateTravelMonth(travel, month);
 
                     toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start); // in case of new month creation check the number of months in the long term travel
