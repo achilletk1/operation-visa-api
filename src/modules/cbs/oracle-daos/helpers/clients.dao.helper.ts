@@ -198,35 +198,40 @@ export const helper = {
                 INTI: 'Compte de chèque              ',
                 AGE: '01400',
                 CHA: '372100',
-                CLC: '18'
+                CLC: '18',
+                LIB_AGE: 'BICEC AKWA              '
             },
             {
                 NCP: '37307027068',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01400',
                 CHA: '373100',
-                CLC: '19'
+                CLC: '19',
+                LIB_AGE: 'BICEC EDEA            '
             },
             {
                 NCP: '37207012337',
                 INTI: 'Compte de chèque              ',
                 AGE: '01800',
                 CHA: '372100',
-                CLC: '20'
+                CLC: '20',
+                LIB_AGE: 'BICEC BASSA                    '
             },
             {
                 NCP: '37307012338',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01800',
                 CHA: '373100',
-                CLC: '21'
+                CLC: '21',
+                LIB_AGE: 'DIRECTION GENERALE                            '
             },
             {
                 NCP: '37107096755',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01100',
                 CHA: '373100',
-                CLC: '21'
+                CLC: '21',
+                LIB_AGE: 'BICEC BUEA UNIVERSITY                  '
             },
         ];
     },

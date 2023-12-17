@@ -79,7 +79,8 @@ export const clientsDAO = {
             const query =
                 `select
                     p.ncp, p.inti, p.age, p.dev, p.cha, p.clc, 
-                    (select lib2 from infoc.bknom where infoc.bknom.ctab = '005' and infoc.bknom.cacc = p.dev) currency
+                    (select lib2 from infoc.bknom where infoc.bknom.ctab = '005' and infoc.bknom.cacc = p.dev) currency,
+                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "lib_age"
                 from infoc.bkcom p
                 where p.cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200') and p.cfe = 'N' and p.ife = 'N' and p.cli = '${cli}'`
                 // :
