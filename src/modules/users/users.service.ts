@@ -13,7 +13,7 @@ import { User } from "./model";
 import { hash } from "bcrypt";
 import moment from "moment";
 
-export class UsersService extends CrudService<User> {
+export class UsersService extends CrudService<User>  {
 
     static userRepository: UsersRepository;
 

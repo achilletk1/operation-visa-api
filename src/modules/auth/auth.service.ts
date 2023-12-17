@@ -128,14 +128,34 @@ export class AuthService extends BaseService {
     async verifyCredentialsUser(credentials: any) {
         try {
             const { ncp } = credentials;
-            if (['development'].includes(config.get('env'))) { await timeout(500); }
-            const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
-            if (isEmpty(clientDatas)) { throw new Error(errorMsg.USER_NOT_FOUND); }
+            if (config.get('env') === 'development') { await timeout(500); };
+            let client
 
-            const client = clientDatas[0];
-            if (!client.TEL && !client.EMAIL) { return new Error(errorMsg.MISSING_USER_DATA); }
+            // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
+            // const client = clientDatas[0];
 
-            return { email: client.EMAIL, phone: client.TEL };
+            client = await UsersController.usersService.findAll({ filter: { 'accounts.ncp': ncp } });
+
+            if (isEmpty(client.data)) {
+                client = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null,);
+                if (isEmpty(client)) throw new Error(errorMsg.USER_NOT_FOUND);   
+            }
+
+            if(client.length == 1) {
+                if (!client[0].TEL && !client[0].EMAIL) throw new Error(errorMsg.MISSING_USER_DATA);
+                return { email: client[0].EMAIL, phone: client[0].TEL } 
+            }
+
+
+
+            if (client.length > 1) {
+                return client.map((user: any) => user.accounts)
+                .flat()
+                .filter((account: any) => account.NCP == ncp)
+                .map((account: any) => { return { label: account.LIB_AGE, code: account.AGE } })
+            }
+
+            // return { email: clientDatas.EMAIL, phone: clientDatas.TEL };
         } catch (error) { throw error; }
     }
 
@@ -158,7 +178,7 @@ export class AuthService extends BaseService {
             // const {data: users} = await TmpController.tmpService.findAll();
             // let user = users.find(user => user.ncp === ncp)
             let user
-            try { user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User; } catch (e) {}
+            try { user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User; } catch (e) { }
 
             if (!user) {
                 const clientData = (await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client') || [])[0];

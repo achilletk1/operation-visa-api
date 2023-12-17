@@ -55,9 +55,10 @@ export class CbsService extends BaseService {
                 const accounts = await clientsDAO.getClientAccounts(elt?.CLI);
                 if (accounts && accounts instanceof Array) {
                     client[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
+                    i++
                 }
             }
-
+            
             return client;
         } catch (error: any) {
             logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);

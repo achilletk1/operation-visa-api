@@ -198,35 +198,40 @@ export const helper = {
                 INTI: 'Compte de chèque              ',
                 AGE: '01400',
                 CHA: '372100',
-                CLC: '18'
+                CLC: '18',
+                LIB_AGE: ""
             },
             {
                 NCP: '37307027068',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01400',
                 CHA: '373100',
-                CLC: '19'
+                CLC: '19',
+                LIB_AGE: "",
             },
             {
                 NCP: '37207012337',
                 INTI: 'Compte de chèque              ',
                 AGE: '01800',
                 CHA: '372100',
-                CLC: '20'
+                CLC: '20',
+                LIB_AGE: ""
             },
             {
                 NCP: '37307012338',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01800',
                 CHA: '373100',
-                CLC: '21'
+                CLC: '21',
+                LIB_AGE: ""
             },
             {
                 NCP: '37107096755',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01100',
                 CHA: '373100',
-                CLC: '21'
+                CLC: '21',
+                LIB_AGE: ""
             },
         ];
     },
@@ -287,14 +292,15 @@ export const helper = {
             },
         }
 
-        const mapping: any = {
-            '37207027067': {
+        const clients: any[] = [
+            {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
                 NOM: 'MOUTASSI NZOGUE',
                 PRE: 'Kevin Armel',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
+                NCP: '37207027067',
                 CLC: '19 ',
                 CIVILITY: 'Congolaise',
                 ADDRESS: 'Kinshasa ',
@@ -306,7 +312,7 @@ export const helper = {
                 CLI: '37207027067',
                 CHA: '372100',
             },
-            '37307027068': {
+            {
                 NOMREST: 'TACHUM KAMGA Achille',
                 NOM: 'TACHUM KAMGA',
                 PRE: 'Achille',
@@ -325,17 +331,19 @@ export const helper = {
                 CHA: '372100',
                 CLI: '70017185'
             },
-            '37207012337': {
+            {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
                 NOM: 'MOUTASSI NZOGUE',
                 PRE: 'Kevin Armel',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
+                NCP: '37207012337',
                 CLC: '19 ',
                 CIVILITY: 'Congolaise',
                 ADDRESS: 'Kinshasa ',
                 TEL: '242068207839 ',
+                EMAIL: 'test@gmail.com',
                 POB: 'DOUALA ',
                 DOB: '11/04/1995',
                 IDTYPE: 'CNI',
@@ -343,14 +351,14 @@ export const helper = {
                 CLI: '00000000',
                 CHA: '372100',
             },
-            '37307012338': {
+            {
                 NOMREST: 'TACHUM KAMGA Achille',
                 NOM: 'TACHUM KAMGA',
                 PRE: 'Achille',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
-                NCP: '37207027067',
+                NCP: '37307012338',
                 CLC: '19 ',
                 CIVILITY: 'Camerounaise',
                 ADDRESS: 'Ange rafael ',
@@ -362,9 +370,9 @@ export const helper = {
                 CHA: '372100',
                 CLI: '70017185'
             },
-        }
+        ]
 
-        const result = mapping[ncp] ? [mapping[ncp]] : [];
+        const result = clients.filter(client => client.NCP == ncp);
 
         return Promise.resolve(result);
     },
