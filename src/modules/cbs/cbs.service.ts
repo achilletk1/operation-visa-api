@@ -3,7 +3,7 @@ import { clientsDAO } from "./oracle-daos";
 import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
-import { get } from "lodash";
+import { get, isEmpty } from "lodash";
 
 export class CbsService extends BaseService {
 
@@ -27,7 +27,7 @@ export class CbsService extends BaseService {
             let accounts: any;
 
             if ([true, 'true'].includes(includeAccounts)) {
-                accounts = await clientsDAO.getClientAccountsWithBalance(code);
+                accounts = await clientsDAO.getClientAccounts(code);
             }
 
             return { client, accounts };
@@ -42,45 +42,23 @@ export class CbsService extends BaseService {
         try {
             if (isDev) { await timeout(500); }
 
-            const client = await clientsDAO.getClientDatasByNcp(ncp, age, clc);
+            let client = await clientsDAO.getClientDatasByNcp(ncp, age, clc);
 
-            const result = removeSpacesFromResultSet(client[0] || {});
+            if (isEmpty(client) || !(client instanceof Array)) { throw new Error('ClientNotFound'); }
+
+            client = client.map((elt: any) => removeSpacesFromResultSet(elt));
 
             if (scope === 'client') { return client; }
 
-            if (client?.length === 0) { throw new Error('ClientNotFound'); }
-
-            let accounts = await clientsDAO.getClientAccountsWithBalance(result?.CLI);
-
-            if (accounts && accounts instanceof Array) {
-                accounts = accounts.map((dat: any) => removeSpacesFromResultSet(dat));
+            let i = 0;
+            for (const elt of client) {
+                const accounts = await clientsDAO.getClientAccounts(elt?.CLI);
+                if (accounts && accounts instanceof Array) {
+                    client[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
+                }
             }
-            const { SOLDE } = accounts.find((e: any) => e.ncp === ncp) || {};
 
-            const PHONES = await clientsDAO.getClientsTels([result?.CLI]);
-            const EMAILS = await clientsDAO.getClientsEmails([result?.CLI]);
-
-            const { CLI, IDTYPE, CIVILITY, IDNUM, POB, DOB, ADDRESS, NOM, PRE, AGE, NCP, CLC, INTI, CHA } = result;
-            const response: any = {};
-            if (CLI) { response.clientCode = CLI.toLowerCase(); }
-            if (IDTYPE) { response.idType = IDTYPE.toLowerCase(); }
-            if (CIVILITY) { response.civility = CIVILITY.toLowerCase(); }
-            if (IDNUM) { response.idnum = IDNUM.toLowerCase(); }
-            if (POB) { response.pob = POB.toLowerCase(); }
-            if (DOB) { response.dob = DOB.split('/'); }
-            if (ADDRESS) { response.address = ADDRESS.toLowerCase(); }
-            if (NOM) { response.lname = NOM.toLowerCase(); }
-            if (PRE) { response.fname = PRE.toLowerCase(); }
-            if (AGE) { response.age = AGE.toLowerCase(); }
-            if (NCP) { response.ncp = NCP.toLowerCase(); }
-            if (CLC) { response.clc = CLC.toLowerCase(); }
-            if (INTI) { response.inti = CLC.toLowerCase(); }
-            if (CHA) { response.cha = CHA.toLowerCase(); }
-            if (SOLDE) { response.balance = +SOLDE; }
-            if (PHONES && PHONES[0]) { response.phone = PHONES[0].NUM; }
-            if (EMAILS && EMAILS[0]) { response.email = EMAILS[0].EMAIL; }
-
-            return response;
+            return client;
         } catch (error: any) {
             logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);
             throw error;
@@ -103,7 +81,7 @@ export class CbsService extends BaseService {
             }
 
             let accounts: any;
-            if ([true, 'true'].includes(includeAccounts)) { accounts = await clientsDAO.getClientAccountsWithBalance(code) };
+            if ([true, 'true'].includes(includeAccounts)) { accounts = await clientsDAO.getClientAccounts(code) };
             if ([true, 'true'].includes(isChaFilter)) { accounts = accounts.filter((elt: any) => ['371', '372'].includes(elt?.CHA.slice(0, 3))); }
             if (!accounts || accounts?.length === 0) { throw new Error('AccountNotFound'); }
 

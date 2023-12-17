@@ -65,7 +65,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientAccountsWithBalance: async (cli: any) => {
+    getClientAccounts: async (cli: any) => {
         const methodPath = `${classPath}.getClientAccountsWithBalance()`;
         try {
             logger.info(`init get client accounts with balance cli: ${cli}`, { methodPath });
@@ -104,28 +104,13 @@ export const clientsDAO = {
             // TODO change request sql to get client all informations by ncp
             let query =
                 `
-            select
-                b.cli, b.ncp, b.age, b.clc, a.age, a.nom, a.pre, a.nomrest, a.sext, a.nat CIVILITY, t1.num TEL, t2.email EMAIL, b.inti,
-                TO_CHAR(a.dna, 'DD/MM/YYYY') DOB, a.viln POB, a.depn departement_naissance, a.payn pays_naissance, b.cha,
-                a.tid IDTYPE, a.nid IDNUM, a.did date_delivrance_PI, a.vid date_validite_PI, a.lid lieu_delivrance_PI, a.oid organisme_delivrance_PI
-            from infoc.bkcli a
-            left join (SELECT a.cli, a.ncp, a.age, a.clc, a.inti, a.cha FROM infoc.bkcom a WHERE a.ncp = '${ncp}' and rownum = 1) b on a.cli = b.cli
-            left join (SELECT a.cli, a.num FROM infoc.bktelcli a WHERE rownum = 1) t1 on b.cli = t1.cli
-            left join (SELECT a.cli, a.email FROM infoc.bkemacli a WHERE rownum = 1) t2 on b.cli = t2.cli
-            where a.cli = b.cli`;
-            if (age && clc) {
-                query =
-                    `
-            select
-                b.cli, b.ncp, b.age, b.clc, a.age, a.nom, a.pre, a.nomrest, a.sext, a.nat CIVILITY, t1.num TEL, t2.email EMAIL, b.inti, b.cha,
-                TO_CHAR(a.dna, 'DD/MM/YYYY') DOB, a.viln POB, a.depn departement_naissance, a.payn pays_naissance,
-                a.tid IDTYPE, a.nid IDNUM, a.did date_delivrance_PI, a.vid date_validite_PI, a.lid lieu_delivrance_PI, a.oid organisme_delivrance_PI
-            from infoc.bkcli a
-            left join (SELECT a.cli, a.ncp, a.age, a.clc, a.inti , a.cha FROM infoc.bkcom a WHERE a.ncp = '${ncp}' and a.age = '${age}' and a.clc = '${clc}' and rownum = 1) b on a.cli = b.cli
-            left join (SELECT a.cli, a.num FROM infoc.bktelcli a WHERE rownum = 1) t1 on b.cli = t1.cli
-            left join (SELECT a.cli, a.email FROM infoc.bkemacli a WHERE rownum = 1) t2 on b.cli = t2.cli
-            where a.cli = b.cli`;
-            }
+                select
+                    trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
+                    (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                    (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                from infoc.bkcli p, infoc.bkcom a
+                where p.cli = a.cli and a.cfe = 'N' and a.ife = 'N' and substr(a.cha,1,3) in ('371','372','373') and a.cha not like '37%99%' and a.ncp = '${ncp}' ${(age && clc) ? `and a.age = ${age} and a.clc = ${clc}` : ''}`;
 
             const result = await executeQuery(query);
 
