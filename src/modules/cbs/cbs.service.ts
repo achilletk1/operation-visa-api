@@ -4,6 +4,7 @@ import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
 import { get, isEmpty } from "lodash";
+import { UsersController } from "..";
 
 export class CbsService extends BaseService {
 
@@ -55,8 +56,11 @@ export class CbsService extends BaseService {
                 const accounts = await clientsDAO.getClientAccounts(elt?.CLI);
                 if (accounts && accounts instanceof Array) {
                     client[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
+                    i++
                 }
             }
+
+            UsersController.usersService.createUser(client[0], 'front-office');
 
             return client;
         } catch (error: any) {

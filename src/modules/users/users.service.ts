@@ -9,11 +9,11 @@ import { CbsController } from "modules/cbs";
 import { CrudService } from "common/base";
 import { config } from "convict-config";
 import { isEmpty } from "lodash";
-import { User } from "./model";
+import { BankClient, User } from "./model";
 import { hash } from "bcrypt";
 import moment from "moment";
 
-export class UsersService extends CrudService<User> {
+export class UsersService extends CrudService<User>  {
 
     static userRepository: UsersRepository;
 
@@ -61,18 +61,18 @@ export class UsersService extends CrudService<User> {
         } catch (error) { throw error; }
     }
 
-    async createUser(createData: User, scope: 'back-office' | 'front-office') {
+    async createUser(createData: User | BankClient, scope: 'back-office' | 'front-office') {
         try {
             const authUser = httpContext.get('user');
-            if (authUser.category < 500) { return new Error('Forbidden'); }
+            if (authUser && authUser.category < 500) { return new Error('Forbidden'); }
 
-            const filter: any = { clientCode: createData.clientCode };
+            const filter: any = ('CLI' in createData) ? { clientCode: createData.CLI } : { clientCode: createData.clientCode };
             if (scope === 'back-office') { filter.userCode = createData.userCode; }
 
             const existingUser = await this.baseRepository.findOne({ filter });
 
             if (!isEmpty(existingUser)) { return new Error('UserAllreadyExist') }
-            let user: User = {};
+            let user: User | BankClient = {};
 
             if (scope === 'back-office') {
                 const userLdap: any = await getLdapUser(createData.userCode);
@@ -85,22 +85,20 @@ export class UsersService extends CrudService<User> {
                 };
             }
 
-            if (scope === 'front-office') {
-                const userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client;
+            if (scope === 'front-office' && 'CLI' in createData) {
+                const userCbs = (await CbsController.cbsService.getUserDataByCode(createData.CLI, scope))?.client;
                 user = {
                     ...user,
                     lname: userCbs.NOM, fname: userCbs.PRE, fullName: userCbs.NOMREST, email: userCbs.EMAIL,
                     tel: userCbs.TEL, gender: userCbs.SEXT, lang: userCbs.LANG !== '001' ? 'en' : 'fr',
-                    age: { label: userCbs.LIBELLE_AGENCE, code: userCbs.AGE },
-                    category: createData.category,
+                    accounts: createData.accounts,
                 };
             }
 
-            user.clientCode = createData.clientCode;
+            user.clientCode = 'CLI' in createData ? createData.CLI : createData.clientCode;
             user.enabled = createData.enabled;
-            user.editors = [];
             user.pwdReseted = true;
-            user.editors.push({ _id: authUser._id, date: moment().valueOf(), fullName: authUser.fullName })
+            if (authUser) user.editors = [{ _id: authUser?._id, date: moment().valueOf(), fullName: authUser.fullName }];
 
             const result = await UsersController.usersService.create(user);
 
@@ -202,7 +200,7 @@ export class UsersService extends CrudService<User> {
                 // notificationService.sendPwdResetedSMS(user, passwordClear)
             ]);
             return {};
-        } catch (error) { throw(error); }
+        } catch (error) { throw (error); }
     }
 
 }

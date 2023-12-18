@@ -50,6 +50,31 @@ export class User {
     // }
 }
 
+export class BankClient extends User {
+
+    NOMREST?: string;
+    NOM?: string;
+    PRE?: string;
+    NRC?: string;
+    NIDF?: string;
+    AGE?: string;
+    NCP?: string[];
+    CLC?: string;
+    CIVILITY?: string;
+    ADDRESS?: string;
+    TEL?: string;
+    EMAIL?: string;
+    POB?: string;
+    DOB?: string;
+    IDTYPE?: string;
+    IDNUM?: string;
+    CHA?: string;
+    CLI?: string;
+    accounts?: string[];
+
+
+}
+
 export class Wallet {
     provider?: {
         code?: number; // 1:Airtel; 2: MTN; 3: GIMAC

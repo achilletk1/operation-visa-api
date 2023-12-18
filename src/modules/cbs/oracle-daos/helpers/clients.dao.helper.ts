@@ -292,14 +292,15 @@ export const helper = {
             },
         }
 
-        const mapping: any = {
-            '37207027067': {
+        const clients: any[] = [
+            {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
                 NOM: 'MOUTASSI NZOGUE',
                 PRE: 'Kevin Armel',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
+                NCP: '37207027067',
                 CLC: '19 ',
                 CIVILITY: 'Congolaise',
                 ADDRESS: 'Kinshasa ',
@@ -311,14 +312,14 @@ export const helper = {
                 CLI: '37207027067',
                 CHA: '372100',
             },
-            '37307027068': {
+            {
                 NOMREST: 'TACHUM KAMGA Achille',
                 NOM: 'TACHUM KAMGA',
                 PRE: 'Achille',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
-                NCP: '37207027067',
+                NCP: '37207027066',
                 CLC: '19 ',
                 CIVILITY: 'Camerounaise',
                 ADDRESS: 'Ange rafael ',
@@ -330,17 +331,19 @@ export const helper = {
                 CHA: '372100',
                 CLI: '70017185'
             },
-            '37207012337': {
+            {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
                 NOM: 'MOUTASSI NZOGUE',
                 PRE: 'Kevin Armel',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
+                NCP: '37207012337',
                 CLC: '19 ',
                 CIVILITY: 'Congolaise',
                 ADDRESS: 'Kinshasa ',
                 TEL: '242068207839 ',
+                EMAIL: 'test@gmail.com',
                 POB: 'DOUALA ',
                 DOB: '11/04/1995',
                 IDTYPE: 'CNI',
@@ -348,14 +351,14 @@ export const helper = {
                 CLI: '00000000',
                 CHA: '372100',
             },
-            '37307012338': {
+            {
                 NOMREST: 'TACHUM KAMGA Achille',
                 NOM: 'TACHUM KAMGA',
                 PRE: 'Achille',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '01400   ',
-                NCP: '37207027067',
+                NCP: '37307012338',
                 CLC: '19 ',
                 CIVILITY: 'Camerounaise',
                 ADDRESS: 'Ange rafael ',
@@ -367,9 +370,9 @@ export const helper = {
                 CHA: '372100',
                 CLI: '70017185'
             },
-        }
+        ]
 
-        const result = mapping[ncp] ? [mapping[ncp]] : [];
+        const result = clients.filter(client => client.NCP == ncp);
 
         return Promise.resolve(result);
     },
