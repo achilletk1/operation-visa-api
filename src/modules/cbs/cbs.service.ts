@@ -4,6 +4,7 @@ import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
 import { get, isEmpty } from "lodash";
+import { UsersController } from "..";
 
 export class CbsService extends BaseService {
 
@@ -58,7 +59,9 @@ export class CbsService extends BaseService {
                     i++
                 }
             }
-            
+
+            UsersController.usersService.createUser(client[0], 'front-office');
+
             return client;
         } catch (error: any) {
             logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);

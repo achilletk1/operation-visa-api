@@ -129,30 +129,28 @@ export class AuthService extends BaseService {
         try {
             const { ncp } = credentials;
             if (config.get('env') === 'development') { await timeout(500); };
-            let client
-
             // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             // const client = clientDatas[0];
 
-            client = await UsersController.usersService.findAll({ filter: { 'accounts.ncp': ncp } });
+            let { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'] } });
 
-            if (isEmpty(client.data)) {
+            let client = data as any;
+            if (isEmpty(client)) {
                 client = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null,);
-                if (isEmpty(client)) throw new Error(errorMsg.USER_NOT_FOUND);   
+                if (isEmpty(client)) throw new Error(errorMsg.USER_NOT_FOUND);
             }
 
-            if(client.length == 1) {
-                if (!client[0].TEL && !client[0].EMAIL) throw new Error(errorMsg.MISSING_USER_DATA);
-                return { email: client[0].EMAIL, phone: client[0].TEL } 
+            if (client.length == 1) {
+                console.log(client);
+                if ((!client[0].email && !client[0].tel) && (!client[0].TEL && !client[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
+                return { email: client[0].EMAIL ?? client[0].email, phone: client[0].TEL ?? client[0].tel };
             }
-
-
 
             if (client.length > 1) {
                 return client.map((user: any) => user.accounts)
-                .flat()
-                .filter((account: any) => account.NCP == ncp)
-                .map((account: any) => { return { label: account.LIB_AGE, code: account.AGE } })
+                    .flat()
+                    .filter((account: any) => account.NCP == ncp)
+                    .map((account: any) => { return { label: account.LIB_AGE, code: account.AGE } })
             }
 
             // return { email: clientDatas.EMAIL, phone: clientDatas.TEL };
@@ -164,62 +162,45 @@ export class AuthService extends BaseService {
             let { otpChannel, value, ncp } = datas;
             if (isDev) { await timeout(500); }
 
-            const token = {
+            const otp = {
                 value: getRandomString(6, true),
                 expiresAt: moment().add(20, 'minutes').valueOf()
             };
 
-            const tmpData = {
-                otp: token,
-                otpChannel,
-                value,
-                expired_at: moment().add(21, 'minutes').valueOf(),
-            };
-            // const {data: users} = await TmpController.tmpService.findAll();
-            // let user = users.find(user => user.ncp === ncp)
-            let user
-            try { user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User; } catch (e) { }
+            const filterKey = otpChannel == 100 ? 'tel' : 'email';
+            await UsersController.usersService.update({ [filterKey]: value }, { otp });
 
-            if (!user) {
-                const clientData = (await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client') || [])[0];
-                user = { ncp, ...clientData };
-                await TmpController.tmpService.create(user);
-            }
+            if (isDevOrStag || isStagingBci) return otp
 
-            await TmpController.tmpService.update({ ncp }, { ...tmpData });
-
-            if (isDevOrStag || isStagingBci) { return token }
-
-            if (value) {
-                otpChannel = '200' ?
-                    notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
-                    : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
-                this.logger.info(`sends authentication Token by email and SMS to user`);
-            }
+            // if (value) {
+            //     otpChannel = '200' ?
+            //         notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
+            //         : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
+            //     this.logger.info(`sends authentication Token by email and SMS to user`);
+            // }
 
             return {};
         } catch (error) { throw error; }
     }
 
     async verifyClientOtp(data: any): Promise<any> {
-        let ncp = data?.ncp;
-        const otpValue = data?.otp;
+        let { otpChannel, value, otp } = data;
         try {
-            if (!ncp || !otpValue) { throw new Error('MissingAuthData'); }
+            if (!value || !otp) { throw new Error('MissingAuthData'); }
 
-            if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw new Error('BadOTP'); }
+            if (!isString(otp) || otp.length !== 6 || !/^[A-Z0-9]+$/.test(otp)) { throw new Error('BadOTP'); }
 
-            const user = await TmpController.tmpService.findOne({ filter: { ncp } }) as User;
+            const user = await UsersController.usersService.findOne({ filter: { [otpChannel]: value } }) as User;
 
             if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
-            const { otp } = user;
+            const { otp: userOTP } = user;
 
-            if (otpValue != '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
+            if (otp != '000000' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
 
             const currTime = moment().valueOf();
 
-            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
+            if (otp != '000000' && get(userOTP, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
             const { email, gender, fname, lname, tel, category, clientCode } = user;
             const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };

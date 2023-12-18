@@ -151,12 +151,15 @@ export class httpForbidden extends httpError {
 export const convertParams = (query: QueryOptions): QueryOptions => {
   if (query.filter) {
     for (const key in query.filter) {
+      if ('excepts' in query.filter && query.filter.excepts.includes(key)) continue;
       if (['true'].includes(query.filter[key])) { query.filter[key] = true; }
       if (query.filter[key] === 'false') { query.filter[key] = false; }
       if (RegExp(/[a-z]/i).test(query.filter[key])) { continue; }
       if (key === 'user.clientCode') { continue; }
       query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
     }
+
+    delete query.filter?.excepts;
   }
 
   if (query.limit) { query.limit = +query.limit; }
