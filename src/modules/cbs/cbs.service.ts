@@ -1,10 +1,10 @@
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
-import { UserCategory, UsersController } from "modules/users";
+import { UserCategory, UsersController } from "modules";
 import { clientsDAO } from "./oracle-daos";
 import { config } from "convict-config";
 import { logger } from "winston-config";
-import { BaseService } from "common";
 import { get, isEmpty } from "lodash";
+import { BaseService } from "common";
 
 export class CbsService extends BaseService {
 

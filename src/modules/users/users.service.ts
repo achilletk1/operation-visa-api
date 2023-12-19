@@ -3,9 +3,9 @@ import { formatUserFilters, generateUsersExportXlsx } from "./helper";
 import { getLdapUser } from "common/helpers/ldap.helpers";
 import { UsersRepository } from "./users.repository";
 import { UsersController } from './users.controller';
+import { CbsController, CbsBankUser } from "modules";
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
-import { CbsController } from "modules/cbs";
 import { BankClient, User } from "./model";
 import { CrudService } from "common/base";
 import { config } from "convict-config";
@@ -13,7 +13,6 @@ import { UserCategory } from "./enum";
 import { isEmpty } from "lodash";
 import { hash } from "bcrypt";
 import moment from "moment";
-import { CbsBankUser } from "modules/cbs/model";
 
 export class UsersService extends CrudService<User>  {
 
