@@ -1,13 +1,12 @@
-import { deleteDirectory, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
 import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
 import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
+import { deleteDirectory, readFile, saveAttachment } from "common/utils";
 import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
-import { OnlinePaymentMonth, OnlinePaymentStatement } from "./model";
 import { UsersController } from "modules/users";
 import httpContext from 'express-http-context';
-import generateId from 'generate-unique-id';
+import { OnlinePaymentMonth } from "./model";
 import { CrudService } from "common/base";
 import { get, isEmpty } from "lodash";
 import moment from "moment";
@@ -68,7 +67,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                     user: {
                         email: get(user, 'email'),
                         tel: get(user, 'tel'),
-                        _id: get(user, '_id').toString(),
+                        _id: get(user, '_id')?.toString(),
                         clientCode: get(user, 'clientCode'),
                         fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
                     },
@@ -116,13 +115,12 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode') } });
 
             if (user) {
-                onlinePayment.user.fullName = `${get(user, 'fname')} ${get(user, 'lname')}`;
-                onlinePayment.user._id = user?._id?.toString() || '';
+                onlinePayment.user = { ...onlinePayment.user, fullName: `${get(user, 'fname')} ${get(user, 'lname')}`, _id: user?._id?.toString() };
             }
 
             onlinePayment.status = OpeVisaStatus.TO_COMPLETED;
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: VisaCeilingType.ONLINE_PAYMENT } })
-            onlinePayment.dates.created = moment().valueOf();
+            onlinePayment.dates = { ...onlinePayment.dates, created: moment().valueOf() };
             onlinePayment.ceiling = get(ceiling, 'value', 0);
 
             const insertedId = await OnlinePaymentController.onlinePaymentService.create(onlinePayment);

@@ -8,6 +8,8 @@ router.get('/', visaTransactionsFilesController.findAll);
 
 router.get('/labels', visaTransactionsFilesController.getVisaTransationsFilesLabels);
 
+router.get('/columnTitles', visaTransactionsFilesController.getVisaTransationsFilesColumnTitles);
+
 router.get('/import/array/:id', visaTransactionsFilesController.getTransactionFilesDataArray);
 
 router.get('/:id', visaTransactionsFilesController.findOneById);

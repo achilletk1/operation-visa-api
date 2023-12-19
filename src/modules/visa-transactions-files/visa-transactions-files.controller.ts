@@ -47,4 +47,9 @@ export class VisaTransactionsFilesController {
         catch (error) { next(error); }
     }
 
+    async getVisaTransationsFilesColumnTitles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(VisaTransactionsFilesController.visaTransactionsFilesService.getVisaTransationsFilesColumnTitles()); }
+        catch (error) { next(error); }
+    }
+
 }

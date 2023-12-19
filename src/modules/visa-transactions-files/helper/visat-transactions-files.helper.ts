@@ -14,20 +14,20 @@ export function verifyTransactionFileTypeContent(dataArray: any) {
 export function verifyTransactionFileContent(dataArray: any[], fileName: string) {
     const month = fileName.split('_')[3];
     return dataArray.findIndex((element) => {
-        let currentMonth = element['DATE'].split('/');
+        let currentMonths = `${element['DATE']}`.split('/');
         // currentMonth.shift();
-        currentMonth = [currentMonth[2].trim(), currentMonth[1].trim()].join('');
-        return month !== currentMonth || isEmpty(element['CLIENT']);
+        const currentMonth = [currentMonths[2]?.trim() || '', currentMonths[1]?.trim() || ''].join('');
+        return month !== currentMonth;
     });
 };
 
 export function verifyTransactionFileDataContent(dataArray: any[]): { column?: string; line?: string; type?: string; } {
     let i = 2;
     for (let element of dataArray) {
-        if (isEmpty(element['CLIENT'])) { return { column: 'CLIENT', line: i.toString(), type: element['TYPE_TRANS'] }; }
-        if (isEmpty(element['CARTE'])) { return { column: 'CARTE', line: i.toString(), type: element['TYPE_TRANS'] }; }
-        if (isEmpty(element['DATE'])) { return { column: 'DATE', line: i.toString(), type: element['TYPE_TRANS'] }; }
-        if (isEmpty(element['MONTANT_XAF'])) { return { column: 'MONTANT_XAF', line: i.toString(), type: element['TYPE_TRANS'] }; }
+        if (!element['CLIENT']) { return { column: 'CLIENT', line: i.toString(), type: element['TYPE_TRANS'] }; }
+        if (!element['CARTE']) { return { column: 'CARTE', line: i.toString(), type: element['TYPE_TRANS'] }; }
+        if (!element['DATE']) { return { column: 'DATE', line: i.toString(), type: element['TYPE_TRANS'] }; }
+        if (!element['MONTANT_XAF']) { return { column: 'MONTANT_XAF', line: i.toString(), type: element['TYPE_TRANS'] }; }
         i++;
     }
     return {};
@@ -43,8 +43,16 @@ export function verifyTransactionFileName(fileName: string) {
     return data[0] === 'bicec' && data[1] === 'hors' && data[2] === 'cemac' && /20\d{2}(0[ 1-9 ]|1[ 0-2 ])$/.test(data[3]);
 };
 
-export const verifyTransactionFile = (header: string[]) => {
-    const data =
+export const verifyTransactionFile = (dataArray: any[]) => {
+    
+    const header = Object.keys(dataArray.find(e => Object.keys(e).length === columnTitles.length) || dataArray[0]);
+
+    const containsAll = columnTitles.find(element => !header.includes(element));
+
+    return containsAll;
+};
+
+export const columnTitles =
         [
             'AGENCE',
             'COMPTE',
@@ -90,9 +98,3 @@ export const verifyTransactionFile = (header: string[]) => {
         //     'PAYS',
         //     'CATEGORIE',
         // ];
-    const containsAll = data.find(element => {
-        return !header.includes(element);
-    });
-
-    return containsAll;
-};

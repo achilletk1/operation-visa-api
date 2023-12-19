@@ -74,7 +74,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     try {
       const document = await this.baseRepository.findOne(query);
 
-      if (!document) throw new Error(errorMsg.NOT_FOUND);
+      if (!document) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(query));
 
       return document as T;
     } catch (error) { throw error; }

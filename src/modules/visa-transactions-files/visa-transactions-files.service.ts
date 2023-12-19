@@ -1,4 +1,4 @@
-import { verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile } from "./helper";
+import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile } from "./helper";
 import { VisaTransactionsFilesRepository } from "./visa-transactions-files.repository";
 import { VisaTransactionsFilesController } from './visa-transactions-files.controller';
 import { VisaOperationsController } from 'modules/visa-operations';
@@ -44,7 +44,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
 
             const fileIsNotEmpty = verifyTransactionNotEmptyFile(dataArray);
             if (!fileIsNotEmpty) { throw new Error('FileIsEmpty'); }
-            const containsAll = verifyTransactionFile(Object.keys(dataArray[0] as any));
+            const containsAll = verifyTransactionFile(dataArray);
             if (containsAll) {
                 const error: any = new Error('IncorrectFileColumn');
                 error['index'] = containsAll; throw error;
@@ -57,7 +57,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const typesMatch = verifyTransactionFileTypeContent(dataArray);
             if (typesMatch) {
                 const error: any = new Error('IncorrectFileType');
-                [error['index'], error['type']] = [(typesMatch?.arrayIndex || 0) + 2, typesMatch.found.NATURE];
+                [error['index'], error['type']] = [(typesMatch?.arrayIndex || 0) + 2, typesMatch.found.TYPE_TRANS];
                 throw error;
             }
             const dataMatch = verifyTransactionFileDataContent(dataArray);
@@ -75,7 +75,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
                 pending: moment().add(config.get('visaTransactionFilePendingValue'), 'minutes').valueOf(),
             };
 
-            const insertedId = await VisaTransactionsFilesController.visaTransactionsFilesService.create(transactionsFile);
+            const insertedId = (await VisaTransactionsFilesController.visaTransactionsFilesService.create(transactionsFile))?.data;
 
             return { insertedId };
         } catch (error) { throw error; }
@@ -124,12 +124,14 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
 
             const transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
 
-            const { content } = transactionsFile;
+            const { content, label } = transactionsFile;
 
             let dataArray = excelToJson(content);
             dataArray = dataArray.slice(0, 40 || dataArray.length);
-            return { dataArray };
+            return { dataArray, label };
         } catch (error) { throw error; }
     }
+
+    getVisaTransationsFilesColumnTitles = () => columnTitles;
 
 }
