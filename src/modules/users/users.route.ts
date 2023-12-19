@@ -5,7 +5,8 @@ import express from 'express';
 const router = express.Router();
 export const usersController = new UsersController();
 
-router.post('/', validateCreateUserMiddleware, usersController.createUser);
+// router.post('/', validateCreateUserMiddleware, usersController.createUser);
+router.post('/', usersController.createUser);
 
 router.post('/update', usersController.updateUserById);
 
