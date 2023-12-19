@@ -18,7 +18,7 @@ export const clientsDAO = {
             const query = (scope === 'front-office')
                 ? ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
-                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
+                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
                         (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p
@@ -26,12 +26,12 @@ export const clientsDAO = {
                 : ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
                         a.ges,
-                        a.cge as "code_gestionnaire",
-                        a.puti as "code_profil",
-                        a.cuti as "code_utilisateur",
-                        trim(a.lib) as "noms_complet",
-                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) "libelle_du_profil",
-                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) "libelle_agence",
+                        a.cge as code_gestionnaire,
+                        a.puti as code_profil,
+                        a.cuti as code_utilisateur,
+                        trim(a.lib) as noms_complet,
+                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_du_profil,
+                        (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) libelle_agence,
                         (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p, evuti a
@@ -80,7 +80,7 @@ export const clientsDAO = {
                 `select
                     p.ncp, p.inti, p.age, p.dev, p.cha, p.clc, 
                     (select lib2 from infoc.bknom where infoc.bknom.ctab = '005' and infoc.bknom.cacc = p.dev) currency,
-                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "lib_age"
+                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) lib_age
                 from infoc.bkcom p
                 where p.cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200') and p.cfe = 'N' and p.ife = 'N' and p.cli = '${cli}'`
                 // :
@@ -107,7 +107,7 @@ export const clientsDAO = {
                 `
                 select
                     trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
-                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
+                    (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
                     (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                     (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                 from infoc.bkcli p, infoc.bkcom a
