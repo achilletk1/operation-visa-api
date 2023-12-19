@@ -17,14 +17,14 @@ export const clientsDAO = {
 
             const query = (scope === 'front-office')
                 ? ` select
-                        trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                        trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
                         (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p
                     where p.cli = '${cli}'`
                 : ` select
-                        trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                        trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
                         a.ges,
                         a.cge as "code_gestionnaire",
                         a.puti as "code_profil",
@@ -54,7 +54,7 @@ export const clientsDAO = {
 
             if (isDevOrStag) { return await helper.getMockClientData(cli); }
 
-            const query = `select nomrest, nom, pre, nrc, nidf, nid, vid, sext from bank.bkcli where cli = '${cli}'`;
+            const query = `select trim(nomrest) nomrest, trim(nom) nom, trim(pre) pre, nrc, nidf, nid, vid, sext from infoc.bkcli where cli = '${cli}'`;
 
             const result = await executeQuery(query);
 
@@ -106,7 +106,7 @@ export const clientsDAO = {
             let query =
                 `
                 select
-                    trim(p.nomrest), trim(p.nom), trim(p.pre), p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                    trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
                     (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) "libelle_agence",
                     (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                     (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
