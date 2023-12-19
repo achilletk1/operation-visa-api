@@ -1,10 +1,11 @@
+import { CbsAccounts, CbsBankUser, CbsClientUser, CbsEmail, CbsPhone } from "../../model";
 import { logger } from "winston-config";
 
 const classPath = 'oracle-daos.helper.clients';
 
 export const helper = {
 
-    getMockClientData: async (cli: any) => {
+    getMockClientData: async (cli: any): Promise<(CbsClientUser | CbsBankUser)[]> => {
         const methodPath = `${classPath}.getMockClientData()`
         logger.info(`mock data used from ${methodPath}`);
 
@@ -187,53 +188,64 @@ export const helper = {
         return Promise.resolve(result);
     },
 
-    getMockClientAccounts: (cli: any) => {
+    getMockClientAccounts: (cli: any): Promise<CbsAccounts[]> => {
         const methodPath = `${classPath}.getMockClientAccounts()`
 
         logger.info(`mock data used from ${methodPath}`);
 
-        return [
+        const accounts: CbsAccounts[] = [
             {
                 NCP: '37207027067',
                 INTI: 'Compte de chèque              ',
                 AGE: '01400',
+                DEV: '001',
                 CHA: '372100',
                 CLC: '18',
+                CURRENCY: 'XAF',
                 LIB_AGE: 'BICEC AKWA              '
             },
             {
                 NCP: '37307027068',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01400',
+                DEV: '001',
                 CHA: '373100',
                 CLC: '19',
+                CURRENCY: 'XAF',
                 LIB_AGE: 'BICEC EDEA            '
             },
             {
                 NCP: '37207012337',
                 INTI: 'Compte de chèque              ',
                 AGE: '01800',
+                DEV: '001',
                 CHA: '372100',
                 CLC: '20',
+                CURRENCY: 'XAF',
                 LIB_AGE: 'BICEC BASSA                    '
             },
             {
                 NCP: '37307012338',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01800',
+                DEV: '001',
                 CHA: '373100',
                 CLC: '21',
+                CURRENCY: 'XAF',
                 LIB_AGE: 'DIRECTION GENERALE                            '
             },
             {
                 NCP: '37107096755',
                 INTI: 'Compte sur livret                     ',
                 AGE: '01100',
+                DEV: '001',
                 CHA: '373100',
                 CLC: '21',
+                CURRENCY: 'XAF',
                 LIB_AGE: 'BICEC BUEA UNIVERSITY                  '
             },
         ];
+        return Promise.resolve(accounts);
     },
 
     getMockClientDatas: async (ncp: any) => {
@@ -590,121 +602,121 @@ export const helper = {
         return Promise.resolve(result);
     },
 
-    getMockClientsTels: async (clientCodes: any[]) => {
+    getMockClientsTels: async (clientCodes: any[]): Promise<CbsPhone[]> => {
         const methodPath = `${classPath}.getMockClientsTels()`
         logger.info(`mock data used from ${methodPath}`);
 
-        const mapping: any = {
-            '70017185': {
+        const mapping: CbsPhone[] = [
+            {
                 CLI: '87654321',
                 TYP: '11',
                 NUM: '+242069894986',
                 NOMREST: 'TACHUM Achille',
-                SEXT: 'm'
+                // SEXT: 'm'
             },
-            '87654321': {
+            {
                 CLI: '87654321',
                 TYP: '11',
                 NUM: '+24069894986',
                 NOMREST: 'TACHUM Achille',
-                SEXT: 'm'
+                // SEXT: 'm'
             },
-            '70052448': {
+            {
                 CLI: '70052448',
                 TYP: '12',
                 NUM: '+242068669500',
                 NOMREST: 'ESSIAKOU BALLA Saïd',
             },
-            '02478803': {
+            {
                 CLI: '02478803',
                 TYP: '11',
                 NUM: '242055791126',
                 NOMREST: 'LIBAM FRANCK',
             },
-            '55555555': {
+            {
                 CLI: '55555555',
                 TYP: '10',
                 NUM: '242055791126',
                 NOMREST: 'MAMOUDOU Manssourou',
             },
-            '66666666': {
+            {
                 CLI: '66666666',
                 TYP: '11',
                 NUM: '242699949789',
                 NOMREST: 'AMOGO Fabrice',
             },
-            '75023431': {
+            {
                 CLI: '75023431',
                 TYP: '12',
                 NUM: '24265231245',
                 NOMREST: 'SIGNE KARL-DIMITRI',
             },
-            '70089528': {
+            {
                 CLI: '70089528',
                 TYP: '11',
                 NUM: '24265522332',
                 NOMREST: 'Kevin MOUTASSI',
             },
-        }
-        let result = clientCodes.filter(e => { return !!mapping[e] });
-        if (result.length === 0) { return [] }
-        result = result.map((e) => mapping[e]);
+        ];
+        const result = mapping.filter(e => clientCodes.includes(e.CLI));
+        // if (result.length === 0) { return [] }
+        // result = result.map((e) => mapping[e]);
         return Promise.resolve(result);
     },
 
-    getMoackClientsEmails: async (clientCodes: any[]) => {
+    getMoackClientsEmails: async (clientCodes: any[]): Promise<CbsEmail[]> => {
         const methodPath = `${classPath}.getMoackClientsEmails()`
         logger.info(`mock data used from ${methodPath}`);
 
-        const mapping: any = {
-            '70017185': {
+        const mapping: CbsEmail[] = [
+            {
                 CLI: '87654321',
                 TYP: '11',
                 EMAIL: 'achille.tachum@londo.io',
                 NOMREST: 'TACHUM Achille',
-                SEXT: 'm'
+                // SEXT: 'm'
             },
-            '87654321': {
+            {
                 CLI: '87654321',
                 TYP: '11',
                 EMAIL: 'achille.tachum@londo.io',
                 NOMREST: 'TACHUM Achille',
-                SEXT: 'm'
+                // SEXT: 'm'
             },
-            '70052448': {
+            {
                 CLI: '70052448',
                 TYP: '12',
                 EMAIL: 'said.essiakou@londo.io',
                 NOMREST: 'ESSIAKOU BALLA Saïd',
             },
-            '02478803': {
+            {
                 CLI: '02478803',
                 TYP: '11',
                 EMAIL: 'franck.libam@londo.io',
                 NOMREST: 'LIBAM FRANCK',
             },
-            '66666666': {
+            {
                 CLI: '66666666',
                 TYP: '11',
                 EMAIL: 'fabrice.amogo@londo.io',
                 NOMREST: 'AMOGO Fabrice',
             },
-            '75023431': {
+            {
                 CLI: '75023431',
                 TYP: '12',
                 EMAIL: 'dimitri.signe@londo.io',
                 NOMREST: 'SIGNE KARL-DIMITRI',
             },
-            '70089528': {
+            {
                 CLI: '70089528',
                 TYP: '11',
                 EMAIL: 'kevin.moutassi@londo.io',
                 NOMREST: 'Kevin MOUTASSI',
             },
-        }
-        let result = clientCodes.filter(e => { return !!mapping[e] });
-        if (result.length === 0) { return [] }
-        result = result.map((e) => mapping[e]);
+        ];
+        const result = mapping.filter(e => clientCodes.includes(e.CLI));
+        // if (result.length === 0) { return [] }
+        // result = result.map((e) => mapping[e]);
         return Promise.resolve(result);
     },
 

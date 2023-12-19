@@ -1,10 +1,10 @@
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
+import { UserCategory, UsersController } from "modules/users";
 import { clientsDAO } from "./oracle-daos";
 import { config } from "convict-config";
 import { logger } from "winston-config";
 import { BaseService } from "common";
 import { get, isEmpty } from "lodash";
-import { UsersController } from "..";
 
 export class CbsService extends BaseService {
 
@@ -43,26 +43,29 @@ export class CbsService extends BaseService {
         try {
             if (isDev) { await timeout(500); }
 
-            let client = await clientsDAO.getClientDatasByNcp(ncp, age, clc);
+            let clients = await clientsDAO.getClientDatasByNcp(ncp, age, clc);
 
-            if (isEmpty(client) || !(client instanceof Array)) { throw new Error('ClientNotFound'); }
+            if (isEmpty(clients) || !(clients instanceof Array)) { throw new Error('ClientNotFound'); }
 
-            client = client.map((elt: any) => removeSpacesFromResultSet(elt));
+            clients = clients.map((elt: any) => removeSpacesFromResultSet(elt));
 
-            if (scope === 'client') { return client; }
+            if (scope === 'client') { return clients; }
 
             let i = 0;
-            for (const elt of client) {
-                const accounts = await clientsDAO.getClientAccounts(elt?.CLI);
+            for (const client of clients) {
+                const accounts = await clientsDAO.getClientAccounts(client?.CLI);
                 if (accounts && accounts instanceof Array) {
-                    client[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
+                    clients[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
                     i++
                 }
             }
 
-            UsersController.usersService.createUser(client[0], 'front-office');
+            if (clients.length === 1) {
+                const createData = { clientCode: clients[0].CLI, enabled: true, category: UserCategory.DEFAULT };
+                await UsersController.usersService.createUser(createData, 'front-office');
+            }
 
-            return client;
+            return clients;
         } catch (error: any) {
             logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);
             throw error;

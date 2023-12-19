@@ -2,12 +2,13 @@ import { executeQuery } from "common/oracle-daos/config";
 import { isDevOrStag } from "common/helpers";
 import { logger } from 'winston-config';
 import { helper } from "./helpers";
+import { BaseCbsUser, CbsAccounts, CbsBankUser, CbsClientUser, CbsEmail, CbsPhone } from "../model";
 
 const classPath = 'oracle-daos.clients';
 
 export const clientsDAO = {
 
-    getClientDataByCli: async (cli: any, scope: 'back-office' | 'front-office') => {
+    getClientDataByCli: async (cli: any, scope: 'back-office' | 'front-office'): Promise<(CbsClientUser | CbsBankUser)[]> => {
         const methodPath = `${classPath}.getClientDataByCli()`;
         try {
 
@@ -46,7 +47,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientAccountDataByCli: async (cli: any) => {
+    getClientAccountDataByCli: async (cli: any): Promise<BaseCbsUser[]> => {
         const methodPath = `${classPath}.getClientDataByCli()`;
         try {
 
@@ -65,12 +66,12 @@ export const clientsDAO = {
         }
     },
 
-    getClientAccounts: async (cli: any) => {
+    getClientAccounts: async (cli: any): Promise<CbsAccounts[]> => {
         const methodPath = `${classPath}.getClientAccountsWithBalance()`;
         try {
             logger.info(`init get client accounts with balance cli: ${cli}`, { methodPath });
 
-            if (isDevOrStag) { return helper.getMockClientAccounts(cli); }
+            if (isDevOrStag) { return await helper.getMockClientAccounts(cli); }
 
             // const query = (config.get('env') !== 'staging-cbs') ?
             //     `select ncp, inti, age, sde, infoc.getsolde(ncp, age, dev, clc) as "SOLDE", clc from infoc.bkcom where cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200') and cfe = 'N' and ife = 'N' and cli = '${cli}'` :
@@ -95,7 +96,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientDatasByNcp: async (ncp: any, age?: string | null, clc?: string | null) => {
+    getClientDatasByNcp: async (ncp: any, age?: string | null, clc?: string | null): Promise<CbsClientUser[]> => {
         const methodPath = `${classPath}.getClientDatasByNcp()`;
         try {
             logger.info(`init get client data by ncp: ${ncp}`);
@@ -122,7 +123,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientsTels: async (clientCodes: string[]) => {
+    getClientsTels: async (clientCodes: string[]): Promise<CbsPhone[]> => {
         const methodPath = `${classPath}.getClientsTels()`;
 
         try {
@@ -145,7 +146,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientsEmails: async (clientCodes: string[]) => {
+    getClientsEmails: async (clientCodes: string[]): Promise<CbsEmail[]> => {
         const methodPath = `${classPath}.getClientsEmails()`;
 
         try {

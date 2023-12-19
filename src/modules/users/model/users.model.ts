@@ -1,3 +1,4 @@
+import { CbsAccounts } from "modules/cbs/model";
 import { UserCategory } from "../enum";
 
 export enum visaOpecategory {
@@ -38,6 +39,7 @@ export class User {
     created_at?: number;
     updated_at?: number;
     otp2fa?: boolean;
+    accounts?: CbsAccounts[];
 
     constructor(userCode: string, fname: string) {
         this.userCode = userCode;
@@ -70,7 +72,7 @@ export class BankClient extends User {
     IDNUM?: string;
     CHA?: string;
     CLI?: string;
-    accounts?: string[];
+    accounts?: CbsAccounts[];
 
 
 }

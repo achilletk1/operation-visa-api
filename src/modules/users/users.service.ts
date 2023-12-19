@@ -6,12 +6,14 @@ import { UsersController } from './users.controller';
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
 import { CbsController } from "modules/cbs";
+import { BankClient, User } from "./model";
 import { CrudService } from "common/base";
 import { config } from "convict-config";
+import { UserCategory } from "./enum";
 import { isEmpty } from "lodash";
-import { BankClient, User } from "./model";
 import { hash } from "bcrypt";
 import moment from "moment";
+import { CbsBankUser } from "modules/cbs/model";
 
 export class UsersService extends CrudService<User>  {
 
@@ -61,41 +63,43 @@ export class UsersService extends CrudService<User>  {
         } catch (error) { throw error; }
     }
 
-    async createUser(createData: User | BankClient, scope: 'back-office' | 'front-office') {
+    async createUser(createData: User, scope: 'back-office' | 'front-office') {
         try {
             const authUser = httpContext.get('user');
             if (authUser && authUser.category < 500) { return new Error('Forbidden'); }
 
-            const filter: any = ('CLI' in createData) ? { clientCode: createData.CLI } : { clientCode: createData.clientCode };
+            const filter: any = { clientCode: createData.clientCode };
             if (scope === 'back-office') { filter.userCode = createData.userCode; }
 
-            const existingUser = await this.baseRepository.findOne({ filter });
+            const existingUser = await UsersController.usersService.baseRepository.findOne({ filter });
 
             if (!isEmpty(existingUser)) { return new Error('UserAllreadyExist') }
-            let user: User | BankClient = {};
+            let user: User = {};
 
             if (scope === 'back-office') {
                 const userLdap: any = await getLdapUser(createData.userCode);
+                let userCbs: CbsBankUser[] = [];
+                if (createData.clientCode) { userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client as CbsBankUser[]; }
                 user = {
                     ...user,
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
-                    userCode: userLdap.userCode, email: userLdap.email, tel: userLdap.tel,
-                    gender: '', lang: 'fr', category: 600,
+                    userCode: userLdap.userCode, email: userLdap.email, tel: userLdap.tel, category: UserCategory.ADMIN,
+                    gender: !isEmpty(userCbs) ? userCbs[0].SEXT : '', lang: !isEmpty(userCbs) && userCbs[0].LANG !== '001' ? 'en' : 'fr',
                     visaOpecategory: createData.visaOpecategory, otp2fa: createData.otp2fa,
+                    age: { label: userCbs[0].LIBELLE_AGENCE, code: userCbs[0].AGE }
                 };
             }
 
-            if (scope === 'front-office' && 'CLI' in createData) {
-                const userCbs = (await CbsController.cbsService.getUserDataByCode(createData.CLI, scope))?.client;
+            if (scope === 'front-office') {
+                const { client, accounts } = await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope);
                 user = {
                     ...user,
-                    lname: userCbs.NOM, fname: userCbs.PRE, fullName: userCbs.NOMREST, email: userCbs.EMAIL,
-                    tel: userCbs.TEL, gender: userCbs.SEXT, lang: userCbs.LANG !== '001' ? 'en' : 'fr',
-                    accounts: createData.accounts,
+                    lname: client[0].NOM, fname: client[0].PRE, fullName: client[0].NOMREST, email: client[0].EMAIL,
+                    tel: client[0].TEL, gender: client[0].SEXT, lang: client[0].LANG !== '001' ? 'en' : 'fr',
+                    accounts, category: createData.category
                 };
             }
 
-            user.clientCode = 'CLI' in createData ? createData.CLI : createData.clientCode;
             user.enabled = createData.enabled;
             user.pwdReseted = true;
             if (authUser) user.editors = [{ _id: authUser?._id, date: moment().valueOf(), fullName: authUser.fullName }];

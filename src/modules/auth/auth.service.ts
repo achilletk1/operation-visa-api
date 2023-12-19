@@ -2,7 +2,7 @@ import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd, errorM
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { getLdapUser } from "common/helpers/ldap.helpers";
-import { User, UsersController } from "modules/users";
+import { User, UserCategory, UsersController } from "modules/users";
 import { SettingsController } from 'modules/settings';
 import { get, isEmpty, isString } from "lodash";
 import httpContext from 'express-http-context';
@@ -12,6 +12,7 @@ import { config } from "convict-config";
 import bcrypt from 'bcrypt';
 import moment from "moment";
 import { isDev } from 'common/helpers';
+import { CbsClientUser } from "modules/cbs/model";
 
 export class AuthService extends BaseService {
 
@@ -132,25 +133,25 @@ export class AuthService extends BaseService {
             // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             // const client = clientDatas[0];
 
-            let { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'] } });
+            let { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
 
-            let client = data as any;
-            if (isEmpty(client)) {
-                client = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null,);
-                if (isEmpty(client)) throw new Error(errorMsg.USER_NOT_FOUND);
+            let clients = data as (User | CbsClientUser)[];
+            if (isEmpty(clients)) {
+                clients = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null,);
+                if (isEmpty(clients)) throw new Error(errorMsg.USER_NOT_FOUND);
             }
 
-            if (client.length == 1) {
-                console.log(client);
-                if ((!client[0].email && !client[0].tel) && (!client[0].TEL && !client[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
-                return { email: client[0].EMAIL ?? client[0].email, phone: client[0].TEL ?? client[0].tel };
+            if (clients.length == 1) {
+                // console.log(clients);
+                if ((!(clients as User[])[0].email && !(clients as User[])[0].tel) && (!(clients as CbsClientUser[])[0].TEL && !(clients as CbsClientUser[])[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
+                return { email: (clients as CbsClientUser[])[0].EMAIL ?? (clients as User[])[0].email, phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel };
             }
 
-            if (client.length > 1) {
-                return client.map((user: any) => user.accounts)
+            if (clients.length > 1) {
+                return clients.map(user => user.accounts)
                     .flat()
-                    .filter((account: any) => account.NCP == ncp)
-                    .map((account: any) => { return { label: account.LIB_AGE, code: account.AGE } })
+                    .filter(account => account?.NCP == ncp)
+                    .map(account => { return { label: account?.LIB_AGE, code: account?.AGE }; })
             }
 
             // return { email: clientDatas.EMAIL, phone: clientDatas.TEL };
