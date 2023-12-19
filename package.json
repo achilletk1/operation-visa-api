@@ -42,7 +42,7 @@
     "morgan": "^1.10.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^2.7.0",
-    "oracledb": "^6.2.0",
+    "oracledb": "^5.5.0",
     "postmark": "^3.0.12",
     "prompt-confirm": "^2.0.4",
     "replace-special-characters": "^1.2.6",
