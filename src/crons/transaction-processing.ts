@@ -5,10 +5,10 @@ import { VisaOperationsController } from "modules/visa-operations";
 
 export class startTransactionsProcessingCron {
     public static start() {
-        const cronExpression = config.get('cronTransactionProcessing');
+        const cronExpression = config.get('crons.transactionProcessing');
 
         cron.schedule(cronExpression, async () => {
-            logger.debug('Start transaction processing cron');       
+            logger.debug('Start transaction processing cron');
             await VisaOperationsController.visaOperationsService.startTransactionsProcessing();
         });
     }
