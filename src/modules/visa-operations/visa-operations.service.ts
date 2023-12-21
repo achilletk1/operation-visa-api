@@ -265,7 +265,6 @@ export class VisaOperationsService extends CrudService<any> {
                 for (const month of months) {
                     let selectedTransactions = element.transactions.filter((elt: any) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
                     selectedTransactions = markExceedTransaction(selectedTransactions, +Number(travel?.ceiling));
-
                     const travelMonth = await getOrCreateTravelMonth(travel, month);
 
                     toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start); // in case of new month creation check the number of months in the long term travel
