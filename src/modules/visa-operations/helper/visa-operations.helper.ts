@@ -7,8 +7,9 @@ import { Travel, TravelController } from "modules/travel";
 import { OpeVisaStatus } from "../enum";
 import { getTotal } from "common/utils";
 import { logger } from "winston-config";
-import { get, isEmpty } from "lodash";
+import { forEach, get, isEmpty } from "lodash";
 import moment from "moment";
+import { Transaction } from 'mongodb';
 
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
     const totalAmount = getTotal(data?.transactions || []);
@@ -39,7 +40,6 @@ export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
     return travelMonth;
 }
 
-
 export const updateTravelMonth = async (travelMonth: TravelMonth, transactions: VisaTransaction[], toBeUpdated: any, travel: Travel) => {
     travelMonth?.transactions?.push(...transactions);
     toBeUpdated.notifications = verifyExcedingOnTravel(travelMonth, +Number(travel?.ceiling), travel);
@@ -57,15 +57,30 @@ export const sendEmailNotifications = async (notification: any) => {
 
     if (key === 'firstTransaction')
         notificationEmmiter.emit('detect-transactions-mail', new DetectTransactionsEvent(data, receiver, lang, id));
-        // await NotificationsController.notificationsService.sendEmailDetectTransactions(data, receiver, lang, id);
+    // await NotificationsController.notificationsService.sendEmailDetectTransactions(data, receiver, lang, id);
 
     if (key === 'ceilingOverrun')
         notificationEmmiter.emit('visa-exceding-mail', new VisaExcedingEvent(data, receiver, lang, id));
-        // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
+    // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
 }
 
 export const sendSMSNotifications = async (notification: any) => {
     const { data, lang, id, phone, key, subject } = notification.data;
     notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
     // await NotificationsController.notificationsService.sendTemplateSMS(data, phone, key, lang, id, subject);
+}
+
+export const markExceedTransaction = (transactions: VisaTransaction[], ceiling: number) => {
+    const totalAmount = getTotal(transactions || []);
+    if (totalAmount > ceiling) {
+        let exceding = 0;
+
+        transactions?.forEach((transaction: any) => {
+            exceding += transaction.amount;
+            if (exceding > ceiling){
+                transaction.isExceed = true;
+            }
+        })
+    }
+    return transactions;
 }

@@ -172,7 +172,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             data.editors = !isEmpty(data.editors) ? data.editors : [];
             data?.editors?.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
+                fullName: `${authUser?.fname}${authUser?.lname}`,
                 date: moment().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })

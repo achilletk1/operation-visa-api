@@ -19,7 +19,7 @@ export class TemplateSmsNotification extends BaseSmsNotification<TemplateSmsEven
         
             return templateData?.body;
           } catch (error: any) {
-            this.logger(`Error during sms template-sms notification generation \n${error.stack}`);
+            this.logger.info(`Error during sms template-sms notification generation \n${error.stack}`);
             return '';
           }
     }
