@@ -1,6 +1,7 @@
-import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile } from "./helper";
+import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn } from "./helper";
 import { VisaTransactionsFilesRepository } from "./visa-transactions-files.repository";
 import { VisaTransactionsFilesController } from './visa-transactions-files.controller';
+import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaOperationsController } from 'modules/visa-operations';
 import { UsersController } from 'modules/users';
 import { VisaTransactionsFile } from "./model";
@@ -40,7 +41,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const isNameCorrect = verifyTransactionFileName(fileName);
             if (!isNameCorrect) { throw new Error('IncorrectFileName'); }
 
-            const dataArray = excelToJson(content);
+            const dataArray = excelToJson(content) as VisaTransactionsTmp[];
 
             const fileIsNotEmpty = verifyTransactionNotEmptyFile(dataArray);
             if (!fileIsNotEmpty) { throw new Error('FileIsEmpty'); }
@@ -66,12 +67,19 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
                 [error['index'], error['column'], error['type']] = [dataMatch.line, dataMatch.column, dataMatch.type];
                 throw error;
             }
+            const duplicatesindexes = await verifyTransactionFileDuplicateData(dataArray);
+            if (!duplicatesindexes || duplicatesindexes.length > 0) {
+                const error: any = new Error('IncorrectFileDuplicate');
+                [error['index'], error['column']] = [duplicatesindexes, fileCheckSumColumn];
+                throw error;
+            }
+
             if (!email) { email = get(user, 'email') };
             const transactionsFile = {
                 label, content, email, status: 100,
                 month: +fileName.split('_')[3],
                 date: { created: moment().valueOf(), },
-                userId: get(authUser, '_id').toString(),
+                user: { _id: authUser?._id?.toString(), fullName: authUser?.fullName, },
                 pending: moment().add(config.get('visaTransactionFilePendingValue'), 'minutes').valueOf(),
             };
 
@@ -87,11 +95,11 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             if (!authUser) { throw new Error('Forbbiden'); }
             let transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
 
-            const { userId, content, label } = transactionsFile;
+            const { user, content, label } = transactionsFile;
             const fileName = label?.replace('.xlsx' || '.xls', '');
-            if (userId !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
+            if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
 
-            const visaTransactionsTmp = excelToJson(content);
+            const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
             await VisaOperationsController.visaTransactionsTmpService.createMany(visaTransactionsTmp);
 
             const code = `${get(transactionsFile, '_id')?.toString()}-${fileName}`
@@ -103,8 +111,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             delete transactionsFile.pending;
 
 
-            await VisaTransactionsFilesController.visaTransactionsFilesService.update({ _id: get(transactionsFile, '_id') }, transactionsFile);
-            return await VisaTransactionsFilesController.visaTransactionsFilesService.updateDeleteFeild({ _id: get(transactionsFile, '_id') }, { pending: true, content: true });
+            await VisaTransactionsFilesController.visaTransactionsFilesService.update({ _id: get(transactionsFile, '_id') }, { ...transactionsFile }, { pending: true, content: true });
         } catch (error) { throw error; }
     }
 

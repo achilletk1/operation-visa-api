@@ -13,11 +13,13 @@ export class BaseCron implements CronInterface {
   startOnProd  = true;
   startOnDev  = false;
 
-  constructor() { }
+  protected logger;
+
+  constructor() { this.logger = logger; }
 
   async start(): Promise<void> {
     if (!!this.canIStartCron()) {
-      logger.info(`Start ${this.getCronName()} cron`);
+      this.logger.info(`Start ${this.getCronName()} cron`);
       cron.schedule(config.get(this.cronExpressionPath), async () => {
         await this.service();
       });

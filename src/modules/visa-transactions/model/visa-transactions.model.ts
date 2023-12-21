@@ -13,8 +13,8 @@ export interface VisaTransaction {
     amountTrans?: number;
     currencyTrans?: string;
     amountCompens?: number;
-    currencyCompens?: number;
-    date?: number;
+    currencyCompens?: string;
+    date?: string;
     type?: string;
     ncp?: string;
     age?: string;
@@ -31,5 +31,6 @@ export interface VisaTransaction {
     statementRef?: string;
     tel?: string;
     email?: string;
-    attachments?: any[]
+    attachments?: any[];
+    match: string;
 }

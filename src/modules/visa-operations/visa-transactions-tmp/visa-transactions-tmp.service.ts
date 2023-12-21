@@ -1,7 +1,8 @@
 import { VisaTransactionsTmpRepository } from "./visa-transactions-tmp.repository";
+import { VisaTransactionsTmp } from "./model";
 import { CrudService } from "common/base";
 
-export class VisaTransactionsTmpService extends CrudService<any> {
+export class VisaTransactionsTmpService extends CrudService<VisaTransactionsTmp> {
 
     static visaTransactionsTmpRepository: VisaTransactionsTmpRepository;
 

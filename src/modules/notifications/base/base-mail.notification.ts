@@ -72,7 +72,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
 
       return this.getNotificationBody();
     } catch (error: any) {
-      this.logger(`Error during mail ${this.templateName} notification generation \n${error.stack}`);
+      this.logger.error(`Error during mail ${this.templateName} notification generation \n${error.stack}`);
       return '';
     }
   }
@@ -93,7 +93,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     try {
       if (this.keyNotification) return await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, queueData.receiver, (this.eventData as any)?.id, queueData.attachments, (this.eventData as any)?.key, (this.eventData as any)?.type);
       return await this.add(NotificationsType.MAIL, queueData, this.priority, this.delayUntil);
-    } catch (error: any) { this.logger(`Error during insertion mail ${this.templateName} notification in queue \n${error.stack}`); }
+    } catch (error: any) { this.logger.error(`Error during insertion mail ${this.templateName} notification in queue \n${error.stack}`); }
   }
 
 }

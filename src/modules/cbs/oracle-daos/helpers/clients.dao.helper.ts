@@ -9,7 +9,7 @@ export const helper = {
         const methodPath = `${classPath}.getMockClientData()`
         logger.info(`mock data used from ${methodPath}`);
 
-        const mapping: any = {
+        const mapping: any/*(CbsClientUser | CbsBankUser)[]*/ = {
             '37207027067': {
                 NOMREST: 'BRALICO',
                 NRC: 'AZERTYUIOPLKJHGF    ',
@@ -132,7 +132,11 @@ export const helper = {
                 PRE: 'LETUTOUR    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                SEXT: 'M',
+                LIBELLE_AGENCE: 'DIRECTION GENERALE',
+                TEL: '237693405447',
+                EMAIL: 'achille.tachum@londo-tech.com',
             },
             '70089578': {
                 NOMREST: 'Brice LETUTOUR',
@@ -248,7 +252,7 @@ export const helper = {
         return Promise.resolve(accounts);
     },
 
-    getMockClientDatas: async (ncp: any) => {
+    getMockClientDatas: async (ncp: any): Promise<CbsClientUser[]> => {
         const methodPath = `${classPath}.getMockClientData()`
 
         logger.info(`mock data used from ${methodPath}`);
@@ -304,7 +308,7 @@ export const helper = {
             },
         }
 
-        const clients: any[] = [
+        const clients: /*CbsClientUser*/any[] = [
             {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
                 NOM: 'MOUTASSI NZOGUE',
@@ -335,7 +339,7 @@ export const helper = {
                 CLC: '19 ',
                 CIVILITY: 'Camerounaise',
                 ADDRESS: 'Ange rafael ',
-                TEL: '242068207839 ',
+                TEL: '237693405447 ',
                 POB: 'Kinshasa ',
                 DOB: '11/04/1988',
                 IDTYPE: 'PASSEPORT',
@@ -380,12 +384,130 @@ export const helper = {
                 IDTYPE: 'PASSEPORT',
                 IDNUM: '00258963',
                 CHA: '372100',
-                CLI: '70017185'
+                CLI: '02478803'
             },
         ]
 
         const result = clients.filter(client => client.NCP == ncp);
 
+        return Promise.resolve(result);
+    },
+
+    getMockClientsTels: async (clientCodes: any[]): Promise<CbsPhone[]> => {
+        const methodPath = `${classPath}.getMockClientsTels()`
+        logger.info(`mock data used from ${methodPath}`);
+
+        const mapping: CbsPhone[] = [
+            {
+                CLI: '87654321',
+                TYP: '11',
+                NUM: '+242069894986',
+                NOMREST: 'TACHUM Achille',
+                // SEXT: 'm'
+            },
+            {
+                CLI: '87654321',
+                TYP: '11',
+                NUM: '+24069894986',
+                NOMREST: 'TACHUM Achille',
+                // SEXT: 'm'
+            },
+            {
+                CLI: '70052448',
+                TYP: '12',
+                NUM: '+242068669500',
+                NOMREST: 'ESSIAKOU BALLA Saïd',
+            },
+            {
+                CLI: '02478803',
+                TYP: '11',
+                NUM: '242055791126',
+                NOMREST: 'LIBAM FRANCK',
+            },
+            {
+                CLI: '55555555',
+                TYP: '10',
+                NUM: '242055791126',
+                NOMREST: 'MAMOUDOU Manssourou',
+            },
+            {
+                CLI: '66666666',
+                TYP: '11',
+                NUM: '242699949789',
+                NOMREST: 'AMOGO Fabrice',
+            },
+            {
+                CLI: '75023431',
+                TYP: '12',
+                NUM: '24265231245',
+                NOMREST: 'SIGNE KARL-DIMITRI',
+            },
+            {
+                CLI: '70089528',
+                TYP: '11',
+                NUM: '24265522332',
+                NOMREST: 'Kevin MOUTASSI',
+            },
+        ];
+        const result = mapping.filter(e => clientCodes.includes(e.CLI));
+        // if (result.length === 0) { return [] }
+        // result = result.map((e) => mapping[e]);
+        return Promise.resolve(result);
+    },
+
+    getMoackClientsEmails: async (clientCodes: any[]): Promise<CbsEmail[]> => {
+        const methodPath = `${classPath}.getMoackClientsEmails()`
+        logger.info(`mock data used from ${methodPath}`);
+
+        const mapping: CbsEmail[] = [
+            {
+                CLI: '87654321',
+                TYP: '11',
+                EMAIL: 'achille.tachum@londo.io',
+                NOMREST: 'TACHUM Achille',
+                // SEXT: 'm'
+            },
+            {
+                CLI: '87654321',
+                TYP: '11',
+                EMAIL: 'achille.tachum@londo.io',
+                NOMREST: 'TACHUM Achille',
+                // SEXT: 'm'
+            },
+            {
+                CLI: '70052448',
+                TYP: '12',
+                EMAIL: 'said.essiakou@londo.io',
+                NOMREST: 'ESSIAKOU BALLA Saïd',
+            },
+            {
+                CLI: '02478803',
+                TYP: '11',
+                EMAIL: 'franck.libam@londo.io',
+                NOMREST: 'LIBAM FRANCK',
+            },
+            {
+                CLI: '66666666',
+                TYP: '11',
+                EMAIL: 'fabrice.amogo@londo.io',
+                NOMREST: 'AMOGO Fabrice',
+            },
+            {
+                CLI: '75023431',
+                TYP: '12',
+                EMAIL: 'dimitri.signe@londo.io',
+                NOMREST: 'SIGNE KARL-DIMITRI',
+            },
+            {
+                CLI: '70089528',
+                TYP: '11',
+                EMAIL: 'kevin.moutassi@londo.io',
+                NOMREST: 'Kevin MOUTASSI',
+            },
+        ];
+        const result = mapping.filter(e => clientCodes.includes(e.CLI));
+        // if (result.length === 0) { return [] }
+        // result = result.map((e) => mapping[e]);
         return Promise.resolve(result);
     },
 
@@ -601,128 +723,6 @@ export const helper = {
         result = result.map((e) => { return { CLI: e } });
         return Promise.resolve(result);
     },
-
-    getMockClientsTels: async (clientCodes: any[]): Promise<CbsPhone[]> => {
-        const methodPath = `${classPath}.getMockClientsTels()`
-        logger.info(`mock data used from ${methodPath}`);
-
-        const mapping: CbsPhone[] = [
-            {
-                CLI: '87654321',
-                TYP: '11',
-                NUM: '+242069894986',
-                NOMREST: 'TACHUM Achille',
-                // SEXT: 'm'
-            },
-            {
-                CLI: '87654321',
-                TYP: '11',
-                NUM: '+24069894986',
-                NOMREST: 'TACHUM Achille',
-                // SEXT: 'm'
-            },
-            {
-                CLI: '70052448',
-                TYP: '12',
-                NUM: '+242068669500',
-                NOMREST: 'ESSIAKOU BALLA Saïd',
-            },
-            {
-                CLI: '02478803',
-                TYP: '11',
-                NUM: '242055791126',
-                NOMREST: 'LIBAM FRANCK',
-            },
-            {
-                CLI: '55555555',
-                TYP: '10',
-                NUM: '242055791126',
-                NOMREST: 'MAMOUDOU Manssourou',
-            },
-            {
-                CLI: '66666666',
-                TYP: '11',
-                NUM: '242699949789',
-                NOMREST: 'AMOGO Fabrice',
-            },
-            {
-                CLI: '75023431',
-                TYP: '12',
-                NUM: '24265231245',
-                NOMREST: 'SIGNE KARL-DIMITRI',
-            },
-            {
-                CLI: '70089528',
-                TYP: '11',
-                NUM: '24265522332',
-                NOMREST: 'Kevin MOUTASSI',
-            },
-        ];
-        const result = mapping.filter(e => clientCodes.includes(e.CLI));
-        // if (result.length === 0) { return [] }
-        // result = result.map((e) => mapping[e]);
-        return Promise.resolve(result);
-    },
-
-    getMoackClientsEmails: async (clientCodes: any[]): Promise<CbsEmail[]> => {
-        const methodPath = `${classPath}.getMoackClientsEmails()`
-        logger.info(`mock data used from ${methodPath}`);
-
-        const mapping: CbsEmail[] = [
-            {
-                CLI: '87654321',
-                TYP: '11',
-                EMAIL: 'achille.tachum@londo.io',
-                NOMREST: 'TACHUM Achille',
-                // SEXT: 'm'
-            },
-            {
-                CLI: '87654321',
-                TYP: '11',
-                EMAIL: 'achille.tachum@londo.io',
-                NOMREST: 'TACHUM Achille',
-                // SEXT: 'm'
-            },
-            {
-                CLI: '70052448',
-                TYP: '12',
-                EMAIL: 'said.essiakou@londo.io',
-                NOMREST: 'ESSIAKOU BALLA Saïd',
-            },
-            {
-                CLI: '02478803',
-                TYP: '11',
-                EMAIL: 'franck.libam@londo.io',
-                NOMREST: 'LIBAM FRANCK',
-            },
-            {
-                CLI: '66666666',
-                TYP: '11',
-                EMAIL: 'fabrice.amogo@londo.io',
-                NOMREST: 'AMOGO Fabrice',
-            },
-            {
-                CLI: '75023431',
-                TYP: '12',
-                EMAIL: 'dimitri.signe@londo.io',
-                NOMREST: 'SIGNE KARL-DIMITRI',
-            },
-            {
-                CLI: '70089528',
-                TYP: '11',
-                EMAIL: 'kevin.moutassi@londo.io',
-                NOMREST: 'Kevin MOUTASSI',
-            },
-        ];
-        const result = mapping.filter(e => clientCodes.includes(e.CLI));
-        // if (result.length === 0) { return [] }
-        // result = result.map((e) => mapping[e]);
-        return Promise.resolve(result);
-    },
-
-    getMockClientAccountBalanceByNcp: () => { return [{ SOLDE: 500000000 }]; },
-
-    getMockClientAccountBalanceByNcpAndAge: () => { return [{ DATE: '30/11/2020', SOLDE: 500000000 }]; },
 
     getMockClientCards: () => {
         return [{

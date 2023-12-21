@@ -9,7 +9,7 @@ import { isEmpty } from "lodash";
 
 export class QueueService extends BaseRepository {
 
-    logger: any;
+    logger;
 
     constructor() { super(); this.collectionName = 'queue'; this.logger = logger; }
 

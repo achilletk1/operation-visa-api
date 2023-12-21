@@ -1,17 +1,17 @@
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
-import { notificationEmmiter, TravelDeclarationEvent, TravelStatusChangedEvent } from 'modules/notifications';
+import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
-import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
+import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
-import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
 import { getTravelStatus, saveAttachmentTravel } from "./helper";
+import { UserCategory, UsersController } from 'modules/users';
+import { OpeVisaStatus } from "modules/visa-operations";
 import { CrudService, QueryOptions } from "common/base";
 import { TravelRepository } from "./travel.repository";
 import { TravelController } from './travel.controller';
 import { parseNumberFields } from "common/helpers";
-import { UsersController } from 'modules/users';
 import httpContext from 'express-http-context';
 import generateId from 'generate-unique-id';
 import { QueryFilter } from "common/types";
@@ -39,7 +39,7 @@ export class TravelService extends CrudService<Travel> {
 
     async getTravels(query: QueryOptions) {
         try {
-            query.filter = this.formatFilters(query.filter);
+            query.filter = this.formatFilters(query.filter || {});
             return await TravelController.travelService.findAll(query);
         } catch (error) { throw error; }
     }
@@ -138,7 +138,7 @@ export class TravelService extends CrudService<Travel> {
     async insertTravelFromSystem(travel: Travel): Promise<any> {
         try {
 
-            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode') } });
+            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
 
             if (user) {
                 travel.user._id = user?._id?.toString();

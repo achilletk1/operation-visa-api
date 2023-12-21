@@ -4,13 +4,23 @@ export interface RepositoryInterface {
 
     create(data: Document): Promise<InsertOneResult<Document>>;
 
+    async createMany(documents: Document[]): Promise<InsertManyResult<Document>>;
+
     findAll(query?: QueryOptions): Promise<Document[]>;
 
     findOne(query: QueryOptions): Promise<WithId<globalThis.Document> | null>;
 
+    findAllAggregate(agregation: any): Promise<Document[]>;
+
     count(query: QueryFilter): Promise<number>;
 
-    update(filter: QueryFilter, data: Document): Promise<UpdateResult>;
+    update(filter: QueryFilter, data: Document, unsetDocument: Document): Promise<UpdateResult>;
+
+    updateMany(filter: QueryFilter, setDocument: Document, unsetDocument: Document): Promise<UpdateResult>;
+
+    deleteOne(filter: QueryFilter): Promise<DeleteResult>;
+
+    deleteMany(filter: QueryFilter): Promise<DeleteResult>;
 }
 
 
@@ -30,4 +40,4 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<unknown>
 
-declare type QueryProjection = ObjectType<0 | 1>
+declare type QueryProjection = ObjectType<0 | 1 | number>

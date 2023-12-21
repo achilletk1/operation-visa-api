@@ -1,8 +1,8 @@
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
+import { CbsAccounts, CbsBankUser, CbsClientUser } from "./model";
 import { UserCategory, UsersController } from "modules";
 import { clientsDAO } from "./oracle-daos";
 import { config } from "convict-config";
-import { logger } from "winston-config";
 import { get, isEmpty } from "lodash";
 import { BaseService } from "common";
 
@@ -13,27 +13,25 @@ export class CbsService extends BaseService {
 
     constructor() { super() }
 
-    async getUserDataByCode(code: any, scope: 'back-office' | 'front-office' = 'front-office', includeAccounts: boolean = false) {
+    async getUserDataByCode(code: any, scope: 'back-office' | 'front-office' = 'front-office') {
         if (isDev) { await timeout(500); }
 
         try {
-            let client = await clientsDAO.getClientDataByCli(code, scope);
+            let client: CbsBankUser | CbsClientUser | undefined = undefined;
+            const clients = await clientsDAO.getClientDataByCli(code, scope);
 
-            if (!client || client?.length === 0) { throw new Error('ClientNotFound'); }
+            if (isEmpty(clients) || clients?.length === 0) { throw new Error('ClientNotFound'); }
 
-            if (client && client instanceof Array) {
-                client = removeSpacesFromResultSet(get(client, `[0]`, null));
+            if (clients && clients instanceof Array) {
+                client = removeSpacesFromResultSet(get(clients, `[0]`, null));
             }
 
-            let accounts: any;
-
-            if ([true, 'true'].includes(includeAccounts)) {
-                accounts = await clientsDAO.getClientAccounts(code);
-            }
+            let accounts = await clientsDAO.getClientAccounts(code);
+            accounts = accounts.map(e => removeSpacesFromResultSet(e));
 
             return { client, accounts };
         } catch (error: any) {
-            logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
+            this.logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
             throw error;
         }
     }
@@ -47,7 +45,7 @@ export class CbsService extends BaseService {
 
             if (isEmpty(clients) || !(clients instanceof Array)) { throw new Error('ClientNotFound'); }
 
-            clients = clients.map((elt: any) => removeSpacesFromResultSet(elt));
+            clients = clients.map(elt => removeSpacesFromResultSet(elt));
 
             if (scope === 'client') { return clients; }
 
@@ -55,7 +53,7 @@ export class CbsService extends BaseService {
             for (const client of clients) {
                 const accounts = await clientsDAO.getClientAccounts(client?.CLI);
                 if (accounts && accounts instanceof Array) {
-                    clients[i].accounts = accounts.map((elt: any) => removeSpacesFromResultSet(elt));
+                    clients[i].accounts = accounts.map(elt => removeSpacesFromResultSet(elt));
                     i++
                 }
             }
@@ -67,7 +65,7 @@ export class CbsService extends BaseService {
 
             return clients;
         } catch (error: any) {
-            logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);
+            this.logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);
             throw error;
         }
     }
@@ -78,7 +76,6 @@ export class CbsService extends BaseService {
         const { code, includeAccounts, isChaFilter } = datas;
 
         try {
-
             let client = await clientsDAO.getClientAccountDataByCli(code);
 
             if (!client || client?.length === 0) { throw new Error('ClientNotFound'); }
@@ -87,14 +84,14 @@ export class CbsService extends BaseService {
                 client = removeSpacesFromResultSet(get(client, `[0]`, null));
             }
 
-            let accounts: any;
+            let accounts: CbsAccounts[] = [];
             if ([true, 'true'].includes(includeAccounts)) { accounts = await clientsDAO.getClientAccounts(code) };
-            if ([true, 'true'].includes(isChaFilter)) { accounts = accounts.filter((elt: any) => ['371', '372'].includes(elt?.CHA.slice(0, 3))); }
+            if ([true, 'true'].includes(isChaFilter)) { accounts = accounts.filter(elt => ['371', '372'].includes(elt?.CHA.slice(0, 3))); }
             if (!accounts || accounts?.length === 0) { throw new Error('AccountNotFound'); }
 
             return { client, accounts };
         } catch (error: any) {
-            logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
+            this.logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
             throw error;
         }
     }

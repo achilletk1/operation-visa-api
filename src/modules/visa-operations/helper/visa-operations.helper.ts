@@ -4,12 +4,12 @@ import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OnlinePaymentMonth } from "modules/online-payment";
 import { VisaTransaction } from "modules/visa-transactions";
 import { Travel, TravelController } from "modules/travel";
+import { forEach, get, isEmpty } from "lodash";
 import { OpeVisaStatus } from "../enum";
 import { getTotal } from "common/utils";
 import { logger } from "winston-config";
-import { forEach, get, isEmpty } from "lodash";
-import moment from "moment";
 import { Transaction } from 'mongodb';
+import moment from "moment";
 
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
     const totalAmount = getTotal(data?.transactions || []);
@@ -43,7 +43,7 @@ export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
 export const updateTravelMonth = async (travelMonth: TravelMonth, transactions: VisaTransaction[], toBeUpdated: any, travel: Travel) => {
     travelMonth?.transactions?.push(...transactions);
     toBeUpdated.notifications = verifyExcedingOnTravel(travelMonth, +Number(travel?.ceiling), travel);
-    await TravelMonthController.travelMonthService.updateTravelMonthsById(travelMonth?._id, { transactions: travelMonth?.transactions, "dates.updated": moment().valueOf() } as any);
+    await TravelMonthController.travelMonthService.updateTravelMonthsById(travelMonth?._id, { transactions: travelMonth?.transactions, "dates.updated": moment().valueOf() } as Partial<TravelMonth>);
 
 }
 

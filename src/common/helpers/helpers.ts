@@ -252,7 +252,7 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<any>
 
-declare type QueryProjection = ObjectType<0 | 1>
+declare type QueryProjection = ObjectType<0 | 1 | number>
 
 
 declare type PaginationParam = 'offset' | 'limit';

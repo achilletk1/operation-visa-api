@@ -1,18 +1,17 @@
 import { BaseService, getRandomString, isDevOrStag, isStagingBci, isProd, errorMsg, timeout } from "common";
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
-import { getLdapUser } from "common/helpers/ldap.helpers";
 import { User, UserCategory, UsersController } from "modules/users";
+import { getLdapUser } from "common/helpers/ldap.helpers";
 import { SettingsController } from 'modules/settings';
+import { CbsClientUser } from "modules/cbs/model";
 import { get, isEmpty, isString } from "lodash";
 import httpContext from 'express-http-context';
-import { TmpController } from "modules/tmp";
 import { CbsController } from "modules/cbs";
 import { config } from "convict-config";
+import { isDev } from 'common/helpers';
 import bcrypt from 'bcrypt';
 import moment from "moment";
-import { isDev } from 'common/helpers';
-import { CbsClientUser } from "modules/cbs/model";
 
 export class AuthService extends BaseService {
 
@@ -129,15 +128,15 @@ export class AuthService extends BaseService {
     async verifyCredentialsUser(credentials: any) {
         try {
             const { ncp } = credentials;
-            if (config.get('env') === 'development') { await timeout(500); };
+            if (isDev) { await timeout(500); };
             // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             // const client = clientDatas[0];
 
-            let { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
+            const { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
 
-            let clients = data as (User | CbsClientUser)[];
+            let clients: (User | CbsClientUser)[] = data;
             if (isEmpty(clients)) {
-                clients = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null,);
+                clients = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null);
                 if (isEmpty(clients)) throw new Error(errorMsg.USER_NOT_FOUND);
             }
 
@@ -160,7 +159,7 @@ export class AuthService extends BaseService {
 
     async sendClientOtp(datas: any) {
         try {
-            let { otpChannel, value, ncp } = datas;
+            const { otpChannel, value, ncp } = datas;
             if (isDev) { await timeout(500); }
 
             const otp = {
@@ -191,7 +190,7 @@ export class AuthService extends BaseService {
 
             if (!isString(otp) || otp.length !== 6 || !/^[A-Z0-9]+$/.test(otp)) { throw new Error('BadOTP'); }
 
-            const user = await UsersController.usersService.findOne({ filter: { [otpChannel]: value } }) as User;
+            const user = await UsersController.usersService.findOne({ filter: { [otpChannel]: value } });
 
             if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
@@ -203,8 +202,8 @@ export class AuthService extends BaseService {
 
             if (otp != '000000' && get(userOTP, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
-            const { email, gender, fname, lname, tel, category, clientCode } = user;
-            const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode };
+            const { email, gender, fname, lname, tel, category, clientCode, fullName } = user;
+            const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode, fullName };
 
             const oauth = create(tokenData);
             delete user.password;

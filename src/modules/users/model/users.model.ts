@@ -52,30 +52,6 @@ export class User {
     // }
 }
 
-export class BankClient extends User {
-
-    NOMREST?: string;
-    NOM?: string;
-    PRE?: string;
-    NRC?: string;
-    NIDF?: string;
-    AGE?: string;
-    NCP?: string[];
-    CLC?: string;
-    CIVILITY?: string;
-    ADDRESS?: string;
-    TEL?: string;
-    EMAIL?: string;
-    POB?: string;
-    DOB?: string;
-    IDTYPE?: string;
-    IDNUM?: string;
-    CHA?: string;
-    CLI?: string;
-    accounts?: CbsAccounts[];
-
-
-}
 
 export class Wallet {
     provider?: {

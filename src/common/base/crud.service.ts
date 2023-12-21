@@ -64,7 +64,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async findAllAggregate(aggregation: unknown): Promise<Document[]> {
+  async findAllAggregate(aggregation: object[]): Promise<Document[]> {
     try {
       return await this.baseRepository.findAllAggregate(aggregation ?? []);
     } catch (error) { throw error; }
@@ -74,7 +74,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     try {
       const document = await this.baseRepository.findOne(query);
 
-      if (!document) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(query));
+      if (!document) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(query.filter));
 
       return document as T;
     } catch (error) { throw error; }
@@ -88,28 +88,13 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async update(filter: QueryFilter, data: Document): Promise<QueryResult> {
+  async update(filter: QueryFilter, data: Document, unsetData?: Document): Promise<QueryResult> {
     try {
       const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND);
+      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
       delete data?._id;
 
-      const updatedDocument = await this.baseRepository.update(filter, data);
-
-      if (!updatedDocument.acknowledged)
-        throw new Error(errorMsg.ON_UPDATE);
-
-      return setResponse(200, respMsg.UPDATED);
-    } catch (error) { throw error; }
-  }
-
-  async updateDeleteFeild(filter: QueryFilter, data: Document): Promise<QueryResult> {
-    try {
-      const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND);
-      delete data?._id;
-
-      const updatedDocument = await this.baseRepository.updateDeleteFeild(filter, data);
+      const updatedDocument = await this.baseRepository.update(filter, data, unsetData || {});
 
       if (!updatedDocument.acknowledged)
         throw new Error(errorMsg.ON_UPDATE);
@@ -121,7 +106,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
   async updateMany(filter: QueryFilter, data: Document, unsetData: Document): Promise<QueryResult> {
     try {
       const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND);
+      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
       delete data?._id;
 
       const updatedDocument = await this.baseRepository.updateMany(filter, data, unsetData);
@@ -136,7 +121,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
   async deleteOne(filter: QueryFilter): Promise<QueryResult> {
     try {
       const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND);
+      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
 
       const deletedResult = await this.baseRepository.deleteOne(filter);
 
@@ -150,7 +135,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
   async deleteMany(filter: QueryFilter): Promise<QueryResult> {
     try {
       const existVerify = await this.baseRepository.findOne({ filter });
-      if (existVerify) throw new Error(errorMsg.NOT_FOUND);
+      if (existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
 
       const deletedResult = await this.baseRepository.deleteMany(filter);
 
@@ -213,7 +198,7 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<any>
 
-declare type QueryProjection = ObjectType<0 | 1>
+declare type QueryProjection = ObjectType<0 | 1 | number>
 
 declare type getAllResult<T> = {
   data: T[],

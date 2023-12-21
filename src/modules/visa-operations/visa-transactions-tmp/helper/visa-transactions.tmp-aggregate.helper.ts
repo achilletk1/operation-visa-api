@@ -50,7 +50,7 @@ export const formatedVisaTransactionsTmps = [
             type: { $trim: { input: "$TYPE_TRANS", }, },
             ncp: { $trim: { input: "$COMPTE", }, },
             age: { $trim: { input: "$AGENCE", }, },
-            cha: { $trim: { input: "$CHAPITRE", }, },
+            cha: { $trim: { input: { $toString: "$CHAPITRE", } }, },
             card: {
                 name: { $trim: { input: "$NOM_CARTE", }, },
                 code: { $trim: { input: "$CARTE", }, },
@@ -67,6 +67,7 @@ export const formatedVisaTransactionsTmps = [
             reference: "",
             statementRef: "",
             travel: "$travel",
+            match: { $concat: [ "$CLIENT", { $toString: "$MONTANT_XAF", }, "$DEVISE", "$DATE", "$HEURE", "$TYPE_TRANS", "$CARTE", "$PAYS"] },
         },
     },
     {

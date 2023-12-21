@@ -23,8 +23,8 @@ export const generateTravelByProcessing = (cli: string, transaction: VisaTransac
             created: moment().valueOf(),
         },
         proofTravel: {
-            continents: [],
-            countries: [],
+            // continents: [],
+            // countries: [],
             dates: {
                 start: dates.start,
                 end: dates.end,
@@ -130,13 +130,13 @@ export const generateOnlinePaymentMonth = (clientCode: string, transaction: Visa
             tel: transaction.tel,
             lang: transaction?.lang
         },
-        currentMonth: month,
+        currentMonth: +month,
         status: OpeVisaStatus.EMPTY,
         dates: {},
         amounts: 0,
-        statementAmounts: 0,
+        // statementAmounts: 0,
         ceiling: 0,
-        statements: [],
+        // statements: [],
         transactions: [],
     }
 }

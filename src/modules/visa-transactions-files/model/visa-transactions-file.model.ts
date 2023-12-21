@@ -1,3 +1,5 @@
+import { User } from "modules/users";
+
 export interface VisaTransactionsFile {
     _id?: string;
     label?: string;
@@ -6,7 +8,7 @@ export interface VisaTransactionsFile {
     date?: { created: number, updated: number };
     pending?: number;
     content?: any;
-    userId?: string;
+    user?: Partial<User>;
     email?: string;
     status?: VisaTransactionsFileStatus;
 }

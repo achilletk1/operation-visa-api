@@ -2,7 +2,7 @@ import { logger } from "winston-config";
 
 export class BaseService {
 
-  protected logger: any;
+  protected logger;
 
   constructor() { this.logger = logger; }
 

@@ -10,6 +10,8 @@ export interface ServiceInterface<T> {
 
     findOne(query: QueryOptions): Promise<T | WithId<Document> | QueryResult>;
 
+    findAllAggregate(aggregation: object[]): Promise<Document[]>;
+
     count(query: QueryFilter): Promise<number | QueryResult>;
 
     update(filter: QueryFilter, data: Document): Promise<QueryResult>;
@@ -43,7 +45,7 @@ declare type QueryOptions = {
 
 declare type QueryFilter = ObjectType<unknown>
 
-declare type QueryProjection = ObjectType<0 | 1>
+declare type QueryProjection = ObjectType<0 | 1 | number>
 
 declare type getAllResult<T> = {
     data: T[],

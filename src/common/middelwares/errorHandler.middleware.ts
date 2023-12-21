@@ -53,6 +53,7 @@ function formatErrorResponseMsg(err: Error | { index: string; type: string; colu
     if (message === 'IncorrectFileMonth' && 'index' in err) { details = `La champ "DATE" de la ligne ${err.index} ne correspond pas au mois du fichier`; title = 'Ligne de fichier incorrecte'; }
     if (message === 'IncorrectFileType' && 'index' in err) { details = `Le champ "NATURE" de la ligne ${err.index} (${err.type}) ne correspond pas aux valeurs attendu, veuillez le remplacer par une nature de transaction connu`; title = 'Type de transaction incorrecte'; }
     if (message === 'IncorrectFileData' && 'index' in err) { details = `Le champ "${err.column}" de la ligne ${err.index} (${err.type}) est vide, veuillez remplir ce champ s'il vous plaît`; title = 'Cellule obligatoire vide'; }
+    if (message === 'IncorrectFileDuplicate' && 'index' in err) { details = { indexes: err.index, column: err.column }; title = 'Opérations déjà intégrées dans le système détecté'; }
 
 
     if (details) { errResp.details = details; }

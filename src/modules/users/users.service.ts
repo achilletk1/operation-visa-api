@@ -6,11 +6,11 @@ import { UsersController } from './users.controller';
 import { CbsController, CbsBankUser } from "modules";
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
-import { BankClient, User } from "./model";
 import { CrudService } from "common/base";
 import { config } from "convict-config";
 import { UserCategory } from "./enum";
 import { isEmpty } from "lodash";
+import { User } from "./model";
 import { hash } from "bcrypt";
 import moment from "moment";
 
@@ -77,15 +77,15 @@ export class UsersService extends CrudService<User>  {
 
             if (scope === 'back-office') {
                 const userLdap: any = await getLdapUser(createData.userCode);
-                let userCbs: CbsBankUser[] = [];
-                if (createData.clientCode) { userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client as CbsBankUser[]; }
+                let userCbs: CbsBankUser | null = null;
+                if (createData.clientCode) { userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client as CbsBankUser; }
                 user = {
                     ...user,
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
                     userCode: userLdap.userCode, email: userLdap.email, tel: userLdap.tel, category: UserCategory.ADMIN,
-                    gender: !isEmpty(userCbs) ? userCbs[0].SEXT : '', lang: !isEmpty(userCbs) && userCbs[0].LANG !== '001' ? 'en' : 'fr',
+                    gender: userCbs ? userCbs?.SEXT : '', lang: userCbs && userCbs?.LANG && userCbs?.LANG !== '001' ? 'en' : 'fr',
                     visaOpecategory: createData.visaOpecategory, otp2fa: createData.otp2fa,
-                    age: { label: userCbs[0].LIBELLE_AGENCE, code: userCbs[0].AGE }
+                    age: { label: userCbs?.LIBELLE_AGENCE, code: userCbs?.AGE }
                 };
             }
 
@@ -93,12 +93,13 @@ export class UsersService extends CrudService<User>  {
                 const { client, accounts } = await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope);
                 user = {
                     ...user,
-                    lname: client[0].NOM, fname: client[0].PRE, fullName: client[0].NOMREST, email: client[0].EMAIL,
-                    tel: client[0].TEL, gender: client[0].SEXT, lang: client[0].LANG !== '001' ? 'en' : 'fr',
-                    accounts, category: createData.category
+                    lname: client?.NOM, fname: client?.PRE, fullName: client?.NOMREST, email: client?.EMAIL,
+                    tel: client?.TEL, gender: client?.SEXT, lang: client?.LANG && client?.LANG !== '001' ? 'en' : 'fr',
+                    category: createData.category, accounts, age: { label: client?.LIBELLE_AGENCE, code: client?.AGE },
                 };
             }
 
+            user.clientCode = createData.clientCode;
             user.enabled = createData.enabled;
             user.pwdReseted = true;
             if (authUser) user.editors = [{ _id: authUser?._id, date: moment().valueOf(), fullName: authUser.fullName }];
@@ -195,8 +196,7 @@ export class UsersService extends CrudService<User>  {
             if (!user) throw new Error('UserNotFound');
             const passwordClear = '000000'/*getRandomString(6)*/;
             const password = await hash(passwordClear, config.get('saltRounds'));
-            await UsersController.usersService.update({ _id }, { password });
-            await UsersController.usersService.updateDeleteFeild({ _id }, { pwdReseted: false });
+            await UsersController.usersService.update({ _id }, { password }, { pwdReseted: false });
             // TODO send notifications
             await Promise.all([
                 // notificationService.sendEmailPwdReseted(user, passwordClear),

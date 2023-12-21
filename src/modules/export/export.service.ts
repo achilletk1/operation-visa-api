@@ -87,7 +87,7 @@ export class ExportService extends BaseService {
 
         if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
 
-        const data = readFile(path);
+        const data = readFile(path) || '';
         const buffer = Buffer.from(data, 'base64');
         const extension = getExtensionByContentType(contentType)
         const name = `export_${new Date().getTime()}-${fileName || ''}.${extension}`;
@@ -454,7 +454,7 @@ export class ExportService extends BaseService {
 
             }
 
-            const zip = generateOperationZippedFolder(folder as any);
+            const zip = generateOperationZippedFolder(folder);
 
             const fileName = `${dataTosendToExcel[type].name}_${camelCase(data?.user?.fullName)}_${id}.zip`
             return { fileContent: zip, fileName, contentType: 'application/zip, application/octet-stream' };

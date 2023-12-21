@@ -26,7 +26,7 @@ export class ImporterService extends CrudService<any> {
             // const authUser = httpContext.get('user');
             // const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            return await ImporterController.importerService.update({ _id: id }, data);
+            return await ImporterController.importerService.update({ _id: id }, { ...data });
         } catch (error) { throw error; }
     }
 

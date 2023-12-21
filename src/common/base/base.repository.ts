@@ -1,4 +1,4 @@
-import { Collection, Document, InsertOneResult, InsertManyResult, ObjectId, UpdateResult, WithId, DeleteResult } from 'mongodb';
+import { Collection, Document, InsertOneResult, InsertManyResult, ObjectId, UpdateResult, WithId, DeleteResult, UpdateQuery } from 'mongodb';
 import { RepositoryInterface } from '../interfaces';
 import * as db from 'database/mongodb';
 import { isEmpty } from 'lodash';
@@ -57,11 +57,13 @@ export class BaseRepository implements RepositoryInterface {
     } catch (error) { throw error; }
   }
 
-  async update(filter: QueryFilter, document: Document): Promise<UpdateResult> {
+  async update(filter: QueryFilter, document: Document, unsetDocument: Document): Promise<UpdateResult> {
     try {
       this.setMongoId(filter);
 
-      return (await this.getCollection()).updateOne(filter, { $set: document });
+      const updateQuery: UpdateQuery<any> = { $set: document };
+      if (unsetDocument) { updateQuery.$unset = unsetDocument; }
+      return (await this.getCollection()).updateOne(filter, updateQuery);
     } catch (error) { throw error; }
   }
 
@@ -73,14 +75,6 @@ export class BaseRepository implements RepositoryInterface {
       if (!isEmpty(setDocument)) updateFilter.$set = setDocument;
       if (!isEmpty(unsetDocument)) updateFilter.$unset = unsetDocument;
       return (await this.getCollection()).updateMany(filter, updateFilter);
-    } catch (error) { throw error; }
-  }
-
-  async updateDeleteFeild(filter: QueryFilter, document: Document): Promise<UpdateResult> {
-    try {
-      this.setMongoId(filter);
-
-      return (await this.getCollection()).updateOne(filter, { $unset: document });
     } catch (error) { throw error; }
   }
 
@@ -136,4 +130,4 @@ export declare type QueryOptions = {
 
 export declare type QueryFilter = ObjectType<any>
 
-export declare type QueryProjection = ObjectType<0 | 1>
+export declare type QueryProjection = ObjectType<0 | 1 | number>

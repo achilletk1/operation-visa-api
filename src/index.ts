@@ -2,8 +2,7 @@ import 'module-alias/register';
 import { ExpressLoader } from 'loaders/express';
 import { startDatabase } from 'database/mongodb';
 import { logger } from 'winston-config';
-import { startCrons } from 'crons/cron.service';
-// import { startCrons } from './crons';
+import { startCrons } from './crons';
 
 
 startDatabase().then(async () => {

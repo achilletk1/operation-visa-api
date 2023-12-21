@@ -48,7 +48,7 @@
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "crons": {
         "revivalMail": "3 * * * *",
-        "transactionProcessing": "* * * * * *",
+        "transactionProcessing": "*/3 * * * *",
         "deleteTemporaryFile": "0 */3 * * *",
         "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
         "clientInDemeure":"*/3 */1 * * *"

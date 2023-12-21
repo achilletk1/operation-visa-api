@@ -1,10 +1,10 @@
+import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
-import { VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { deleteDirectory, readFile, saveAttachment } from "common/utils";
-import { OpeVisaStatus, VisaCeilingType } from "modules/visa-operations";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
-import { UsersController } from "modules/users";
+import { UserCategory, UsersController } from "modules/users";
+import { OpeVisaStatus } from "modules/visa-operations";
 import httpContext from 'express-http-context';
 import { OnlinePaymentMonth } from "./model";
 import { CrudService } from "common/base";
@@ -53,7 +53,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const { month, year } = onlinepaymentMonth;
             if (!user) { throw Error('UserNotFound'); }
             if (!('month' in onlinepaymentMonth) || !('year' in onlinepaymentMonth)) { throw Error('OnlinePayementDateNotFound'); }
-            const currentMonth: number = +(year + '' + month) as number;
+            const currentMonth = +(year + '' + month);
             let onlinePayment: OnlinePaymentMonth = {};
             let insertion = false;
             // onlinepaymentMonth.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
@@ -112,7 +112,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async insertOnlinePayment(onlinePayment: OnlinePaymentMonth): Promise<any> {
         try {
 
-            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode') } });
+            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
 
             if (user) {
                 onlinePayment.user = { ...onlinePayment.user, fullName: `${get(user, 'fname')} ${get(user, 'lname')}`, _id: user?._id?.toString() };
@@ -214,12 +214,12 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             updateData.editors = !isEmpty(updateData.editors) ? updateData.editors : [];
             updateData.editors.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
+                fullName: `${authUser?.fname} ${authUser?.lname}`,
                 date: moment().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })
 
-            const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id }, updateData);
+            const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id }, { ...updateData });
             return result;
         } catch (error) { throw error; }
     }
