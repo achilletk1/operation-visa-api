@@ -1,6 +1,6 @@
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
-import { deleteDirectory, readFile, saveAttachment } from "common/utils";
+import { deleteDirectory, getTotal, readFile, saveAttachment } from "common/utils";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
@@ -47,29 +47,48 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         } catch (error) { throw error; }
     }
 
+    async removeOnlinePaymentsWithExceedings() {
+        try {
+            const onlinePaymentsMonths = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { currentMonth: { $lt: +moment().subtract(1, 'month').format('YYYYMM') } } }))?.data;
+    
+            for (const onlinePaymentsMonth of onlinePaymentsMonths) {
+                const total = getTotal(onlinePaymentsMonth?.transactions || []);
+                if (onlinePaymentsMonth?.ceiling && total < onlinePaymentsMonth?.ceiling) {
+                    await OnlinePaymentController.onlinePaymentService.deleteOne({ _id: onlinePaymentsMonth?._id });
+                }
+            }
+        } catch (e: any) {
+            this.logger.error(`Error during excution removeOnlinePaymentsWithExceedings cron \n ${e.stack}\n`);
+        }
+    }
+
     async insertOnlinePaymentStatement(userId: string, onlinepaymentMonth: OnlinePaymentMonth): Promise<any> {
         try {
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
-            const { month, year } = onlinepaymentMonth;
             if (!user) { throw Error('UserNotFound'); }
+
             if (!('month' in onlinepaymentMonth) || !('year' in onlinepaymentMonth)) { throw Error('OnlinePayementDateNotFound'); }
+            const { month, year } = onlinepaymentMonth;
             const currentMonth = +(year + '' + month);
+
             let onlinePayment: OnlinePaymentMonth = {};
-            let insertion = false;
-            // onlinepaymentMonth.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
-            onlinepaymentMonth.status = OpeVisaStatus.TO_VALIDATED;
             try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { currentMonth, 'user._id': userId } }); } catch (error) { }
             if (!isEmpty(onlinePayment)) { throw Error('OnlinePayementExist'); }
+
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: VisaCeilingType.ONLINE_PAYMENT } });
             if (!ceiling) { throw Error('CeilingNotFound'); }
+
+            let insertion = false;
+            // onlinepaymentMonth.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
             if (isEmpty(onlinePayment)) {
                 onlinePayment = {
                     user: {
                         email: get(user, 'email'),
                         tel: get(user, 'tel'),
+                        gender: get(user, 'gender'),
                         _id: get(user, '_id')?.toString(),
                         clientCode: get(user, 'clientCode'),
-                        fullName: `${get(user, 'fname')} ${get(user, 'lname')}`
+                        fullName: get(user, 'fullName', '')
                     },
                     dates: {
                         created: moment().valueOf(),
@@ -85,13 +104,13 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 onlinePayment._id = (await OnlinePaymentController.onlinePaymentService.create(onlinePayment))?.data?.toString();
             }
 
-            const id = String(get(onlinePayment, '_id'));
+            const id = onlinePayment._id.toString();
             for (let attachment of onlinepaymentMonth?.othersAttachements || []) {
                 if (!attachment.temporaryFile) { continue; }
                 const content = readFile(String(attachment?.temporaryFile?.path));
                 if (!content) { continue; }
                 attachment.content = content;
-                attachment = saveAttachment(onlinePayment._id, attachment, Number(onlinePayment.dates?.created), 'onlinePayment', moment(onlinepaymentMonth.dates?.created).format('DD-MM-YY'));
+                attachment = saveAttachment(onlinePayment._id, attachment, Number(onlinePayment.dates?.created), 'onlinePayment');
                 deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                 delete attachment.temporaryFile;
             }
@@ -123,19 +142,20 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePayment.dates = { ...onlinePayment.dates, created: moment().valueOf() };
             onlinePayment.ceiling = get(ceiling, 'value', 0);
 
-            const insertedId = await OnlinePaymentController.onlinePaymentService.create(onlinePayment);
+            const insertedId = (await OnlinePaymentController.onlinePaymentService.create(onlinePayment))?.data;
             onlinePayment._id = insertedId;
 
             return onlinePayment;
         } catch (error) { throw error; }
     }
 
-    async updateOnlinePaymentsById(id: string, data: OnlinePaymentMonth) {
+    async updateOnlinePaymentsById(_id: string, data: OnlinePaymentMonth) {
         try {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            const actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
+            let actualOninePayment: OnlinePaymentMonth | null = null;;
+            try { actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }); } catch(e) {}
 
             if (!actualOninePayment) { throw new Error('OnlinePayment'); }
 
@@ -177,7 +197,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 steps: "liste des déclaration d'achat en ligne"
             })
 
-            const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id }, data);
+            const result = await OnlinePaymentController.onlinePaymentService.update({ _id }, data);
             return result;
         } catch (error) { throw error; }
     }

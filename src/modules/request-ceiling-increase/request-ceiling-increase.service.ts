@@ -1,7 +1,4 @@
-import {
-    CeilingAssignedEvent, CeilingCaeAssignedEvent, IncreaseCeilingBankEvent, IncreaseCeilingEvent, notificationEmmiter,
-    RejectCeilingEvent, ValidCeilingEvent
-} from "modules/notifications";
+import { CeilingAssignedEvent, CeilingCaeAssignedEvent, IncreaseCeilingBankEvent, IncreaseCeilingEvent, notificationEmmiter, RejectCeilingEvent, ValidCeilingEvent } from "modules/notifications";
 import { RequestCeilingIncreaseRepository } from "./request-ceiling-increase.repository";
 import { RequestCeilingIncreaseController } from "./request-ceiling-increase.controller";
 import { Assignered, RequestCeilingIncrease } from "./model";

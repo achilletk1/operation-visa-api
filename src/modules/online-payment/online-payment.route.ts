@@ -18,7 +18,7 @@ router.get('/validators/:id', onlinePaymentController.getValidationsOnlinePaymen
 
 router.put('/statement/status/:id', onlinePaymentController.updateStatementStatusById);
 
-router.put('/:id', onlinePaymentController.insertOnlinePaymentStatement);
+router.post('/:id', onlinePaymentController.insertOnlinePaymentStatement);
 
 router.get('/:id', onlinePaymentController.findOneById);
 

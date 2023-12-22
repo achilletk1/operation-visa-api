@@ -1,10 +1,6 @@
-import {
-    generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth,
-    updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications,
-    sendEmailNotifications, markExceedTransaction
-} from "./helper";
-import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
+import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction } from "./helper";
 import { FormalNoticeEvent, ListOfUsersToBloquedEvent, notificationEmmiter, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
+import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
 import { VisaOperationsRepository } from "./visa-operations.repository";
 import { VisaOperationsController } from "./visa-operations.controller";
@@ -241,7 +237,7 @@ export class VisaOperationsService extends CrudService<any> {
             const travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(firstDate, 'DD/MM/YYYY HH:mm:ss').valueOf(), travelType: TravelType.LONG_TERM_TRAVEL });
 
             if (isEmpty(travel)) {
-                onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } });
+                try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } }); } catch(e) {}
             }
 
             transactionsGroupedByOnlinePayment.push({ transactions: selectedTransactions, onlinePaymentId: onlinePayment?._id.toString() || null, travelId: travel?._id.toString() || null, month });
@@ -263,7 +259,7 @@ export class VisaOperationsService extends CrudService<any> {
                 travel = generateTravelByProcessing(cli, element?.transactions[0], { start: firstDate, end: lastDate });
             }
 
-            travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel);
+            try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch(e) {}
             if (!travel || travel instanceof Error) { continue }
             travel.notifications = [];
 
@@ -305,7 +301,7 @@ export class VisaOperationsService extends CrudService<any> {
 
             const { month } = element;
             if (element.travelId) {
-                travel = await TravelController.travelService.findOne({ filter: { _id: element.travelId } });
+                try { travel = await TravelController.travelService.findOne({ filter: { _id: element.travelId } }); } catch(e) {}
                 const travelMonth = await getOrCreateTravelMonth(travel, month);
                 await updateTravelMonth(travelMonth, element.transactions, toBeUpdated, travel);
                 await updateTravel(travel, toBeUpdated);
@@ -316,9 +312,10 @@ export class VisaOperationsService extends CrudService<any> {
                 onlinePayment = generateOnlinePaymentMonth(cli, element.transactions[0], month);
             }
 
+            try {
             onlinePayment = element.onlinePaymentId
                 ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: element.onlinePaymentId } })
-                : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment);
+                : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment); } catch(e) {}
 
             toBeUpdated.transactions?.push(...element.transactions);
 

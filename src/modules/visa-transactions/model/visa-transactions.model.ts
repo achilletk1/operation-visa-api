@@ -1,3 +1,4 @@
+import { ExpenseCategory, VisaOperationsAttachment } from "modules/visa-operations";
 
 export interface VisaTransaction {
     _id?: string;
@@ -27,10 +28,15 @@ export interface VisaTransaction {
     country?: string;
     category?: string;
     reference?: string;
-    currentMonth?: string;
+    currentMonth?: number;
     statementRef?: string;
     tel?: string;
     email?: string;
-    attachments?: any[];
+    attachments?: VisaOperationsAttachment[];
     match: string;
+    isExceed: boolean;  // porperty to mark operation which make overrun
+    isJustify?: boolean;
+    status?: number;
+    nature?: { _id?: string; label?: string; otherLabel?: string; };
+    expenseCategory?: ExpenseCategory;
 }

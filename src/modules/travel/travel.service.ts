@@ -395,7 +395,7 @@ export class TravelService extends CrudService<Travel> {
 
                 const month = moment(travel.proofTravel.dates.start).add(index, 'M').format('YYYYMM').toString();
 
-                const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === month);
+                const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === +month);
 
                 const expenseDetailMonth = travel?.expenseDetails.filter((elt) => moment(elt.date).format('YYYYMM').toString() === month);
 

@@ -1,10 +1,10 @@
-import { Document, InsertOneResult, UpdateResult, WithId } from "mongodb";
+import { Document, InsertOneResult, UpdateResult, WithId, InsertManyResult, DeleteResult } from "mongodb";
 
 export interface RepositoryInterface {
 
     create(data: Document): Promise<InsertOneResult<Document>>;
 
-    async createMany(documents: Document[]): Promise<InsertManyResult<Document>>;
+    createMany(documents: Document[]): Promise<InsertManyResult<Document>>;
 
     findAll(query?: QueryOptions): Promise<Document[]>;
 
