@@ -2,7 +2,7 @@ import { RequestCeilingValidator } from "./validator.model";
 import { Status } from "../enum";
 
 export interface RequestCeilingIncrease {
-    _id?: string;
+    _id: string;
     user?: {
         _id?: string;
         clientCode?: string;
@@ -37,6 +37,7 @@ export interface RequestCeilingIncrease {
     status?: Status;
     desc: string;
     signature: any;
+    othersAttachements?: any[];
     dates?: {
         created?: number;
         assigned?: number;

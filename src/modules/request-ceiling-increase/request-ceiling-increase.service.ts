@@ -6,6 +6,8 @@ import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
 import { isEmpty } from "lodash";
 import moment from "moment";
+import { Status } from "./enum";
+import { deleteDirectory, readFile, saveAttachment } from "common/utils";
 
 export class RequestCeilingIncreaseService extends CrudService<RequestCeilingIncrease> {
 
@@ -25,14 +27,25 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
     async insertRequestCeilling(ceiling: RequestCeilingIncrease): Promise<any> {
         try {
-            const ceilingsTab = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { account: { ...ceiling.account } } });
+            const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { account: { ...ceiling.account }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
 
-            const resultat = ceilingsTab?.data.find((elm: any) => elm?.account?.ncp === ceiling?.account?.ncp &&
-                elm?.status === ceiling?.status && elm.desiredCeiling.type === ceiling?.desiredCeiling?.type)
+            if (data.length > 0) throw new Error('ApplicationNotProcessed');
 
-            if (resultat) { throw new Error('ApplicationNotProcessed'); }
+            const insertionId = (await RequestCeilingIncreaseController.requestCeilingIncreaseService.create(ceiling))?.data?.toString();
+            const insertedCeiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id: insertionId } });
 
-            await RequestCeilingIncreaseController.requestCeilingIncreaseService.create(ceiling);
+            for (let attachment of ceiling?.othersAttachements || []) {
+                if (!attachment.temporaryFile) { continue; }
+                const content = readFile(String(attachment?.temporaryFile?.path));
+                if (!content) { continue; }
+                attachment.content = content;
+                attachment = saveAttachment(insertedCeiling._id, attachment, Number(insertedCeiling.dates?.created), 'ceilingIncreaseRequest');
+                attachment.dates = { created: moment().valueOf() }
+                deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
+                delete attachment.temporaryFile;
+            }
+
+            await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id: insertionId }, ceiling);
 
             notificationEmmiter.emit('increase-ceiling-mail', new IncreaseCeilingEvent(ceiling));
             notificationEmmiter.emit('increase-ceiling-bank-mail', new IncreaseCeilingBankEvent(ceiling));
