@@ -50,7 +50,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async removeOnlinePaymentsWithExceedings() {
         try {
             const onlinePaymentsMonths = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { currentMonth: { $lt: +moment().subtract(1, 'month').format('YYYYMM') } } }))?.data;
-    
+
             for (const onlinePaymentsMonth of onlinePaymentsMonths) {
                 const total = getTotal(onlinePaymentsMonth?.transactions || []);
                 if (onlinePaymentsMonth?.ceiling && total < onlinePaymentsMonth?.ceiling) {
@@ -111,12 +111,13 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 if (!content) { continue; }
                 attachment.content = content;
                 attachment = saveAttachment(onlinePayment._id, attachment, Number(onlinePayment.dates?.created), 'onlinePayment');
+                attachment.dates = { created: moment().valueOf() }
                 deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                 delete attachment.temporaryFile;
             }
 
 
-            onlinePayment?.othersAttachements?.push(onlinepaymentMonth.othersAttachements);
+            onlinePayment.othersAttachements = onlinepaymentMonth.othersAttachements;
             //  const updateData = { 'dates.updated': moment().valueOf(), statements: onlinePayment.statements }
             const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id.toString() }, onlinePayment);
             notificationEmmiter.emit('online-payement-declaration-mail', new OnlinePayementDeclarationEvent({ ...onlinePayment, _id: id }));
@@ -155,7 +156,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
             let actualOninePayment: OnlinePaymentMonth | null = null;;
-            try { actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }); } catch(e) {}
+            try { actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }); } catch (e) { }
 
             if (!actualOninePayment) { throw new Error('OnlinePayment'); }
 

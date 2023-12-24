@@ -1,9 +1,9 @@
 import { getExtensionByContentType } from "modules/export";
-import { Attachment } from "modules/visa-operation";
 import { writeFile } from "./files.service";
 import moment from "moment";
+import { VisaOperationsAttachment } from "modules/visa-operations";
 
-export function saveAttachment(ref: string, attachment: Attachment, created: number, operationType: string, subRepertory?: string) {
+export function saveAttachment(ref: string, attachment: VisaOperationsAttachment, created: number, operationType: string, subRepertory?: string) {
     try {
         const { content, label, contentType } = attachment;
         delete attachment.content
