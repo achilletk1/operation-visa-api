@@ -42,7 +42,7 @@ export async function closeDBConnection(isLogs: boolean) {
 }
 
 
-export async function executeQuery(query: any, isLogs: boolean = false): Promise<any> {
+export async function executeQuery(query: any, isLogs: boolean = false): Promise<any[]> {
     let result: any = [];
 
     try {

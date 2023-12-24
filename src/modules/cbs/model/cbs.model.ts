@@ -52,3 +52,14 @@ export interface CbsEmail {
     TYP: string;
     NOMREST: string;
 }
+
+export interface cbsCard {
+    AGE: string;
+    NUM_CPTE: string;
+    CODE_CLIENT: string;
+    DATE_FIN_VALIDITE: string;
+    NOMREST: string;
+    LIBELLE_TYPE: string;
+    NUM_CARTE: string;
+    INTITULE_CMPTE: string;
+}

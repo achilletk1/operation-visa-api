@@ -1,14 +1,14 @@
+import { BaseCbsUser, CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone } from "../model";
 import { executeQuery } from "common/oracle-daos/config";
 import { isDevOrStag } from "common/helpers";
 import { logger } from 'winston-config';
 import { helper } from "./helpers";
-import { BaseCbsUser, CbsAccounts, CbsBankUser, CbsClientUser, CbsEmail, CbsPhone } from "../model";
 
 const classPath = 'oracle-daos.clients';
 
 export const clientsDAO = {
 
-    getClientDataByCli: async (cli: any, scope: 'back-office' | 'front-office'): Promise<(CbsClientUser | CbsBankUser)[]> => {
+    getClientDataByCli: async (cli: any, scope: 'back-office' | 'front-office' = 'front-office'): Promise<(CbsClientUser | CbsBankUser)[]> => {
         const methodPath = `${classPath}.getClientDataByCli()`;
         try {
 
@@ -37,25 +37,6 @@ export const clientsDAO = {
                         (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p, evuti a
                     where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
-
-            const result = await executeQuery(query);
-
-            return result;
-        } catch (error: any) {
-            logger.error(`Failed to get client data by cli ${cli}`, { error, stack: error.stack, methodPath });
-            throw error;
-        }
-    },
-
-    getClientAccountDataByCli: async (cli: any): Promise<BaseCbsUser[]> => {
-        const methodPath = `${classPath}.getClientDataByCli()`;
-        try {
-
-            logger.info(`init get client data by cli: ${cli}`, { methodPath });
-
-            if (isDevOrStag) { return await helper.getMockClientData(cli); }
-
-            const query = `select trim(nomrest) nomrest, trim(nom) nom, trim(pre) pre, nrc, nidf, nid, vid, sext from infoc.bkcli where cli = '${cli}'`;
 
             const result = await executeQuery(query);
 
@@ -167,6 +148,39 @@ export const clientsDAO = {
             logger.error(`Failed to get client email by cli ${clientCodes[0]}`, { error, stack: error.stack, methodPath });
             throw error;
         }
+    },
+
+    getClientCardsByCli: async (cli: string): Promise<cbsCard[]> => {
+        const methodPath = `${classPath}.getClientCardsByCli()`;
+
+        logger.info(`init get client cards matching cli: ${cli}`, { methodPath });
+
+        if (isDevOrStag) { return await helper.getMockClientCards(); }
+
+        const query = `
+        select
+            b.age,
+            b.ncp num_cpte,
+            b.cli code_client,
+            a.dfv date_fin_validite,
+            (select nomrest from bank.bkcli d where b.cli=d.cli) nomrest,
+            (select c.lib from bank.motycart c where c.type = b.typ) libelle_type,
+            concat(substr(b.ncart,1,6), concat('******',substr(b.ncart,13,4))) num_carte,
+            (select c.inti from bank.bkcom c where c.age = b.age and c.ncp = b.ncp and c.dev = b.dev) intitule_cmpte
+        from bank.bkcadab a, bank.moctr b
+        where
+            a.ncart = b.ncart and
+            a.ncpbc = b.ncp and
+            a.nctr = b.nctr and
+            a.age = b.age and
+            a.eta = '07' and
+            b.sit = 'C' and
+            b.cli = '${cli}'
+        `;
+
+        const result = await executeQuery(query);
+
+        return result;
     },
 
 };

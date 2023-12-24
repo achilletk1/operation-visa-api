@@ -1,11 +1,11 @@
 import { generateVisaTransactionExportXlsx, generateCeillingExportXlsx, generateOnlineOperationsExportXlsx, generateOnlinePaymentExportXlsx, generateTravelsExportXlsx, generateExpenseDetailsExportXlsx } from "./helper/export.xlsx.helper";
 import { getExtensionByContentType, generateNotificationExportPdf, getContentTypeByExtension, generateDeclarationFolderExportPdf } from "./helper/export.pdf.helper";
 import { generateOperationZippedFolder, getFileNamesTree } from "./helper/export.zip.helper";
-import { FilesController } from 'modules/visa-transactions-files/files';
 import { OnlinePaymentController, OnlinePaymentStatement } from "modules/online-payment";
-import { NotificationsController } from "modules/notifications";
-import { parseNumberFields, timeout } from "common/helpers";
+import { isDevOrStag, parseNumberFields, timeout } from "common/helpers";
+import { FilesController } from 'modules/visa-transactions-files/files';
 import { ExpenseDetail, TravelController } from 'modules/travel';
+import { NotificationsController } from "modules/notifications";
 import { camelCase, get, isEmpty } from "lodash";
 import { UsersController } from "modules/users";
 import { BaseService } from "common/base";
@@ -23,7 +23,9 @@ export class ExportService extends BaseService {
 
     async generateExportVisaTransactionLinks(fields: any) {
         const { end, start, clientCode } = fields;
-        timeout(5000);
+
+        if (isDevOrStag) { await timeout(5000); }
+
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
         const options = { end, start, ttl, clientCode };
@@ -58,13 +60,18 @@ export class ExportService extends BaseService {
         try {
             const { path } = query;
             const data = readFile(path);
+
+            if (isDevOrStag) { await timeout(5000); }
+
             return { data };
         } catch (error) { throw error; }
     }
 
     async generateExportAttachmentLinks(fields: any) {
         const { path, contentType } = fields;
-        timeout(5000);
+
+        if (isDevOrStag) { await timeout(5000); }
+
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
         const options = { ttl, path, contentType };
@@ -107,6 +114,8 @@ export class ExportService extends BaseService {
 
         const payments = await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy({ ...fields });
         if (isEmpty(payments?.data)) { throw new Error('OnlinePaymentNotFound'); }
+
+        if (isDevOrStag) { await timeout(5000); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -151,6 +160,8 @@ export class ExportService extends BaseService {
         const payments = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: operationId } });
         if (isEmpty(payments?.transactions)) { throw new Error('MonthOnlineOperationsNotFound'); }
 
+        if (isDevOrStag) { await timeout(5000); }
+
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
         const options = { ttl, operationId };
@@ -189,6 +200,8 @@ export class ExportService extends BaseService {
     async generateTravelsCeillingExportLinks(travelId: string) {
         const travle = await TravelController.travelService.findOne({ filter: { _id: travelId } });
         if (isEmpty(travle?.transactions)) { throw new Error('OnlineCeillingNotFound'); }
+
+        if (isDevOrStag) { await timeout(5000); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -229,6 +242,8 @@ export class ExportService extends BaseService {
 
         const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
         if (!user || isEmpty(user)) { throw new Error('UserNotFound'); }
+
+        if (isDevOrStag) { await timeout(5000); }
 
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -302,6 +317,8 @@ export class ExportService extends BaseService {
         const travels = await TravelController.travelService.findAll({ filter: fields });
         if (isEmpty(travels?.data)) { throw new Error('travelsNotFound'); }
 
+        if (isDevOrStag) { await timeout(5000); }
+
         const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
         const options = { ttl, ...fields };
@@ -344,6 +361,8 @@ export class ExportService extends BaseService {
 
             const file = await FilesController.filesService.findOne({ filter: { key } });
             if (!file) { throw new Error('Forbbiden'); }
+
+            if (isDevOrStag) { await timeout(5000); }
 
             const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 
@@ -389,6 +408,8 @@ export class ExportService extends BaseService {
                 : type === 'onlinePayment'
                     ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }) : null;
             if (!data) { throw new Error('DataNotFound'); }
+
+            if (isDevOrStag) { await timeout(5000); }
 
             const ttl = moment().add(config.get('exportTTL'), 'seconds').valueOf();
 

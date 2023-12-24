@@ -1,4 +1,4 @@
-import { CbsAccounts, CbsBankUser, CbsClientUser, CbsEmail, CbsPhone } from "../../model";
+import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone } from "../../model";
 import { logger } from "winston-config";
 
 const classPath = 'oracle-daos.helper.clients';
@@ -77,6 +77,22 @@ export const helper = {
                 AGE: '12023   '
             },
             '02478803': {
+                NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
+                NOM: 'LIBAM',
+                PRE: 'FRANCK    ',
+                NRC: 'GWB5O3RPI4WWUCJ/DV    ',
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                AGE: '12023   '
+            },
+            '02478804': {
+                NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
+                NOM: 'LIBAM',
+                PRE: 'FRANCK    ',
+                NRC: 'GWB5O3RPI4WWUCJ/DV    ',
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                AGE: '12023   '
+            },
+            '02478805': {
                 NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
                 NOM: 'LIBAM',
                 PRE: 'FRANCK    ',
@@ -366,6 +382,25 @@ export const helper = {
                 IDNUM: '002589634785',
                 CLI: '00000000',
                 CHA: '372100',
+            },
+            {
+                NOMREST: 'TACHUM KAMGA Achille',
+                NOM: 'TACHUM KAMGA',
+                PRE: 'Achille',
+                NRC: 'GWB5O3RPI4WWUCJ/DV    ',
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                AGE: '01400   ',
+                NCP: '37307012338',
+                CLC: '19 ',
+                CIVILITY: 'Camerounaise',
+                ADDRESS: 'Ange rafael ',
+                TEL: '237693405449',
+                POB: 'Kinshasa ',
+                DOB: '11/04/1988',
+                IDTYPE: 'PASSEPORT',
+                IDNUM: '00258963',
+                CHA: '372100',
+                CLI: '02478805'
             },
             {
                 NOMREST: 'TACHUM KAMGA Achille',
@@ -724,28 +759,30 @@ export const helper = {
         return Promise.resolve(result);
     },
 
-    getMockClientCards: () => {
-        return [{
-            "AGE": "01700",
-            "CODE_CLIENT": "70017464       ",
-            "NOMREST": "ABONI OLANDA JERRY                                                 ",
-            "NUM_CARTE": "604855******7233",
-            "DATE_FIN_VALIDITE": "2022-02-28",
-            "NUM_CPTE": "37307077836",
-            "INTITULE_CMPTE": "COMPTES SUR LIVRETS           ",
-            "LIBELLE_TYPE": "CARTE LEADER EMV  "
-        },
-        {
-            "AGE": "01700",
-            "CODE_CLIENT": "70017464       ",
-            "NOMREST": "ABONI OLANDA JERRY                                                 ",
-            "NUM_CARTE": "604855******6537",
-            "DATE_FIN_VALIDITE": "2022-02-28",
-            "NUM_CPTE": "37207077837",
-            "INTITULE_CMPTE": "COMPTES DE CHEQUES            ",
-            "LIBELLE_TYPE": "CARTE EXPRESS EMV             "
-        }
-        ]
+    getMockClientCards: async (): Promise<cbsCard[]> => {
+        const cards: cbsCard[] = [
+            {
+                AGE: "01700",
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY                                                 ",
+                NUM_CARTE: "604855******7233",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37307077836",
+                INTITULE_CMPTE: "COMPTES SUR LIVRETS           ",
+                LIBELLE_TYPE: "CARTE LEADER EMV  "
+            },
+            {
+                AGE: "01700",
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY                                                 ",
+                NUM_CARTE: "604855******6537",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES            ",
+                LIBELLE_TYPE: "CARTE EXPRESS EMV             "
+            }
+        ];
+        return Promise.resolve(cards);
     },
 
 };

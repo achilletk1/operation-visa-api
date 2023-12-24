@@ -4,7 +4,7 @@ import {
   reportingRoute, downloadsRoute, templatesRoute, validationsRoute, travelMonthRoute, notificationsRoute,
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
-  validationLevelSettingsRoute, importersRoute, cbsRoute
+  validationLevelSettingsRoute, cbsRoute, importsRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -16,8 +16,10 @@ const routes = (app: Express) => {
   app.use( "/users", usersRoute);
 
   app.use( "/export", exportRoute);
-  
+
   app.use( "/travels", travelRoute);
+
+  app.use( "/imports", importsRoute);
 
   app.use( "/senders", sendersRoute);
 
@@ -32,8 +34,6 @@ const routes = (app: Express) => {
   app.use( "/downloads", downloadsRoute);
 
   app.use( "/templates", templatesRoute);
-
-  app.use( "/importers", importersRoute);
 
   app.use( "/validations", validationsRoute);
 

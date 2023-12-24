@@ -68,7 +68,7 @@ export function generateOnlineOperationsExportXlsx(onlineOperations: any) {
 
         if ('transactions' in result) {
             transactions = result.transactions;
-            console.log(JSON.stringify(transactions, null, 2))
+            // console.log(JSON.stringify(transactions, null, 2))
         }
 
         // if (!(result instanceof Array)) { result = [...onlinetransactions]; }
@@ -77,10 +77,10 @@ export function generateOnlineOperationsExportXlsx(onlineOperations: any) {
 
             transactions.forEach(async (transaction) => {
                 const row = [
-                    `${moment(transaction?.date).format('DD/MM/YYYY')}`,
+                    `${typeof transaction?.date === 'string' ? transaction?.date : moment(transaction?.date).format('DD/MM/YYYY HH:mm:ss')}`,
                     `${transaction?.country || ''}`,
                     `${transaction?.card.label || ''}`,
-                    `${transaction?.user?.fullName || ''}`,
+                    `${transaction?.beneficiary || ''}`,
                     `${transaction?.amount || ''}`,
                 ];
                 excelData.push(row);

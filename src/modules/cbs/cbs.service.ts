@@ -76,7 +76,7 @@ export class CbsService extends BaseService {
         const { code, includeAccounts, isChaFilter } = datas;
 
         try {
-            let client = await clientsDAO.getClientAccountDataByCli(code);
+            let client = await clientsDAO.getClientDataByCli(code);
 
             if (!client || client?.length === 0) { throw new Error('ClientNotFound'); }
 
@@ -92,6 +92,23 @@ export class CbsService extends BaseService {
             return { client, accounts };
         } catch (error: any) {
             this.logger.error(`Failed to get client data by cli ${code}. \n${error.stack}`);
+            throw error;
+        }
+    }
+
+    async getClientCardsByCli(cli: string) {
+        try {
+            let data = await clientsDAO.getClientCardsByCli(cli);
+
+            if (data instanceof Error) { throw data; }
+
+            if (data && data instanceof Array) {
+                data = data.map(dat => removeSpacesFromResultSet(dat));
+            }
+
+            return data;
+        } catch (error: any) {
+            this.logger.error(`Failed to get client cards by cli ${cli} \n${error.stack}`);
             throw error;
         }
     }
