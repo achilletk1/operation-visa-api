@@ -196,11 +196,11 @@ export class AuthService extends BaseService {
 
             const { otp: userOTP } = user;
 
-            if (otp != '000000' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
+            if (config.get('env') === 'production' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
 
-            const currTime = moment().valueOf();
+            if (config.get('env') === 'production' && get(userOTP, 'expiresAt', 0) <= moment().valueOf()) { throw new Error('OTPExpired'); }
 
-            if (otp != '000000' && get(userOTP, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
+            if (otp !== '000000') throw new Error('OTPNoMatch');
 
             const { email, gender, fname, lname, tel, category, clientCode, fullName } = user;
             const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode, fullName };
