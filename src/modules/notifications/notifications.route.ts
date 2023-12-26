@@ -10,4 +10,8 @@ router.put('/not-customer', notificationsController.findAll);
 
 router.post('/mails/preview', notificationsController.generateExportView);
 
+router.post('/mails/preview-instant-notification', notificationsController.generateInstantNotificationView);
+
+router.post('/', notificationsController.saveNotification);
+
 export const notificationsRoute = router;
