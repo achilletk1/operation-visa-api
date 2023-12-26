@@ -5,7 +5,7 @@ import { ValidationLevelSettingsController } from "modules/validation-level-sett
 import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
-import { getTravelStatus, saveAttachmentTravel } from "./helper";
+import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { UserCategory, UsersController } from 'modules/users';
 import { OpeVisaStatus } from "modules/visa-operations";
 import { CrudService, QueryOptions } from "common/base";
@@ -116,6 +116,12 @@ export class TravelService extends CrudService<Travel> {
             // insert travel reference
             travel.travelRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
 
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
+            travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
+            // TODO get expenseDetails status from helper
+            travel.status = getTravelStatus({ ...travel });
+
             const insertedId = await TravelController.travelService.create(travel);
 
             travel.proofTravel.proofTravelAttachs = saveAttachmentTravel(travel?.proofTravel?.proofTravelAttachs || [], insertedId?.data, travel.dates.created);
@@ -170,7 +176,7 @@ export class TravelService extends CrudService<Travel> {
         } catch (error) { throw error; }
     }
 
-    async updateTravelById(id: string, data: any) {
+    async updateTravelById(id: string, data: { travel: Travel, steps: string[] }) {
         try {
             let { travel, steps } = data;
             const authUser = httpContext.get('user');
@@ -182,7 +188,7 @@ export class TravelService extends CrudService<Travel> {
             }
 
             if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
-                travel.proofTravel.proofTravelAttachs = saveAttachmentTravel(travel.proofTravel.proofTravelAttachs, id, travel.dates.created);
+                travel.proofTravel.proofTravelAttachs = saveAttachmentTravel(travel.proofTravel.proofTravelAttachs, id, travel?.dates?.created);
                 // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
 
@@ -196,7 +202,7 @@ export class TravelService extends CrudService<Travel> {
                     }
 
                     if (isEmpty(expenseDetail.attachments)) { continue; }
-                    expenseDetail.attachments = saveAttachmentTravel(expenseDetail.attachments, id, travel.dates.created);
+                    expenseDetail.attachments = saveAttachmentTravel(expenseDetail.attachments, id, travel?.dates?.created);
                 }
             }
 
@@ -211,16 +217,21 @@ export class TravelService extends CrudService<Travel> {
 
                     if (isEmpty(othersAttachement.attachments)) { continue; }
 
-                    othersAttachement.attachments = saveAttachmentTravel(othersAttachement.attachments, id, travel.dates.created);
+                    othersAttachement.attachments = saveAttachmentTravel(othersAttachement.attachments || [], id, travel?.dates?.created);
                 }
             }
 
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
+            travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
+            // TODO get expenseDetails status from helper
+            travel.status = getTravelStatus({ ...travel });
             travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
-            travel.editors.push({
+            travel?.editors?.push({
                 fullName: `${authUser.fname}${authUser.lname}`,
                 date: moment().valueOf(),
                 steps: steps.toString()
-            })
+            });
 
             return await TravelController.travelService.update({ _id: id }, travel);
         } catch (error) { throw error; }
@@ -335,15 +346,17 @@ export class TravelService extends CrudService<Travel> {
                 steps: stepData.toString()
             });
 
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
             travel.othersAttachmentStatus = getOnpStatementStepStatus(travel, 'othersAttachs');
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
-            const travelStatus = getTravelStatus(travel);
 
-            const otherAttachmentAmount = getTotal(travel.expenseDetails, 'stepAmount');
+            const otherAttachmentAmount = getTotal(travel.othersAttachements, 'stepAmount');
             const expenseDetailAmount = getTotal(travel.expenseDetails, 'stepAmount');
 
             travel = { ...travel, ...tobeUpdated };
-            travel.status = travelStatus;
+            travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
+            travel.status = getTravelStatus(travel);
             travel.otherAttachmentAmount = otherAttachmentAmount;
             travel.expenseDetailAmount = expenseDetailAmount;
             if (step === 'proofTravel') {

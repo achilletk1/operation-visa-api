@@ -1,8 +1,10 @@
 import { deleteDirectory, getTotal, readFile, saveAttachment } from "common/utils";
-import { Attachment, OpeVisaStatus } from "modules/visa-operations";
-import { Travel } from "../model";
+import { Attachment, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { Editor, Travel } from "../model";
+import { isEmpty } from "lodash";
+import moment from "moment";
 
-export const saveAttachmentTravel = (attachements: Attachment[], id: string, date: number) => {
+export const saveAttachmentTravel = (attachements: Attachment[], id: string, date: number = moment().valueOf()) => {
     for (let attachment of attachements) {
         if (!attachment.temporaryFile) { continue; }
 
@@ -55,3 +57,33 @@ export function getTravelStatus(travel: Travel): OpeVisaStatus {
     }
     return OpeVisaStatus.TO_COMPLETED;
 }
+
+export function getProofTravelStatus(travel: Travel, maxValidationLevelRequired: number): OpeVisaStatus {
+
+    if (!travel || !travel?.proofTravel) { throw new Error('TravelNotDefined'); }
+
+    const { isPassOut, isPassIn, isTransportTicket, isVisa, proofTravelAttachs, validators } = { ...travel?.proofTravel } || {};
+
+    const labels = ['Ticket de transport', 'Tampon de sortie du passeport', 'Tampon d\'entrée du passeport'];
+
+    if (!isPassOut && !isPassIn && !isTransportTicket && !isVisa) { return OpeVisaStatus.EMPTY; }
+
+    if (!proofTravelAttachs || proofTravelAttachs.filter(e => labels.includes(e.label || '')).length !== 3) { return OpeVisaStatus.TO_COMPLETED; }
+
+    if (!validators || isEmpty(validators) || checkIsUpdateAfterRejection(validators, travel?.editors)) { return OpeVisaStatus.TO_VALIDATED; }
+
+    if (validators[validators?.length - 1]?.status === 300) { return OpeVisaStatus.REJECTED; }
+
+    if (validators?.length !== +maxValidationLevelRequired) { return OpeVisaStatus.VALIDATION_CHAIN; }
+
+    if (travel?.status !== OpeVisaStatus.CLOSED) { return OpeVisaStatus.JUSTIFY; }
+
+    return OpeVisaStatus.CLOSED;
+}
+
+const checkIsUpdateAfterRejection = (validators: Validator[] = [], editors: Editor[] = []) => {
+    const lastValidator = validators[validators?.length - 1];
+    return !isEmpty(validators) && // check if it have min one validation
+    lastValidator?.status === 300 && // check if last validators have reject step
+    editors.filter(e => e?.date >= +(lastValidator?.date || 0) && e?.steps.includes('Preuve de voyage'))?.length > 0;
+};

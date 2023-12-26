@@ -32,6 +32,12 @@ export class OthersAttachement {
     isEdit?: boolean;
 }
 
+export class Editor {
+    fullName!: string;
+    date!: number;
+    steps!: string;
+}
+
 
 export class Travel {
     _id?: any;
@@ -82,7 +88,7 @@ export class Travel {
     otherAttachmentAmount?: number;
     transactions!: VisaTransaction[];
     validators?: Validator[];
-    editors?: any[];
+    editors?: Editor[];
     validationLevel?: number;
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
     link?: string;
