@@ -116,15 +116,15 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
     return str;
   }
   for (const key in values)
-    if (str.includes(`{{${key}}}`)) str = str.split(`{{${key}}}`).join(`${values[key]}`);
+    if (str?.includes(`{{${key}}}`)) str = str?.split(`{{${key}}}`).join(`${values[key]}`);
 
   return str;
 }
 
-const goToTheLine = (str: string, isSms?: boolean) => {
+export const goToTheLine = (str: string, isSms?: boolean) => {
   const reg = '//';
   str = str ?? '';
-  return str.includes(reg) ? isSms ? str.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str.split(reg).join('<br>')) : str;
+  return str?.includes(reg) ? isSms ? str?.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str?.split(reg).join('<br>')) : str;
 }
 
 // export const setResponseController = (data?: unknown): QueryResult => {

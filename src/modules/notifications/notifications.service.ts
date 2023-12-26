@@ -1,8 +1,9 @@
 import { NotificationsRepository } from "./notifications.repository";
-import { replaceVariables } from "common/helpers";
+import { goToTheLine, replaceVariables } from "common/helpers";
 import { generateMailByTemplate } from "./helper";
 import { TemplateForm } from "modules/templates";
 import { CrudService } from "common/base";
+import { NotificationsController } from "./notifications.controller";
 
 export class NotificationsService extends CrudService<TemplateForm> {
 
@@ -27,4 +28,21 @@ export class NotificationsService extends CrudService<TemplateForm> {
         } catch (error) { throw error; }
     }
 
+    async generateInstantNotificationView(data: any) {
+        try {
+            if (!data) { return new Error('MailNotFound'); }
+            let email = await goToTheLine(data?.content, false);
+            const pdfString = generateMailByTemplate({ email, name: data?.name });
+            return { data: pdfString };
+        } catch (error) { throw error; }
+    }
+
+    async saveNotification(data: any): Promise<any> {
+        try {
+            if (!data) { return new Error('MailNotFound'); }
+            let email = await goToTheLine(data?.message, false);
+             data.message = (data.format == 200) ? generateMailByTemplate({ email, name: data?.name }) : email;
+            return await NotificationsController.notificationsService.create(data as any);
+        } catch (error) { throw error; }
+    }
 }
