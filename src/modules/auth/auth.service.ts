@@ -174,7 +174,7 @@ export class AuthService extends BaseService {
 
     async sendClientOtp(datas: any) {
         try {
-            let { userId, clientCode } = datas;
+            let { userId, clientCode, otpChannel, value } = datas;
             if (isDev) { await timeout(500); }
 
             const otp = {
