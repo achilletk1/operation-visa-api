@@ -13,7 +13,7 @@ startDatabase().then(async () => {
     // Create express instance to setup API
     new ExpressLoader();
 
-    // startCrons();
+    startCrons();
 }).catch((err: Error) => {
     console.error(err.stack);
     logger.error("Database connection failed \n", err.stack || '');
