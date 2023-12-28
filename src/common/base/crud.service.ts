@@ -5,7 +5,7 @@ import { ServiceInterface } from '../interfaces';
 import { BaseService } from './base.service';
 import { errorMsg, respMsg } from 'common';
 import { config } from 'convict-config';
-import { Document } from 'mongodb';
+import { Document, ObjectId } from 'mongodb';
 import moment from 'moment';
 
 import crypt from 'url-crypt';
@@ -90,59 +90,59 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
 
   async update(filter: QueryFilter, data: Document, unsetData?: Document): Promise<QueryResult> {
     try {
-      const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
+      // const existVerify = await this.baseRepository.findOne({ filter });
+      // if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
       delete data?._id;
 
       const updatedDocument = await this.baseRepository.update(filter, data, unsetData || {});
 
-      if (!updatedDocument.acknowledged)
-        throw new Error(errorMsg.ON_UPDATE);
+      // if (!updatedDocument.acknowledged)
+      //   throw new Error(errorMsg.ON_UPDATE);
 
-      return setResponse(200, respMsg.UPDATED);
+      return setResponse(updatedDocument.acknowledged ? 200 : 300, respMsg.UPDATED, updatedDocument);
     } catch (error) { throw error; }
   }
 
   async updateMany(filter: QueryFilter, data: Document, unsetData: Document): Promise<QueryResult> {
     try {
-      const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
+      // const existVerify = await this.baseRepository.findOne({ filter });
+      // if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
       delete data?._id;
 
       const updatedDocument = await this.baseRepository.updateMany(filter, data, unsetData);
 
-      if (!updatedDocument.acknowledged)
-        throw new Error(errorMsg.ON_UPDATE);
+      // if (!updatedDocument.acknowledged)
+      //   throw new Error(errorMsg.ON_UPDATE);
 
-      return setResponse(200, respMsg.UPDATED);
+      return setResponse(updatedDocument.acknowledged ? 200 : 300, respMsg.UPDATED, updatedDocument);
     } catch (error) { throw error; }
   }
 
   async deleteOne(filter: QueryFilter): Promise<QueryResult> {
     try {
-      const existVerify = await this.baseRepository.findOne({ filter });
-      if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
+      // const existVerify = await this.baseRepository.findOne({ filter });
+      // if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
 
       const deletedResult = await this.baseRepository.deleteOne(filter);
 
-      if (!deletedResult.acknowledged)
-        throw new Error(errorMsg.ON_DELETE);
+      // if (!deletedResult.acknowledged)
+      //   throw new Error(errorMsg.ON_DELETE);
 
-      return setResponse(200, respMsg.DELETED);
+      return setResponse(deletedResult.acknowledged ? 200 : 300, respMsg.DELETED, deletedResult);
     } catch (error) { throw error; }
   }
 
   async deleteMany(filter: QueryFilter): Promise<QueryResult> {
     try {
-      const existVerify = await this.baseRepository.findOne({ filter });
-      if (existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
+      // const existVerify = await this.baseRepository.findOne({ filter });
+      // if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));
 
       const deletedResult = await this.baseRepository.deleteMany(filter);
 
-      if (!deletedResult.acknowledged)
-        throw new Error(errorMsg.ON_DELETE);
+      // if (!deletedResult.acknowledged)
+      //   throw new Error(errorMsg.ON_DELETE);
 
-      return setResponse(200, respMsg.DELETED);
+      return setResponse(deletedResult.acknowledged ? 200 : 300, respMsg.DELETED, deletedResult);
     } catch (error) { throw error; }
   }
 

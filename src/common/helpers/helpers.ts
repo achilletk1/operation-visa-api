@@ -1,4 +1,6 @@
+import { VisaOperationsAttachment } from 'modules/visa-operations';
 import { isEmpty, isString } from 'lodash';
+import { Voucher } from 'modules/vouchers';
 import { config } from 'convict-config';
 import { logger } from 'winston-config';
 import handlebars from 'handlebars';
@@ -236,6 +238,25 @@ export function excelToJson(content: any) {
 
   return XLSX.utils.sheet_to_json(wb.Sheets[sheetNames[0]], { raw: true });
 };
+
+export function generateAttachmentFromVoucher(voucher: Voucher, withoutVoucherId: boolean = false): VisaOperationsAttachment {
+  const attachment: VisaOperationsAttachment = {
+    label: voucher?.label,
+    fileName: '',
+    name: '',
+    contentType: undefined,
+    content: null,
+    path: '',
+    dates: {
+      created: undefined,
+      updated: undefined,
+    },
+    isRequired: voucher?.isRequired || false,
+    extension: voucher?.extension || '*',
+  };
+  if (!withoutVoucherId) { attachment.voucherId = voucher?._id; }
+  return attachment;
+}
 
 declare type ObjectType<T> = {
   [key: string]: T

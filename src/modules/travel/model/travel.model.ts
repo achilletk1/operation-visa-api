@@ -1,7 +1,7 @@
 import { Attachment, ExpenseCategory, OperationType, OpeVisaStatus, Validator } from "modules/visa-operations";
 import { VisaTransaction } from "modules/visa-transactions";
+import { Editor, User } from "modules/users";
 import { TravelType } from "../enum";
-import { User } from "modules/users";
 
 export class ExpenseDetail {
     ref?: string;
@@ -32,20 +32,13 @@ export class OthersAttachement {
     isEdit?: boolean;
 }
 
-export class Editor {
-    fullName!: string;
-    date!: number;
-    steps!: string;
-}
-
-
 export class Travel {
     _id?: any;
-    status!: OpeVisaStatus;
-    user!: Partial<User>;
+    status?: OpeVisaStatus;
+    user?: Partial<User>;
     travelRef?: string;
     fullName?: string;
-    travelType!: TravelType;
+    travelType?: TravelType;
     ceiling?: number;
     dates?: {
         created: number;
@@ -58,7 +51,7 @@ export class Travel {
         //     continent: string;
         //     currency?: any;
         // }[];
-        dates: {
+        dates?: {
             start: number;
             end?: number;
         };
@@ -73,10 +66,10 @@ export class Travel {
         isVisa?: boolean;
         isPassOut?: boolean;
         isPassIn?: boolean;
-        proofTravelAttachs: Attachment[];
-        status: OpeVisaStatus;
+        proofTravelAttachs?: Attachment[];
+        status?: OpeVisaStatus;
         rejectReason?: string;
-        validators: Validator[];
+        validators?: Validator[];
         isEdit?: boolean;
         nbrefOfMonth?: number;
     };

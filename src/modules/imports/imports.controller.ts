@@ -18,12 +18,17 @@ export class ImportsController {
     }
 
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ImportsController.importsService.update({ _id: req.params.id }, { ...req.body })); }
+        try { res.send(await ImportsController.importsService.updateImportation(req.params.id, req.body)); }
         catch (error) { next(error); }
     }
     
     async findOneById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await ImportsController.importsService.findOne({ filter: { _id: req.params.id } })); }
+        catch (error) { next(error); }
+    }
+
+    async getImportsProjected(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send((await ImportsController.importsService.findAll({ filter: { ...req.query, status: { $in: [101, 100, 400] }, $or: [{ finalPayment: { $exists: false } }, { finalPayment: false }] }, projection: { subject: 1, type: 1, transactions: 1, status: 1 } }))?.data); }
         catch (error) { next(error); }
     }
 

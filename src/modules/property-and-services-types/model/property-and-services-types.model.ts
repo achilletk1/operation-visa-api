@@ -4,7 +4,7 @@ export class PropertyAndServicesType {
     _id?: string;
     label?: string;
     vouchers?: Voucher[];
-    dates!: {
+    dates?: {
         created?: number;
         updated?: number;
     };

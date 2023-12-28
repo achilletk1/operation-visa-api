@@ -40,6 +40,7 @@ export class VisaOperationsService extends CrudService<any> {
 
     static visaOperationsRepository: VisaOperationsRepository;
     static queueState: QueueState = QueueState.PENDING;
+    static queueStateRevival: QueueState = QueueState.PENDING;
 
     constructor() {
         VisaOperationsService.visaOperationsRepository = new VisaOperationsRepository();
@@ -112,44 +113,51 @@ export class VisaOperationsService extends CrudService<any> {
 
     async startRevivalMail(): Promise<any> {
         try {
-            const travels = (await TravelController.travelService.findAll({ filter: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] } } }))?.data;
+            if (VisaOperationsService.queueStateRevival === QueueState.PENDING) {
+                VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
+                // TODO 
+                const travels = (await TravelController.travelService.findAll({ filter: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }))?.data;
 
-            if (isEmpty(travels)) {
-                return await SettingsController.settingsService.deleteOne({ key: 'start_revival_mail_in_progress' });
-            }
-
-            const letter = await LettersController.lettersService.findOne({});
-            if (!letter) throw new Error('LetterNotFound');
-
-            const visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
-
-            for (const travel of travels) {
-                if (isEmpty(travel?.transactions)) continue;
-                const firstDate = Math.min(...travel?.transactions?.map(elt => +(elt?.date || '')));
-                const currentDate = moment().valueOf();
-                if (!travel?.user?.email) continue;
-
-                // TODO set lang dynamically
-                const lang = 'fr';
-
-                if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                    notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang));
-                    // await Promise.all([
-                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
-                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
-                    // ]);
-
-                    await TravelController.travelService.update({ _id: travel._id.toString() }, { 'proofTravel.status': OpeVisaStatus.EXCEDEED, status: OpeVisaStatus.EXCEDEED });
+                if (isEmpty(travels)) {
+                    VisaOperationsService.queueStateRevival = QueueState.PENDING;
+                    return await SettingsController.settingsService.deleteOne({ key: 'start_revival_mail_in_progress' });
                 }
-                if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                    notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
-                    // await Promise.all([
-                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
-                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
-                    // ]);
+
+                const letter = await LettersController.lettersService.findOne({});
+                if (!letter) throw new Error('LetterNotFound');
+
+                const visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
+
+                for (const travel of travels) {
+                    if (isEmpty(travel?.transactions)) continue;
+                    const firstDate = Math.min(...travel?.transactions?.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
+                    const currentDate = moment().valueOf();
+                    if (!travel?.user?.email) continue;
+
+                    // TODO set lang dynamically
+                    const lang = 'fr';
+
+                    if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
+                        notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang));
+                        // await Promise.all([
+                        //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
+                        //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
+                        // ]);
+
+                        await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEDEED });
+                    }
+                    if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
+                        notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
+                        // await Promise.all([
+                        //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
+                        //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
+                        // ]);
+                    }
                 }
+                VisaOperationsService.queueStateRevival = QueueState.PENDING;
             }
         } catch (e: any) {
+            VisaOperationsService.queueStateRevival = QueueState.PENDING;
             this.logger.error(`error during revival mail cron execution \n${e.stack}\n`);
         }
     }
@@ -283,7 +291,7 @@ export class VisaOperationsService extends CrudService<any> {
                     selectedTransactions = markExceedTransaction(selectedTransactions, +Number(travel?.ceiling));
                     const travelMonth = await getOrCreateTravelMonth(travel, month);
 
-                    toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start); // in case of new month creation check the number of months in the long term travel
+                    toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
                     await updateTravelMonth(travelMonth, selectedTransactions, toBeUpdated, travel);
                 }
 

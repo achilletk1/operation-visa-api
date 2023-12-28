@@ -1,11 +1,11 @@
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
+import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
-import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { UserCategory, UsersController } from 'modules/users';
 import { OpeVisaStatus } from "modules/visa-operations";
 import { CrudService, QueryOptions } from "common/base";
@@ -50,8 +50,8 @@ export class TravelService extends CrudService<Travel> {
             const travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if ('validators' in travel?.proofTravel) {
-                travel?.proofTravel?.validators.forEach((elt: any) => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
-                validators.push(...travel?.proofTravel?.validators)
+                travel?.proofTravel?.validators?.forEach((elt: any) => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
+                validators.push(...travel?.proofTravel?.validators || []);
             }
 
             travel?.expenseDetails?.forEach((expense: any) => {
@@ -147,9 +147,12 @@ export class TravelService extends CrudService<Travel> {
             const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
 
             if (user) {
-                travel.user._id = user?._id?.toString();
-                travel.user.fullName = `${user?.fname} ${user?.lname}`;
-                travel.user.email = user?.email;
+                travel.user = {
+                    ...travel.user,
+                    _id: user?._id?.toString(),
+                    fullName: `${user?.fname} ${user?.lname}` ,
+                    email: user?.email
+                };
             }
 
             // Set request status to created
@@ -176,7 +179,7 @@ export class TravelService extends CrudService<Travel> {
         } catch (error) { throw error; }
     }
 
-    async updateTravelById(id: string, data: { travel: Travel, steps: string[] }) {
+    async updateTravelById(id: string = '', data: { travel: Partial<Travel>, steps: string[] }) {
         try {
             let { travel, steps } = data;
             const authUser = httpContext.get('user');
@@ -187,13 +190,13 @@ export class TravelService extends CrudService<Travel> {
                 delete travel.proofTravel.isEdit;
             }
 
-            if (!isEmpty(travel.proofTravel.proofTravelAttachs)) {
-                travel.proofTravel.proofTravelAttachs = saveAttachmentTravel(travel.proofTravel.proofTravelAttachs, id, travel?.dates?.created);
+            if (!isEmpty(travel?.proofTravel?.proofTravelAttachs)) {
+                travel.proofTravel = { ...travel.proofTravel, proofTravelAttachs: saveAttachmentTravel(travel?.proofTravel?.proofTravelAttachs, id, travel?.dates?.created) };
                 // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
 
             if (!isEmpty(travel.expenseDetails)) {
-                for (let expenseDetail of travel.expenseDetails) {
+                for (let expenseDetail of travel?.expenseDetails || []) {
                     if (expenseDetail.status && !adminAuth && expenseDetail.isEdit) { delete expenseDetail.status }
 
                     if (expenseDetail.isEdit) {
@@ -207,7 +210,7 @@ export class TravelService extends CrudService<Travel> {
             }
 
             if (!isEmpty(travel.othersAttachements)) {
-                for (let othersAttachement of travel.othersAttachements) {
+                for (let othersAttachement of travel?.othersAttachements || []) {
                     if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
 
                     if (othersAttachement.isEdit) {
@@ -223,14 +226,15 @@ export class TravelService extends CrudService<Travel> {
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
+            travel.proofTravel = { ...travel.proofTravel, status: getProofTravelStatus({ ...travel } as Travel, maxValidationLevelRequired)};
             // TODO get expenseDetails status from helper
-            travel.status = getTravelStatus({ ...travel });
+            travel.status = getTravelStatus({ ...travel } as Travel);
             travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
             travel?.editors?.push({
-                fullName: `${authUser.fname}${authUser.lname}`,
+                _id: authUser._id,
+                fullName: authUser?.fullName,
                 date: moment().valueOf(),
-                steps: steps.toString()
+                steps: steps.toString() || 'Preuve de voyage'
             });
 
             return await TravelController.travelService.update({ _id: id }, travel);
@@ -269,7 +273,7 @@ export class TravelService extends CrudService<Travel> {
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
                 proofTravel.validators = isEmpty(proofTravel.validators) ? [] : proofTravel.validators;
-                proofTravel.validators.push({
+                proofTravel?.validators?.push({
                     _id: validator._id,
                     fullName: `${user.fname} ${user.lname}`,
                     userCode: user?.userCode,
@@ -278,7 +282,7 @@ export class TravelService extends CrudService<Travel> {
                     status,
                     level: validator.level
                 });
-                if (rejectReason) { proofTravel.validators[proofTravel.validators.length - 1].rejectReason = rejectReason; }
+                if (rejectReason) { (proofTravel.validators || [])[(proofTravel?.validators || [])?.length - 1].rejectReason = rejectReason; }
 
                 if (!validator.fullRights && validator.level !== validationLevelNumber && status !== OpeVisaStatus.REJECTED) {
                     updateData.status = OpeVisaStatus.VALIDATION_CHAIN;
@@ -341,7 +345,8 @@ export class TravelService extends CrudService<Travel> {
             }
             travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
             travel?.editors?.push({
-                fullName: `${authUser.fname} ${authUser.lname}`,
+                _id: authUser._id,
+                fullName: authUser?.fullName,
                 date: moment().valueOf(),
                 steps: stepData.toString()
             });
@@ -377,7 +382,7 @@ export class TravelService extends CrudService<Travel> {
         for (const data of existingTravels?.data) {
             // travel.proofTravel.continents.push(...data.proofTravel.continents);
             // travel.proofTravel.countries.push(...data.proofTravel.countries);
-            travel.proofTravel.proofTravelAttachs.push(...data.proofTravel.proofTravelAttachs);
+            travel?.proofTravel?.proofTravelAttachs?.push(...(data?.proofTravel?.proofTravelAttachs || []));
             if (data.proofTravel.isTransportTicket) { travel.proofTravel.isTransportTicket = true; }
             if (data.proofTravel.isVisa) { travel.proofTravel.isVisa = true; }
             if (data.proofTravel.isPassIn) { travel.proofTravel.isPassIn = true; }
@@ -403,10 +408,10 @@ export class TravelService extends CrudService<Travel> {
         const travelMonths: TravelMonth[] = [];
 
         if (travel?.travelType === TravelType.LONG_TERM_TRAVEL) {
-            const monthDiff = moment(travel.proofTravel.dates.end).diff(travel.proofTravel.dates.start, 'M');
+            const monthDiff = moment(travel?.proofTravel?.dates?.end).diff(travel?.proofTravel?.dates?.start, 'M');
             for (let index = 0; index < monthDiff; index++) {
 
-                const month = moment(travel.proofTravel.dates.start).add(index, 'M').format('YYYYMM').toString();
+                const month = moment(travel?.proofTravel?.dates?.start).add(index, 'M').format('YYYYMM').toString();
 
                 const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === +month);
 

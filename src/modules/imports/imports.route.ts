@@ -10,6 +10,8 @@ router.get('/', importsController.findAll);
 
 router.get('/all', importsController.findAll);
 
+router.get('/projected-for-select', importsController.getImportsProjected);
+
 router.get('/:id', importsController.findOneById);
 
 router.put('/:id', importsController.update);

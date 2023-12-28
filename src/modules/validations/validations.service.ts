@@ -161,7 +161,7 @@ export class ValidationsService extends CrudService<UserValidator> {
             data.validationLevel = level;
 
             const result = type === 'travel'
-                ? await TravelController.travelService.updateTravelById(id, data as Travel)
+                ? await TravelController.travelService.updateTravelById(id, { travel: (data as Travel), steps: ['Preuve de voyage'] })
                 : type === 'onlinePayment'
                     ? await OnlinePaymentController.onlinePaymentService.updateOnlinePaymentsById(id, data as OnlinePaymentMonth)
                     : null;

@@ -1,5 +1,5 @@
 import { getExpenseCategoryLabel, getOperationTypeLabel, getStatuslabel } from 'common/utils';
-import { ExpenseDetail, OthersAttachement, Travel } from 'modules/travel';
+import { ExpenseDetail, OthersAttachement, Travel, TravelType } from 'modules/travel';
 import { OnlinePaymentStatement } from 'modules/online-payment';
 import { OpeVisaStatus } from 'modules/visa-operations';
 import { get, isEmpty } from 'lodash';
@@ -184,12 +184,12 @@ export function generateTravelsExportXlsx(travel: Travel[]) {
                 `${getTransactionsAmount(travel?.transactions) || ''}`,
                 `${travel?.ceiling || ''}`,
                 `${getEccedCeilling(travel) || ''}`,
-                `${status[travel?.status]}`,
-                `${type[travel?.travelType]}`,
+                `${status[travel?.status as OpeVisaStatus] || ''}`,
+                `${type[travel?.travelType as TravelType] || ''}`,
                 // `${(travel?.proofTravel?.continents).toString() || ''}`,
                 // `${ (travel?.proofTravel?.countries).map(countrie => countrie?.name).toString()  || ''}`,
                 `${travel?.proofTravel?.travelReason?.label || ''}`,
-                `${status[travel?.proofTravel?.status] || ''}`,
+                `${status[travel?.proofTravel?.status  as OpeVisaStatus] || ''}`,
                 `${travel?.proofTravel?.isTransportTicket ? 'Oui' : 'Non' }`,
                 `${travel?.proofTravel?.isVisa ? 'Oui' : 'Non'}`,
                 `${travel?.proofTravel?.isPassIn ? 'Oui' : 'Non'}`,

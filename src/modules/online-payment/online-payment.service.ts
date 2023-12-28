@@ -131,8 +131,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
     async insertOnlinePayment(onlinePayment: OnlinePaymentMonth): Promise<any> {
         try {
-
-            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
+            let user;
+            try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } }); } catch(e) {}
 
             if (user) {
                 onlinePayment.user = { ...onlinePayment.user, fullName: `${get(user, 'fname')} ${get(user, 'lname')}`, _id: user?._id?.toString() };
@@ -193,7 +193,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             data.editors = !isEmpty(data.editors) ? data.editors : [];
             data?.editors?.push({
-                fullName: `${authUser?.fname}${authUser?.lname}`,
+                _id: authUser._id,
+                fullName: authUser?.fullName,
                 date: moment().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })
@@ -235,7 +236,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             updateData.editors = !isEmpty(updateData.editors) ? updateData.editors : [];
             updateData.editors.push({
-                fullName: `${authUser?.fname} ${authUser?.lname}`,
+                _id: authUser._id,
+                fullName: authUser?.fullName,
                 date: moment().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })

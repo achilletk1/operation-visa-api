@@ -6,7 +6,7 @@ class RevivalMailCron extends BaseCron {
     cronExpressionPath = 'crons.revivalMail';  // At every 30th minute 
     service = VisaOperationsController.visaOperationsService.startRevivalMail;
     startOnStagingBci = false;
-    startOnDev = false;
+    startOnDev = true;
 }
 
 export default new RevivalMailCron();

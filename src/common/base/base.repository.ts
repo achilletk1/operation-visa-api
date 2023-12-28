@@ -71,10 +71,10 @@ export class BaseRepository implements RepositoryInterface {
     try {
       this.setMongoId(filter);
 
-      const updateFilter = {};
+      const updateFilter: UpdateQuery<any> = {};
       if (!isEmpty(setDocument)) updateFilter.$set = setDocument;
       if (!isEmpty(unsetDocument)) updateFilter.$unset = unsetDocument;
-      return (await this.getCollection()).updateMany(filter, updateFilter);
+      return (await this.getCollection()).updateMany(filter, updateFilter) as UpdateResult;
     } catch (error) { throw error; }
   }
 

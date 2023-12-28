@@ -128,7 +128,8 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             const editors = !isEmpty(travel.editors) ? travel.editors : [];
             editors?.push({
-                fullName: `${authUser.fname} ${authUser.lname}`,
+                _id: authUser._id,
+                fullName: authUser?.fullName,
                 date: moment().valueOf(),
                 steps: 'expenseDetails'
             })
@@ -139,7 +140,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             travelMonth = { ...travelMonth, ...tobeUpdated };
             travelMonth.expenseDetailAmount = expenseDetailAmount;
 
-            await TravelController.travelService.updateTravelById(String(travelMonth?.travelId), { editors });
+            await TravelController.travelService.updateTravelById(travelMonth?.travelId, { travel: { editors }, steps: ['expenseDetails'] });
             return await TravelMonthController.travelMonthService.update({ _id }, travelMonth);
 
         } catch (error) { throw error; }

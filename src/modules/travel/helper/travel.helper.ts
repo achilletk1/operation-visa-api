@@ -1,10 +1,11 @@
 import { deleteDirectory, getTotal, readFile, saveAttachment } from "common/utils";
 import { Attachment, OpeVisaStatus, Validator } from "modules/visa-operations";
-import { Editor, Travel } from "../model";
+import { Editor } from "modules/users";
+import { Travel } from "../model";
 import { isEmpty } from "lodash";
 import moment from "moment";
 
-export const saveAttachmentTravel = (attachements: Attachment[], id: string, date: number = moment().valueOf()) => {
+export const saveAttachmentTravel = (attachements: Attachment[] = [], id: string, date: number = moment().valueOf()) => {
     for (let attachment of attachements) {
         if (!attachment.temporaryFile) { continue; }
 
@@ -85,5 +86,5 @@ const checkIsUpdateAfterRejection = (validators: Validator[] = [], editors: Edit
     const lastValidator = validators[validators?.length - 1];
     return !isEmpty(validators) && // check if it have min one validation
     lastValidator?.status === 300 && // check if last validators have reject step
-    editors.filter(e => e?.date >= +(lastValidator?.date || 0) && e?.steps.includes('Preuve de voyage'))?.length > 0;
+    editors.filter(e => e?.date >= +(lastValidator?.date || 0) && e?.steps?.includes('Preuve de voyage'))?.length > 0;
 };

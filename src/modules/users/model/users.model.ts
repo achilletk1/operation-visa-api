@@ -103,4 +103,5 @@ export interface Editor {
     _id?: string;
     date: number;
     fullName?: string;
+    steps?: string;
 }

@@ -13,7 +13,7 @@ export class TemplateSmsNotification extends BaseSmsNotification<TemplateSmsEven
     private async getNotificationBody(): Promise<string> {
         try {
             let visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.notificationData.key } });
-            if (!visaTemplate) { throw `Template ${this.notificationData.key} Not Found`; }
+            if (!visaTemplate) { throw new Error(`Template ${this.notificationData.key} Not Found`); }
         
             const templateData = replaceSmsVariables(visaTemplate[this.notificationData.lang], this.notificationData.datas, this.notificationData.lang);
         

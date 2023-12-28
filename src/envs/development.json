@@ -47,7 +47,7 @@
     "maxFileSizeUpload": 5,
     "ceilingIncreaseEmail": "dominique.mvogo@londo.io",
     "crons": {
-        "revivalMail": "3 * * * *",
+        "revivalMail": "* * * * *",
         "transactionProcessing": "*/3 * * * *",
         "deleteTemporaryFile": "0 */3 * * *",
         "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
