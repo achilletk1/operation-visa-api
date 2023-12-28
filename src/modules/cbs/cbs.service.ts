@@ -58,11 +58,6 @@ export class CbsService extends BaseService {
                 }
             }
 
-            if (clients.length === 1) {
-                const createData = { clientCode: clients[0].CLI, enabled: true, category: UserCategory.DEFAULT };
-                await UsersController.usersService.createUser(createData, 'front-office');
-            }
-
             return clients;
         } catch (error: any) {
             this.logger.error(`Unable to get user datas from core banking by account: ${age || 'age'}-${ncp}-${clc || 'clc'} \n${error.stack}`);

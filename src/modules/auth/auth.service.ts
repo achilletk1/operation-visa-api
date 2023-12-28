@@ -127,12 +127,14 @@ export class AuthService extends BaseService {
 
     async verifyCredentialsUser(credentials: any) {
         try {
-            const { ncp } = credentials;
+            const { ncp, contactCBS = false } = credentials;
             if (isDev) { await timeout(500); };
             // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             // const client = clientDatas[0];
 
-            const { data } = await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
+            const { data } = !contactCBS
+                ? await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } })
+                : { data: [] };
 
             let clients: (User | CbsClientUser)[] = data;
             if (isEmpty(clients)) {
@@ -141,36 +143,55 @@ export class AuthService extends BaseService {
             }
 
             if (clients.length == 1) {
-                // console.log(clients);
                 if ((!(clients as User[])[0].email && !(clients as User[])[0].tel) && (!(clients as CbsClientUser[])[0].TEL && !(clients as CbsClientUser[])[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
-                return { email: (clients as CbsClientUser[])[0].EMAIL ?? (clients as User[])[0].email, phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel };
+                return {
+                    email: (clients as CbsClientUser[])[0].EMAIL ?? (clients as User[])[0].email,
+                    phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel,
+                    _id: (clients as User[])[0]._id ?? '',
+                    clientCode: (clients as CbsClientUser[])[0].CLI ?? (clients as User[])[0].clientCode
+                };
             }
 
             if (clients.length > 1) {
-                return clients.map(user => user.accounts)
-                    .flat()
-                    .filter(account => account?.NCP == ncp)
-                    .map(account => { return { label: account?.LIB_AGE, code: account?.AGE }; })
+                const accounts = []
+                for (let client of clients) {
+                    const account = client.accounts?.find(account => account.NCP === ncp);
+                    accounts.push({
+                        email: (client as CbsClientUser).EMAIL ?? (client as User).email,
+                        phone: (client as CbsClientUser).TEL ?? (client as User).tel,
+                        _id: (client as User)._id ?? '',
+                        clientCode: (client as CbsClientUser).CLI ?? (client as User).clientCode,
+                        agency: {
+                            label: account?.LIB_AGE,
+                            code: account?.AGE
+                        }
+                    })
+                }
+                return accounts
             }
-
-            // return { email: clientDatas.EMAIL, phone: clientDatas.TEL };
         } catch (error) { throw error; }
     }
 
     async sendClientOtp(datas: any) {
         try {
-            const { otpChannel, value, ncp } = datas;
+            let { userId, clientCode } = datas;
             if (isDev) { await timeout(500); }
 
             const otp = {
                 value: getRandomString(6, true),
-                expiresAt: moment().add(20, 'minutes').valueOf()
+                expiresAt: moment().add(20, 'minutes').valueOf(),
             };
 
-            const filterKey = otpChannel == 100 ? 'tel' : 'email';
-            await UsersController.usersService.update({ [filterKey]: value }, { otp });
+            if (!userId) {
+                const createData = { clientCode, enabled: true, category: UserCategory.DEFAULT };
+                const insertResult = await UsersController.usersService.createUser(createData, 'front-office');
+                if (insertResult instanceof Error) throw new Error("Une erreur est survenu lors de la création de l'utilisateur");
+                userId = insertResult._id?.data;
+            }
 
-            if (isDevOrStag || isStagingBci) return otp
+            await UsersController.usersService.update({ _id: userId }, { otp });
+
+            if (isDevOrStag || isStagingBci) return { ...otp, userId }
 
             // if (value) {
             //     otpChannel = '200' ?
@@ -184,21 +205,24 @@ export class AuthService extends BaseService {
     }
 
     async verifyClientOtp(data: any): Promise<any> {
-        let { otpChannel, value, otp } = data;
         try {
-            if (!value || !otp) { throw new Error('MissingAuthData'); }
+            let { userId, otp } = data;
+
+            if (!otp) { throw new Error('MissingAuthData'); }
 
             if (!isString(otp) || otp.length !== 6 || !/^[A-Z0-9]+$/.test(otp)) { throw new Error('BadOTP'); }
 
-            const user = await UsersController.usersService.findOne({ filter: { [otpChannel]: value } });
+            let user = await UsersController.usersService.findOne({ filter: { _id: userId } });
 
             if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
             const { otp: userOTP } = user;
 
-            if (otp != '000000' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
+            if (config.get('env') === 'production' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
 
-            if (otp != '000000' && get(userOTP, 'expiresAt', 0) <= moment().valueOf()) { throw new Error('OTPExpired'); }
+            if (config.get('env') === 'production' && get(userOTP, 'expiresAt', 0) <= moment().valueOf()) { throw new Error('OTPExpired'); }
+
+            if (otp !== '999999') throw new Error('OTPNoMatch');
 
             const { email, gender, fname, lname, tel, category, clientCode, fullName } = user;
             const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode, fullName };
@@ -207,7 +231,7 @@ export class AuthService extends BaseService {
             delete user.password;
             delete user.otp;
 
-            return { oauth, user };
+            return { oauth, user: { ...user, lastLogin: moment().valueOf() } };
         } catch (error) { throw error; }
     }
 
