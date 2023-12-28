@@ -5,8 +5,8 @@ import { BaseCron } from "common/base";
 class RevivalMailCron extends BaseCron {
     cronExpressionPath = 'crons.revivalMail';  // At every 30th minute 
     service = VisaOperationsController.visaOperationsService.startRevivalMail;
-    startOnStagingBci = false;
-    startOnDev = true;
+    startOnStagingBci = true;
+    startOnDev = false;
 }
 
 export default new RevivalMailCron();

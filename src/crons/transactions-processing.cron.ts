@@ -5,7 +5,7 @@ import { BaseCron } from "common/base";
 class TransactionsProcessingCron extends BaseCron {
     cronExpressionPath = 'crons.transactionProcessing';  // At every 3rd minute 
     service = VisaOperationsController.visaOperationsService.startTransactionsProcessing;
-    startOnStagingBci = false;
+    startOnStagingBci = true;
     startOnDev = false;
 }
 
