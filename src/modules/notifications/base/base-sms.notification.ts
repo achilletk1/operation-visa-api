@@ -16,16 +16,17 @@ export class BaseSmsNotification<T> extends QueueService {
         public key?: string,
     ) {
         super();
-        this.logger.info(`insert SMS ${this.keyNotification} to sending in queue to: ${phone}`);
+        this.logger.info(`insert SMS ${this.key || this.keyNotification} to sending in queue to: ${phone}`);
     }
 
     async sendNotification() {
-        if (isDevOrStag || !this.phone || !this.body) { return null; }
+        // if (isDevOrStag) { return null; }
+        if (!this.phone || !this.body) { return null; }
 
         try {
-            if (this.keyNotification) return await this.insertNotification('', NotificationFormat.MAIL, this.body, this.phone, this.id, '', this.key);
+            if (this.keyNotification) await this.insertNotification('', NotificationFormat.MAIL, this.body, this.phone, this.id, '', this.key);
             return await this.add(NotificationsType.SMS, { receiver: this.phone, date: new Date(), body: this.body });
-        } catch (error: any) { this.logger.error(`Error during insertion SMS notification in queue, to ${this.phone} \n${error.stack}`); }
+        } catch (error: any) { this.logger.error(`Error during insertion SMS notification in queue, ${this.key || this.keyNotification} to ${this.phone} \n${error.stack}`); }
 
     }
 

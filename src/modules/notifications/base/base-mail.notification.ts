@@ -36,6 +36,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     protected delayUntil?: Date | number,
     public keyNotification?: string,
     public lang: 'fr' | 'en' = 'fr',
+    public saveNotification = false,
   ) {
     super();
     this.templateData = {
@@ -47,7 +48,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
       app: this.appName,
       company: this.company,
     };
-    this.logger.info(`send mail ${this.keyNotification || this.templateName} to ${get(this.eventData, 'receiver', null)}`);
+    this.logger.info(`send mail ${this.keyNotification || this.templateName} to ${get(this.eventData, 'receiver', null)} ${get(this.eventData, 'cc', '')}`);
   }
 
   private loadTemplate(filename: string): string {
@@ -73,7 +74,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
 
       return this.getNotificationBody();
     } catch (error: any) {
-      this.logger.error(`Error during mail ${this.templateName} notification generation \n${error.stack}`);
+      this.logger.error(`Error during mail ${this.keyNotification || this.templateName} notification generation to ${get(this.eventData, 'receiver', '')} ${get(this.eventData, 'cc', '')} \n${error.stack}`);
       return '';
     }
   }
@@ -81,10 +82,11 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
   async sendNotification() {
     // if (isDevOrStag) { return null; }
 
+    const body = (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody();
     const queueData: QueueData = {
       subject: this.subject,
       receiver: !isDevOrStag ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),
-      body: (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody(),
+      body,
       cc: !isDevOrStag ? String(get(this.eventData, 'cc', '')) : '',
       attachments: get(this.eventData, 'attachments', []) as MailAttachment[],
       date: new Date(),
@@ -92,9 +94,9 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     if (!queueData.body || !queueData.receiver) { return null; }
 
     try {
-      if (this.keyNotification) return await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, queueData.receiver, (this.eventData as any)?.id, queueData.attachments, (this.eventData as any)?.key, (this.eventData as any)?.type);
-      return await this.add(NotificationsType.MAIL, queueData, this.priority, this.delayUntil);
-    } catch (error: any) { this.logger.error(`Error during insertion mail ${this.templateName} notification in queue \n${error.stack}`); }
+      if (this.keyNotification || this.saveNotification) await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, ''.concat(queueData?.receiver, queueData?.cc || ''), (this.eventData as any)?.id, queueData.attachments, this.key, this.type);
+      await this.add(NotificationsType.MAIL, queueData, this.priority, this.delayUntil);
+    } catch (error: any) { this.logger.error(`Error during insertion mail ${this.keyNotification || this.templateName} notification to ${get(this.eventData, 'receiver', '')} ${get(this.eventData, 'cc', '')} in queue \n${error.stack}`); }
   }
 
 }

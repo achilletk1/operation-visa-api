@@ -5,8 +5,9 @@ import { QueuePriority } from "modules/notifications";
 export class TransactionOutsideNotJustifiedMailNotification extends BaseMailNotification<TransactionOutsideNotJustifiedEvent> {
 
     constructor(notificationData: TransactionOutsideNotJustifiedEvent) {
-        super('visa-template', notificationData, QueuePriority.HIGH, undefined, 'transactionOutsideNotJustified');
+        super('visa-template', notificationData, QueuePriority.HIGH, undefined, 'transactionOutsideNotJustified', notificationData.lang);
 
+        this.key = 'transactionOutsideNotJustified';
         this.subject = ''; // If subjet are setted in template, it must be erase this subject
     }
 }

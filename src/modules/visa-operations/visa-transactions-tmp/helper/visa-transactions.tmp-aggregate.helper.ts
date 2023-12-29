@@ -26,10 +26,10 @@ export const formatedVisaTransactionsTmps = [
             lang: {
                 $cond: {
                     if: {
-                        $eq: [{ $trim: { input: "$CODE_LANGUE_CLIENT", }, }, "001",],
+                        $ne: [{ $trim: { input: "$CODE_LANGUE_CLIENT", }, }, "001",],
                     },
-                    then: "fr",
-                    else: "en",
+                    then: "en",
+                    else: "fr",
                 },
             },
             tel: { $trim: { input: "$TELEPHONE_CLIENT", }, },

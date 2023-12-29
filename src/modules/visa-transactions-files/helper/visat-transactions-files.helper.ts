@@ -12,7 +12,7 @@ export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[
 };
 
 export function verifyTransactionFileContent(dataArray: VisaTransactionsTmp[], fileName: string) {
-    const month = fileName.split('_')[3];
+    const month = fileName.split('_')[3].slice(0, 6);
     return dataArray.findIndex(element => {
         let currentMonths = `${element['DATE']}`.split('/');
         // currentMonth.shift();
@@ -40,7 +40,7 @@ export function verifyTransactionNotEmptyFile(dataArray: VisaTransactionsTmp[]) 
 export function verifyTransactionFileName(fileName: string) {
     fileName = fileName.toLowerCase();
     const data = fileName.split('_');
-    return data[0] === 'bicec' && data[1] === 'hors' && data[2] === 'cemac' && /20\d{2}(0[ 1-9 ]|1[ 0-2 ])$/.test(data[3]);
+    return data[0] === 'bicec' && data[1] === 'hors' && data[2] === 'cemac' && /20\d{2}(0[ 1-9 ]|1[ 0-2 ])+/.test(data[3]);
 };
 
 export function verifyTransactionFile(dataArray: VisaTransactionsTmp[]) {
@@ -83,6 +83,7 @@ export const columnTitles =
             'NOM_CLIENT',
             'CODE_GESTIONNAIRE',
             'NOM_GESTIONNAIRE',
+            'CODE_LANGUE_CLIENT',
             'TELEPHONE_CLIENT',
             'EMAIL_CLIENT',
             'NOM_CARTE',

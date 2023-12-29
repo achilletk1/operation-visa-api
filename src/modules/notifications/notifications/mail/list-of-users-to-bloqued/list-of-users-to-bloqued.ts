@@ -5,7 +5,7 @@ import { QueuePriority } from "modules/notifications";
 export class ListOfUsersToBloquedMailNotification extends BaseMailNotification<ListOfUsersToBloquedEvent> {
 
     constructor(notificationData: ListOfUsersToBloquedEvent) {
-        super('list-of-users-to-bloqued', notificationData, QueuePriority.HIGH);
+        super('list-of-users-to-bloqued', notificationData, QueuePriority.HIGH, undefined, undefined, 'fr', true);
         
         this.key = 'customer_in_demeure';
         this.type = 'mails_liste_clients_en_demeurres';

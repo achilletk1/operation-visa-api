@@ -58,7 +58,8 @@ interface Notification {
     dates: {
         createdAt: number;
     };
-    status: number;
+    status?: number;
+    state?: number;
     attachments: any;
     key: any;
 };

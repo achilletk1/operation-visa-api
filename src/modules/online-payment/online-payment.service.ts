@@ -54,8 +54,10 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             for (const onlinePaymentsMonth of onlinePaymentsMonths) {
                 const total = getTotal(onlinePaymentsMonth?.transactions || []);
                 if (onlinePaymentsMonth?.ceiling && total < onlinePaymentsMonth?.ceiling) {
-                    await OnlinePaymentController.onlinePaymentService.deleteOne({ _id: onlinePaymentsMonth?._id });
+                    return await OnlinePaymentController.onlinePaymentService.deleteOne({ _id: onlinePaymentsMonth?._id });
                 }
+                // TODO manage case of onlinePaymentMonth who can have exceed ceiling, and check if it as already justiy or associate on request ceiling, if not it must mark status as EXCEEEDED
+                // await OnlinePaymentController.onlinePaymentService.update({ _id: onlinePaymentsMonth?._id }, { status: OpeVisaStatus.EXCEDEED });
             }
         } catch (e: any) {
             this.logger.error(`Error during excution removeOnlinePaymentsWithExceedings cron \n ${e.stack}\n`);

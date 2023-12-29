@@ -17,7 +17,7 @@ export class TemplateSmsNotification extends BaseSmsNotification<TemplateSmsEven
         
             const templateData = replaceSmsVariables(visaTemplate[this.notificationData.lang], this.notificationData.datas, this.notificationData.lang);
         
-            return templateData?.body;
+            return templateData?.sms;
           } catch (error: any) {
             this.logger.info(`Error during sms template-sms notification generation \n${error.stack}`);
             return '';

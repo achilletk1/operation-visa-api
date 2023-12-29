@@ -1,5 +1,5 @@
 import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction } from "./helper";
-import { FormalNoticeEvent, ListOfUsersToBloquedEvent, notificationEmmiter, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
+import { FormalNoticeEvent, ListOfUsersToBloquedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
 import { VisaOperationsRepository } from "./visa-operations.repository";
@@ -8,7 +8,6 @@ import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
 import { Travel, TravelController, TravelType } from 'modules/travel';
 import { User, UserCategory, UsersController } from 'modules/users';
 import { TemplatesController } from "modules/templates";
-import { SettingsController } from "modules/settings";
 import { LettersController } from "modules/letters";
 import { QueueState } from "common/helpers";
 import { CrudService } from "common/base";
@@ -33,7 +32,7 @@ interface OnlinePaymentGrouped {
 interface ToBeUpdated {
     notifications: any;
     transactions?: any[];
-    'proofTravel.nbrefOfMonth'?: any;
+    'proofTravel.nbrefOfMonth'?: number;
 }
 
 export class VisaOperationsService extends CrudService<any> {
@@ -52,13 +51,13 @@ export class VisaOperationsService extends CrudService<any> {
         try {
             if (VisaOperationsService.queueState === QueueState.PENDING) {
                 VisaOperationsService.queueState = QueueState.PROCESSING;
-                console.log('===============-==================================-==================================');
-                console.log('===============-==============  START TRAITMENT ====================-============');
-                console.log('===============-========================================================-============');
 
                 const aggregatedTransactions: VisaTransactionsTmpAggregate[] = await VisaOperationsController.visaTransactionsTmpService.getFormatedVisaTransactionsTmps();
 
                 if (isEmpty(aggregatedTransactions)) { VisaOperationsService.queueState = QueueState.PENDING; return; }
+                console.log('===============-==================================-==================================');
+                console.log('===============-==============  START TRAITMENT ====================-============');
+                console.log('===============-========================================================-============');
 
                 const transactions: VisaTransaction[] = [];
                 for (const element of aggregatedTransactions) {
@@ -120,7 +119,7 @@ export class VisaOperationsService extends CrudService<any> {
 
                 if (isEmpty(travels)) {
                     VisaOperationsService.queueStateRevival = QueueState.PENDING;
-                    return await SettingsController.settingsService.deleteOne({ key: 'start_revival_mail_in_progress' });
+                    return;
                 }
 
                 const letter = await LettersController.lettersService.findOne({});
@@ -148,6 +147,7 @@ export class VisaOperationsService extends CrudService<any> {
                     }
                     if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
                         notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
+                        // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
                         // await Promise.all([
                         //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
                         //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
@@ -279,8 +279,8 @@ export class VisaOperationsService extends CrudService<any> {
                     toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
                     toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "SMS", 'firstTransaction'));
                 }
-
-                toBeUpdated.transactions = element.transactions;
+                
+                toBeUpdated.transactions = travel.transactions;
                 toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(travel?.ceiling));
             }
 
@@ -305,12 +305,14 @@ export class VisaOperationsService extends CrudService<any> {
         for (const element of transactionsGroupedByOnlinePayment) {
             let onlinePayment: OnlinePaymentMonth = new OnlinePaymentMonth();
             let travel: Travel = new Travel();
-            const toBeUpdated: ToBeUpdated = { notifications: [], transactions: [] };
+            const toBeUpdated: ToBeUpdated = { notifications: [] };
 
             const { month } = element;
             if (element.travelId) {
                 try { travel = await TravelController.travelService.findOne({ filter: { _id: element.travelId } }); } catch(e) {}
+                element.transactions = markExceedTransaction(element.transactions, +Number(travel?.ceiling));
                 const travelMonth = await getOrCreateTravelMonth(travel, month);
+                toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
                 await updateTravelMonth(travelMonth, element.transactions, toBeUpdated, travel);
                 await updateTravel(travel, toBeUpdated);
                 continue;
@@ -321,13 +323,16 @@ export class VisaOperationsService extends CrudService<any> {
             }
 
             try {
-            onlinePayment = element.onlinePaymentId
-                ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: element.onlinePaymentId } })
-                : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment); } catch(e) {}
+                onlinePayment = element.onlinePaymentId
+                    ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: element.onlinePaymentId } })
+                    : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment);
+            } catch(e) {}
 
-            toBeUpdated.transactions?.push(...element.transactions);
+            onlinePayment.transactions = !element.onlinePaymentId ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
 
-            toBeUpdated.notifications = verifyExcedingOnTravel(travel, +Number(travel?.ceiling));
+            toBeUpdated.notifications = verifyExcedingOnTravel(onlinePayment, +Number(onlinePayment?.ceiling));
+            toBeUpdated.transactions = onlinePayment.transactions;
+            toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(onlinePayment?.ceiling));
             if (isEmpty(toBeUpdated.notifications)) {
                 delete toBeUpdated.notifications;
             }

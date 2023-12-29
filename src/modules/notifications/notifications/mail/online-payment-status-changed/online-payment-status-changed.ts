@@ -5,8 +5,9 @@ import { QueuePriority } from "modules/notifications";
 export class OnlinePaymentStatusChangedMailNotification extends BaseMailNotification<OnlinePaymentStatusChangedEvent> {
 
     constructor(notificationData: OnlinePaymentStatusChangedEvent) {
-        super('online-payment-status-changed', notificationData, QueuePriority.HIGH);
+        super('online-payment-status-changed', notificationData, QueuePriority.HIGH, undefined, undefined, 'fr', true);
 
+        this.key = 'onlinePaymentStatusChanged';
         this.subject = `Mise à jour de la déclaration de payement en ligne`;
     }
 }

@@ -195,7 +195,7 @@ export class AuthService extends BaseService {
             if (value && user) {
                 otpChannel = '200' ?
                     notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(otp, 'value')))
-                    : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'TEL', '')));
+                    : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'tel', '')));
                 this.logger.info(`sends authentication Token by email or SMS to user`);
             }
 

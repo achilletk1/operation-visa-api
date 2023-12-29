@@ -4,11 +4,10 @@ import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OnlinePaymentMonth } from "modules/online-payment";
 import { VisaTransaction } from "modules/visa-transactions";
 import { Travel, TravelController } from "modules/travel";
-import { forEach, get, isEmpty } from "lodash";
 import { OpeVisaStatus } from "../enum";
 import { getTotal } from "common/utils";
 import { logger } from "winston-config";
-import { Transaction } from 'mongodb';
+import { get, isEmpty } from "lodash";
 import moment from "moment";
 
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {

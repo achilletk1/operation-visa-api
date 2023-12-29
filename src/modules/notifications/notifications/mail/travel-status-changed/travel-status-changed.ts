@@ -5,8 +5,9 @@ import { QueuePriority } from "modules/notifications";
 export class TravelStatusChangedMailNotification extends BaseMailNotification<TravelStatusChangedEvent> {
 
     constructor(notificationData: TravelStatusChangedEvent) {
-        super('travel-status-changed', notificationData, QueuePriority.HIGH);
+        super('travel-status-changed', notificationData, QueuePriority.HIGH, undefined, undefined, 'fr', true);
 
+        this.key = 'travelStatusChanged';
         this.subject = `Mise à jour de la déclaration de voyage hors CEMAC`;
     }
 }
