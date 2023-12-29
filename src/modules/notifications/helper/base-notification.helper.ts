@@ -65,7 +65,7 @@ const getVariablesValue = (data: { transactions: VisaTransaction[], amount: numb
         PAYS: transaction?.country,
         ACQUEREUR: transaction?.beneficiary,
         PLAFOND: ceiling,
-        MOIS_DEPART: getYearMonthLabel(transaction?.currentMonth || '', 'both'),
+        MOIS_DEPART: getYearMonthLabel(transaction?.currentMonth?.toString() || '', 'both'),
         DATE_COURANTE: moment().locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
         DATE_COURANTE_LONG: moment().locale(`${lang || 'fr'}`).format('dddd, Do MMMM YYYY'),
     }

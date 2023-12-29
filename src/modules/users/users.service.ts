@@ -82,7 +82,7 @@ export class UsersService extends CrudService<User>  {
                 user = {
                     ...user,
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
-                    userCode: userLdap.userCode, email: userLdap.email, tel: userLdap.tel, category: UserCategory.ADMIN,
+                    userCode: userLdap.userCode, email: userLdap.email || userCbs?.EMAIL, tel: userLdap.tel || userCbs?.TEL, category: UserCategory.ADMIN,
                     gender: userCbs ? userCbs?.SEXT : '', lang: userCbs && userCbs?.LANG && userCbs?.LANG !== '001' ? 'en' : 'fr',
                     visaOpecategory: createData.visaOpecategory, otp2fa: createData.otp2fa,
                     age: { label: userCbs?.LIBELLE_AGENCE, code: userCbs?.AGE }

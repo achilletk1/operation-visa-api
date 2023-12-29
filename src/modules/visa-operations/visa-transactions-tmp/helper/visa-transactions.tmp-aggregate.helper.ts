@@ -32,7 +32,7 @@ export const formatedVisaTransactionsTmps = [
                     else: "fr",
                 },
             },
-            tel: { $trim: { input: "$TELEPHONE_CLIENT", }, },
+            tel: { $replaceOne: { input: { $trim: { input: "$TELEPHONE_CLIENT", } }, find: "Left Handed", replacement: "Ambidextrous" } },
             email: { $trim: { input: "$EMAIL_CLIENT", }, },
             beneficiary: { $trim: { input: "$ACQUEREUR", }, },
             amount: { $toDouble: "$MONTANT_XAF", },

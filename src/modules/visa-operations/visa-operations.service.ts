@@ -6,9 +6,9 @@ import { VisaOperationsRepository } from "./visa-operations.repository";
 import { VisaOperationsController } from "./visa-operations.controller";
 import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
 import { Travel, TravelController, TravelType } from 'modules/travel';
+import { TemplateForm, TemplatesController } from "modules/templates";
 import { User, UserCategory, UsersController } from 'modules/users';
-import { TemplatesController } from "modules/templates";
-import { LettersController } from "modules/letters";
+import { Letter, LettersController } from "modules/letters";
 import { QueueState } from "common/helpers";
 import { CrudService } from "common/base";
 import { getTotal } from "common/utils";
@@ -115,17 +115,20 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueStateRevival === QueueState.PENDING) {
                 VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
                 // TODO 
-                const travels = (await TravelController.travelService.findAll({ filter: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }))?.data;
+                const travels = await TravelController.travelService.findAllAggregate([{ $match: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
 
                 if (isEmpty(travels)) {
                     VisaOperationsService.queueStateRevival = QueueState.PENDING;
                     return;
                 }
+                console.log('===============-==================================-==================================');
+                console.log('===============-==============  START REVIVAL TRAITMENT ================-============');
+                console.log('===============-========================================================-============');
 
-                const letter = await LettersController.lettersService.findOne({});
+                const letter = (await LettersController.lettersService.findAllAggregate([{ $match: {} }]))[0] as Letter;
                 if (!letter) throw new Error('LetterNotFound');
 
-                const visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
+                const visaTemplate = (await TemplatesController.templatesService.findAllAggregate([{ $match: { key: 'transactionOutsideNotJustified' } }]))[0] as TemplateForm;
 
                 for (const travel of travels) {
                     if (isEmpty(travel?.transactions)) continue;
@@ -155,9 +158,15 @@ export class VisaOperationsService extends CrudService<any> {
                     }
                 }
                 VisaOperationsService.queueStateRevival = QueueState.PENDING;
+                console.log('===============-==================================-==================================');
+                console.log('===============-==============  END REVIVAL TRAITMENT ==================-============');
+                console.log('===============-========================================================-============');
             }
         } catch (e: any) {
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
+            console.log('===============-==================================-==================================');
+            console.log('===============-==============  ERROR DURING REVIVAL TRAITMENT =========-============');
+            console.log('===============-========================================================-============');
             this.logger.error(`error during revival mail cron execution \n${e.stack}\n`);
         }
     }
