@@ -1,4 +1,5 @@
 import { NotificationsType, NotificationFormat, QueuePriority } from 'modules/notifications/enum';
+import { generateFormalNoticeLetterAttachment } from 'modules/export';
 import { replaceMailVariables } from 'modules/notifications/helper';
 import { MailNotificationInterface } from 'common/interfaces';
 import { MailAttachment } from 'modules/notifications/model';
@@ -83,6 +84,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     // if (isDevOrStag) { return null; }
 
     const body = (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody();
+    if (this.keyNotification === 'letters') { (this.eventData as any).attachments = await generateFormalNoticeLetterAttachment(body); }
     const queueData: QueueData = {
       subject: this.subject,
       receiver: !isDevOrStag ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),

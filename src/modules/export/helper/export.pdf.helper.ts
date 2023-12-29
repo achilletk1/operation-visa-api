@@ -7,6 +7,7 @@ import moment from "moment";
 import { getStatuslabel } from 'common/utils';
 import { getYearMonthLabel } from 'common/helpers';
 import { OnlinePaymentMonth } from 'modules/online-payment';
+import { OpeVisaStatus } from 'modules/visa-operations';
 import { Travel, TravelType } from 'modules/travel';
 import { isEmpty } from 'lodash';
 
@@ -82,7 +83,7 @@ export function getContentTypeByExtension(extension: string): string {
 
 };
 
-export async function generateFormalNoticeLetter(data: any): Promise<string> {
+export async function generateFormalNoticeLetter(data: any): Promise<any> {
     try {
 
         const template = handlebars.compile(templateFormalNoticeLetter);
@@ -90,6 +91,17 @@ export async function generateFormalNoticeLetter(data: any): Promise<string> {
         const html = template(data);
 
         return await pdf.setAttachment(html);
+    } catch (error) { throw error; }
+};
+
+export async function generateFormalNoticeLetterAttachment(html: string): Promise<any> {
+    try {
+        const pdfString = await pdf.setAttachment(html);
+        return [{
+            name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
+            content: pdfString,
+            contentType: 'application/pdf'
+        }];
     } catch (error) { throw error; }
 };
 
@@ -196,12 +208,12 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             data = {
                 image,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),
-                fullName: travel.user.fullName,
-                clientCode: travel.user.clientCode,
+                fullName: travel?.user?.fullName,
+                clientCode: travel?.user?.clientCode,
                 ref: travel.travelRef || 'NON RENSEIGNE',
-                status: getStatuslabel(travel.status),
-                start: moment(travel.proofTravel.dates.start).format('DD/MM/YYYY HH:mm:ss'),
-                end: moment(travel.proofTravel.dates.end).format('DD/MM/YYYY HH:mm:ss'),
+                status: getStatuslabel(travel?.status as OpeVisaStatus),
+                start: moment(travel?.proofTravel?.dates?.start).format('DD/MM/YYYY HH:mm:ss'),
+                end: moment(travel?.proofTravel?.dates?.end).format('DD/MM/YYYY HH:mm:ss'),
                 date: moment(travel?.dates?.created).format('DD/MM/YYYY HH:mm:ss'),
                 nbreOperations: travel.transactions.length,
                 amount,
@@ -224,11 +236,11 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             data = {
                 image,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),
-                fullName: onlinePaymentMonth.user.fullName,
-                clientCode: onlinePaymentMonth.user.clientCode,
-                status: getStatuslabel(onlinePaymentMonth.status),
-                created: moment(onlinePaymentMonth.dates.created).format('DD/MM/YYYY HH:mm:ss'),
-                month: getYearMonthLabel(onlinePaymentMonth?.currentMonth || '', 'both'),
+                fullName: onlinePaymentMonth?.user?.fullName,
+                clientCode: onlinePaymentMonth?.user?.clientCode,
+                status: getStatuslabel(onlinePaymentMonth?.status as OpeVisaStatus),
+                created: moment(onlinePaymentMonth?.dates?.created).format('DD/MM/YYYY HH:mm:ss'),
+                month: getYearMonthLabel(onlinePaymentMonth?.currentMonth?.toString() || '', 'both'),
                 nbreOperations: onlinePaymentMonth?.transactions?.length,
                 amount,
                 overrun: (amount - (onlinePaymentMonth?.ceiling || 0)) > 0 ? (amount - (onlinePaymentMonth?.ceiling || 0)) : 0,
