@@ -190,15 +190,14 @@ export class AuthService extends BaseService {
             }
 
             await UsersController.usersService.update({ _id: userId }, { otp });
-
             if (isDevOrStag || isStagingBci) return { ...otp, userId }
-
-            // if (value) {
-            //     otpChannel = '200' ?
-            //         notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(token, 'value')))
-            //         : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(token, 'value'), get(user, 'TEL', '')));
-            //     this.logger.info(`sends authentication Token by email and SMS to user`);
-            // }
+            const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
+            if (value && user) {
+                otpChannel = '200' ?
+                    notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(otp, 'value')))
+                    : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'TEL', '')));
+                this.logger.info(`sends authentication Token by email or SMS to user`);
+            }
 
             return {};
         } catch (error) { throw error; }
