@@ -14,22 +14,22 @@ const expenseCategories = [{
     code: ExpenseCategory.IMPORT_OF_GOODS,
     label: `importation de biens`,
     vouchers: [
-      { label: `Facture pro Format`, isRequired: true },
-      { label: `Déclaration d'importation`, isRequired: true },
-      { label: `Numéro d'identification fiscal`, isRequired: false },
-      { label: `Autorisation(produits soumis a restriction)`, isRequired: false }
+        { label: `Facture pro Format`, isRequired: true },
+        { label: `Déclaration d'importation`, isRequired: true },
+        { label: `Numéro d'identification fiscal`, isRequired: false },
+        { label: `Autorisation(produits soumis a restriction)`, isRequired: false }
     ]
-  },
-  {
+},
+{
     code: ExpenseCategory.IMPORT_OF_SERVICES,
     label: `importation de services`,
     vouchers: [
-      { label: `Importez la Facture pro Format ou Bon de commande`, isRequired: true },
-      { label: `Contrat de service dûment enregistré`, isRequired: true },
-      { label: `Numéro d'identification fiscal`, isRequired: false },
-      { label: `Déclaration d\'importation de services à la Banque centrale`, isRequired: false },
+        { label: `Importez la Facture pro Format ou Bon de commande`, isRequired: true },
+        { label: `Contrat de service dûment enregistré`, isRequired: true },
+        { label: `Numéro d'identification fiscal`, isRequired: false },
+        { label: `Déclaration d\'importation de services à la Banque centrale`, isRequired: false },
     ],
-  }];
+}];
 
 export class ImportsService extends CrudService<Import> {
 
@@ -47,7 +47,7 @@ export class ImportsService extends CrudService<Import> {
             const { EMPTY, TO_COMPLETED, REJECTED, TO_VALIDATED } = OpeVisaStatus;
             let oldImportation: Import = {};
 
-            try { oldImportation = await ImportsController.importsService.findOne({ filter: { _id } }); } catch (error) {}
+            try { oldImportation = await ImportsController.importsService.findOne({ filter: { _id } }); } catch (error) { }
 
             // Update from imports history, Partial<importation> like { attachments } 
             if (!isEmpty(importation?.attachments) && importation?.attachments instanceof Array && [EMPTY, TO_COMPLETED, REJECTED].includes(importation?.status as OpeVisaStatus)) {
@@ -64,18 +64,15 @@ export class ImportsService extends CrudService<Import> {
                 if (isEmpty(oldImportation?.attachments)) {
                     importation.attachments = [];
                     const vouchers: Voucher[] = importation?.type?.code === ExpenseCategory.IMPORT_OF_GOODS ? expenseCategories[0].vouchers : expenseCategories[1].vouchers;
-                    importation.attachments?.push( ...vouchers.map(elt => generateAttachmentFromVoucher(elt, true)));
+                    importation.attachments?.push(...vouchers.map(voucher => generateAttachmentFromVoucher(voucher, true)));
                 }
-                // TODO sent final notification to inform client counter of 30 day start to apure importation folder
+                // TODO sent final notification to inform client counter of 30 days start to apure importation folder
             }
 
-            oldImportation.editors = !isEmpty(oldImportation.editors) ? oldImportation.editors : [];
-            oldImportation?.editors?.push({
-                _id: authUser._id,
-                fullName: authUser?.fullName,
-                date: moment().valueOf(),
-                steps
-            });
+            importation.editors = [
+                ...(oldImportation?.editors || []),
+                { _id: authUser._id, fullName: authUser?.fullName, date: moment().valueOf(), steps, },
+            ];
 
             return await ImportsController.importsService.update({ _id }, { ...importation });
 

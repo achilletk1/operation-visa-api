@@ -115,7 +115,7 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueStateRevival === QueueState.PENDING) {
                 VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
                 // TODO 
-                const travels = await TravelController.travelService.findAllAggregate([{ $match: { 'proofTravel.status': { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
+                const travels = await TravelController.travelService.findAllAggregate([{ $match: { status: { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
 
                 if (isEmpty(travels)) {
                     VisaOperationsService.queueStateRevival = QueueState.PENDING;
