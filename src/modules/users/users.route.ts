@@ -26,6 +26,8 @@ router.get('/one', usersController.getUserBy);
 
 router.get('/visa-operations/all', usersController.getUserByOperations);
 
+router.get('/labels', usersController.getUsersLabels);
+
 router.get('/:id', usersController.findOneById);
 
 export const usersRoute = router;

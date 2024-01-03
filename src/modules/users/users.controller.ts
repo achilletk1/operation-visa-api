@@ -32,6 +32,11 @@ export class UsersController {
         catch (error) { next(error); }
     }
 
+    async getUsersLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await UsersController.usersService.getUsers({ filter: req.query }, { fullName: 1, userCode: 1, clientCode: 1, password: 0, otp: 0 })); }
+        catch (error) { next(error); }
+    }
+
     async verifyLdapUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await UsersController.usersService.verifyLdapUser(req.query)); }
         catch (error) { next(error); }

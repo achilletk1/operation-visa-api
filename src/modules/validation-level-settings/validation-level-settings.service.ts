@@ -21,6 +21,7 @@ export class ValidationLevelSettingsService extends CrudService<LevelValidation>
 
             const validationLevel = await ValidationLevelSettingsController.levelValidateService.baseRepository.findOne({ filter: { usersId: id }, projection: { level: 1, label: 1, description: 1 } });
             if (!validationLevel) { throw new Error('UserLevelNotFound'); }
+            return validationLevel;
         } catch (error) { throw error; }
     }
 

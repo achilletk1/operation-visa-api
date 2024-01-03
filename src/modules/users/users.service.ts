@@ -23,7 +23,7 @@ export class UsersService extends CrudService<User>  {
         super(UsersService.userRepository);
     }
 
-    async getUsers(filters: any) {
+    async getUsers(filters: any, projection?: any) {
         try {
             const authUser = httpContext.get('user');
             if (authUser?.category < 500) { return new Error('Forbidden'); }
