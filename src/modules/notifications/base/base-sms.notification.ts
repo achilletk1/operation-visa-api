@@ -24,7 +24,7 @@ export class BaseSmsNotification<T> extends QueueService {
         if (!this.phone || !this.body) { return null; }
 
         try {
-            if (this.keyNotification) await this.insertNotification('', NotificationFormat.MAIL, this.body, this.phone, this.id, '', this.key);
+            if (this.keyNotification) await this.insertNotification('', NotificationFormat.SMS, this.body, this.phone, this.id, '', this.key);
             return await this.add(NotificationsType.SMS, { receiver: this.phone, date: new Date(), body: this.body });
         } catch (error: any) { this.logger.error(`Error during insertion SMS notification in queue, ${this.key || this.keyNotification} to ${this.phone} \n${error.stack}`); }
 

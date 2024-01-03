@@ -19,8 +19,8 @@ export class ValidationLevelSettingsService extends CrudService<LevelValidation>
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { return new Error('Forbidden'); }
 
-            return await ValidationLevelSettingsController.levelValidateService.findOne({ filter: { usersId: id }, projection: { level: 1, label: 1, description: 1 } });
-
+            const validationLevel = await ValidationLevelSettingsController.levelValidateService.baseRepository.findOne({ filter: { usersId: id }, projection: { level: 1, label: 1, description: 1 } });
+            if (!validationLevel) { throw new Error('UserLevelNotFound'); }
         } catch (error) { throw error; }
     }
 

@@ -136,6 +136,7 @@ export class AuthService extends BaseService {
                 ? await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } })
                 : { data: [] };
 
+
             let clients: (User | CbsClientUser)[] = data;
             if (isEmpty(clients)) {
                 clients = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null);
@@ -144,6 +145,7 @@ export class AuthService extends BaseService {
 
             if (clients.length == 1) {
                 if ((!(clients as User[])[0].email && !(clients as User[])[0].tel) && (!(clients as CbsClientUser[])[0].TEL && !(clients as CbsClientUser[])[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
+                if (!contactCBS && !data[0].enabled) { throw new Error('DisableUser'); }
                 return {
                     email: (clients as CbsClientUser[])[0].EMAIL ?? (clients as User[])[0].email,
                     phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel,

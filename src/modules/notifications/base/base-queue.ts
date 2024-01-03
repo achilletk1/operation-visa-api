@@ -1,9 +1,11 @@
 import { NotificationsController } from "modules/notifications/notifications.controller";
 import { NotificationsType, QueuePriority } from "modules/notifications";
+import { generateNotification } from '../helper';
 import { saveAttachment } from "common/utils";
 import { NotificationFormat } from '../enum';
 import { BaseRepository } from "common/base";
 import { QueueData } from "common/types";
+import { Notification } from '../model';
 import { logger } from "winston-config";
 import { isEmpty } from "lodash";
 
@@ -28,10 +30,8 @@ export class QueueService extends BaseRepository {
         if (typeof delayUntil == 'number') return new Date(+ new Date() + delayUntil * 1000);
     }
 
-    async insertNotification(object: string, format: NotificationFormat, message: string, receiver: string, id?: string, attachments?: any, key?: any, type?: string) {
-        const email = format === NotificationFormat.MAIL ? receiver : null;
-        const tel = format === NotificationFormat.SMS ? receiver : null;
-        const notification: Notification = { object, format, message, email, tel, id, dates: { createdAt: new Date().valueOf() }, status: 100, attachments, key };
+    async insertNotification(object: string, format: NotificationFormat, message: string, receiver: string | undefined, id?: string, attachments?: any, key?: any, type?: string) {
+        const notification: Notification = generateNotification(object, format, message, receiver, id, attachments, key);
         try {
             const { data } = await NotificationsController.notificationsService.create(notification);
             if (!isEmpty(attachments)) await this.saveAttachments(attachments, notification, data, type || '')
@@ -47,19 +47,3 @@ export class QueueService extends BaseRepository {
         } catch (error) { throw error; }
     }
 }
-
-interface Notification {
-    object: string;
-    format: NotificationFormat;
-    message: string;
-    email: string | null;
-    tel: string | null;
-    id: string | undefined;
-    dates: {
-        createdAt: number;
-    };
-    status?: number;
-    state?: number;
-    attachments: any;
-    key: any;
-};

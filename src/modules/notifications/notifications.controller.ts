@@ -24,13 +24,12 @@ export class NotificationsController {
     }
 
     async generateInstantNotificationView(req: Request, res: Response, next: NextFunction) {
-        console.log("req.body " , req.body );
         try { res.send(await NotificationsController.notificationsService.generateInstantNotificationView(req.body as any)); }
         catch (error) { next(error); }
     }
 
-    async saveNotification(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await NotificationsController.notificationsService.saveNotification(req.body as any)); }
+    async sendAndInsertNotification(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await NotificationsController.notificationsService.sendAndInsertNotification(req.body as any)); }
         catch (error) { next(error); }
     }
 }

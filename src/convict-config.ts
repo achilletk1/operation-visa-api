@@ -285,6 +285,12 @@ export const config = convict({
         default: 'kevin.moutassi@londo-tech.com',
         env: 'EMAIL_TEST'
     },
+    phoneTest: {
+        doc: 'phone test to send notification',
+        format: String,
+        default: '237693405447',
+        env: 'PHONE_TEST'
+    },
     emailBank: {
         doc: 'email bank to send notification',
         format: String,

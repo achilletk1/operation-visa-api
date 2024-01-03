@@ -16,3 +16,10 @@ export enum NotificationFormat {
     MAIL = 200,
     WHATSAPP = 300
 }
+
+export enum NotificationStatus {
+    CREATED = 100, // Crée
+    SUCCESS_SEND = 200, // Envoyer et recu
+    FAIL_SEND = 300, // Echec d'envois
+    READ = 400, // Lu
+  }

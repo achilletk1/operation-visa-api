@@ -12,6 +12,6 @@ router.post('/mails/preview', notificationsController.generateExportView);
 
 router.post('/mails/preview-instant-notification', notificationsController.generateInstantNotificationView);
 
-router.post('/', notificationsController.saveNotification);
+router.post('/', notificationsController.sendAndInsertNotification);
 
 export const notificationsRoute = router;
