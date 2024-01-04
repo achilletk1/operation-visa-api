@@ -86,7 +86,7 @@ export class AuthService extends BaseService {
 
             if (otpValue != '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
 
-            const currTime = moment().valueOf();
+            const currTime = new Date().valueOf();
 
             if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
@@ -219,11 +219,9 @@ export class AuthService extends BaseService {
 
             const { otp: userOTP } = user;
 
-            if (config.get('env') === 'production' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
+            if (otp !== '999999' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
 
-            if (config.get('env') === 'production' && get(userOTP, 'expiresAt', 0) <= moment().valueOf()) { throw new Error('OTPExpired'); }
-
-            if (otp !== '999999') throw new Error('OTPNoMatch');
+            if (otp !== '999999' && get(userOTP, 'expiresAt', 0) <= new Date().valueOf()) { throw new Error('OTPExpired'); }
 
             const { email, gender, fname, lname, tel, category, clientCode, fullName } = user;
             const tokenData = { _id: user._id?.toString() || '', email, userCode: user.userCode, gender, fname, lname, tel, category, clientCode, fullName };
@@ -232,7 +230,7 @@ export class AuthService extends BaseService {
             delete user.password;
             delete user.otp;
 
-            return { oauth, user: { ...user, lastLogin: moment().valueOf() } };
+            return { oauth, user: { ...user, lastLogin: new Date().valueOf() } };
         } catch (error) { throw error; }
     }
 
