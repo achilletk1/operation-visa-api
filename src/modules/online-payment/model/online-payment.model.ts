@@ -18,7 +18,8 @@ export class OnlinePaymentMonth {
     //statements!: OnlinePaymentStatement[];
     // statementAmounts?: number;
     othersAttachements?: any[];
-    //  othersAttachmentStatus?: OpeVisaStatus;
+    othersAttachmentStatus?: OpeVisaStatus;
+    expenseDetailsLevel?: number;
     transactions?: VisaTransaction[];
     validationLevel?: number;
     validators?: Validator[];

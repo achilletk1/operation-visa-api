@@ -136,7 +136,7 @@ export class AuthService extends BaseService {
                 ? await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } })
                 : { data: [] };
 
-            if (!contactCBS && !data[0]?.enabled) { throw new Error('DisableUser'); }
+            if (!contactCBS && !isEmpty(data) && !data[0]?.enabled) { throw new Error('DisableUser'); }
 
             let clients: (User | CbsClientUser)[] = data;
             if (isEmpty(clients)) {
