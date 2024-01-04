@@ -75,6 +75,7 @@ export class Travel {
     };
     expenseDetails!: ExpenseDetail[];
     expenseDetailsStatus!: OpeVisaStatus;
+    expenseDetailsLevel?: number;
     expenseDetailAmount?: number;
     othersAttachements!: OthersAttachement[];
     othersAttachmentStatus?: OpeVisaStatus;

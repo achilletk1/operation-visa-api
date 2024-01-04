@@ -38,12 +38,11 @@ export function getTravelStatus(travel: Travel): OpeVisaStatus {
 
     if (status.every(elt => elt === OpeVisaStatus.CLOSED)) { return OpeVisaStatus.CLOSED; }
 
-    if (status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.EXCEDEED; }
+    // if (status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.EXCEDEED; }
 
     if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
 
     if (status.includes(OpeVisaStatus.TO_VALIDATED) &&
-        !status.includes(OpeVisaStatus.REJECTED) &&
         !status.includes(OpeVisaStatus.EXCEDEED) &&
         !status.includes(OpeVisaStatus.TO_COMPLETED) &&
         !status.includes(OpeVisaStatus.EMPTY)
@@ -52,7 +51,6 @@ export function getTravelStatus(travel: Travel): OpeVisaStatus {
     }
 
     if (status.includes(OpeVisaStatus.TO_COMPLETED) &&
-        !status.includes(OpeVisaStatus.REJECTED) &&
         !status.includes(OpeVisaStatus.EXCEDEED)) {
         return OpeVisaStatus.TO_COMPLETED;
     }

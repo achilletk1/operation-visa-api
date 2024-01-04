@@ -7,7 +7,7 @@ export interface Validator {
     signature?: string;
     date?: number;
     status?: OpeVisaStatus;
-    level?: number;
+    level: number;
     rejectReason?: string;
 
 }

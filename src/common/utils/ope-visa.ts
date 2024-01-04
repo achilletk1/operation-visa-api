@@ -14,7 +14,7 @@ export function getTotal(transactions: any[], type?: string | 'stepAmount') {
 
 export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttachs' | 'expenseDetail' | 'month') {
     if (!data) { throw new Error('OnlinePaymentNotDefined'); }
-    let array = []; let total: number = 0;
+    let array: any[] = []; let total: number = 0;
     if (step === 'onp') {
         if (isEmpty(data?.statements)) { return OpeVisaStatus.EMPTY };
         array = data?.statements;
@@ -31,12 +31,12 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
         total = data?.otherAttachmentAmount;
     }
     if (step === 'expenseDetail') {
-        if (isEmpty(data?.expenseDetails)) { return OpeVisaStatus.EMPTY };
-        array = data?.expenseDetails;
-        total = data?.expenseDetailsAmount;
+        if (isEmpty(data?.transactions)) { return OpeVisaStatus.EMPTY };
+        array = data?.transactions;
+        total = array.map(elt => +elt.amount).reduce((elt, prev) => elt + prev, 0);
     }
 
-    let status = array.map((elt: any) => +elt?.status);
+    let status = array.filter((e: any) => e.isExceed).map((elt: any) => +elt?.status);
 
     // renvoi le statut à compléter
     if (status.includes(OpeVisaStatus.TO_COMPLETED)
@@ -58,6 +58,9 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
     // renvoi le statut rejeté
     if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
 
+    // renvoi en chaine de validation
+    if (status.includes(OpeVisaStatus.VALIDATION_CHAIN) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+
     // renvoi le statut justifié
     if (status.includes(OpeVisaStatus.JUSTIFY)
         && !status.includes(OpeVisaStatus.TO_COMPLETED)
@@ -65,6 +68,7 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
         && !status.includes(OpeVisaStatus.REJECTED)
         && !status.includes(OpeVisaStatus.TO_VALIDATED)
         && !status.includes(OpeVisaStatus.EXCEDEED)
+        && !status.includes(OpeVisaStatus.VALIDATION_CHAIN)
         && !status.includes(OpeVisaStatus.CLOSED)) {
         return OpeVisaStatus.JUSTIFY;
     }

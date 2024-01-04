@@ -150,7 +150,7 @@ export class TravelService extends CrudService<Travel> {
                 travel.user = {
                     ...travel.user,
                     _id: user?._id?.toString(),
-                    fullName: `${user?.fname} ${user?.lname}` ,
+                    fullName: `${user?.fname} ${user?.lname}`,
                     email: user?.email
                 };
             }
@@ -195,28 +195,35 @@ export class TravelService extends CrudService<Travel> {
                 // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
 
-            if (!isEmpty(travel.expenseDetails)) {
-                for (let expenseDetail of travel?.expenseDetails || []) {
-                    if (expenseDetail.status && !adminAuth && expenseDetail.isEdit) { delete expenseDetail.status }
+            if (!isEmpty(travel.transactions)) {
+                for (let transaction of travel?.transactions || []) {
+                    // if (transaction.status && !adminAuth && transaction.isEdit) { delete transaction.status }
 
-                    if (expenseDetail.isEdit) {
-                        // expenseDetail.status = OpeVisaStatus.TO_COMPLETED;
-                        delete expenseDetail.isEdit;
+                    // if (transaction.isEdit) {
+                    //     // expenseDetail.status = OpeVisaStatus.TO_COMPLETED;
+                    //     delete transaction.isEdit;
+                    // }
+
+                    if (isEmpty(transaction.attachments)) { continue; }
+                    transaction.attachments = saveAttachmentTravel(transaction.attachments, id, travel?.dates?.created);
+
+                    if (transaction.isExceed && transaction.nature) {
+                        const index = transaction.attachments.findIndex(elt => elt.isRequired === true && !elt.path);
+                        if (index === -1 && [OpeVisaStatus.EMPTY, OpeVisaStatus.TO_COMPLETED, null, undefined].includes(transaction.status as OpeVisaStatus)) {
+                            transaction.status = OpeVisaStatus.TO_VALIDATED;
+                        }
                     }
-
-                    if (isEmpty(expenseDetail.attachments)) { continue; }
-                    expenseDetail.attachments = saveAttachmentTravel(expenseDetail.attachments, id, travel?.dates?.created);
                 }
             }
 
             if (!isEmpty(travel.othersAttachements)) {
                 for (let othersAttachement of travel?.othersAttachements || []) {
-                    if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
+                    // if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
 
-                    if (othersAttachement.isEdit) {
-                        // othersAttachement.status = OpeVisaStatus.TO_COMPLETED;
-                        delete othersAttachement.isEdit;
-                    }
+                    // if (othersAttachement.isEdit) {
+                    //     // othersAttachement.status = OpeVisaStatus.TO_COMPLETED;
+                    //     delete othersAttachement.isEdit;
+                    // }
 
                     if (isEmpty(othersAttachement.attachments)) { continue; }
 
@@ -226,7 +233,7 @@ export class TravelService extends CrudService<Travel> {
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            travel.proofTravel = { ...travel.proofTravel, status: getProofTravelStatus({ ...travel } as Travel, maxValidationLevelRequired)};
+            travel.proofTravel = { ...travel.proofTravel, status: getProofTravelStatus({ ...travel } as Travel, maxValidationLevelRequired) };
             // TODO get expenseDetails status from helper
             travel.status = getTravelStatus({ ...travel } as Travel);
             travel.editors = !isEmpty(travel.editors) ? travel.editors : [];
@@ -252,6 +259,8 @@ export class TravelService extends CrudService<Travel> {
 
             const { status, step, rejectReason, validator, references, signature } = data;
 
+            const { JUSTIFY, REJECTED, VALIDATION_CHAIN, TO_VALIDATED } = OpeVisaStatus;
+
             if (!step || !['proofTravel', 'expenseDetails', 'othersAttachements'].includes(step)) { throw new Error('StepNotProvided') };
 
             let travel = await TravelController.travelService.findOne({ filter: { _id } });
@@ -262,13 +271,15 @@ export class TravelService extends CrudService<Travel> {
 
             const validationLevelNumber = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
+            if (status === REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
-            let updateData: any, tobeUpdated: any;
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
+            let updateData: any, tobeUpdated: any = {};
 
             updateData = { status };
 
-            if (status === OpeVisaStatus.REJECTED) { updateData = { status, rejectReason } }
+            if (status === REJECTED) { updateData = { status, rejectReason } }
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
@@ -284,8 +295,8 @@ export class TravelService extends CrudService<Travel> {
                 });
                 if (rejectReason) { (proofTravel.validators || [])[(proofTravel?.validators || [])?.length - 1].rejectReason = rejectReason; }
 
-                if (!validator.fullRights && validator.level !== validationLevelNumber && status !== OpeVisaStatus.REJECTED) {
-                    updateData.status = OpeVisaStatus.VALIDATION_CHAIN;
+                if (!validator.fullRights && validator.level !== validationLevelNumber && status !== REJECTED) {
+                    updateData.status = VALIDATION_CHAIN;
                 }
                 proofTravel = { ...proofTravel, ...updateData };
                 travel.proofTravel = proofTravel;
@@ -301,23 +312,36 @@ export class TravelService extends CrudService<Travel> {
             if (step === 'expenseDetails') {
                 if (!references) { throw new Error('ReferenceNotProvided'); }
 
-                const { expenseDetails } = travel;
+                const { transactions } = travel;
 
                 stepData.push('État détaillé des dépenses');
+                
+                if (isEmpty(travel.validators)) { travel.validators = []; }
+                travel.validators?.push(validator);
 
-                for (const expenseDetailRef of references) {
+                for (const transactionMatch of references) {
 
-                    const expenseDetailIndex = expenseDetails.findIndex((elt: any) => elt.ref === expenseDetailRef) || -1;
+                    const transactionIndex = transactions.findIndex(elt => elt.match === transactionMatch);
 
-                    if (expenseDetailIndex && expenseDetailIndex < 0) { throw new Error('BadReference'); }
+                    if (transactionIndex && transactionIndex < 0) { throw new Error('BadReference'); }
 
-                    expenseDetails[expenseDetailIndex].validators.push(validator);
-
-                    expenseDetails[expenseDetailIndex] = { ...expenseDetails[expenseDetailIndex], ...updateData }
+                    transactions[transactionIndex] = { ...transactions[transactionIndex], ...updateData }
 
                 }
 
-                tobeUpdated = { expenseDetails };
+                if (transactions.findIndex(e => e.isExceed && e.status !== JUSTIFY) === -1) {
+                    if (maxValidationLevelRequired !== travel.expenseDetailsLevel) {
+                        tobeUpdated.expenseDetailsLevel = (travel?.expenseDetailsLevel || 1) + 1;
+                        transactions.forEach(e => e.status = VALIDATION_CHAIN);
+                    }
+                }
+
+                if (rejectReason) {
+                    tobeUpdated.expenseDetailsLevel = 1;
+                    transactions.forEach(e => e.status === VALIDATION_CHAIN && (e.status = TO_VALIDATED));
+                }
+
+                tobeUpdated.transactions = transactions;
 
             }
 
@@ -351,18 +375,16 @@ export class TravelService extends CrudService<Travel> {
                 steps: stepData.toString()
             });
 
-            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
-
-            travel.othersAttachmentStatus = getOnpStatementStepStatus(travel, 'othersAttachs');
+            // travel.othersAttachmentStatus = getOnpStatementStepStatus(travel, 'othersAttachs');
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
 
-            const otherAttachmentAmount = getTotal(travel.othersAttachements, 'stepAmount');
-            const expenseDetailAmount = getTotal(travel.expenseDetails, 'stepAmount');
+            // const otherAttachmentAmount = getTotal(travel.othersAttachements, 'stepAmount');
+            const expenseDetailAmount = getTotal(travel.transactions);
 
             travel = { ...travel, ...tobeUpdated };
             travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
             travel.status = getTravelStatus(travel);
-            travel.otherAttachmentAmount = otherAttachmentAmount;
+            // travel.otherAttachmentAmount = otherAttachmentAmount;
             travel.expenseDetailAmount = expenseDetailAmount;
             if (step === 'proofTravel') {
                 // travel = await this.verifyTravelTransactions(_id, travel);
