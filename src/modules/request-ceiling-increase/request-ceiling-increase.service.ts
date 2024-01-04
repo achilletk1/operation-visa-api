@@ -8,6 +8,7 @@ import { isEmpty } from "lodash";
 import moment from "moment";
 import { Status } from "./enum";
 import { deleteDirectory, readFile, saveAttachment } from "common/utils";
+import { SettingsController } from "modules/settings";
 
 export class RequestCeilingIncreaseService extends CrudService<RequestCeilingIncrease> {
 
@@ -47,8 +48,10 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
             await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id: insertionId }, ceiling);
 
+            const bankUser = await SettingsController.settingsService.findOne({ filter: { key: 'email_bank' } });
+
             notificationEmmiter.emit('increase-ceiling-mail', new IncreaseCeilingEvent(ceiling));
-            notificationEmmiter.emit('increase-ceiling-bank-mail', new IncreaseCeilingBankEvent(ceiling));
+            notificationEmmiter.emit('increase-ceiling-bank-mail', new IncreaseCeilingBankEvent(ceiling, bankUser?.data));
             // await Promise.all([
             //     NotificationsController.notificationsService.sendEmailIncreaseCeiling(ceiling),
             //     NotificationsController.notificationsService.sendEmailIncreaseCeilingBank(ceiling)
@@ -134,6 +137,11 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
                 //     NotificationsController.notificationsService.sendEmailRejectCeiling(ceiling)
                 // ]);
             }
+
+            // execute request in progress
+            await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id }, ceiling);
+            // notificationEmmiter.emit('ceiling-inprogress-mail', new CeilingInProgressEvent(ceiling));
+
 
         } catch (error) { throw error; }
     }
