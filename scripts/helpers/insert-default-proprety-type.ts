@@ -1,6 +1,5 @@
 import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
-import moment from 'moment'
 
 export const inserDefaultPropertyType = async () => {
 
@@ -42,7 +41,7 @@ export const inserDefaultPropertyType = async () => {
           isRequired: false
         }
       ],
-      dates: { created: moment().valueOf() }
+      dates: { created: new Date().valueOf() }
     },
     {
       label: 'Règlement frais de scolarité',
@@ -76,7 +75,7 @@ export const inserDefaultPropertyType = async () => {
           isRequired: true
         }
       ],
-      dates: { created: moment().valueOf() }
+      dates: { created: new Date().valueOf() }
     },
     {
       label: 'Règlement frais de santé',
@@ -96,7 +95,7 @@ export const inserDefaultPropertyType = async () => {
           isRequired: false
         }
       ],
-      dates: { created: moment().valueOf() }
+      dates: { created: new Date().valueOf() }
     },
     {
       label: "Règlement frais d'hôtel",
@@ -123,7 +122,7 @@ export const inserDefaultPropertyType = async () => {
           isRequired: false
         }
       ],
-      dates: { created: moment().valueOf() }
+      dates: { created: new Date().valueOf() }
     }
   ];
 

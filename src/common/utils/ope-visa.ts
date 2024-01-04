@@ -1,13 +1,13 @@
 import { ExpenseCategory, OperationType, OpeVisaStatus } from "modules/visa-operations";
-import { OnlinePaymentStatement } from "modules/online-payment";
+import { VisaTransaction } from 'modules/visa-transactions';
 import { isEmpty } from "lodash";
 
-export function getTotal(transactions: any[], type?: string | 'stepAmount') {
+export function getTotal(transactions: VisaTransaction[] | undefined, type?: string | 'stepAmount') {
     if (!transactions || isEmpty(transactions)) { return 0; }
 
-    if (type === 'stepAmount') { transactions = transactions.filter(elt => [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(elt.status)) }
+    if (type === 'stepAmount') { transactions = transactions.filter(elt => [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(elt?.status as OpeVisaStatus)) }
 
-    const totalAmountTransaction = transactions.map((elt) => +elt.amount).reduce((elt, prev) => elt + prev, 0);
+    const totalAmountTransaction = transactions.map(elt => +(elt?.amount as number)).reduce((elt, prev) => elt + prev, 0);
 
     return totalAmountTransaction;
 };
@@ -79,11 +79,12 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
     return OpeVisaStatus.TO_COMPLETED;
 };
 
-export function getOnpStatus(statements: OnlinePaymentStatement[]) {
-    if (isEmpty(statements)) { return OpeVisaStatus.EMPTY; }
-    const statusList = statements.map(elt => elt?.status);
+export function getOnpStatus(transaction: VisaTransaction[] | undefined) {
+    if (isEmpty(transaction)) { return OpeVisaStatus.EMPTY; }
+    const statusList = transaction?.filter(e => e.isExceed).map(elt => elt?.status) || [];
     if (statusList.includes(OpeVisaStatus.REJECTED)) { return OpeVisaStatus.REJECTED; }
     if (statusList.includes(OpeVisaStatus.TO_COMPLETED)) { return OpeVisaStatus.TO_COMPLETED; }
+    if (statusList.every(e => e === OpeVisaStatus.VALIDATION_CHAIN)) { return OpeVisaStatus.VALIDATION_CHAIN; }
     if (statusList.every(e => e === OpeVisaStatus.TO_VALIDATED)) { return OpeVisaStatus.TO_VALIDATED; }
     if (statusList.every(e => e === OpeVisaStatus.JUSTIFY)) { return OpeVisaStatus.VALIDATION_CHAIN; }
     return OpeVisaStatus.TO_COMPLETED;

@@ -1,6 +1,5 @@
 import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
-import moment from 'moment'
 
 export const inserDefaultVisaCeilings = async () => {
 
@@ -16,7 +15,7 @@ export const inserDefaultVisaCeilings = async () => {
             value: 5000000,
             description: 'Voyages courtes durées (PAIEMENT TPE & RETRAIT GAB)',
             date: {
-                created: moment().valueOf()
+                created: new Date().valueOf()
             }
         },
         {
@@ -24,7 +23,7 @@ export const inserDefaultVisaCeilings = async () => {
             value: 1000000,
             description: 'Paiement en ligne ou élèctronique',
             date: {
-                created: moment().valueOf()
+                created: new Date().valueOf()
             }
         },
         {
@@ -32,7 +31,7 @@ export const inserDefaultVisaCeilings = async () => {
             value: 5000000,
             description: 'Voyages longues durées (PAIEMENT TPE, RETRAIT GAB, paiement élèctronique)',
             date: {
-                created: moment().valueOf()
+                created: new Date().valueOf()
             }
         },
         {
@@ -40,7 +39,7 @@ export const inserDefaultVisaCeilings = async () => {
             value: 2000000,
             description: `Plafond pour les étudiants hors zone CEMAC relevant d'un ménage de la CEMAC lors des voyages courtes et longues durées`,
             date: {
-                created: moment().valueOf()
+                created: new Date().valueOf()
             }
         },
     ]

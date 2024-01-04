@@ -1,5 +1,4 @@
 import { getDatabase } from '../../src/database/mongodb';
-import moment from 'moment'
 
 export const inserDefaultSetting = async () => {
 
@@ -13,35 +12,35 @@ export const inserDefaultSetting = async () => {
     {
       key: 'max_upload_file_size',
       label: 'Taille maximale des fichier à importer',
-      created_at: moment().valueOf(),
+      created_at: new Date().valueOf(),
       updated_at: [],
       data: 5
     },
     {
       key: 'ttl_value',
       label: 'Parametrage du TTL',
-      created_at: moment().valueOf(),
+      created_at: new Date().valueOf(),
       updated_at: [],
       data: 40
     },
     {
       key: 'otp_status',
       label: "Parametrage globale de l'authentification avec OTP",
-      created_at: moment().valueOf(),
+      created_at: new Date().valueOf(),
       updated_at: [],
       data: true
     },
     {
       key: 'mail_gateway',
       label: 'Parametrage de la paserelle de mail',
-      created_at: moment().valueOf(),
+      created_at: new Date().valueOf(),
       updated_at: [],
       data: 10
     },
     {
       key: 'email_bank',
       label: 'Parametrage de l\'adresse mail qui recevra les mails de la banque',
-      created_at: moment().valueOf(),
+      created_at: new Date().valueOf(),
       updated_at: [],
       data: 'achille.tachum@londo-tech.com'
     }

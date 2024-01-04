@@ -269,8 +269,6 @@ export class TravelService extends CrudService<Travel> {
 
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
-            const validationLevelNumber = await ValidationLevelSettingsController.levelValidateService.count({});
-
             if (status === REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
@@ -279,7 +277,7 @@ export class TravelService extends CrudService<Travel> {
 
             updateData = { status };
 
-            if (status === REJECTED) { updateData = { status, rejectReason } }
+            if (status === REJECTED) { updateData = { status, rejectReason }; }
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
@@ -295,7 +293,7 @@ export class TravelService extends CrudService<Travel> {
                 });
                 if (rejectReason) { (proofTravel.validators || [])[(proofTravel?.validators || [])?.length - 1].rejectReason = rejectReason; }
 
-                if (!validator.fullRights && validator.level !== validationLevelNumber && status !== REJECTED) {
+                if (!validator.fullRights && validator.level !== maxValidationLevelRequired && status !== REJECTED) {
                     updateData.status = VALIDATION_CHAIN;
                 }
                 proofTravel = { ...proofTravel, ...updateData };
@@ -303,7 +301,7 @@ export class TravelService extends CrudService<Travel> {
                 // TODO generate this notification
                 // notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(travel as Travel, 'reject', 'proofTravel', +validator.level === 1 ? 'frontoffice' :'backoffice'))
 
-                // TODO notify next level if validator.level !== validationLevelNumber
+                // TODO notify next level if validator.level !== maxValidationLevelRequired
                 tobeUpdated = { proofTravel };
 
                 stepData.push('Preuve de voyage');
@@ -312,7 +310,7 @@ export class TravelService extends CrudService<Travel> {
             if (step === 'expenseDetails') {
                 if (!references) { throw new Error('ReferenceNotProvided'); }
 
-                const { transactions } = travel;
+                const transactions = travel?.transactions || [];
 
                 stepData.push('État détaillé des dépenses');
                 
@@ -321,7 +319,7 @@ export class TravelService extends CrudService<Travel> {
 
                 for (const transactionMatch of references) {
 
-                    const transactionIndex = transactions.findIndex(elt => elt.match === transactionMatch);
+                    const transactionIndex = transactions?.findIndex(elt => elt.match === transactionMatch) as number;
 
                     if (transactionIndex && transactionIndex < 0) { throw new Error('BadReference'); }
 
@@ -371,7 +369,7 @@ export class TravelService extends CrudService<Travel> {
             travel?.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
-                date: moment().valueOf(),
+                date: new Date().valueOf(),
                 steps: stepData.toString()
             });
 
@@ -379,13 +377,13 @@ export class TravelService extends CrudService<Travel> {
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
 
             // const otherAttachmentAmount = getTotal(travel.othersAttachements, 'stepAmount');
-            const expenseDetailAmount = getTotal(travel.transactions);
+            // const expenseDetailAmount = getTotal(travel.transactions);
 
             travel = { ...travel, ...tobeUpdated };
             travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
             travel.status = getTravelStatus(travel);
             // travel.otherAttachmentAmount = otherAttachmentAmount;
-            travel.expenseDetailAmount = expenseDetailAmount;
+            travel.expenseDetailAmount = getTotal(travel.transactions);
             if (step === 'proofTravel') {
                 // travel = await this.verifyTravelTransactions(_id, travel);
             }

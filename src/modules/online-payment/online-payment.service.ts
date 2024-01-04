@@ -1,9 +1,11 @@
+import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
-import { deleteDirectory, getTotal, readFile, saveAttachment } from "common/utils";
+import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
+import { saveAttachmentTravel } from "modules/travel/helper";
 import { OpeVisaStatus } from "modules/visa-operations";
 import httpContext from 'express-http-context';
 import { OnlinePaymentMonth } from "./model";
@@ -33,7 +35,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async getValidationsOnlinePayment(id: string) {
         let validators: any[] = [];
         try {
-            const onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
+            const onlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id: id } }) as OnlinePaymentMonth;
 
             // onlinePayment?.statements?.forEach((online: any) => {
             //     if ('validators' in online) {
@@ -73,8 +75,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const { month, year } = onlinepaymentMonth;
             const currentMonth = +(year + '' + month);
 
-            let onlinePayment: OnlinePaymentMonth = {};
-            try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { currentMonth, 'user._id': userId } }); } catch (error) { }
+            let onlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { currentMonth, 'user._id': userId } }) as OnlinePaymentMonth;
             if (!isEmpty(onlinePayment)) { throw Error('OnlinePayementExist'); }
 
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: VisaCeilingType.ONLINE_PAYMENT } });
@@ -152,15 +153,36 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         } catch (error) { throw error; }
     }
 
-    async updateOnlinePaymentsById(_id: string, data: OnlinePaymentMonth) {
+    async updateOnlinePaymentsById(_id: string, onlinePaymentMonth: OnlinePaymentMonth) {
         try {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            let actualOninePayment: OnlinePaymentMonth | null = null;;
-            try { actualOninePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } }); } catch (e) { }
+            const actualOninePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id } }) as OnlinePaymentMonth;
 
-            if (!actualOninePayment) { throw new Error('OnlinePayment'); }
+            if (isEmpty(actualOninePayment)) { throw new Error('OnlinePayment'); }
+
+            if (!isEmpty(onlinePaymentMonth?.transactions)) {
+                for (let transaction of onlinePaymentMonth?.transactions || []) {
+
+                    if (isEmpty(transaction?.attachments)) { continue; }
+                    transaction.attachments = saveAttachmentTravel(transaction?.attachments, onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+
+                    if (transaction?.isExceed && transaction?.nature) {
+                        const index = transaction?.attachments?.findIndex(elt => elt?.isRequired === true && !elt?.path);
+                        if (index === -1 && [OpeVisaStatus.EMPTY, OpeVisaStatus.TO_COMPLETED, null, undefined].includes(transaction?.status as OpeVisaStatus)) {
+                            transaction.status = OpeVisaStatus.TO_VALIDATED;
+                        }
+                    }
+                }
+            }
+
+            for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
+
+                if (isEmpty(othersAttachement?.attachments)) { continue; }
+
+                othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+            }
 
             // for (let statement of data.statements) {
             //     if (statement?.status && !adminAuth && statement?.isEdit) { delete statement.status; }
@@ -190,19 +212,18 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             //     }
             // }
             // data.statementAmounts = getTotal(data?.statements, 'stepAmount');
-            // const globalStatus = getOnpStatus(data?.statements);
             // data.status = globalStatus;
-
-            data.editors = !isEmpty(data.editors) ? data.editors : [];
-            data?.editors?.push({
+            
+            onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
+            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth.editors : [];
+            onlinePaymentMonth?.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
                 date: moment().valueOf(),
-                steps: "liste des déclaration d'achat en ligne"
+                steps: "État détaillé des dépenses"
             })
 
-            const result = await OnlinePaymentController.onlinePaymentService.update({ _id }, data);
-            return result;
+            return await OnlinePaymentController.onlinePaymentService.update({ _id }, onlinePaymentMonth);
         } catch (error) { throw error; }
     }
 
@@ -213,17 +234,50 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             if (!adminAuth) { throw new Error('Forbidden'); }
 
-            const { status, validator, statementRefs, rejectReason } = data;
+            const { status, validator, references, rejectReason } = data;
 
-            if (isEmpty(statementRefs)) throw new Error('MissingStatementRefs');
+            if (isEmpty(references)) throw new Error('MissingStatementRefs');
 
-            const onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: id } });
+            let onlinePaymentMonth = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id: id } }) as OnlinePaymentMonth;
 
-            if (!onlinePayment) { throw new Error('OnlinePaymentNotFound'); }
+            if (!onlinePaymentMonth) { throw new Error('OnlinePaymentNotFound'); }
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
-            //    const { statements } = onlinePayment;
-            let updateData: any = {};
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
+            let updateData: any = {}; let tobeUpdated: any = {};
+
+            if (status === OpeVisaStatus.REJECTED) { updateData = { status, rejectReason }; }
+
+            const transactions = onlinePaymentMonth?.transactions || [];
+
+            if (isEmpty(onlinePaymentMonth.validators)) { onlinePaymentMonth.validators = []; }
+            onlinePaymentMonth.validators?.push(validator);
+
+            for (const transactionMatch of references) {
+
+                const transactionIndex = transactions?.findIndex(elt => elt.match === transactionMatch) as number;
+
+                if (transactionIndex && transactionIndex < 0) { throw new Error('BadReference'); }
+
+                transactions[transactionIndex] = { ...transactions[transactionIndex], ...updateData }
+
+            }
+
+            if (transactions.findIndex(e => e.isExceed && e.status !== OpeVisaStatus.JUSTIFY) === -1) {
+                if (maxValidationLevelRequired !== onlinePaymentMonth.expenseDetailsLevel) {
+                    tobeUpdated.expenseDetailsLevel = (onlinePaymentMonth?.expenseDetailsLevel || 1) + 1;
+                    transactions.forEach(e => e.status = OpeVisaStatus.VALIDATION_CHAIN);
+                }
+            }
+
+            if (rejectReason) {
+                tobeUpdated.expenseDetailsLevel = 1;
+                transactions.forEach(e => e.status === OpeVisaStatus.VALIDATION_CHAIN && (e.status = OpeVisaStatus.TO_VALIDATED));
+            }
+
+            tobeUpdated.transactions = transactions;
+
             // for (let statement of statements) {
             //     if (!statementRefs.includes(statement.statementRef)) { continue; }
             //     statement.status = status;
@@ -236,16 +290,20 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             // const globalStatus = getOnpStatus(statements);
             // if (onlinePayment.status !== globalStatus) { updateData.status = globalStatus; }
 
-            updateData.editors = !isEmpty(updateData.editors) ? updateData.editors : [];
-            updateData.editors.push({
+            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth.editors : [];
+            onlinePaymentMonth.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
-                date: moment().valueOf(),
+                date: new Date().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"
             })
 
-            const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id }, { ...updateData });
-            return result;
+            onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
+            onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth.transactions);
+            onlinePaymentMonth = { ...onlinePaymentMonth, ...tobeUpdated };
+            onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
+
+            return await OnlinePaymentController.onlinePaymentService.update({ _id: id }, onlinePaymentMonth);
         } catch (error) { throw error; }
     }
 

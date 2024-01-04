@@ -1,6 +1,5 @@
 import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
-import moment from 'moment'
 
 export const insertDefaultTemplateSetting = async () => {
 
@@ -40,7 +39,7 @@ export const insertDefaultTemplateSetting = async () => {
             enabled: true,
             period: 0,
             dates: {
-                created: moment().valueOf(),
+                created: new Date().valueOf(),
             }
         },
 
@@ -77,7 +76,7 @@ export const insertDefaultTemplateSetting = async () => {
             enabled: true,
             period: 0,
             dates: {
-                created: moment().valueOf(),
+                created: new Date().valueOf(),
             }
         },
 
@@ -111,7 +110,7 @@ export const insertDefaultTemplateSetting = async () => {
             period: 38,
             enabled: true,
             dates: {
-                created: moment().valueOf(),
+                created: new Date().valueOf(),
             }
         }
     ]

@@ -67,8 +67,8 @@ export class UsersService extends CrudService<User>  {
             const authUser = httpContext.get('user');
             if (authUser && authUser.category < 500) { return new Error('Forbidden'); }
 
-            const filter: any = { clientCode: createData.clientCode };
-            if (scope === 'back-office') { filter.userCode = createData.userCode; }
+            const filter: any = { clientCode: createData.clientCode, category: { $in: [100, 200] } };
+            if (scope === 'back-office') { filter.userCode = createData.userCode; filter.category = { $nin: [100, 200] } }
 
             const existingUser = await UsersController.usersService.baseRepository.findOne({ filter });
 
