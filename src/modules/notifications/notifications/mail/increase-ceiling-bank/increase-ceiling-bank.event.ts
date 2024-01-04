@@ -5,10 +5,12 @@ export class IncreaseCeilingBankEvent extends IncreaseCeilingEvent implements In
     ageCode!: string;
     clientCode!: string;
 
-    constructor(ceiling: RequestCeilingIncrease) {
+    constructor(ceiling: RequestCeilingIncrease, bankReceiver: string) {
         super(ceiling);
         this.ageCode = ceiling?.account?.age || '';
         this.clientCode = ceiling?.user?.clientCode || '';
+        this.receiver = bankReceiver || '';
+
     }
 
 }

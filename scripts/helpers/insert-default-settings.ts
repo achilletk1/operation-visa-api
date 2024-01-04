@@ -37,6 +37,13 @@ export const inserDefaultSetting = async () => {
       created_at: moment().valueOf(),
       updated_at: [],
       data: 10
+    },
+    {
+      key: 'email_bank',
+      label: 'Parametrage de l\'adresse mail qui recevra les mails de la banque',
+      created_at: moment().valueOf(),
+      updated_at: [],
+      data: 'achille.tachum@londo-tech.com'
     }
   ]
   console.log('insert default max size file  collection');
