@@ -14,6 +14,8 @@ export const generateMailByTemplate = (content: any) => {
 
         const data = {
             ...content,
+            image: config.get('template.image'),
+            color: config.get('template.color'),
             actionUrl,
             civility: `Mr/Mme`,
         }

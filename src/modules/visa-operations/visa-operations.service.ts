@@ -59,7 +59,7 @@ export class VisaOperationsService extends CrudService<any> {
                 console.log('===============-==============  START TRAITMENT ====================-============');
                 console.log('===============-========================================================-============');
 
-                const transactions: VisaTransaction[] = [];
+                const transactions: VisaTransaction[] =  [];
                 for (const element of aggregatedTransactions) {
                     let { _id: cli, travel, onlinepayment } = element;
 
@@ -194,7 +194,7 @@ export class VisaOperationsService extends CrudService<any> {
 
         // sort transactions by date in ascending order
         travelTransactions = travelTransactions.sort((a, b) => {
-            return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+            return moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() < moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? -1 : moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() > moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? 1 : 0;
         });
         for (const transaction of travelTransactions) {
 
@@ -227,7 +227,7 @@ export class VisaOperationsService extends CrudService<any> {
 
             }
 
-            if (!transactionsGroupedByTravel[currentIndex]?.travelId || transactionsGroupedByTravel[currentIndex]?.travelId !== travel?._id.toString()) {
+            if (transactionsGroupedByTravel[currentIndex] && (!transactionsGroupedByTravel[currentIndex]?.travelId || transactionsGroupedByTravel[currentIndex]?.travelId !== travel?._id.toString())) {
                 currentIndex++;
             }
 
@@ -277,7 +277,7 @@ export class VisaOperationsService extends CrudService<any> {
             }
 
             try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch(e) {}
-            if (!travel || travel instanceof Error) { continue }
+            if (!travel || travel instanceof Error) { continue; }
             travel.notifications = [];
 
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {

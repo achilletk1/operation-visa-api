@@ -24,7 +24,7 @@
                                                                     <a href="" target="_blank" width="110px"
                                                                         height="50px" class="CToWUd"
                                                                         data-saferedirecturl="https://www.google.com/url?q=https://mandrillapp.com/track/click/30191028/ui8.net?p%3DeyJzIjoiQ2lPYVNhLTJsQWhZSVlBZ2o4b2ZtN0p6VURVIiwidiI6MSwicCI6IntcInVcIjozMDE5MTAyOCxcInZcIjoxLFwidXJsXCI6XCJodHRwczpcXFwvXFxcL3VpOC5uZXRcIixcImlkXCI6XCJkNmZhZTI5Y2FiZTE0MzY0OGQwOTlkYmM1NTNkOGY5ZVwiLFwidXJsX2lkc1wiOltcImQ2YWRjMzEwYTQ0NGIyM2ZmYzlkNTFiYTc4YzM5MWUwMjc5YzVlYzdcIl19In0&amp;source=gmail&amp;ust=1586697714629000&amp;usg=AFQjCNGzvPYuzJ4UGfmp6-93rUg8tJtJPg">
-                                                                        <img src="{{image}}">
+                                                                        <img src="{{image}}" width="110px" height="50px" class="CToWUd">
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -48,7 +48,7 @@
                                                                         Nous vous informons que votre validation est
                                                                         requise pour la {{type}} du client
                                                                         {{client}} à partir de ce jour du {{date}}<br>
-                                                                        Veuillez vous connecter à BCIONLINE afin de
+                                                                        Veuillez vous connecter à {{app}} afin de
                                                                         procéder à la validation.
                                                                     </p>
                                                                 </td>
@@ -56,10 +56,23 @@
                                                             <tr>
                                                                 <td>
                                                                     <br><br>
-                                                                    <a href="{{actionUrl}}"
-                                                                        style="background-color:{{color}};border:1px solid {{color}};border-radius:29px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:16px;line-height:35px;text-align:center;text-decoration:none;width:206px;-webkit-text-size-adjust:none;mso-hide:all;">
-                                                                        Retour vers l'application
-                                                                    </a>
+                                                                    <p style="font-family: Helvetica, sans-serif;font-size: 100%;margin: 0;padding: 0;margin-top: 0">
+                                                                        <!--[if mso]>
+                                                                            <v:roundrect href="{{actionUrl}}" style="width:273px;height:40px;v-text-anchor:middle;" arcsize="50%" stroke="f" fillcolor="{{color}}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word">
+                                                                                <w:anchorlock/>
+                                                                                <v:textbox inset="0,0,0,0">
+                                                                                <center>
+                                                                            <![endif]-->
+                                                                            <a href="{{actionUrl}}"
+                                                                                style="font-family: Helvetica, sans-serif;font-size:11px;margin: 0;padding: 0 24px;color: #ffffff;margin-top: 0;font-weight: bold;line-height: 40px;letter-spacing: 0.1ch;text-transform: uppercase;background-color: {{color}};border-radius: 5000px;box-shadow: 0 8px 14px 2px #f45c2324, 0 6px 20px 5px #f45c231f, 0 8px 10px -5px #f45c2333;display: inline-block;text-align: center;text-decoration: none;white-space: nowrap;-webkit-text-size-adjust: none">
+                                                                                Retour vers l'application
+                                                                            </a>
+                                                                            <!--[if mso]>
+                                                                                </center>
+                                                                                </v:textbox>
+                                                                            </v:roundrect>
+                                                                        <![endif]-->
+                                                                    </p>
                                                                 </td>
                                                                 <td style="width:160px;"></td>
                                                             </tr>

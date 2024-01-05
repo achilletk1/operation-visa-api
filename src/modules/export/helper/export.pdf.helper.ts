@@ -1,25 +1,29 @@
+import { OnlinePaymentMonth } from 'modules/online-payment';
+import { OpeVisaStatus } from 'modules/visa-operations';
+import { Travel, TravelType } from 'modules/travel';
+import { getYearMonthLabel } from 'common/helpers';
+import { getStatuslabel } from 'common/utils';
 import { pdf } from './pdf-generator.helper';
 import { config } from 'convict-config';
 import { User } from 'modules/users';
 import handlebars from 'handlebars';
 import { readFileSync } from 'fs';
-import moment from "moment";
-import { getStatuslabel } from 'common/utils';
-import { getYearMonthLabel } from 'common/helpers';
-import { OnlinePaymentMonth } from 'modules/online-payment';
-import { OpeVisaStatus } from 'modules/visa-operations';
-import { Travel, TravelType } from 'modules/travel';
 import { isEmpty } from 'lodash';
+import moment from "moment";
 
-const image = `${config.get('template.image')}`;
-const color = `${config.get('template.color')}`;
+const image = config.get('template.image');
+const color = config.get('template.color');
+const imageBase64 = config.get('template.imageBase64');
+const companySiteUrl = config.get('template.companySiteUrl');
+const app = config.get('appName') || config.get('template.app');
+const company = config.get('clientName') || config.get('template.company');
 
 const templateFormalNoticeLetter = readFileSync(__dirname + '/templates/formal-notice-letter.template.html', 'utf8');
 const templateExportNotification = readFileSync(__dirname + '/templates/export-notification.pdf.template.html', 'utf8');
 // const templateFormalNoticeMail = readFileSync(__dirname + '/templates/formal-notice-mail.template.html', 'utf8');
 const templateContainBlockedUserPdf = readFileSync(__dirname + '/templates/contain-blocked-users.pdf.template.html', 'utf8');
-let templateTravelDeclarationRecapPdf = readFileSync(__dirname + '/templates/travel-declaration-recap.html', 'utf8');
-let templateOnlinePaymentDeclarationRecapPdf = readFileSync(__dirname + '/templates/online-payment-declaration-recap.html', 'utf8');
+const templateTravelDeclarationRecapPdf = readFileSync(__dirname + '/templates/travel-declaration-recap.html', 'utf8');
+const templateOnlinePaymentDeclarationRecapPdf = readFileSync(__dirname + '/templates/online-payment-declaration-recap.html', 'utf8');
 
 export function getExtensionByContentType(contentType: string): string {
     const data: any = {
@@ -88,7 +92,7 @@ export async function generateFormalNoticeLetter(data: any): Promise<any> {
 
         const template = handlebars.compile(templateFormalNoticeLetter);
 
-        const html = template(data);
+        const html = template({ ...data, image, color, companySiteUrl, app, company, imageBase64 });
 
         return await pdf.setAttachment(html);
     } catch (error) { throw error; }
@@ -105,7 +109,7 @@ export async function generateFormalNoticeLetterAttachment(html: string): Promis
     } catch (error) { throw error; }
 };
 
-export async function generateNotificationExportPdf(user: any, notification: any, start: any, end: any): Promise<string> {
+export async function generateNotificationExportPdf(user: User, notification: any[], start: string, end: string): Promise<string> {
     try {
         const data = getTemplateNotificationPdfData(user, notification, start, end);
 
@@ -116,11 +120,17 @@ export async function generateNotificationExportPdf(user: any, notification: any
     } catch (error) { throw error; }
 };
 
-const getTemplateNotificationPdfData = (user: User, notifications: any, start: any, end: any) => {
+const getTemplateNotificationPdfData = (user: User, notifications: any[], start: string, end: string) => {
 
     const data: any = {};
     data.range_start = start;
     data.range_end = end;
+    data.app = app;
+    data.image = image;
+    data.color = color;
+    data.company = company;
+    data.imageBase64 = imageBase64;
+    data.companySiteUrl = companySiteUrl;
     //var message
 
     if (!start) {
@@ -137,7 +147,7 @@ const getTemplateNotificationPdfData = (user: User, notifications: any, start: a
     const dataStatus: any = { 100: 'CRÉÉE', 200: 'ENVOYÉE', 300: 'REÇU', 400: 'LUE' };
     const dataFormat: any = { 100: 'SMS', 200: 'MAIL' };
 
-    data.notifications = notifications.map((elt: any) => {
+    data.notifications = notifications.map(elt => {
         return {
             notification_send_date: elt?.dates?.sentAt ? moment(elt?.dates?.sentAt).format('DD/MM/YYYY') : 'N/A',
             notification_received_date: elt.dates.receivedAt ? moment(elt?.dates?.receivedAt).format('DD/MM/YYYY') : 'N/A',
@@ -166,15 +176,19 @@ export const generatePdfContainBlockedUser = async (usersLocked: any[]) => {
     } catch (error) { throw error; }
 };
 
-const getTemplateContainBlockedUserPdf = (data: any) => {
+const getTemplateContainBlockedUserPdf = (data: any[]) => {
     const _data: any = {};
+    _data.app = app;
     _data.image = image;
     _data.color = color;
+    _data.company = company;
+    _data.imageBase64 = imageBase64;
+    _data.companySiteUrl = companySiteUrl;
     _data.date = moment().format('DD/MM/YYYY');
     _data.transactions = [];
 
     // Add client data
-    data.forEach((elt: any) =>
+    data.forEach(elt =>
         _data.transactions.push(
             {
                 fullName: elt?.fullName || '',
@@ -196,8 +210,8 @@ const getTemplateContainBlockedUserPdf = (data: any) => {
 export const generateDeclarationFolderExportPdf = async (operation: Travel | OnlinePaymentMonth, type: 'travel' | 'onlinePayment') => {
 
     try {
-        let data: any;
-        let templateData: any;
+        let data: any = { image, color, companySiteUrl, app, company, imageBase64 };
+        let templateData: string;
 
         if (type === 'travel') {
             const travel = operation as Travel;
@@ -206,7 +220,7 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             let exceeddays = moment().diff(moment(travel?.transactions[0]?.date).add(30, 'days'), 'days')
 
             data = {
-                image,
+                ...data,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),
                 fullName: travel?.user?.fullName,
                 clientCode: travel?.user?.clientCode,
@@ -234,7 +248,7 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             let exceeddays = moment().diff(moment((onlinePaymentMonth?.transactions || [])[0]?.date).add(30, 'days'), 'days')
 
             data = {
-                image,
+                ...data,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),
                 fullName: onlinePaymentMonth?.user?.fullName,
                 clientCode: onlinePaymentMonth?.user?.clientCode,
@@ -252,9 +266,7 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
 
         const template = handlebars.compile(templateData);
         const html = template(data);
-        const test = await pdf.setAttachment(html);
-        return test
-
+        return await pdf.setAttachment(html);
     } catch (error) { throw error; }
 };
 

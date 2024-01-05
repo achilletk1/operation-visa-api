@@ -1,7 +1,8 @@
-import type { OnlinePaymentMonth, OnlinePaymentStatement } from "modules/online-payment";
 import { createDirectory, deleteDirectory, readFile, writeFile } from "common/utils";
 import type { ExpenseDetail, OthersAttachement, Travel } from "modules/travel";
+import type { OnlinePaymentMonth } from "modules/online-payment";
 import { getExtensionByContentType } from "./export.pdf.helper";
+import { VisaTransaction } from 'modules/visa-transactions';
 import type { Attachment } from 'modules/visa-operations';
 import { getRandomString } from "common/helpers";
 import { config } from "convict-config";
@@ -49,11 +50,11 @@ export const getFileNamesTree = (data: Travel | OnlinePaymentMonth, type: 'trave
         const onlinePayment = data as OnlinePaymentMonth;
         tree.push({
             label: 'Dépenses', type: 'folder',
-            files: onlinePayment?.statements?.map((elt: OnlinePaymentStatement, index: number) => {
+            files: onlinePayment?.transactions?.map((elt: VisaTransaction, index: number) => {
                 return {
-                    label: elt?.statementRef || index, type: 'folder',
+                    label: elt?.match || index, type: 'folder',
                     files: elt?.attachments?.filter((elt: Attachment) => !!elt?.path)?.map((att: Attachment) => {
-                        return { path: att?.path, label: `fichier_justif_${elt?.statementRef}_${index}`, type: 'file', contentType: att?.contentType };
+                        return { path: att?.path, label: `fichier_justif_${elt?.match}_${index}`, type: 'file', contentType: att?.contentType };
                     })
                 };
             })

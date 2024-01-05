@@ -238,6 +238,13 @@ export const config = convict({
             env: 'TEMPLATE_IMAGE',
             arg: 'template-image'
         },
+        imageBase64: {
+            doc: 'image that must be used as a logo on all templates as base64 format',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_IMAGE_BASE64',
+            arg: 'template-image-base64'
+        },
         color: {
             doc: 'color that must be used as a logo on all templates',
             format: String,
@@ -258,6 +265,13 @@ export const config = convict({
             default: '',
             env: 'TEMPLATE_COMPANY',
             arg: 'template-company'
+        },
+        companySiteUrl: {
+            doc: 'company name that must be used as a model on all templates',
+            format: String,
+            default: '',
+            env: 'TEMPLATE_COMPANY_SITE_URL',
+            arg: 'template-company-site-url'
         },
     },
     maxFileSizeUpload: {
