@@ -100,6 +100,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
 
             const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
+            visaTransactionsTmp.forEach(e => { e['TELEPHONE_CLIENT'] = e['TELEPHONE_CLIENT'].replace(/[+]/g, ''); });
             await VisaOperationsController.visaTransactionsTmpService.createMany(visaTransactionsTmp);
 
             const code = `${get(transactionsFile, '_id')?.toString()}-${fileName}`

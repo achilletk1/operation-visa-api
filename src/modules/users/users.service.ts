@@ -104,7 +104,7 @@ export class UsersService extends CrudService<User>  {
             user.pwdReseted = true;
             if (authUser) user.editors = [{ _id: authUser?._id, date: moment().valueOf(), fullName: authUser.fullName }];
 
-            const result = await UsersController.usersService.create(user);
+            const result = (await UsersController.usersService.create(user))?.data;
 
             notificationEmmiter.emit('users', new UsersEvent(user));
 

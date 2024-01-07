@@ -128,7 +128,7 @@ export class AuthService extends BaseService {
     async verifyCredentialsUser(credentials: any) {
         try {
             const { ncp, contactCBS = false } = credentials;
-            if (isDev) { await timeout(500); };
+            if (isDev) { await timeout(1000); }
             // const clientDatas = await CbsController.cbsService.getUserCbsDatasByNcp(ncp, null, null, 'client');
             // const client = clientDatas[0];
 
@@ -148,7 +148,7 @@ export class AuthService extends BaseService {
                 if ((!(clients as User[])[0].email && !(clients as User[])[0].tel) && (!(clients as CbsClientUser[])[0].TEL && !(clients as CbsClientUser[])[0].EMAIL)) throw new Error(errorMsg.MISSING_USER_DATA);
                 return {
                     email: (clients as CbsClientUser[])[0].EMAIL ?? (clients as User[])[0].email,
-                    phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel,
+                    phone: (clients as CbsClientUser[])[0].TEL ?? (clients as User[])[0].tel?.replace(/[+]/g, ''),
                     _id: (clients as User[])[0]._id ?? '',
                     clientCode: (clients as CbsClientUser[])[0].CLI ?? (clients as User[])[0].clientCode
                 };
@@ -160,7 +160,7 @@ export class AuthService extends BaseService {
                     const account = client.accounts?.find(account => account.NCP === ncp);
                     accounts.push({
                         email: (client as CbsClientUser).EMAIL ?? (client as User).email,
-                        phone: (client as CbsClientUser).TEL ?? (client as User).tel,
+                        phone: (client as CbsClientUser).TEL ?? (client as User).tel?.replace(/[+]/g, ''),
                         _id: (client as User)._id ?? '',
                         clientCode: (client as CbsClientUser).CLI ?? (client as User).clientCode,
                         agency: {
@@ -177,7 +177,7 @@ export class AuthService extends BaseService {
     async sendClientOtp(datas: any) {
         try {
             let { userId, clientCode, otpChannel, value } = datas;
-            if (isDev) { await timeout(500); }
+            if (isDev) { await timeout(1000); }
 
             const otp = {
                 value: getRandomString(6, true),
@@ -188,7 +188,7 @@ export class AuthService extends BaseService {
                 const createData = { clientCode, enabled: true, category: UserCategory.DEFAULT };
                 const insertResult = await UsersController.usersService.createUser(createData, 'front-office');
                 if (insertResult instanceof Error) throw new Error("Une erreur est survenu lors de la création de l'utilisateur");
-                userId = insertResult._id?.data;
+                userId = insertResult._id;
             }
 
             await UsersController.usersService.update({ _id: userId }, { otp });
@@ -208,6 +208,7 @@ export class AuthService extends BaseService {
     async verifyClientOtp(data: any): Promise<any> {
         try {
             let { userId, otp } = data;
+            if (isDev) { await timeout(1000); }
 
             if (!otp) { throw new Error('MissingAuthData'); }
 

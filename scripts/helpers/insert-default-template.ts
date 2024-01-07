@@ -93,7 +93,7 @@ export const insertDefaultTemplateSetting = async () => {
                 Nous vous invitons à contacter notre service clientèle dès que possible pour discuter de ce sujet afin de trouver une solution. 
                 Nous sommes désolés pour les désagréments que cela pourrait causer et nous espérons que nous pourrions résoudre ce problème rapidement.`,
 
-                sms: `Cher client, nous sommes contraints de bloquer votre carte bancaire au vu des transactions non justifiees dans les delais. Contactez nous en discuter`,
+                sms: `Cher client, nous sommes contraints de bloquer votre carte bancaire au vu des transactions non justifiees dans les delais. Rapprocher de votre agence pour plus d'informations`,
                 obj: `Notification de blocage de carte bancaire`
 
             },

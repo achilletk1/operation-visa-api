@@ -12,8 +12,18 @@ export class ValidationLevelSettingsController {
         catch (error) { next(error); }
     }
 
+    async insertNewUserIdInValidationLevel(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.insertNewUserIdInValidationLevel(req.body)); }
+        catch (error) { next(error); }
+    }
+
     async getValidationLevelSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await ValidationLevelSettingsController.levelValidateService.findAll({ filter: req.query })); }
+        catch (error) { next(error); }
+    }
+
+    async getOnlyValidationLevelSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ValidationLevelSettingsController.levelValidateService.findAll({ filter: req.query, projection: { usersId: 0, created_at: 0, enabled: 0 } })); }
         catch (error) { next(error); }
     }
 
@@ -31,6 +41,5 @@ export class ValidationLevelSettingsController {
         try { res.send(await ValidationLevelSettingsController.levelValidateService.update({ _id: req.params.id }, req.body)); }
         catch (error) { next(error); }
     }
-
 
 }

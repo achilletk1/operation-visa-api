@@ -177,11 +177,13 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 }
             }
 
-            for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
-
-                if (isEmpty(othersAttachement?.attachments)) { continue; }
-
-                othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+            if (!isEmpty(onlinePaymentMonth?.othersAttachements)) {
+                for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
+    
+                    if (isEmpty(othersAttachement?.attachments)) { continue; }
+    
+                    othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+                }
             }
 
             // for (let statement of data.statements) {
@@ -215,13 +217,15 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             // data.status = globalStatus;
             
             onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
-            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth.editors : [];
+            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth?.editors : [];
             onlinePaymentMonth?.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
                 date: moment().valueOf(),
                 steps: "État détaillé des dépenses"
-            })
+            });
+            onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
+            onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth?.transactions);
 
             return await OnlinePaymentController.onlinePaymentService.update({ _id }, onlinePaymentMonth);
         } catch (error) { throw error; }
@@ -290,7 +294,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             // const globalStatus = getOnpStatus(statements);
             // if (onlinePayment.status !== globalStatus) { updateData.status = globalStatus; }
 
-            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth.editors : [];
+            onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth?.editors : [];
             onlinePaymentMonth.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
@@ -299,7 +303,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             })
 
             onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
-            onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth.transactions);
+            onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth?.transactions);
             onlinePaymentMonth = { ...onlinePaymentMonth, ...tobeUpdated };
             onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
 

@@ -20,8 +20,8 @@ export const clientsDAO = {
                 ? ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
-                        (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
-                        (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p
                     where p.cli = '${cli}'`
                 : ` select
@@ -33,8 +33,8 @@ export const clientsDAO = {
                         trim(a.lib) as noms_complet,
                         (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_du_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) libelle_agence,
-                        (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
-                        (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p, evuti a
                     where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
 
@@ -163,11 +163,11 @@ export const clientsDAO = {
             b.ncp num_cpte,
             b.cli code_client,
             a.dfv date_fin_validite,
-            (select nomrest from bank.bkcli d where b.cli=d.cli) nomrest,
-            (select c.lib from bank.motycart c where c.type = b.typ) libelle_type,
+            (select nomrest from infoc.bkcli d where b.cli=d.cli) nomrest,
+            (select c.lib from infoc.motycart c where c.type = b.typ) libelle_type,
             concat(substr(b.ncart,1,6), concat('******',substr(b.ncart,13,4))) num_carte,
-            (select c.inti from bank.bkcom c where c.age = b.age and c.ncp = b.ncp and c.dev = b.dev) intitule_cmpte
-        from bank.bkcadab a, bank.moctr b
+            (select c.inti from infoc.bkcom c where c.age = b.age and c.ncp = b.ncp and c.dev = b.dev) intitule_cmpte
+        from infoc.bkcadab a, infoc.moctr b
         where
             a.ncart = b.ncart and
             a.ncpbc = b.ncp and

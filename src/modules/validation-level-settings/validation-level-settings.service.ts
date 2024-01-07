@@ -25,5 +25,13 @@ export class ValidationLevelSettingsService extends CrudService<LevelValidation>
         } catch (error) { throw error; }
     }
 
+    async insertNewUserIdInValidationLevel(data: { _id: string; userId: string; }) {
+        try {
+            const validationLevel = await ValidationLevelSettingsController.levelValidateService.findOne({ filter: { _id: data?._id }, projection: { usersId: 1 } });
+            validationLevel.usersId?.push(data?.userId);
+            await ValidationLevelSettingsController.levelValidateService.update({ _id: data?._id }, { usersId: validationLevel.usersId });
+        } catch (error) { throw error; }
+    }
+
 }
 

@@ -185,7 +185,7 @@ export class TravelService extends CrudService<Travel> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            if (travel.proofTravel && travel.proofTravel.isEdit) {
+            if (travel?.proofTravel && travel?.proofTravel?.isEdit) {
                 // travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
                 delete travel.proofTravel.isEdit;
             }
@@ -195,7 +195,7 @@ export class TravelService extends CrudService<Travel> {
                 // travel.proofTravel.status = OpeVisaStatus.TO_VALIDATED;
             }
 
-            if (!isEmpty(travel.transactions)) {
+            if (!isEmpty(travel?.transactions)) {
                 for (let transaction of travel?.transactions || []) {
                     // if (transaction.status && !adminAuth && transaction.isEdit) { delete transaction.status }
 
@@ -216,7 +216,7 @@ export class TravelService extends CrudService<Travel> {
                 }
             }
 
-            if (!isEmpty(travel.othersAttachements)) {
+            if (!isEmpty(travel?.othersAttachements)) {
                 for (let othersAttachement of travel?.othersAttachements || []) {
                     // if (othersAttachement.status && !adminAuth && othersAttachement.isEdit) { delete othersAttachement.status }
 
@@ -243,6 +243,8 @@ export class TravelService extends CrudService<Travel> {
                 date: moment().valueOf(),
                 steps: steps.toString() || 'Preuve de voyage'
             });
+            travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
+            travel.expenseDetailAmount = getTotal(travel?.transactions);
 
             return await TravelController.travelService.update({ _id: id }, travel);
         } catch (error) { throw error; }
@@ -377,13 +379,12 @@ export class TravelService extends CrudService<Travel> {
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
 
             // const otherAttachmentAmount = getTotal(travel.othersAttachements, 'stepAmount');
-            // const expenseDetailAmount = getTotal(travel.transactions);
 
             travel = { ...travel, ...tobeUpdated };
             travel.proofTravel.status = getProofTravelStatus({ ...travel }, maxValidationLevelRequired);
             travel.status = getTravelStatus(travel);
             // travel.otherAttachmentAmount = otherAttachmentAmount;
-            travel.expenseDetailAmount = getTotal(travel.transactions);
+            travel.expenseDetailAmount = getTotal(travel?.transactions);
             if (step === 'proofTravel') {
                 // travel = await this.verifyTravelTransactions(_id, travel);
             }

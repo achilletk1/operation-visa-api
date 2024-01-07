@@ -12,7 +12,7 @@ export function saveAttachment(ref: string, attachment: VisaOperationsAttachment
         let path = `${operationType}/${year}/${date}/${ref}`;
         if (subRepertory) { path = `${path}/${subRepertory}` }
         const extension = getExtensionByContentType(String(contentType));
-        const filename = `${date}_${ref}_${label}${extension}`;
+        const filename = `${date}_${ref}_${label}${extension}`.replace(/[\\/]/g, '_');
         writeFile(content, path, filename);
         attachment.path = `${path}/${filename}`;
         attachment.name = filename;

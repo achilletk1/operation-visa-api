@@ -6,9 +6,13 @@ export const levelValidateService = new ValidationLevelSettingsController();
 
 router.post('/', levelValidateService.insertValidationLevelSettings);
 
+router.post('/id', levelValidateService.insertNewUserIdInValidationLevel);
+
 router.put('/:id', levelValidateService.updateValidationLevelSettingsById);
 
 router.get('/', levelValidateService.getValidationLevelSettings);
+
+router.get('/level', levelValidateService.getOnlyValidationLevelSettings);
 
 router.get('/user-level-by-id/:id', levelValidateService.getUserLevelById);
 

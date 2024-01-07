@@ -36,7 +36,7 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
         total = array.map(elt => +elt.amount).reduce((elt, prev) => elt + prev, 0);
     }
 
-    let status = array.filter((e: any) => e.isExceed).map((elt: any) => +elt?.status);
+    let status = array.filter(e => e.isExceed).map(elt => +elt?.status);
 
     // renvoi le statut à compléter
     if (status.includes(OpeVisaStatus.TO_COMPLETED)
@@ -48,7 +48,7 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
     // renvoi le statut à valider
     if (status.includes(OpeVisaStatus.TO_VALIDATED)
         && !status.includes(OpeVisaStatus.TO_COMPLETED)
-        && !status.includes(OpeVisaStatus.EMPTY)
+        // && !status.includes(OpeVisaStatus.EMPTY)
         && !status.includes(OpeVisaStatus.REJECTED)
         && !status.includes(OpeVisaStatus.EXCEDEED)
     ) {

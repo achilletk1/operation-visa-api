@@ -187,6 +187,7 @@ export function removeSpacesFromResultSet(resultSet: any) {
       obj[key] = (typeof resultSet[key] === 'string')
         ? resultSet[key].trim().replace(/[�]/g, '°')
         : resultSet[key];
+      if (key === 'TEL' && typeof resultSet[key] === 'string') { obj[key] = obj[key].replace(/[+]/g, '') }
     }
   } catch (error) { logger.error('failed to remove spaces from resultset', { error }); }
 
