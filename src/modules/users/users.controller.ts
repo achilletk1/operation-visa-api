@@ -33,7 +33,7 @@ export class UsersController {
     }
 
     async getUsersLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await UsersController.usersService.getUsers(req.query, { fullName: 1, userCode: 1, clientCode: 1 })); }
+        try { res.send(await UsersController.usersService.getUsers(req.query, { fullName: 1, userCode: 1, clientCode: 1, email: 1, tel: 1, gender: 1 })); }
         catch (error) { next(error); }
     }
 

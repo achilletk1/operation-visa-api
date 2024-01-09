@@ -22,7 +22,7 @@ export const replaceSmsVariables = (content: any, userData: any, lang: 'fr' | 'e
 
 function setVariablesInObject(content: any, values: any, obj: any, isSms?: boolean, isTest?: boolean) {
     for (const key in content) {
-        if (!content.hasOwnProperty(key)) { break; }
+        if (!content.hasOwnProperty(key)) { continue; }
         obj[key] = goToTheLine(formatContent(content[key], values, isTest), isSms);
     }
 }
@@ -90,9 +90,12 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
     return str;
 }
 
-
 const goToTheLine = (str: string, isSms?: boolean) => {
     const reg = '//';
     str = str ?? '';
-    return str.includes(reg) ? isSms ? str.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str.split(reg).join('<br>')) : str;
+    return str.includes(reg)
+    ? isSms
+        ? str.replace(new RegExp(reg, 'g'), '\n')
+        : new handlebars.SafeString(str.split(reg).join('<br>'))
+    : str;
 }

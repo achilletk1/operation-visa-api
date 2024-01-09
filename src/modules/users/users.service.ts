@@ -108,7 +108,8 @@ export class UsersService extends CrudService<User>  {
 
             const result = (await UsersController.usersService.create(user))?.data;
 
-            notificationEmmiter.emit('users', new UsersEvent(user));
+            // TODO review if this notification works, and create SMS notification 
+            if (scope === 'back-office') notificationEmmiter.emit('users', new UsersEvent(user));
 
             return { _id: result };
         } catch (error) { throw error; }

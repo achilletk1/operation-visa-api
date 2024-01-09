@@ -40,7 +40,7 @@ export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
 }
 
 export const updateTravelMonth = async (travelMonth: TravelMonth, transactions: VisaTransaction[], toBeUpdated: any, travel: Travel) => {
-    travelMonth?.transactions?.push(...transactions);
+    travelMonth.transactions = isEmpty(travelMonth?.transactions) ? [...transactions] : [...(travelMonth?.transactions || []), ...transactions];
     toBeUpdated.notifications = verifyExcedingOnTravel(travelMonth, +Number(travel?.ceiling), travel);
     await TravelMonthController.travelMonthService.updateTravelMonthsById(travelMonth?._id, { transactions: travelMonth?.transactions, "dates.updated": moment().valueOf() } as Partial<TravelMonth>);
 

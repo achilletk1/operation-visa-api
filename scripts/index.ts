@@ -12,16 +12,16 @@ import readline from 'readline';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    // await dropTestCollections();
-    // await inserDefaultVisaCeilings();
-    // await inserDefaultLongTravelsTypes();
-    // await inserDefaultLetter();
-    // await inserDefaultPropertyType();
+    await dropTestCollections();
+    await inserDefaultVisaCeilings();
+    await inserDefaultLongTravelsTypes();
+    await inserDefaultLetter();
+    await inserDefaultPropertyType();
     await inserDefaultSetting();
-    // await insertDefaultTemplateSetting();
-    // await inserDefaultVouchers();
-    // await inserDefaultUsersValidations();
-    // await inserDefaultBankUsers();
+    await insertDefaultTemplateSetting();
+    await inserDefaultVouchers();
+    await inserDefaultUsersValidations();
+    await inserDefaultBankUsers();
 }
 
 (async () => {

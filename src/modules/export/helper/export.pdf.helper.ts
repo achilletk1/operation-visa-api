@@ -1,5 +1,6 @@
 import { OnlinePaymentMonth } from 'modules/online-payment';
 import { OpeVisaStatus } from 'modules/visa-operations';
+import { MailAttachment } from 'modules/notifications';
 import { Travel, TravelType } from 'modules/travel';
 import { getYearMonthLabel } from 'common/helpers';
 import { getStatuslabel } from 'common/utils';
@@ -87,14 +88,22 @@ export function getContentTypeByExtension(extension: string): string {
 
 };
 
-export async function generateFormalNoticeLetter(data: any): Promise<any> {
+export async function generateFormalNoticeLetter(data: any, attachmentFormat = false): Promise<string | MailAttachment[]> {
     try {
 
         const template = handlebars.compile(templateFormalNoticeLetter);
 
         const html = template({ ...data, image, color, companySiteUrl, app, company, imageBase64 });
 
-        return await pdf.setAttachment(html);
+        const pdfString: string = await pdf.setAttachment(html);
+
+        return (!attachmentFormat)
+            ? pdfString
+            : [{
+                name: `Lettre-de-mise-en-demeure-du-${moment().format('DD/MM/YYYY')}.pdf`,
+                content: pdfString,
+                contentType: 'application/pdf'
+            }] as MailAttachment[];
     } catch (error) { throw error; }
 };
 
@@ -211,7 +220,7 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
 
     try {
         let data: any = { image, color, companySiteUrl, app, company, imageBase64 };
-        let templateData: string;
+        let templateData = '';
 
         if (type === 'travel') {
             const travel = operation as Travel;

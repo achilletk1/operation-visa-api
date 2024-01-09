@@ -524,7 +524,7 @@ export class TravelService extends CrudService<Travel> {
         catch (error) { throw error; }
     }
 
-    async getTravelsForPocessing(params: { date: number; cli: string; travelType?: TravelType; }) {
+    async getTravelsForPocessing(params: { date: number; cli: string; travelType?: TravelType | any; }) {
         try { return await TravelService.travelRepository.getTravelsForPocessing(params); }
         catch (error) { throw error; }
     }

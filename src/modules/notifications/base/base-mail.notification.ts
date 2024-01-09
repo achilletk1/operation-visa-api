@@ -1,8 +1,8 @@
 import { NotificationsType, NotificationFormat, QueuePriority } from 'modules/notifications/enum';
-import { generateFormalNoticeLetterAttachment } from 'modules/export';
 import { replaceMailVariables } from 'modules/notifications/helper';
 import { MailNotificationInterface } from 'common/interfaces';
 import { MailAttachment } from 'modules/notifications/model';
+import { generateFormalNoticeLetter } from 'modules/export';
 import { TemplatesController } from 'modules/templates';
 import { QueueData, TemplateData } from 'common/types';
 import { LettersController } from 'modules/letters';
@@ -29,6 +29,8 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
   protected appName = config.get('appName') || config.get('template.app');
 
   protected company = config.get('clientName') || config.get('template.company');
+
+  protected formalNoticeLetterAttachmentBody!: string;
 
   constructor(
     protected templateName: string,
@@ -64,10 +66,10 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
   private async getSendersNotificationBody(): Promise<string> {
     try {
       let visaTemplate: any
-      try { visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.keyNotification } }); } catch(e) {}
+      try { visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.keyNotification } }); } catch (e) { }
 
       // send notice letters 
-      if (this.keyNotification === 'letters')  try { visaTemplate = (await LettersController.lettersService.findOne({})).pdf; } catch(e) {}
+      if (this.keyNotification === 'letters') visaTemplate = this.getFormalNoticeLetterVisaTemplateMail();
       if (!visaTemplate) { throw new Error(`Template ${this.keyNotification} Not Found`); }
 
       this.templateData = replaceMailVariables(visaTemplate[this.lang], this.eventData, this.lang, visaTemplate?.signature);
@@ -80,11 +82,17 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     }
   }
 
+  private async getFormalNoticeLetterVisaTemplateMail() {
+    const visaTemplate = await LettersController.lettersService.findOne({});
+    this.formalNoticeLetterAttachmentBody = replaceMailVariables(visaTemplate.pdf[this.lang], this.eventData, this.lang, visaTemplate?.pdf?.signature);
+    return visaTemplate.emailText;
+  }
+
   async sendNotification() {
     // if (isDevOrStag) { return null; }
 
     const body = (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody();
-    if (this.keyNotification === 'letters') { (this.eventData as any).attachments = await generateFormalNoticeLetterAttachment(body); }
+    if (this.keyNotification === 'letters') { (this.eventData as any).attachments = await generateFormalNoticeLetter(this.formalNoticeLetterAttachmentBody, true); }
     const queueData: QueueData = {
       subject: this.subject,
       receiver: !isDevOrStag ? String(get(this.eventData, 'receiver', '')) : config.get('emailTest'),

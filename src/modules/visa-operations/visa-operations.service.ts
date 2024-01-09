@@ -59,7 +59,7 @@ export class VisaOperationsService extends CrudService<any> {
                 console.log('===============-==============  START TRAITMENT ====================-============');
                 console.log('===============-========================================================-============');
 
-                const transactions: VisaTransaction[] =  [];
+                const transactions: VisaTransaction[] = [];
                 for (const element of aggregatedTransactions) {
                     let { _id: cli, travel, onlinepayment } = element;
 
@@ -251,10 +251,10 @@ export class VisaOperationsService extends CrudService<any> {
             let onlinePayment: OnlinePaymentMonth | null = null;
             const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
             const firstDate = moment(month, 'YYYYMM').startOf('month').valueOf();
-            const travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(firstDate, 'DD/MM/YYYY HH:mm:ss').valueOf(), travelType: TravelType.LONG_TERM_TRAVEL });
+            const travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(firstDate, 'DD/MM/YYYY HH:mm:ss').valueOf(), travelType: { $in: [TravelType.LONG_TERM_TRAVEL, TravelType.SHORT_TERM_TRAVEL] } });
 
             if (isEmpty(travel)) {
-                try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } }); } catch(e) {}
+                try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } }); } catch (e) { }
             }
 
             transactionsGroupedByOnlinePayment.push({ transactions: selectedTransactions, onlinePaymentId: onlinePayment?._id.toString() || null, travelId: travel?._id.toString() || null, month });
@@ -276,34 +276,20 @@ export class VisaOperationsService extends CrudService<any> {
                 travel = generateTravelByProcessing(cli, element?.transactions[0], { start: firstDate, end: lastDate });
             }
 
-            try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch(e) {}
+            try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch (e) { }
             if (!travel || travel instanceof Error) { continue; }
             travel.notifications = [];
 
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
-                travel.transactions = isEmpty(travel?.transactions) ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
-                toBeUpdated.notifications = verifyExcedingOnTravel(travel, +Number(travel?.ceiling));
-                const totalAmount = getTotal(travel?.transactions);
-                if (travel?.transactions?.length === element?.transactions?.length) { // to detect first transaction
-                    toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
-                    toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "SMS", 'firstTransaction'));
-                }
-                
-                toBeUpdated.transactions = travel.transactions;
-                toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(travel?.ceiling));
+                await this.addTransactionsInTravel(travel, element?.transactions, toBeUpdated);
             }
 
             if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
                 const months = [...new Set(element.transactions.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))] as string[];
                 for (const month of months) {
                     let selectedTransactions = element.transactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
-                    selectedTransactions = markExceedTransaction(selectedTransactions, +Number(travel?.ceiling));
-                    const travelMonth = await getOrCreateTravelMonth(travel, month);
-
-                    toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
-                    await updateTravelMonth(travelMonth, selectedTransactions, toBeUpdated, travel);
+                    await this.addTransactionsInTravel(travel, selectedTransactions, toBeUpdated);
                 }
-
             }
 
             await updateTravel(travel, toBeUpdated);
@@ -318,11 +304,8 @@ export class VisaOperationsService extends CrudService<any> {
 
             const { month } = element;
             if (element.travelId) {
-                try { travel = await TravelController.travelService.findOne({ filter: { _id: element.travelId } }); } catch(e) {}
-                element.transactions = markExceedTransaction(element.transactions, +Number(travel?.ceiling));
-                const travelMonth = await getOrCreateTravelMonth(travel, month);
-                toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
-                await updateTravelMonth(travelMonth, element.transactions, toBeUpdated, travel);
+                try { travel = await TravelController.travelService.findOne({ filter: { _id: element.travelId } }); } catch (e) { }
+                await this.addTransactionsInTravel(travel, element?.transactions, toBeUpdated, month);
                 await updateTravel(travel, toBeUpdated);
                 continue;
             }
@@ -335,7 +318,7 @@ export class VisaOperationsService extends CrudService<any> {
                 onlinePayment = element.onlinePaymentId
                     ? await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id: element.onlinePaymentId } })
                     : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment);
-            } catch(e) {}
+            } catch (e) { }
 
             onlinePayment.transactions = !element.onlinePaymentId ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
 
@@ -347,6 +330,29 @@ export class VisaOperationsService extends CrudService<any> {
             }
 
             await OnlinePaymentController.onlinePaymentService.updateOnlinePaymentsById(onlinePayment?._id, { ...toBeUpdated });
+        }
+    }
+
+    private async addTransactionsInTravel(travel: Travel, transactions: VisaTransaction[], toBeUpdated: ToBeUpdated, month: string = '') {
+        if (travel?.travelType === TravelType.SHORT_TERM_TRAVEL) {
+            travel.transactions = isEmpty(travel?.transactions) ? [...transactions] : [...travel?.transactions, ...transactions];
+            toBeUpdated.notifications = verifyExcedingOnTravel(travel, +Number(travel?.ceiling));
+            const totalAmount = getTotal(travel?.transactions);
+            if (travel?.transactions?.length === transactions?.length) { // to detect first transaction
+                toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
+                toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "SMS", 'firstTransaction'));
+            }
+    
+            toBeUpdated.transactions = travel.transactions;
+            toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(travel?.ceiling));
+        }
+
+        if (travel?.travelType === TravelType.LONG_TERM_TRAVEL) {
+            transactions = markExceedTransaction(transactions, +Number(travel?.ceiling));
+            const travelMonth = await getOrCreateTravelMonth(travel, month);
+
+            toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
+            await updateTravelMonth(travelMonth, transactions, toBeUpdated, travel);
         }
     }
 
