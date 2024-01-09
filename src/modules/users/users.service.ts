@@ -29,7 +29,9 @@ export class UsersService extends CrudService<User>  {
             if (authUser?.category < 500) { return new Error('Forbidden'); }
 
             const filter = formatUserFilters(filters);
-            return await UsersController.usersService.findAll({ filter });
+            const opts: any = { filter };
+            if (projection) { opts.projection = projection; }
+            return await UsersController.usersService.findAll(opts);
         } catch (error) { throw error; }
     }
 

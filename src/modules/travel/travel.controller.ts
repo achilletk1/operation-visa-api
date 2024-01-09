@@ -42,6 +42,11 @@ export class TravelController {
         catch (error) { next(error); }
     }
 
+    async getTravelsLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TravelController.travelService.findAllAggregate([{ $project: { _id: 0, clientCode: "$user.clientCode", fullName: "$user.fullName" } }])); }
+        catch (error) { next(error); }
+    }
+
     async generateQueryLink(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await TravelController.travelService.generateQueryLink(req.params.id)); }
         catch (error) { next(error); }

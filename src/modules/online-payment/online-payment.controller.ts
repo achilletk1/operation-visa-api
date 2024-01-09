@@ -23,6 +23,11 @@ export class OnlinePaymentController {
         catch (error) { next(error); }
     }
 
+    async getOnlinePaymentLabels(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await OnlinePaymentController.onlinePaymentService.findAllAggregate([{ $project: { _id: 0, clientCode: "$user.clientCode", fullName: "$user.fullName" } }])); }
+        catch (error) { next(error); }
+    }
+
     async insertOnlinePaymentStatement(req: Request, res: Response, next: NextFunction) {
         try { res.send(await OnlinePaymentController.onlinePaymentService.insertOnlinePaymentStatement(req.params.id as string, req.body as OnlinePaymentStatement)); }
         catch (error) { next(error); }

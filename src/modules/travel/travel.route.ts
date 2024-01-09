@@ -16,6 +16,8 @@ router.put('/steps/status/:id', travelController.updateTravelStepStatusById);
 
 router.get('/transactions/range', travelController.getTravelRangesTransactions);
 
+router.get('/labels', travelController.getTravelsLabels);
+
 router.get('/:id', travelController.findOneById);
 
 router.put('/:id', travelController.updateTravelById);
