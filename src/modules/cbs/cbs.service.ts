@@ -1,6 +1,5 @@
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
-import { CbsAccounts, CbsBankUser, CbsClientUser } from "./model";
-import { UserCategory, UsersController } from "modules";
+import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, cbsProduct } from "./model";
 import { clientsDAO } from "./oracle-daos";
 import { config } from "convict-config";
 import { get, isEmpty } from "lodash";
@@ -13,7 +12,7 @@ export class CbsService extends BaseService {
 
     constructor() { super() }
 
-    async getUserDataByCode(code: any, scope: 'back-office' | 'front-office' = 'front-office') {
+    async getUserDataByCode(code: any, scope: 'back-office' | 'front-office' = 'front-office'): Promise<{ client: CbsClientUser | CbsBankUser | undefined; accounts: CbsAccounts[]; }> {
         if (isDev) { await timeout(500); }
 
         try {
@@ -37,7 +36,7 @@ export class CbsService extends BaseService {
     }
 
     // TODO get user all informations
-    async getUserCbsDatasByNcp(ncp: any, age?: string | null, clc?: string | null, scope: 'client' | 'all' | null = null) {
+    async getUserCbsDatasByNcp(ncp: any, age?: string | null, clc?: string | null, scope: 'client' | 'all' | null = null): Promise<CbsClientUser[]> {
         try {
             if (isDev) { await timeout(500); }
 
@@ -65,7 +64,7 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getUserCbsAccountsDatas(datas: any) {
+    async getUserCbsAccountsDatas(datas: any): Promise<{ client: (CbsBankUser | CbsClientUser)[], accounts: CbsAccounts[] } > {
         if (isDev) { await timeout(500); }
 
         const { code, includeAccounts, isChaFilter } = datas;
@@ -91,7 +90,7 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getClientCardsByCli(cli: string) {
+    async getClientCardsByCli(cli: string): Promise<cbsCard[]> {
         try {
             let data = await clientsDAO.getClientCardsByCli(cli);
 
@@ -104,6 +103,23 @@ export class CbsService extends BaseService {
             return data;
         } catch (error: any) {
             this.logger.error(`Failed to get client cards by cli ${cli} \n${error.stack}`);
+            throw error;
+        }
+    }
+
+    async getProductData(code: string): Promise<(cbsProduct | undefined)[]> {
+        try {
+            let data = await clientsDAO.getProductData(code);
+
+            if (data instanceof Error) { throw data; }
+
+            if (data && data instanceof Array) {
+                data = data.map(dat => removeSpacesFromResultSet(dat));
+            }
+
+            return data;
+        } catch (error: any) {
+            this.logger.error(`Failed to get product data by code ${code} \n${error.stack}`);
             throw error;
         }
     }

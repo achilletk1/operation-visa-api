@@ -55,6 +55,7 @@ export interface CbsEmail {
 
 export interface cbsCard {
     AGE: string;
+    CPRO: string;
     NUM_CPTE: string;
     CODE_CLIENT: string;
     DATE_FIN_VALIDITE: string;
@@ -62,4 +63,9 @@ export interface cbsCard {
     LIBELLE_TYPE: string;
     NUM_CARTE: string;
     INTITULE_CMPTE: string;
+}
+
+export interface cbsProduct {
+    CPRO: string;
+    LIB: string;
 }

@@ -1,4 +1,4 @@
-import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone } from "../../model";
+import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone, cbsProduct } from "../../model";
 import { logger } from "winston-config";
 
 const classPath = 'oracle-daos.helper.clients';
@@ -763,6 +763,7 @@ export const helper = {
         const cards: cbsCard[] = [
             {
                 AGE: "01700",
+                CPRO: '185',
                 CODE_CLIENT: "70017464       ",
                 NOMREST: "ABONI OLANDA JERRY                                                 ",
                 NUM_CARTE: "604855******7233",
@@ -773,6 +774,7 @@ export const helper = {
             },
             {
                 AGE: "01700",
+                CPRO: '186',
                 CODE_CLIENT: "70017464       ",
                 NOMREST: "ABONI OLANDA JERRY                                                 ",
                 NUM_CARTE: "604855******6537",
@@ -783,6 +785,20 @@ export const helper = {
             }
         ];
         return Promise.resolve(cards);
+    },
+
+    getMockProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
+        const products: cbsProduct[] = [
+            {
+                CPRO: '185',
+                LIB: "CARTE LEADER EMV ",
+            },
+            {
+                CPRO: '186',
+                LIB: "CARTE EXPRESS EMV             ",
+            }
+        ];
+        return Promise.resolve([products.find(e => e.CPRO === code)]);
     },
 
 };

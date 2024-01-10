@@ -1,4 +1,4 @@
-import { BaseCbsUser, CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone } from "../model";
+import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone, cbsProduct } from "../model";
 import { executeQuery } from "common/oracle-daos/config";
 import { isDevOrStag } from "common/helpers";
 import { logger } from 'winston-config';
@@ -160,6 +160,7 @@ export const clientsDAO = {
         const query = `
         select
             b.age,
+            a.cpro,
             b.ncp num_cpte,
             b.cli code_client,
             a.dfv date_fin_validite,
@@ -177,6 +178,20 @@ export const clientsDAO = {
             b.sit = 'C' and
             b.cli = '${cli}'
         `;
+
+        const result = await executeQuery(query);
+
+        return result;
+    },
+
+    getProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
+        const methodPath = `${classPath}.getProductData()`;
+
+        logger.info(`init get product data matching cpro: ${code}`, { methodPath });
+
+        if (isDevOrStag) { return await helper.getMockProductData(code); }
+
+        const query = `select a.cpro, a.lib from infoc.bkprod a where a.cpro = '${code}'`;
 
         const result = await executeQuery(query);
 

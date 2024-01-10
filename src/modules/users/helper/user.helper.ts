@@ -15,7 +15,7 @@ export function formatUserFilters(fields: any) {
 
     if (category && +category === 100499) { fields.category = { '$in': [100, 200] }; }
 
-    if (category && +category === 500699) { fields.category = { '$in': [500, 600, 601, 602, 603, 604,700,701] }; }
+    if (category && +category === 500699) { fields.category = { '$in': [500, 600, 601, 602, 603, 604, 700, 701] }; }
 
     const range = (start && end) ? { start: moment(start).startOf('day').valueOf(), end: moment(end).endOf('day').valueOf() } :
         undefined;
@@ -40,7 +40,7 @@ export function formatUserFilters(fields: any) {
         delete fields.ncp;
     }
 
-    if (fields?.nameFilter) {} // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
+    if (fields?.nameFilter) { } // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
 
     if (isEmpty(fields)) fields = { enabled: true };
 
@@ -93,3 +93,25 @@ export function generateUsersExportXlsx(users: any[]) {
 
 }
 
+interface cardType {
+    _id?: string;
+    label?: string;
+    productCode?: string;
+    cardTransactionsType: CardTransactionsType[];
+    profiles?: CardProfile[];
+}
+
+interface CardTransactionsType {
+    _id?: string;
+    label?: string;
+    amount?: number;
+    frequency?: 'week' | 'month';
+    maxTransactionsPerDay?: number;
+}
+
+interface CardProfile {
+    code?: string;
+    label: string;
+    percentage?: number;
+    maxTransactionsPerDay?: number;
+}
