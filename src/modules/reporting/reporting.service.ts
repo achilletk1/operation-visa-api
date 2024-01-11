@@ -1,6 +1,6 @@
 import { OnlinePaymentController } from "modules/online-payment";
 import { parseNumberFields, timeout } from "common/helpers";
-import { getStatementByStatus } from "common/utils";
+import { getAGEListByBankCode, getBankList, getStatementByStatus } from "common/utils";
 import { TravelController } from "modules/travel";
 import { generateChartByType } from "./helper";
 import { BaseService } from "common/base";
@@ -30,11 +30,18 @@ export class ReportingService extends BaseService {
     async getStatusOperation(fields: any) {
         try {
             parseNumberFields(fields);
-            let { filterStatus, travelType, statemenType, status, start, end } = fields;
-            const data = statemenType === 'TRAVEL' ? await TravelController.travelService.getStatusOperationTravelReport({ travelType, filterStatus, start, end }) :
-                await OnlinePaymentController.onlinePaymentService.getStatusOperationOnlinePaymentReport({ filterStatus, start, end });
+            let { filterStatus, travelType, statemenType, start, end, agencyCode, regionCode } = fields;
+            const data = statemenType === 'TRAVEL' ? await TravelController.travelService.getStatusOperationTravelReport({ travelType, filterStatus, start, end, agencyCode, regionCode }) :
+                await OnlinePaymentController.onlinePaymentService.getStatusOperationOnlinePaymentReport({ filterStatus, start, end, agencyCode, regionCode });
             return getStatementByStatus(data);
         } catch (error) { throw error; }
+    }
+
+    async getAgencies({ filter }: any): Promise<any> {
+        try {
+            const bankList = await getBankList();
+            return getAGEListByBankCode(filter?.CountryCode, filter?.bankCode, bankList);
+        } catch (error) { throw (error); }
     }
 
     async getAverageTimeJustify(fields: any) {
@@ -46,7 +53,7 @@ export class ReportingService extends BaseService {
                 await OnlinePaymentController.onlinePaymentService.getAverageTimeJustifyOnlinePaymentReport({ status, start, end });
             const dateTime = new Date(data[0]?.time);
 
-            return { averageTime: `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s`};
+            return { averageTime: `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s` };
         } catch (error) { throw error; }
     }
 

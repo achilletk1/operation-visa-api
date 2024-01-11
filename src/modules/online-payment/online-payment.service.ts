@@ -116,7 +116,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async insertOnlinePayment(onlinePayment: OnlinePaymentMonth): Promise<any> {
         try {
             let user;
-            try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } }); } catch(e) {}
+            try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } }); } catch (e) { }
 
             if (user) {
                 onlinePayment.user = { ...onlinePayment.user, fullName: `${get(user, 'fname')} ${get(user, 'lname')}`, _id: user?._id?.toString() };
@@ -197,7 +197,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             // }
             // data.statementAmounts = getTotal(data?.statements, 'stepAmount');
             // data.status = globalStatus;
-            
+
             onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
             onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth?.editors : [];
             onlinePaymentMonth?.editors?.push({
@@ -303,7 +303,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         catch (error) { throw error; }
     }
 
-    async getStatusOperationOnlinePaymentReport(params: { filterStatus: any, start: number, end: number }) {
+    async getStatusOperationOnlinePaymentReport(params: { filterStatus: any, start: number, end: number, agencyCode: string, regionCode: [] }) {
         try { return await OnlinePaymentService.onlinePaymentRepository.getStatusOperationOnlinePaymentReport(params); }
         catch (error) { throw error; }
     }
