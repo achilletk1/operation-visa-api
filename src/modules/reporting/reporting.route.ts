@@ -13,4 +13,6 @@ router.get('/getAverageTimeJustify', reportingController.getAverageTimeJustify);
 
 router.get('/chart', reportingController.getChartData);
 
+router.get('/get-agencies', reportingController.getAgencies);
+
 export const reportingRoute = router;

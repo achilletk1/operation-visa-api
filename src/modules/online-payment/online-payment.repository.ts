@@ -10,7 +10,7 @@ export class OnlinePaymentRepository extends BaseRepository {
         return await this.findAllAggregate(generateConsolidateData(params));
     }
 
-    async getStatusOperationOnlinePaymentReport(params: { filterStatus: any, start: number, end: number })  {
+    async getStatusOperationOnlinePaymentReport(params: { filterStatus: any, start: number, end: number, agencyCode: string, regionCode: [] }) {
         return await this.findAllAggregate(statusOperation(params));
     }
 

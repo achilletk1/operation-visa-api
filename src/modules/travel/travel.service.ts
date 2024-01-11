@@ -313,7 +313,7 @@ export class TravelService extends CrudService<Travel> {
                 const transactions = travel?.transactions || [];
 
                 stepData.push('État détaillé des dépenses');
-                
+
                 if (isEmpty(travel.validators)) { travel.validators = []; }
                 travel.validators?.push(validator);
 
@@ -508,7 +508,7 @@ export class TravelService extends CrudService<Travel> {
         catch (error) { throw error; }
     }
 
-    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any }) {
+    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string ,regionCode:[]}) {
         try { return await TravelService.travelRepository.getStatusOperationTravelReport(params); }
         catch (error) { throw error; }
     }
