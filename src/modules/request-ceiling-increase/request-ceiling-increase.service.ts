@@ -28,7 +28,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
     async insertRequestCeilling(ceiling: RequestCeilingIncrease): Promise<any> {
         try {
-            const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { account: { ...ceiling.account }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
+            const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { cardType: { ...ceiling.cardType }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
 
             if (data.length > 0) throw new Error('ApplicationNotProcessed');
 

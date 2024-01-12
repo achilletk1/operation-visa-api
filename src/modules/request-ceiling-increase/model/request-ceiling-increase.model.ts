@@ -44,6 +44,8 @@ export interface RequestCeilingIncrease {
         accepted?: number;
         rejected?: number;
     };
+    cardType?: any;
+    cardProfileType?: any;
 }
 
 export interface Assignered {
