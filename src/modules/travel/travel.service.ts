@@ -508,7 +508,7 @@ export class TravelService extends CrudService<Travel> {
         catch (error) { throw error; }
     }
 
-    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string ,regionCode:[]}) {
+    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string, regionCode: string }) {
         try { return await TravelService.travelRepository.getStatusOperationTravelReport(params); }
         catch (error) { throw error; }
     }

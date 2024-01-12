@@ -42,7 +42,7 @@ export const generateConsolidateData = (param: { status: any, start: number, end
     }]
 };
 
-export const statusOperation = (params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string,regionCode:[] }) => {
+export const statusOperation = (params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string, regionCode: string }) => {
 
     const { travelType, filterStatus, start, end, agencyCode, regionCode } = params
 
@@ -97,7 +97,7 @@ export const statusOperation = (params: { filterStatus: any, start: number, end:
             },
             {
                 $match: {
-                    "userDetails.age.code": ((!regionCode  || regionCode.join(',').length <= 0) || (regionCode && agencyCode) ) ? agencyCode : { $in: regionCode.join(',') }
+                    "userDetails.age.code": ((!regionCode || regionCode.split(',').length <= 0) || (regionCode && agencyCode)) ? agencyCode : { $in: regionCode.split(',') }
                 }
             }
         );
