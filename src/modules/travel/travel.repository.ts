@@ -11,7 +11,7 @@ export class TravelRepository extends BaseRepository {
         return await this.findAllAggregate(generateConsolidateData(params));
     }
 
-    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string ,regionCode:[]}) {
+    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string ,regionCode:string}) {
         return await this.findAllAggregate(statusOperation(params));
     }
 
