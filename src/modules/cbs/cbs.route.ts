@@ -12,6 +12,8 @@ router.get('/clients/data/:ncp', cbsController.getUserCbsDatasByNcp);
 
 router.get('/clients/cards/:cli', cbsController.getClientCardsByCli);
 
+router.get('/card/type/:code', cbsController.getCardsTypeByCode);
+
 router.get('/products/:code', cbsController.getProductData);
 
 export const cbsRoute = router;

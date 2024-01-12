@@ -28,6 +28,11 @@ export class CbsController {
         catch (error) { next(error); }
     }
 
+    async getCardsTypeByCode(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await CbsController.cbsService.getCardsTypeByCode(req.params?.code)); }
+        catch (error) { next(error); }
+    }
+
     async getProductData(req: Request, res: Response, next: NextFunction) {
         try { res.send(await CbsController.cbsService.getProductData(req.params?.code)); }
         catch (error) { next(error); }
