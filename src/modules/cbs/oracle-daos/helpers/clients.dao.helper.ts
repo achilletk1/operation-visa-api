@@ -764,27 +764,116 @@ export const helper = {
             {
                 AGE: "01700",
                 CPRO: '185',
-                CODE_CLIENT: "70017464       ",
-                NOMREST: "ABONI OLANDA JERRY                                                 ",
+                CODE_CLIENT: "70017464",
+                NOMREST: "ABONI OLANDA JERRY",
                 NUM_CARTE: "604855******7233",
                 DATE_FIN_VALIDITE: "2022-02-28",
                 NUM_CPTE: "37307077836",
-                INTITULE_CMPTE: "COMPTES SUR LIVRETS           ",
+                INTITULE_CMPTE: "COMPTES SUR LIVRETS",
                 LIBELLE_TYPE: "CARTE LEADER EMV  "
             },
             {
                 AGE: "01700",
                 CPRO: '186',
                 CODE_CLIENT: "70017464       ",
-                NOMREST: "ABONI OLANDA JERRY                                                 ",
+                NOMREST: "ABONI OLANDA JERRY",
                 NUM_CARTE: "604855******6537",
                 DATE_FIN_VALIDITE: "2022-02-28",
                 NUM_CPTE: "37207077837",
-                INTITULE_CMPTE: "COMPTES DE CHEQUES            ",
-                LIBELLE_TYPE: "CARTE EXPRESS EMV             "
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "CARTE EXPRESS EMV"
             }
         ];
         return Promise.resolve(cards);
+    },
+
+    getMockCardTypes: async (productCode: string): Promise<any> => {
+        const cartTypes = [
+            {
+                productCode: '185',
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 300000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Paiement',
+                        maxAmountPerDay: 500000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 8000,
+                    },
+                ],
+            },
+            {
+                productCode: '186',
+                cardTypeTransactions: [
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                ],
+            },
+        ];
+
+        const result = cartTypes.find(cartType => cartType.productCode == productCode);
+        return Promise.resolve(result);
+
     },
 
     getMockProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
