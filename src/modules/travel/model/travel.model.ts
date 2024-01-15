@@ -1,36 +1,36 @@
-import { Attachment, ExpenseCategory, OperationType, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { OpeVisaStatus, Validator, VisaOperationsAttachment } from "modules/visa-operations";
 import { VisaTransaction } from "modules/visa-transactions";
 import { Editor, User } from "modules/users";
 import { TravelType } from "../enum";
 
-export class ExpenseDetail {
-    ref?: string;
-    type?: OperationType;
-    date?: number;
-    currency?: any;
-    amount?: number;
-    object?: string;
-    status?: OpeVisaStatus;
-    rejectReason?: string;
-    expenceCategory?: ExpenseCategory;
-    validators!: Validator[];
-    attachments!: Attachment[];
-    isEdit?: boolean;
-}
+// export class ExpenseDetail {
+//     ref?: string;
+//     type?: OperationType;
+//     date?: number;
+//     currency?: any;
+//     amount?: number;
+//     object?: string;
+//     status?: OpeVisaStatus;
+//     rejectReason?: string;
+//     expenceCategory?: ExpenseCategory;
+//     validators!: Validator[];
+//     attachments!: VisaOperationsAttachment[];
+//     isEdit?: boolean;
+// }
 
-export class OthersAttachement {
-    ref?: string;
-    type?: OperationType;
-    date?: number;
-    currency?: any;
-    amount?: number;
-    object?: string;
-    status?: OpeVisaStatus;
-    rejectReason?: string;
-    attachments?: Attachment[];
-    validators!: Validator[];
-    isEdit?: boolean;
-}
+// export class OthersAttachement {
+//     ref?: string;
+//     type?: OperationType;
+//     date?: number;
+//     currency?: any;
+//     amount?: number;
+//     object?: string;
+//     status?: OpeVisaStatus;
+//     rejectReason?: string;
+//     attachments?: VisaOperationsAttachment[];
+//     validators!: Validator[];
+//     isEdit?: boolean;
+// }
 
 export class Travel {
     _id?: any;
@@ -66,20 +66,20 @@ export class Travel {
         isVisa?: boolean;
         isPassOut?: boolean;
         isPassIn?: boolean;
-        proofTravelAttachs?: Attachment[];
+        proofTravelAttachs?: VisaOperationsAttachment[];
         status?: OpeVisaStatus;
         rejectReason?: string;
         validators?: Validator[];
         isEdit?: boolean;
         nbrefOfMonth?: number;
     };
-    expenseDetails!: ExpenseDetail[];
+    // expenseDetails!: ExpenseDetail[];
     expenseDetailsStatus!: OpeVisaStatus;
     expenseDetailsLevel?: number;
     expenseDetailAmount?: number;
-    othersAttachements!: OthersAttachement[];
-    othersAttachmentStatus?: OpeVisaStatus;
-    otherAttachmentAmount?: number;
+    othersAttachements!: VisaOperationsAttachment[];
+    // othersAttachmentStatus?: OpeVisaStatus;
+    // otherAttachmentAmount?: number;
     transactions!: VisaTransaction[];
     validators?: Validator[];
     editors?: Editor[];

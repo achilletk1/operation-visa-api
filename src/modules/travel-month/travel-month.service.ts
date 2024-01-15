@@ -1,14 +1,21 @@
+import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { getOnpStatementStepStatus, getTotal } from "common/utils";
 import { TravelMonthRepository } from "./travel-month.repository";
 import { TravelMonthController } from "./travel-month.controller";
+import { VisaTransaction } from "modules/visa-transactions";
+import { getTravelStatus } from "modules/travel/helper";
 import { OpeVisaStatus } from "modules/visa-operations";
+import { getValidationsFolder } from "common/helpers";
 import { saveAttachmentTravelMonth } from "./helper";
 import { TravelController } from 'modules/travel';
 import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
 import { isEmpty, get } from "lodash";
 import { TravelMonth } from "./model";
-import moment from 'moment';
+
+export interface IsEdit {
+    isEdit?: boolean;
+}
 
 export class TravelMonthService extends CrudService<TravelMonth> {
 
@@ -26,26 +33,33 @@ export class TravelMonthService extends CrudService<TravelMonth> {
         } catch (error) { throw error; }
     }
 
+    async getValidationsTravelMonth(_id: string) {
+        try {
+            const travel = await TravelMonthController.travelMonthService.findOne({ filter: { _id } });
+            return getValidationsFolder(travel);
+        } catch (error) { throw error; }
+    }
+
     async updateTravelMonthsById(_id: string, travelMonth: Partial<TravelMonth>) {
         try {
             const authUser = httpContext.get('user');
-            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+            const adminAuth = authUser?.category >= 500 && authUser?.category < 700;
 
-            const actualTravelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { _id }});
+            const actualTravelMonth: TravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
 
             if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
 
-            if (!isEmpty(travelMonth.expenseDetails)) {
-                for (let expenseDetail of (travelMonth?.expenseDetails || [])) {
-                    if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
+            if (!isEmpty(travelMonth.transactions)) {
+                for (let transaction of (travelMonth?.transactions || []) as (VisaTransaction & IsEdit)[]) {
+                    if (transaction.status && !adminAuth) { delete transaction.status }
 
-                    if (expenseDetail.isEdit) {
-                        expenseDetail.status = OpeVisaStatus.TO_VALIDATED;
-                        delete expenseDetail.isEdit;
+                    if (transaction.isEdit) {
+                        transaction.status = OpeVisaStatus.TO_VALIDATED;
+                        delete transaction.isEdit;
                     }
 
-                    if (isEmpty(expenseDetail.attachments)) { continue; }
-                    expenseDetail.attachments = saveAttachmentTravelMonth(expenseDetail?.attachments, _id, Number(travelMonth?.dates?.created));
+                    if (isEmpty(transaction.attachments)) { continue; }
+                    transaction.attachments = saveAttachmentTravelMonth(transaction?.attachments, _id, travelMonth?.dates?.created);
                 }
             }
             return await TravelMonthController.travelMonthService.update({ _id }, travelMonth);
@@ -55,26 +69,26 @@ export class TravelMonthService extends CrudService<TravelMonth> {
     async updateManyTravelMonths(travelMonths: TravelMonth[]) {
         try {
             const authUser = httpContext.get('user');
-            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+            const adminAuth = authUser?.category >= 500 && authUser?.category < 700;
 
             if (isEmpty(travelMonths)) { throw new Error('TravelMonthsNotFound') }
 
             await Promise.all(travelMonths.map(async (travelMonth) => {
                 const _id = get(travelMonth, '_id');
-                const actualTravelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { _id }});
+                const actualTravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
                 if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
 
-                if (!isEmpty(travelMonth.expenseDetails)) {
-                    for (let expenseDetail of travelMonth.expenseDetails) {
-                        if (expenseDetail.status && !adminAuth) { delete expenseDetail.status }
+                if (!isEmpty(travelMonth.transactions)) {
+                    for (let transaction of (travelMonth.transactions || []) as (VisaTransaction & IsEdit)[]) {
+                        if (transaction.status && !adminAuth) { delete transaction.status }
 
-                        if (expenseDetail.isEdit) {
-                            expenseDetail.status = OpeVisaStatus.TO_VALIDATED;
-                            delete expenseDetail.isEdit;
+                        if (transaction.isEdit) {
+                            transaction.status = OpeVisaStatus.TO_VALIDATED;
+                            delete transaction.isEdit;
                         }
 
-                        if (isEmpty(expenseDetail.attachments)) { continue; }
-                        expenseDetail.attachments = saveAttachmentTravelMonth(expenseDetail?.attachments, _id, travelMonth?.dates?.created);
+                        if (isEmpty(transaction.attachments)) { continue; }
+                        transaction.attachments = saveAttachmentTravelMonth(transaction?.attachments, _id, travelMonth?.dates?.created);
                     }
                 }
                 return await TravelMonthController.travelMonthService.update({ _id }, travelMonth);
@@ -86,13 +100,13 @@ export class TravelMonthService extends CrudService<TravelMonth> {
     async updateTravelMonthExpendeDetailsStatusById(_id: string, data: any) {
         try {
             const authUser = httpContext.get('user');
-            const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
+            const adminAuth = authUser?.category >= 500 && authUser?.category < 700;
 
             if (!adminAuth) { throw new Error('Forbidden'); }
             const { status, rejectReason, validator, references } = data;
 
 
-            let travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: {_id }});
+            let travelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
 
             if (!travelMonth) { throw new Error('TravelMonthNotFound'); }
 
@@ -102,7 +116,9 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
-            let updateData: any, tobeUpdated: any;
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
+
+            let updateData: any, tobeUpdated: { transactions?: VisaTransaction[]; expenseDetailsLevel?: number; } = {};
 
             updateData = { status };
 
@@ -110,37 +126,50 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             if (!references) { throw new Error('ReferenceNotProvided'); }
 
-            const { expenseDetails } = travelMonth;
+            const transactions = travelMonth?.transactions || [];
 
-            for (const expenseDetailRef of references) {
+            if (isEmpty(travelMonth.validators)) { travelMonth.validators = []; }
+            travelMonth.validators?.push(validator);
 
-                const expenseDetailIndex = expenseDetails.findIndex((elt: any) => elt.ref === expenseDetailRef);
+            for (const transactionMatch of references) {
 
-                if (expenseDetailIndex < 0) { throw new Error('BadReference'); }
+                const transactionIndex = transactions?.findIndex((elt: any) => elt.match === transactionMatch) as number;
 
-                expenseDetails[expenseDetailIndex].validators.push(validator);
+                if (transactionIndex < 0) { throw new Error('BadReference'); }
 
-                expenseDetails[expenseDetailIndex] = { ...expenseDetails[expenseDetailIndex], ...updateData }
+                transactions[transactionIndex] = { ...transactions[transactionIndex], ...updateData }
 
             }
 
-            tobeUpdated = { expenseDetails };
+            if (transactions.findIndex(e => e.isExceed && e.status !== OpeVisaStatus.JUSTIFY) === -1) {
+                if (maxValidationLevelRequired !== travelMonth.expenseDetailsLevel) {
+                    tobeUpdated.expenseDetailsLevel = (travelMonth?.expenseDetailsLevel || 1) + 1;
+                    transactions.forEach(e => e.status = OpeVisaStatus.VALIDATION_CHAIN);
+                }
+            }
 
-            const editors = !isEmpty(travel.editors) ? travel.editors : [];
-            editors?.push({
+            if (rejectReason) {
+                tobeUpdated.expenseDetailsLevel = 1;
+                transactions.forEach(e => e.status === OpeVisaStatus.VALIDATION_CHAIN && (e.status = OpeVisaStatus.TO_VALIDATED));
+            }
+
+            tobeUpdated.transactions = transactions;
+
+            travelMonth.editors = !isEmpty(travelMonth.editors) ? travelMonth.editors : [];
+            travelMonth.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
-                date: moment().valueOf(),
-                steps: 'expenseDetails'
+                date: new Date().valueOf(),
+                steps: 'État détaillé des dépenses'
             })
 
             travelMonth.expenseDetailsStatus = getOnpStatementStepStatus(travelMonth, 'expenseDetail');
-            const expenseDetailAmount = getTotal(travelMonth.expenseDetails, 'stepAmount');
-
+            
             travelMonth = { ...travelMonth, ...tobeUpdated };
-            travelMonth.expenseDetailAmount = expenseDetailAmount;
+            travelMonth.status = getTravelStatus(travelMonth);
+            travelMonth.expenseDetailAmount = getTotal(travelMonth.transactions, 'stepAmount');
 
-            await TravelController.travelService.updateTravelById(travelMonth?.travelId, { travel: { editors }, steps: ['expenseDetails'] });
+            // await TravelController.travelService.updateTravelById(travelMonth?.travelId, { travel: { editors }, steps: ['expenseDetails'] });
             return await TravelMonthController.travelMonthService.update({ _id }, travelMonth);
 
         } catch (error) { throw error; }

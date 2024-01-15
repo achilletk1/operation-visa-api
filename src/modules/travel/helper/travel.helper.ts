@@ -1,12 +1,12 @@
 import { deleteDirectory, getTotal, readFile, saveAttachment } from "common/utils";
-import { Attachment, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { VisaOperationsAttachment, OpeVisaStatus, Validator } from "modules/visa-operations";
 import { Editor } from "modules/users";
 import { Travel } from "../model";
 import { isEmpty } from "lodash";
-import moment from "moment";
+import { TravelMonth } from 'modules/travel-month';
 
-export const saveAttachmentTravel = (attachements: Attachment[] = [], id: string, date: number = moment().valueOf()) => {
-    for (let attachment of attachements) {
+export const saveAttachmentTravel = (attachments: VisaOperationsAttachment[] = [], id: string, date: number = new Date().valueOf()) => {
+    for (let attachment of attachments) {
         if (!attachment.temporaryFile) { continue; }
 
         const content = readFile(String(attachment?.temporaryFile?.path));
@@ -21,14 +21,15 @@ export const saveAttachmentTravel = (attachements: Attachment[] = [], id: string
         delete attachment.temporaryFile;
     }
 
-    return attachements;
+    return attachments;
 }
 
-export function getTravelStatus(travel: Travel): OpeVisaStatus {
+export function getTravelStatus(travel: Travel | TravelMonth, ceilingTravelMonth?: number): OpeVisaStatus {
 
     if (!travel) { throw new Error('TravelNotDefined'); }
     const amount = getTotal(travel?.transactions || []);
-    let status = travel?.ceiling && +travel?.ceiling < amount ? [travel?.proofTravel?.status, travel?.expenseDetailsStatus] : [travel?.proofTravel?.status];
+    const ceiling = ceilingTravelMonth || (travel as Travel)?.ceiling
+    let status = ceiling && +ceiling < amount ? [((travel as Travel)?.proofTravel?.status || []), travel?.expenseDetailsStatus] : [((travel as Travel)?.proofTravel?.status || [])];
 
     if (status.every(elt => elt === OpeVisaStatus.EMPTY)) { return OpeVisaStatus.EMPTY; }
 

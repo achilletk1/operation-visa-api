@@ -21,7 +21,7 @@ export class TemporaryFilesService extends CrudService<TemporaryFile> {
             const { fileName, content } = data;
             const temporaryFile: TemporaryFile = {
                 dates: {
-                    created: moment().valueOf()
+                    created: new Date().valueOf()
                 },
                 expiresAt: moment().add(3, 'hours').valueOf(),
                 fileName,
@@ -32,7 +32,7 @@ export class TemporaryFilesService extends CrudService<TemporaryFile> {
             const filePath = writeFile(content, `temporaryFiles/${insertedId?.data}`, fileName);
 
             temporaryFile.path = filePath;
-            temporaryFile.dates.updated = moment().valueOf();
+            temporaryFile.dates.updated = new Date().valueOf();
 
             await TemporaryFilesController.temporaryFilesService.update({ _id: insertedId?.data }, temporaryFile);
 
@@ -56,7 +56,7 @@ export class TemporaryFilesService extends CrudService<TemporaryFile> {
 
             temporaryFile.path = filePath;
             temporaryFile.fileName = fileName;
-            temporaryFile.dates.updated = moment().valueOf();
+            temporaryFile.dates.updated = new Date().valueOf();
 
             await TemporaryFilesController.temporaryFilesService.update({ _id: id }, temporaryFile);
 
@@ -73,7 +73,7 @@ export class TemporaryFilesService extends CrudService<TemporaryFile> {
 
     async removeTemporaryFiles() {
         try {
-            const currentDate = moment().valueOf();
+            const currentDate = new Date().valueOf();
             const temporaryFiles = await TemporaryFilesController.temporaryFilesService.findAll({ filter: { expiresAt: { $lt: currentDate } } });
             const ids = [];
             if (isEmpty(temporaryFiles)) { return; }

@@ -1,11 +1,12 @@
 import { generateVisaTransactionExportXlsx, generateCeillingExportXlsx, generateOnlineOperationsExportXlsx, generateOnlinePaymentExportXlsx, generateTravelsExportXlsx, generateExpenseDetailsExportXlsx } from "./helper/export.xlsx.helper";
 import { getExtensionByContentType, generateNotificationExportPdf, getContentTypeByExtension, generateDeclarationFolderExportPdf } from "./helper/export.pdf.helper";
 import { generateOperationZippedFolder, getFileNamesTree } from "./helper/export.zip.helper";
-import { OnlinePaymentController, OnlinePaymentStatement } from "modules/online-payment";
 import { isDevOrStag, parseNumberFields, timeout } from "common/helpers";
 import { FilesController } from 'modules/visa-transactions-files/files';
-import { ExpenseDetail, TravelController } from 'modules/travel';
+import { OnlinePaymentController } from "modules/online-payment";
 import { NotificationsController } from "modules/notifications";
+import { VisaTransaction } from "modules/visa-transactions";
+import { TravelController } from 'modules/travel';
 import { camelCase, get, isEmpty } from "lodash";
 import { UsersController } from "modules/users";
 import { BaseService } from "common/base";
@@ -453,12 +454,12 @@ export class ExportService extends BaseService {
             const dataTosendToExcel = {
                 'travel': {
                     type: 'expenseDetails',
-                    expenseDetails: get(data, 'expenseDetails', []) as ExpenseDetail[],
+                    expenseDetails: data.transactions || [],
                     name: 'Voyage'
                 },
                 'onlinePayment': {
                     type: 'onlinePayment',
-                    expenseDetails: get(data, 'statements', []) as OnlinePaymentStatement[],
+                    expenseDetails: data.transactions || [],
                     name: 'Paiement_en_ligne'
                 }
             }
@@ -468,12 +469,11 @@ export class ExportService extends BaseService {
                 folder.push({ content: excelExpenseDetailsData, label: 'Etat dépenses', type: 'file', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             }
 
-            if (type === 'travel' && !isEmpty(get(data, 'othersAttachements'))) {
-                const excelOthersAttachementsBuffer = await generateExpenseDetailsExportXlsx(get(data, 'othersAttachements', []), 'othersAttachements');
-                const excelOthersAttachementsData = Buffer.from(excelOthersAttachementsBuffer);
-                folder.push({ content: excelOthersAttachementsData, label: 'Autres Justifs', type: 'file', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-            }
+            // if (type === 'travel' && !isEmpty(get(data, 'othersAttachements'))) {
+            //     const excelOthersAttachementsBuffer = await generateExpenseDetailsExportXlsx(data.othersAttachements || [], 'othersAttachements');
+            //     const excelOthersAttachementsData = Buffer.from(excelOthersAttachementsBuffer);
+            //     folder.push({ content: excelOthersAttachementsData, label: 'Autres Justifs', type: 'file', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            // }
 
             const zip = generateOperationZippedFolder(folder);
 

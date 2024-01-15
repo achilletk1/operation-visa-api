@@ -90,7 +90,7 @@ export class ValidationsService extends CrudService<UserValidator> {
             const isGapInValidation = this.validationListHasGap(validationsLevelList, Number(userValidator?.level));
             if (isGapInValidation) { throw new Error('ValidationLevelGap'); }
 
-            userValidator.dates = !validatorExist ? { created: moment().valueOf() } : { ...userValidator.dates, updated: moment().valueOf() };
+            userValidator.dates = !validatorExist ? { created: new Date().valueOf() } : { ...userValidator.dates, updated: new Date().valueOf() };
             const result = !validatorExist
                 ? await ValidationsController.validationsService.create(userValidator)
                 : await ValidationsController.validationsService.update({ _id: get(validatorExist, '_id') }, { ...userValidator });
@@ -115,7 +115,7 @@ export class ValidationsService extends CrudService<UserValidator> {
             if (otp !== user?.otp?.value) { throw new Error('OTPNoMatch'); }
             let level: number;
 
-            const currTime = moment().valueOf();
+            const currTime = new Date().valueOf();
 
             if (Number(user?.otp?.expiresAt) <= currTime) { throw new Error('OTPExpired'); }
 
@@ -135,7 +135,7 @@ export class ValidationsService extends CrudService<UserValidator> {
                 fullName: `${user.fname} ${user.lname}`,
                 userCode: user?.userCode,
                 signature,
-                date: moment().valueOf(),
+                date: new Date().valueOf(),
                 status,
                 level,
                 rejectReason

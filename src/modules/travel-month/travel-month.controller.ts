@@ -27,6 +27,11 @@ export class TravelMonthController {
         catch (error) { next(error); }
     }
 
+    async getValidationsTravelMonth(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await TravelMonthController.travelMonthService.getValidationsTravelMonth(req.params.id as string)); }
+        catch (error) { next(error); }
+    }
+
     async updateTravelMonthsById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await TravelMonthController.travelMonthService.updateTravelMonthsById(req.params.id as string, req.body)); }
         catch (error) { next(error); }

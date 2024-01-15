@@ -3,12 +3,12 @@ import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from 'module
 import { generateAttachmentFromVoucher } from 'common/helpers';
 import { ImportsController } from './imports.controller';
 import { ImportsRepository } from './imports.repository';
+import { saveAttachmentImportation } from './helper';
 import httpContext from 'express-http-context';
 import { Voucher } from 'modules/vouchers';
 import { CrudService } from "common/base";
 import { isEmpty } from 'lodash';
 import { Import } from './model';
-import moment from 'moment';
 
 const expenseCategories = [{
     code: ExpenseCategory.IMPORT_OF_GOODS,
@@ -50,9 +50,13 @@ export class ImportsService extends CrudService<Import> {
             try { oldImportation = await ImportsController.importsService.findOne({ filter: { _id } }); } catch (error) { }
 
             // Update from imports history, Partial<importation> like { attachments } 
-            if (!isEmpty(importation?.attachments) && importation?.attachments instanceof Array && [EMPTY, TO_COMPLETED, REJECTED].includes(importation?.status as OpeVisaStatus)) {
-                if (oldImportation?.finalPayment && this.checkIfAllRequireAttachmentAreUploaded(importation?.attachments)) {
-                    importation.status = TO_VALIDATED;
+            if (!isEmpty(importation?.attachments) && importation?.attachments instanceof Array) {
+                importation.attachments = saveAttachmentImportation(importation.attachments, importation?._id, importation?.created_at);
+
+                if ([EMPTY, TO_COMPLETED, REJECTED].includes(importation?.status as OpeVisaStatus)) {
+                    if (oldImportation?.finalPayment && this.checkIfAllRequireAttachmentAreUploaded(importation?.attachments)) {
+                        importation.status = TO_VALIDATED;
+                    }
                 }
             }
 
@@ -71,10 +75,10 @@ export class ImportsService extends CrudService<Import> {
 
             importation.editors = [
                 ...(oldImportation?.editors || []),
-                { _id: authUser._id, fullName: authUser?.fullName, date: moment().valueOf(), steps, },
+                { _id: authUser._id, fullName: authUser?.fullName, date: new Date().valueOf(), steps, },
             ];
 
-            return await ImportsController.importsService.update({ _id }, { ...importation });
+            return await ImportsController.importsService.update({ _id }, importation);
 
             // TODO send notifications for client and bank
         } catch (error) { throw error; }

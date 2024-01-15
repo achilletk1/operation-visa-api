@@ -111,7 +111,7 @@ export async function generateFormalNoticeLetterAttachment(html: string): Promis
     try {
         const pdfString = await pdf.setAttachment(html);
         return [{
-            name: `Lettre-de-mise-en-demeure-du-${moment().valueOf()}.pdf`,
+            name: `Lettre-de-mise-en-demeure-du-${new Date().valueOf()}.pdf`,
             content: pdfString,
             contentType: 'application/pdf'
         }];

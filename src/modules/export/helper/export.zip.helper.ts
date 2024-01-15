@@ -1,10 +1,10 @@
 import { createDirectory, deleteDirectory, readFile, writeFile } from "common/utils";
-import type { ExpenseDetail, OthersAttachement, Travel } from "modules/travel";
+import { VisaOperationsAttachment } from "modules/visa-operations";
 import type { OnlinePaymentMonth } from "modules/online-payment";
 import { getExtensionByContentType } from "./export.pdf.helper";
 import { VisaTransaction } from 'modules/visa-transactions';
-import type { Attachment } from 'modules/visa-operations';
 import { getRandomString } from "common/helpers";
+import type { Travel } from "modules/travel";
 import { config } from "convict-config";
 import AdmZip from 'adm-zip';
 import path from 'path';
@@ -18,32 +18,32 @@ export const getFileNamesTree = (data: Travel | OnlinePaymentMonth, type: 'trave
         const travel = data as Travel;
         tree.push({
             label: 'Preuve De Voyage', type: 'folder',
-            files: travel?.proofTravel?.proofTravelAttachs?.filter((elt: Attachment) => !!elt?.path)?.map((elt: Attachment) => {
+            files: travel?.proofTravel?.proofTravelAttachs?.filter((elt: VisaOperationsAttachment) => !!elt?.path)?.map((elt: VisaOperationsAttachment) => {
                 return { path: elt?.path, label: elt?.label, type: 'file', contentType: elt?.contentType };
             })
         });
         tree.push({
             label: 'Dépenses', type: 'folder',
-            files: travel?.expenseDetails?.map((elt: ExpenseDetail, index: number) => {
+            files: travel?.transactions?.map((elt: VisaTransaction, index: number) => {
                 return {
-                    label: elt?.ref || index, type: 'folder',
-                    files: elt?.attachments?.filter((elt: Attachment) => !!elt?.path)?.map((att: Attachment, index: number) => {
-                        return { path: att?.path, label: `fichier_justif_${elt?.ref}_${index}`, type: 'file', contentType: att?.contentType };
+                    label: elt?.type || index, type: 'folder',
+                    files: elt?.attachments?.filter((elt: VisaOperationsAttachment) => !!elt?.path)?.map((att: VisaOperationsAttachment, index: number) => {
+                        return { path: att?.path, label: `fichier_justif_${elt?.type}_${index}`, type: 'file', contentType: att?.contentType };
                     })
                 };
             })
         });
-        tree.push({
-            label: 'Atres Justificatifs', type: 'folder',
-            files: travel?.othersAttachements?.map((elt: OthersAttachement, index: number) => {
-                return {
-                    label: elt?.ref || index, type: 'folder',
-                    files: elt?.attachments?.filter((elt: Attachment) => !!elt?.path)?.map((att: any) => {
-                        return { path: att?.path, label: `fichier_justif_${elt?.ref}_${index}`, type: 'file', contentType: att?.contentType };
-                    })
-                };
-            })
-        });
+        // tree.push({
+        //     label: 'Atres Justificatifs', type: 'folder',
+        //     files: travel?.othersAttachements?.map((elt: OthersAttachement, index: number) => {
+        //         return {
+        //             label: elt?.ref || index, type: 'folder',
+        //             files: elt?.attachments?.filter((elt: VisaOperationsAttachment) => !!elt?.path)?.map((att: any) => {
+        //                 return { path: att?.path, label: `fichier_justif_${elt?.ref}_${index}`, type: 'file', contentType: att?.contentType };
+        //             })
+        //         };
+        //     })
+        // });
     }
 
     if (type === 'onlinePayment') {
@@ -53,7 +53,7 @@ export const getFileNamesTree = (data: Travel | OnlinePaymentMonth, type: 'trave
             files: onlinePayment?.transactions?.map((elt: VisaTransaction, index: number) => {
                 return {
                     label: elt?.match || index, type: 'folder',
-                    files: elt?.attachments?.filter((elt: Attachment) => !!elt?.path)?.map((att: Attachment) => {
+                    files: elt?.attachments?.filter((elt: VisaOperationsAttachment) => !!elt?.path)?.map((att: VisaOperationsAttachment) => {
                         return { path: att?.path, label: `fichier_justif_${elt?.match}_${index}`, type: 'file', contentType: att?.contentType };
                     })
                 };

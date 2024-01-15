@@ -20,7 +20,7 @@ export const generateTravelByProcessing = (cli: string, transaction: VisaTransac
         travelType: TravelType.SHORT_TERM_TRAVEL,
         ceiling: 0,
         dates: {
-            created: moment().valueOf(),
+            created: new Date().valueOf(),
         },
         proofTravel: {
             // continents: [],
@@ -38,12 +38,12 @@ export const generateTravelByProcessing = (cli: string, transaction: VisaTransac
             proofTravelAttachs: [],
             validators: []
         },
-        expenseDetails: [],
+        // expenseDetails: [],
         expenseDetailsStatus: OpeVisaStatus.EMPTY,
         expenseDetailAmount: 0,
         othersAttachements: [],
-        otherAttachmentAmount: 0,
-        othersAttachmentStatus: OpeVisaStatus.EMPTY,
+        // otherAttachmentAmount: 0,
+        // othersAttachmentStatus: OpeVisaStatus.EMPTY,
         transactions: []
     }
 }
@@ -55,9 +55,9 @@ export const generateTravelMonthByProcessing = (travelId: string, userId: string
         travelId,
         month,
         dates: {
-            created: moment().valueOf(),
+            created: new Date().valueOf(),
         },
-        expenseDetails: [],
+        // expenseDetails: [],
         expenseDetailsStatus: OpeVisaStatus.EMPTY,
         expenseDetailAmount: 0,
         transactions: []

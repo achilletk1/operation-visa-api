@@ -2,7 +2,6 @@ import { PropertyAndServicesTypesRepository } from "./property-and-services-type
 import { PropertyAndServicesTypesController } from "./property-and-services-types.controller";
 import { PropertyAndServicesType } from "./model";
 import { CrudService } from "common/base";
-import moment from "moment";
 
 export class PropertyAndServicesTypesService extends CrudService<PropertyAndServicesType> {
 
@@ -15,14 +14,14 @@ export class PropertyAndServicesTypesService extends CrudService<PropertyAndServ
 
     async insertPropertyAndServicesTypes(data: PropertyAndServicesType) {
         try {
-            data.dates = { created: moment().valueOf() };
+            data.dates = { created: new Date().valueOf() };
             return await PropertyAndServicesTypesController.propertyAndServicesTypesService.create(data);
         } catch (error) { throw error; }
     }
 
     async updatePropertyAndServicesTypesById(id: string, data: PropertyAndServicesType) {
         try {
-            data.dates.updated = moment().valueOf();
+            data.dates = { ...data.dates, updated: new Date().valueOf() };
             return await PropertyAndServicesTypesController.propertyAndServicesTypesService.update({ _id: id }, data);
         } catch (error) { throw error; }
     }

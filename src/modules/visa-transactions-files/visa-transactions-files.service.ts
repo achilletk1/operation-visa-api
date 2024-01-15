@@ -78,7 +78,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const transactionsFile = {
                 label, content, email, status: 100,
                 month: +fileName.split('_')[3].slice(0, 6),
-                date: { created: moment().valueOf(), },
+                date: { created: new Date().valueOf(), },
                 user: { _id: authUser?._id?.toString(), fullName: authUser?.fullName, },
                 pending: moment().add(config.get('visaTransactionFilePendingValue'), 'minutes').valueOf(),
             };

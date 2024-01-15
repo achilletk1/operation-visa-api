@@ -1,14 +1,13 @@
 import { CeilingAssignedEvent, CeilingCaeAssignedEvent, IncreaseCeilingBankEvent, IncreaseCeilingEvent, notificationEmmiter, RejectCeilingEvent, ValidCeilingEvent } from "modules/notifications";
 import { RequestCeilingIncreaseRepository } from "./request-ceiling-increase.repository";
 import { RequestCeilingIncreaseController } from "./request-ceiling-increase.controller";
+import { deleteDirectory, readFile, saveAttachment } from "common/utils";
 import { Assignered, RequestCeilingIncrease } from "./model";
+import { SettingsController } from "modules/settings";
 import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
 import { isEmpty } from "lodash";
-import moment from "moment";
 import { Status } from "./enum";
-import { deleteDirectory, readFile, saveAttachment } from "common/utils";
-import { SettingsController } from "modules/settings";
 
 export class RequestCeilingIncreaseService extends CrudService<RequestCeilingIncrease> {
 
@@ -40,8 +39,8 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
                 const content = readFile(String(attachment?.temporaryFile?.path));
                 if (!content) { continue; }
                 attachment.content = content;
-                attachment = saveAttachment(insertedCeiling._id, attachment, Number(insertedCeiling.dates?.created), 'ceilingIncreaseRequest');
-                attachment.dates = { created: moment().valueOf() }
+                attachment = saveAttachment(insertedCeiling._id, attachment, insertedCeiling.dates?.created, 'ceilingIncreaseRequest');
+                attachment.dates = { created: new Date().valueOf() }
                 deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                 delete attachment.temporaryFile;
             }
@@ -83,7 +82,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
                 assignment,
                 validator: {},
                 status: 400,
-                'dates.assigned': moment().valueOf()
+                'dates.assigned': new Date().valueOf()
             });
 
             this.logger.info(`send ceiling assignment notification email`);

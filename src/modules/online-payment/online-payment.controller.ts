@@ -1,6 +1,6 @@
-import { OnlinePaymentMonth, OnlinePaymentStatement } from './model';
 import { OnlinePaymentService } from './online-payment.service';
 import { NextFunction, Request, Response } from 'express';
+import { OnlinePaymentMonth } from './model';
 
 export class OnlinePaymentController {
 
@@ -18,8 +18,8 @@ export class OnlinePaymentController {
         catch (error) { next(error); }
     }
 
-    async getValidationsOnlinePayment(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await OnlinePaymentController.onlinePaymentService.getValidationsOnlinePayment(req.params.id as string)); }
+    async getValidationsOnlinePaymentMonth(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await OnlinePaymentController.onlinePaymentService.getValidationsOnlinePaymentMonth(req.params.id as string)); }
         catch (error) { next(error); }
     }
 
@@ -29,7 +29,7 @@ export class OnlinePaymentController {
     }
 
     async insertOnlinePaymentStatement(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await OnlinePaymentController.onlinePaymentService.insertOnlinePaymentStatement(req.params.id as string, req.body as OnlinePaymentStatement)); }
+        try { res.send(await OnlinePaymentController.onlinePaymentService.insertOnlinePaymentStatement(req.params.id as string, req.body as OnlinePaymentMonth)); }
         catch (error) { next(error); }
     }
 

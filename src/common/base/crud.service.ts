@@ -5,8 +5,7 @@ import { ServiceInterface } from '../interfaces';
 import { BaseService } from './base.service';
 import { errorMsg, respMsg } from 'common';
 import { config } from 'convict-config';
-import { Document, ObjectId } from 'mongodb';
-import moment from 'moment';
+import { Document } from 'mongodb';
 
 import crypt from 'url-crypt';
 
@@ -21,7 +20,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
   async create(data: T | any): Promise<QueryResult> {
     try {
       data.enabled ??= true;
-      data.created_at ??= moment().valueOf();
+      data.created_at ??= new Date().valueOf();
 
       const newDocument = await this.baseRepository.create(data as globalThis.Document);
 
@@ -36,7 +35,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     try {
       documents = documents.map(elt => {
         elt.enable ??= true;
-        elt.created_at ??= moment().valueOf();
+        elt.created_at ??= new Date().valueOf();
         return elt;
       });
       const newDocument = await this.baseRepository.createMany(documents as globalThis.Document[]);

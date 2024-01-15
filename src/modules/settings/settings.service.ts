@@ -5,7 +5,6 @@ import { CrudService } from "common/base";
 import { User } from "modules/users";
 import { Setting } from "./model";
 import { isEmpty } from "lodash";
-import moment from "moment";
 
 export class SettingsService extends CrudService<Setting> {
 
@@ -24,7 +23,7 @@ export class SettingsService extends CrudService<Setting> {
             const authUser = httpContext.get('user') as User;
 
             currSetting.updated_at = isEmpty(currSetting?.updated_at) ? [] : currSetting?.updated_at;
-            currSetting.updated_at.unshift({ user: { _id: authUser._id, fullName: authUser.fullName }, date: moment().valueOf() });
+            currSetting.updated_at.unshift({ user: { _id: authUser._id, fullName: authUser.fullName }, date: new Date().valueOf() });
 
             if (currSetting.updated_at.length >= 10) { currSetting.updated_at.pop(); }
 

@@ -97,13 +97,20 @@ interface cardType {
     _id?: string;
     label?: string;
     productCode?: string;
-    cardTransactionsType: CardTransactionsType[];
+    cardTypeTransactions: CardTypeTransactions[];
     profiles?: CardProfile[];
+    enabled?: boolean;
+    created_at?: number;
 }
 
 interface CardTransactionsType {
     _id?: string;
     label?: string;
+    enabled?: boolean;
+    created_at?: number;
+}
+
+interface CardTypeTransactions extends CardTransactionsType {
     amount?: number;
     frequency?: 'week' | 'month';
     maxTransactionsPerDay?: number;

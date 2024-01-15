@@ -10,6 +10,8 @@ router.get('/', travelMonthController.getTravelMonths);
 
 router.get('/all', travelMonthController.getTravelMonths);
 
+router.get('/validators/:id', travelMonthController.getValidationsTravelMonth);
+
 router.put('/', travelMonthController.updateManyTravelMonths);
 
 router.put('/expense-details/status/:id', travelMonthController.updateTravelMonthExpendeDetailsStatusById);

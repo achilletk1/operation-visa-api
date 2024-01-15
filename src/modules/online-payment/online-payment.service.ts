@@ -2,11 +2,12 @@ import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, rea
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
+import { generateValidator, getValidationsFolder } from "common/helpers";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
-import { saveAttachmentTravel } from "modules/travel/helper";
 import { OpeVisaStatus } from "modules/visa-operations";
+import { saveAttachmentOnlinePayment } from "./helper";
 import httpContext from 'express-http-context';
 import { OnlinePaymentMonth } from "./model";
 import { CrudService } from "common/base";
@@ -32,20 +33,10 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         } catch (error) { throw error; }
     }
 
-    async getValidationsOnlinePayment(id: string) {
-        let validators: any[] = [];
+    async getValidationsOnlinePaymentMonth(_id: string) {
         try {
-            const onlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id: id } }) as OnlinePaymentMonth;
-
-            // onlinePayment?.statements?.forEach((online: any) => {
-            //     if ('validators' in online) {
-            //         online?.validators.forEach((elt: any) => { elt.status = online?.status, elt.step = 'Liste des déclarations' });
-            //         validators.push(...online.validators)
-            //     }
-            // })
-
-            return validators;
-
+            const onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { _id } });
+            return getValidationsFolder(onlinePayment);
         } catch (error) { throw error; }
     }
 
@@ -82,7 +73,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             if (!ceiling) { throw Error('CeilingNotFound'); }
 
             let insertion = false;
-            // onlinepaymentMonth.statementRef = `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`;
+            // onlinepaymentMonth.statementRef = `${new Date().valueOf() + generateId({ length: 3, useLetters: false })}`;
             if (isEmpty(onlinePayment)) {
                 onlinePayment = {
                     user: {
@@ -94,7 +85,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                         fullName: get(user, 'fullName', '')
                     },
                     dates: {
-                        created: moment().valueOf(),
+                        created: new Date().valueOf(),
                     },
                     ceiling: ceiling?.value,
                     amounts: 0,
@@ -108,20 +99,10 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             }
 
             const id = onlinePayment._id.toString();
-            for (let attachment of onlinepaymentMonth?.othersAttachements || []) {
-                if (!attachment.temporaryFile) { continue; }
-                const content = readFile(String(attachment?.temporaryFile?.path));
-                if (!content) { continue; }
-                attachment.content = content;
-                attachment = saveAttachment(onlinePayment._id, attachment, Number(onlinePayment.dates?.created), 'onlinePayment');
-                attachment.dates = { created: moment().valueOf() }
-                deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
-                delete attachment.temporaryFile;
-            }
-
+            onlinepaymentMonth.othersAttachements = saveAttachmentOnlinePayment(onlinepaymentMonth?.othersAttachements, onlinePayment._id, onlinePayment.dates?.created);
 
             onlinePayment.othersAttachements = onlinepaymentMonth.othersAttachements;
-            //  const updateData = { 'dates.updated': moment().valueOf(), statements: onlinePayment.statements }
+            //  const updateData = { 'dates.updated': new Date().valueOf(), statements: onlinePayment.statements }
             const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id.toString() }, onlinePayment);
             notificationEmmiter.emit('online-payement-declaration-mail', new OnlinePayementDeclarationEvent({ ...onlinePayment, _id: id }));
             // Promise.all([
@@ -143,7 +124,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             onlinePayment.status = OpeVisaStatus.TO_COMPLETED;
             const ceiling = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findOne({ filter: { type: VisaCeilingType.ONLINE_PAYMENT } })
-            onlinePayment.dates = { ...onlinePayment.dates, created: moment().valueOf() };
+            onlinePayment.dates = { ...onlinePayment.dates, created: new Date().valueOf() };
             onlinePayment.ceiling = get(ceiling, 'value', 0);
 
             const insertedId = (await OnlinePaymentController.onlinePaymentService.create(onlinePayment))?.data;
@@ -166,7 +147,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 for (let transaction of onlinePaymentMonth?.transactions || []) {
 
                     if (isEmpty(transaction?.attachments)) { continue; }
-                    transaction.attachments = saveAttachmentTravel(transaction?.attachments, onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+                    transaction.attachments = saveAttachmentOnlinePayment(transaction?.attachments, onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
 
                     if (transaction?.isExceed && transaction?.nature) {
                         const index = transaction?.attachments?.findIndex(elt => elt?.isRequired === true && !elt?.path);
@@ -178,17 +159,18 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             }
 
             if (!isEmpty(onlinePaymentMonth?.othersAttachements)) {
-                for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
+                onlinePaymentMonth.othersAttachements = saveAttachmentOnlinePayment(onlinePaymentMonth?.othersAttachements, onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+                // for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
     
-                    if (isEmpty(othersAttachement?.attachments)) { continue; }
+                //     if (isEmpty(othersAttachement?.attachments)) { continue; }
     
-                    othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
-                }
+                //     othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
+                // }
             }
 
             // for (let statement of data.statements) {
             //     if (statement?.status && !adminAuth && statement?.isEdit) { delete statement.status; }
-            //     statement.statementRef = statement.statementRef || `${moment().valueOf() + generateId({ length: 3, useLetters: false })}`
+            //     statement.statementRef = statement.statementRef || `${new Date().valueOf() + generateId({ length: 3, useLetters: false })}`
             //     for (let attachment of (statement?.attachments || [])) {
             //         if (!attachment?.temporaryFile) { continue; }
 
@@ -221,7 +203,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePaymentMonth?.editors?.push({
                 _id: authUser._id,
                 fullName: authUser?.fullName,
-                date: moment().valueOf(),
+                date: new Date().valueOf(),
                 steps: "État détaillé des dépenses"
             });
             onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
@@ -244,6 +226,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             let onlinePaymentMonth = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id: id } }) as OnlinePaymentMonth;
 
+            const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
+
             if (!onlinePaymentMonth) { throw new Error('OnlinePaymentNotFound'); }
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
@@ -256,7 +240,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const transactions = onlinePaymentMonth?.transactions || [];
 
             if (isEmpty(onlinePaymentMonth.validators)) { onlinePaymentMonth.validators = []; }
-            onlinePaymentMonth.validators?.push(validator);
+            const indexes: number[] = [];
 
             for (const transactionMatch of references) {
 
@@ -265,8 +249,11 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 if (transactionIndex && transactionIndex < 0) { throw new Error('BadReference'); }
 
                 transactions[transactionIndex] = { ...transactions[transactionIndex], ...updateData }
+                indexes.push(transactionIndex);
 
             }
+
+            onlinePaymentMonth.validators?.push(generateValidator(validator, user, status, rejectReason, undefined, indexes));
 
             if (transactions.findIndex(e => e.isExceed && e.status !== OpeVisaStatus.JUSTIFY) === -1) {
                 if (maxValidationLevelRequired !== onlinePaymentMonth.expenseDetailsLevel) {

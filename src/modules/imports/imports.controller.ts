@@ -13,7 +13,7 @@ export class ImportsController {
     }
 
     async findAll(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ImportsController.importsService.findAll({ filter: req.query })); }
+        try { res.send(await ImportsController.importsService.findAll({ filter: { ...req.query, excepts: 'user.clientCode' } })); }
         catch (error) { next(error); }
     }
 
@@ -28,7 +28,12 @@ export class ImportsController {
     }
 
     async getImportsProjected(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send((await ImportsController.importsService.findAll({ filter: { ...req.query, status: { $in: [101, 100, 400] }, $or: [{ finalPayment: { $exists: false } }, { finalPayment: false }] }, projection: { subject: 1, type: 1, transactions: 1, status: 1 } }))?.data); }
+        try { res.send((await ImportsController.importsService.findAll({ filter: { ...req.query, excepts: 'user.clientCode', status: { $in: [101, 100, 400] }, $or: [{ finalPayment: { $exists: false } }, { finalPayment: false }] }, projection: { subject: 1, type: 1, transactions: 1, status: 1 } }))?.data); }
+        catch (error) { next(error); }
+    }
+
+    async getImportationsLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ImportsController.importsService.findAllAggregate([{ $project: { _id: 0, clientCode: "$user.clientCode", fullName: "$user.fullName" } }])); }
         catch (error) { next(error); }
     }
 

@@ -1,6 +1,6 @@
 import { VisaTransaction } from "modules/visa-transactions";
-import { OpeVisaStatus } from "modules/visa-operations";
-import { ExpenseDetail } from "modules/travel";
+import { OpeVisaStatus, Validator } from "modules/visa-operations";
+import { Editor } from "modules/users";
 
 export class TravelMonth {
     _id?: any;
@@ -12,9 +12,12 @@ export class TravelMonth {
         created: number;
         updated?: number;
     };
-    expenseDetails!: ExpenseDetail[];
+    // expenseDetails!: ExpenseDetail[];
     expenseDetailsStatus?: OpeVisaStatus;
     expenseDetailAmount?: number;
     transactions?: VisaTransaction[];
+    expenseDetailsLevel?: number;
+    validators?: Validator[];
+    editors?: Editor[];
 
 }

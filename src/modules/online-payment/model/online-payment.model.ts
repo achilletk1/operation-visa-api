@@ -1,4 +1,4 @@
-import { Attachment, ExpenseCategory, OpeVisaStatus, Validator } from "modules/visa-operations";
+import { OpeVisaStatus, Validator, VisaOperationsAttachment } from "modules/visa-operations";
 import { VisaTransaction } from "modules/visa-transactions";
 import { User } from "modules/users";
 
@@ -17,8 +17,8 @@ export class OnlinePaymentMonth {
     year?: any;
     //statements!: OnlinePaymentStatement[];
     // statementAmounts?: number;
-    othersAttachements?: any[];
-    othersAttachmentStatus?: OpeVisaStatus;
+    othersAttachements?: VisaOperationsAttachment[];
+    // othersAttachmentStatus?: OpeVisaStatus;
     expenseDetailsStatus?: OpeVisaStatus;
     expenseDetailAmount?: number;
     expenseDetailsLevel?: number;
@@ -30,18 +30,18 @@ export class OnlinePaymentMonth {
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
 }
 
-export class OnlinePaymentStatement {
-    fullName?: string;
-    label?: string;
-    date?: number;
-    amount?: number;
-    nature?: any;
-    statementRef?: string;
-    comment?: string;
-    attachments?: Attachment[];
-    transactionRef?: string;
-    validators!: Validator[];
-    status?: OpeVisaStatus;
-    expenseCategory?: ExpenseCategory;
-    isEdit?: boolean;
-}
+// export class OnlinePaymentStatement {
+//     fullName?: string;
+//     label?: string;
+//     date?: number;
+//     amount?: number;
+//     nature?: any;
+//     statementRef?: string;
+//     comment?: string;
+//     attachments?: VisaOperationsAttachment[];
+//     transactionRef?: string;
+//     validators!: Validator[];
+//     status?: OpeVisaStatus;
+//     expenseCategory?: ExpenseCategory;
+//     isEdit?: boolean;
+// }

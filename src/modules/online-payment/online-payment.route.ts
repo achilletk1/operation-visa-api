@@ -14,7 +14,7 @@ router.get('/all', onlinePaymentController.getOnlinePaymentsBy);
 
 router.put('/update/:id', onlinePaymentController.updateOnlinePaymentsById);
 
-router.get('/validators/:id', onlinePaymentController.getValidationsOnlinePayment);
+router.get('/validators/:id', onlinePaymentController.getValidationsOnlinePaymentMonth);
 
 router.get('/labels', onlinePaymentController.getOnlinePaymentLabels);
 

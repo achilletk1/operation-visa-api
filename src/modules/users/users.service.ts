@@ -104,7 +104,7 @@ export class UsersService extends CrudService<User>  {
             user.clientCode = createData.clientCode;
             user.enabled = createData.enabled;
             user.pwdReseted = true;
-            if (authUser) user.editors = [{ _id: authUser?._id, date: moment().valueOf(), fullName: authUser.fullName }];
+            if (authUser) user.editors = [{ _id: authUser?._id, date: new Date().valueOf(), fullName: authUser.fullName }];
 
             const result = (await UsersController.usersService.create(user))?.data;
 
@@ -145,12 +145,13 @@ export class UsersService extends CrudService<User>  {
             if (authUser.category < 500) { return new Error('Forbidden'); };
             userDatas.editors?.push({
                 _id: `${authUser?._id}` || '',
-                date: moment()?.valueOf(),
+                fullName: `${authUser?.fullName}` || '',
+                date: new Date().valueOf(),
             });
 
             // userDatas.enabled = !userDatas?.enabled;
             userDatas.fullName = `${userDatas?.fname} ${userDatas?.lname}`;
-            userDatas.updated_at = moment().valueOf();
+            userDatas.updated_at = new Date().valueOf();
 
             const result = await UsersController.usersService.update({ _id: userDatas?._id }, userDatas);
             return result;

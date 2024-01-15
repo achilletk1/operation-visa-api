@@ -17,7 +17,7 @@ export interface VisaTransaction {
     amountCompens?: number;
     currencyCompens?: string;
     date?: string;
-    type?: string;
+    type?: 'RETRAIT DAB' | 'PAIEMENT TPE' | 'PAIEMENT INTERNET';
     ncp?: string;
     age?: string;
     card?: {

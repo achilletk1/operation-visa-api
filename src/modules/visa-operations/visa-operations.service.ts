@@ -133,7 +133,7 @@ export class VisaOperationsService extends CrudService<any> {
                 for (const travel of travels) {
                     if (isEmpty(travel?.transactions)) continue;
                     const firstDate = Math.min(...travel?.transactions?.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
-                    const currentDate = moment().valueOf();
+                    const currentDate = new Date().valueOf();
                     if (!travel?.user?.email) continue;
 
                     // TODO set lang dynamically

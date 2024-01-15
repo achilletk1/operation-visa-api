@@ -1,7 +1,6 @@
 import { TokenPayload, OauthToken } from '../model';
 import { config } from 'convict-config';
 import  jwt from 'jsonwebtoken';
-import  moment from 'moment';
 
 export function create(payload: TokenPayload): OauthToken {
     const issued = getCurrDateSeconds();
@@ -32,5 +31,5 @@ export function refresh(token: string) {
 
 const getCurrDateSeconds = (): number => {
     // tslint:disable-next-line: no-bitwise
-    return moment().valueOf() / 1000 | 0;
+    return new Date().valueOf() / 1000 | 0;
 };

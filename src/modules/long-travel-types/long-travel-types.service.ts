@@ -17,7 +17,7 @@ export class LongTravelTypesService extends CrudService<LongTravelType> {
         try {
             const longTravelType = await LongTravelTypesService.longTravelTypesRepository.findOne({ filter: { label: data?.label } }) as never as LongTravelType;
             if (longTravelType) { throw new Error('DataAlreadyExist') }
-            data.dates = { created : moment().valueOf() };
+            data.dates = { created : new Date().valueOf() };
             return await LongTravelTypesController.longTravelTypesService.create(data);
         } catch (error) { throw error; }
     }

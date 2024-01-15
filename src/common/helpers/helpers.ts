@@ -1,8 +1,12 @@
-import { VisaOperationsAttachment } from 'modules/visa-operations';
+import { VisaOperationsAttachment, OpeVisaStatus, Validator } from 'modules/visa-operations';
+import { OnlinePaymentMonth } from 'modules/online-payment';
+import { TravelMonth } from 'modules/travel-month';
 import { isEmpty, isString } from 'lodash';
 import { Voucher } from 'modules/vouchers';
+import { Travel } from 'modules/travel';
 import { config } from 'convict-config';
 import { logger } from 'winston-config';
+import { User } from 'modules/users';
 import handlebars from 'handlebars';
 import { Response } from 'express';
 import moment from 'moment';
@@ -257,6 +261,35 @@ export function generateAttachmentFromVoucher(voucher: Voucher, withoutVoucherId
   };
   if (!withoutVoucherId) { attachment.voucherId = voucher?._id; }
   return attachment;
+}
+
+export function generateValidator(validator: Validator, user: User, status: OpeVisaStatus, rejectReason: string, signature?: string, indexes?: number[]): Validator {
+  return {
+    _id: validator?._id,
+    fullName: user?.fullName || `${user?.fname} ${user?.lname}`,
+    clientCode: user?.clientCode,
+    userCode: user?.userCode,
+    signature: signature ?? undefined,
+    date: new Date().valueOf(),
+    status,
+    rejectReason: rejectReason ?? undefined,
+    level: validator.level,
+    indexes
+  };
+}
+
+export function getValidationsFolder(folder: Travel | OnlinePaymentMonth | TravelMonth) {
+  const validators = [];
+  if ((folder as Travel)?.proofTravel && 'validators' in (folder as Travel)?.proofTravel) {
+    (folder as Travel)?.proofTravel?.validators?.forEach(elt => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
+    validators.push(...(folder as Travel)?.proofTravel?.validators || []);
+  }
+
+  if ('validators' in folder) {
+    folder?.validators?.forEach(elt => { elt.step = 'État détaillé des dépenses' })
+    validators.push(...folder?.validators || []);
+  }
+  return validators;
 }
 
 declare type ObjectType<T> = {

@@ -1,7 +1,7 @@
-import { getExpenseCategoryLabel, getOperationTypeLabel, getStatuslabel } from 'common/utils';
-import { ExpenseDetail, OthersAttachement, Travel, TravelType } from 'modules/travel';
-import { OnlinePaymentStatement } from 'modules/online-payment';
+import { getExpenseCategoryLabel, getStatuslabel } from 'common/utils';
+import { VisaTransaction } from 'modules/visa-transactions';
 import { OpeVisaStatus } from 'modules/visa-operations';
+import { Travel, TravelType } from 'modules/travel';
 import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import XLSX from 'xlsx';
@@ -212,7 +212,7 @@ export function generateTravelsExportXlsx(travel: Travel[]) {
     }
 };
 
-export const generateExpenseDetailsExportXlsx = async (result: ExpenseDetail[] | OthersAttachement[] | OnlinePaymentStatement[], type: 'expenseDetails' | 'othersAttachements' | 'onlinePayment') => {
+export const generateExpenseDetailsExportXlsx = async (result: VisaTransaction[], type: 'expenseDetails' | 'othersAttachements' | 'onlinePayment') => {
 
     const excelDataHeader:any = ['Référence', 'Date Achat/Dépense', 'Libellé/Obejet Dépense', 'Statut', 'Montant',];
 
@@ -231,10 +231,10 @@ export const generateExpenseDetailsExportXlsx = async (result: ExpenseDetail[] |
         const excelData:any = [];
         excelData.push(excelDataHeader);
 
-        const rows = result.map((elt: ExpenseDetail | OthersAttachement | OnlinePaymentStatement) => {
+        const rows = result.map((elt: VisaTransaction) => {
 
             const row:any = [
-                `${get(elt, 'ref') || get(elt, 'statementRef') || ''}`,
+                `${get(elt, 'type') || get(elt, 'match') || ''}`,
                 `${moment(elt?.date).format('DD/MM/YYYY')}`,
                 `${get(elt, 'label') || get(elt, 'object') || ''}`,
                 `${getStatuslabel(elt?.status || '') || ''}`,
@@ -242,8 +242,8 @@ export const generateExpenseDetailsExportXlsx = async (result: ExpenseDetail[] |
             ];
 
             const additonalRow = {
-                expenseDetails: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${getOperationTypeLabel(get(elt, 'type', ''))}`, `${getExpenseCategoryLabel(get(elt, 'expenceCategory.label', ''))}`],
-                othersAttachements: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${getOperationTypeLabel(get(elt, 'type', ''))}`],
+                expenseDetails: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${elt?.type || ''}`, `${getExpenseCategoryLabel(get(elt, 'expenceCategory.label', ''))}`],
+                othersAttachements: [`${getCurrencies(get(elt, 'currency', { code: [] })) || ''}`, `${elt?.type || ''}`],
                 onlinePayment: [`${get(elt, 'comment') || ''}`, `${get(elt, 'nature.label') || ''}`],
             };
 
