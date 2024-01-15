@@ -13,6 +13,11 @@ export class CardTypeController {
         catch (error) { next(error); }
     }
 
+    async findCard(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await CardTypeController.cardTypeService.getCardTypeById({filter: req.query})); }
+        catch (error) { next(error); }
+    }
+
     async findOneById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await CardTypeController.cardTypeService.getCardTypeById({ filter: { _id: req.params.id } })); }
         catch (error) { next(error); }

@@ -9,6 +9,7 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { dropTestCollections } from './tests/drop-test-collections';
 import readline from 'readline';
+import { inserDefaultUsersCardsTypes } from './helpers/insert-default-cards-types';
 
 const runScripts = async () => {
     // SCRIPTS to execute
@@ -22,6 +23,7 @@ const runScripts = async () => {
     await inserDefaultVouchers();
     await inserDefaultUsersValidations();
     await inserDefaultBankUsers();
+    await inserDefaultUsersCardsTypes();
 }
 
 (async () => {
