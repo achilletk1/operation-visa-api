@@ -21,7 +21,8 @@ export class CardTypeService extends CrudService<CardType> {
 
     async getCardTypeById(filters: any) {
         try {
-            return await CardTypeController.cardTypeService.findOne(filters);
+            const result = await CardTypeController.cardTypeService.findOne(filters);
+            return result;
         } catch (error) { throw error; }
     }
 

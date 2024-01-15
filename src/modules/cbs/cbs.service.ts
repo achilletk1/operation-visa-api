@@ -107,23 +107,6 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getCardsTypeByCode(productCode: string): Promise<cbsCard[]> {
-        try {
-            let data = await clientsDAO.getCardsTypeByCode(productCode);
-
-            if (data instanceof Error) { throw data; }
-
-            // if (data && data instanceof Array) {
-            //     data = data.map(dat => removeSpacesFromResultSet(dat));
-            // }
-
-            return data;
-        } catch (error: any) {
-            this.logger.error(`Failed to get cardType by productCode ${productCode} \n${error.stack}`);
-            throw error;
-        }
-    }
-
 
     async getProductData(code: string): Promise<(cbsProduct | undefined)[]> {
         try {

@@ -8,6 +8,8 @@ router.get('/', cardTypeController.findAll);
 
 router.get('/all', cardTypeController.findAll);
 
+router.get('/card', cardTypeController.findCard);
+
 router.get('/:id', cardTypeController.findOneById);
 
 router.post('/', cardTypeController.insertCardType);

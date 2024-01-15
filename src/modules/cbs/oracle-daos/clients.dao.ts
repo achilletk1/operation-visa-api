@@ -184,17 +184,6 @@ export const clientsDAO = {
         return result;
     },
 
-    getCardsTypeByCode: async (productCode: string): Promise<any> => {
-        const methodPath = `${classPath}.getCardsTypeByCode()`;
-
-        logger.info(`init get cardTypes matching productCode: ${productCode}`, { methodPath });
-
-        if (isDevOrStag) { return await helper.getMockCardTypes(productCode); }
-
-        // const query = ;
-        // const result = await executeQuery(query);
-        // return result;
-    },
 
     getProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
         const methodPath = `${classPath}.getProductData()`;
