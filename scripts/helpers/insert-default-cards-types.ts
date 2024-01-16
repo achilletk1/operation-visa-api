@@ -93,7 +93,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '',
+            productCode: '321',
             label: "GIMAC Express",
             cardTypeTransactions: [
                 {
@@ -114,30 +114,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 10000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '430',
             label: "GIMAC CONFORT",
             cardTypeTransactions: [
                 {
@@ -152,30 +152,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 4000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 8000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '420',
             label: "GIMAC MOOV",
             cardTypeTransactions: [
                 {
@@ -190,30 +190,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 3000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 4000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 6000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '408',
             label: "VISA Serenity",
             cardTypeTransactions: [
                 {
@@ -246,30 +246,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 9000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '206',
             label: "VISA Classic",
             cardTypeTransactions: [
                 {
@@ -302,30 +302,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 9000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '207',
             label: "VISA Gold",
             cardTypeTransactions: [
                 {
@@ -358,30 +358,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 4000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 8000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '208',
             label: "VISA Business",
             cardTypeTransactions: [
                 {
@@ -414,30 +414,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 4000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 7000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '209',
             label: "VISA Business Prem",
             cardTypeTransactions: [
                 {
@@ -470,30 +470,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 5,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 8000,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '948',
             label: "VISA Platinum",
             cardTypeTransactions: [
                 {
@@ -526,30 +526,30 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 10,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 10,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 30,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 30,
-                    amount : 0,
+                    amount : 8500,
                 },
             ],
         },
         {
-            productCode: '',
+            productCode: '958',
             label: "VISA Infinite",
             cardTypeTransactions: [
                 {
@@ -582,25 +582,25 @@ export const inserDefaultUsersCardsTypes = async () => {
                     label: 'Profile 1 (100%)',
                     percentage: 100,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 5000,
                 },
                 {
                     label: 'Profile 2 (150%)',
                     percentage: 150,
                     maxTransactionsPerDay: 15,
-                    amount : 0,
+                    amount : 6000,
                 },
                 {
                     label: 'Profile 3 (200%)',
                     percentage: 200,
                     maxTransactionsPerDay: 45,
-                    amount : 0,
+                    amount : 7000,
                 },
                 {
                     label: 'Profile 4 (400%)',
                     percentage: 400,
                     maxTransactionsPerDay: 45,
-                    amount : 0,
+                    amount : 8000,
                 },
             ],
         }  
