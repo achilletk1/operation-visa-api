@@ -4,7 +4,7 @@ import {
   reportingRoute, downloadsRoute, templatesRoute, validationsRoute, travelMonthRoute, notificationsRoute,
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
-  validationLevelSettingsRoute, cbsRoute, importsRoute
+  validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -60,6 +60,8 @@ const routes = (app: Express) => {
   app.use( "/properties-and-services-types", propertyAndServicesTypesRoute);
   
   app.use( "/validation-level-settings", validationLevelSettingsRoute);
+
+  app.use( "/card-type", cardTypeRoute);
 
 };
 

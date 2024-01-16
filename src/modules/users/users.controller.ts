@@ -61,7 +61,7 @@ export class UsersController {
         try { res.send(await UsersController.usersService.ResetPwrd(req.body?.userId)); }
         catch (error) { next(error); }
     }
-    
+
     async generateUsersExportLinks(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await UsersController.usersService.generateUsersExportLinks(req.query)); }
         catch (error) { next(error); }
