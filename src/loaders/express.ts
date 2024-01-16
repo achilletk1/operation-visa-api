@@ -62,8 +62,5 @@ export class ExpressLoader {
         // Start Cron Jobs
 
     }
-    get Server() {
-        return this.server;
-    }
 
 }

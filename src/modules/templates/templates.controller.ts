@@ -27,6 +27,11 @@ export class TemplatesController {
         catch (error) { next(error); }
     }
 
+    async getTemplatesLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send((await TemplatesController.templatesService.findAll({ projection: { label: 1 } }))?.data); }
+        catch (error) { next(error); }
+    }
+
     async updateTemplateById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await TemplatesController.templatesService.updateTemplateById(req.params.id as string, req.body)); }
         catch (error) { next(error); }

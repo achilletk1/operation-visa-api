@@ -12,6 +12,8 @@ router.get('/all', templatesController.findAll);
 
 router.get('/variables', templatesController.getVariables);
 
+router.get('/labels', templatesController.getTemplatesLabels);
+
 router.post('/variables', templatesController.insertVariables);
 
 router.put('/:id', templatesController.updateTemplateById);
