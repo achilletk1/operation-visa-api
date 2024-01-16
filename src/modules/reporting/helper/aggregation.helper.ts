@@ -1,5 +1,5 @@
 import { logger } from "winston-config";
-import { get } from "lodash";
+import { get, isArray } from "lodash";
 import moment from "moment";
 
 export const generateConsolidateData = (param: { status: any, start: number, end: number, travelType?: any }) => {
@@ -42,32 +42,78 @@ export const generateConsolidateData = (param: { status: any, start: number, end
     }]
 };
 
-export const statusOperation = (params: { filterStatus: any, start: number, end: number, travelType?: any }) => {
+export const statusOperation = (params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string, regionCode: string }) => {
 
-    const { travelType, filterStatus, start, end } = params
+    const { travelType, filterStatus, start, end, agencyCode, regionCode } = params
 
     const match: any = { '$match': {} }
 
     if (start && end) {
         match['$match']['dates.created'] = { $gte: start, $lte: end };
     }
+
     if (travelType) {
         match['$match']['travelType'] = travelType;
     }
 
+    // if (filterStatus === 'NUMBER_STATUS') {
+    //     let query = [
+    //         {
+    //             $group: {
+    //                 _id: '$status',
+    //                 valueResult: { '$sum': 1 }
+    //             }
+    //         }
+    //     ]
+    //     if (match['$match']) { query.unshift(match) }
+    //     return query
+    // } else {
+    //     let query = [
+    //         { $unwind: '$transactions' },
+    //         {
+    //             $group: {
+    //                 _id: '$status',
+    //                 valueResult: { '$sum': '$transactions.amount' }
+    //             }
+    //         }
+    //     ]
+    //     if (match['$match']) { query.unshift(match) }
+    //     return query
+
+    // }
+    let query = [];
+    if (agencyCode || regionCode) {
+        query.push(
+            {
+                $lookup: {
+                    from: "user",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "userDetails"
+                }
+            },
+            {
+                $unwind: "$userDetails"
+            },
+            {
+                $match: {
+                    "userDetails.age.code": ((!regionCode || regionCode.split(',').length <= 0) || (regionCode && agencyCode)) ? agencyCode : { $in: regionCode.split(',') }
+                }
+            }
+        );
+    }
+
     if (filterStatus === 'NUMBER_STATUS') {
-        let query = [
+        query.push(
             {
                 $group: {
                     _id: '$status',
                     valueResult: { '$sum': 1 }
                 }
             }
-        ]
-        if (match['$match']) { query.unshift(match) }
-        return query
+        );
     } else {
-        let query = [
+        query.push(
             { $unwind: '$transactions' },
             {
                 $group: {
@@ -75,11 +121,11 @@ export const statusOperation = (params: { filterStatus: any, start: number, end:
                     valueResult: { '$sum': '$transactions.amount' }
                 }
             }
-        ]
-        if (match['$match']) { query.unshift(match) }
-        return query
-
+        );
     }
+    if (match && match['$match']) { query.unshift(match); }
+
+    return query;
 
 };
 
