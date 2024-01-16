@@ -124,7 +124,6 @@ export class CbsService extends BaseService {
         }
     }
 
-
     async getProductData(code: string): Promise<(cbsProduct | undefined)[]> {
         try {
             let data = await clientsDAO.getProductData(code);
