@@ -18,14 +18,14 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
         super(RequestCeilingIncreaseService.requestCeilingIncreaseRepository);
     }
 
-    async getRequestCeillingIncrease(filters: any) {
+    async getRequestCeilingIncrease(filters: any) {
         try {
             this.formatFilters(filters);
             return await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll(filters);
         } catch (error) { throw error; }
     }
 
-    async insertRequestCeilling(ceiling: RequestCeilingIncrease): Promise<any> {
+    async insertRequestCeiling(ceiling: RequestCeilingIncrease): Promise<any> {
         try {
             const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { cardType: { ...ceiling.cardType }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
 

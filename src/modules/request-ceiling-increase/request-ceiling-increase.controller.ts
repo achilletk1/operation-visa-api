@@ -24,12 +24,12 @@ export class RequestCeilingIncreaseController {
     }
 
     async getRequestCeillingIncrease(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.getRequestCeillingIncrease(req.query as any)); }
+        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.getRequestCeilingIncrease(req.query as any)); }
         catch (error) { next(error); }
     }
 
     async insertRequestCeilling(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.insertRequestCeilling(req.body as RequestCeilingIncrease)); }
+        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.insertRequestCeiling(req.body as RequestCeilingIncrease)); }
         catch (error) { next(error); }
     }
 

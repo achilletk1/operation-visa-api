@@ -1,8 +1,9 @@
+import { getAGEListByBankCode, getStatementByStatus } from "common/utils";
 import { OnlinePaymentController } from "modules/online-payment";
 import { parseNumberFields, timeout } from "common/helpers";
-import { getAGEListByBankCode, getBankList, getStatementByStatus } from "common/utils";
 import { TravelController } from "modules/travel";
 import { generateChartByType } from "./helper";
+import { CbsController } from 'modules/cbs';
 import { BaseService } from "common/base";
 import moment from "moment";
 
@@ -39,7 +40,7 @@ export class ReportingService extends BaseService {
 
     async getAgencies({ filter }: any): Promise<any> {
         try {
-            const bankList = await getBankList();
+            const bankList = await CbsController.cbsService.getBankList();
             return getAGEListByBankCode(filter?.CountryCode, filter?.bankCode, bankList);
         } catch (error) { throw (error); }
     }

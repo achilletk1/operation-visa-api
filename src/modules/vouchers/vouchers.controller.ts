@@ -23,7 +23,7 @@ export class VouchersController {
     }
 
     async updateVoucherById(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await VouchersController.vouchersService.updateVoucherById(req.params.id as string, req.body)); }
+        try { res.send(await VouchersController.vouchersService.updateVoucherById(req.params.id, req.body)); }
         catch (error) { next(error); }
     }
 

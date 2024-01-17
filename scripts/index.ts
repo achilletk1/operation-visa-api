@@ -1,5 +1,6 @@
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 import { inserDefaultUsersValidations } from './helpers/insert-default-user-validation';
+import { inserDefaultUsersCardsTypes } from './helpers/insert-default-cards-types';
 import { inserDefaultPropertyType } from './helpers/insert-default-proprety-type';
 import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
 import { inserDefaultLetter } from './helpers/insert-default-notice-letter';
@@ -9,20 +10,19 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { dropTestCollections } from './tests/drop-test-collections';
 import readline from 'readline';
-import { inserDefaultUsersCardsTypes } from './helpers/insert-default-cards-types';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    await dropTestCollections();
-    await inserDefaultVisaCeilings();
-    await inserDefaultLongTravelsTypes();
-    await inserDefaultLetter();
-    await inserDefaultPropertyType();
-    await inserDefaultSetting();
-    await insertDefaultTemplateSetting();
-    await inserDefaultVouchers();
-    await inserDefaultUsersValidations();
-    await inserDefaultBankUsers();
+    // await dropTestCollections();
+    // await inserDefaultVisaCeilings();
+    // await inserDefaultLongTravelsTypes();
+    // await inserDefaultLetter();
+    // await inserDefaultPropertyType();
+    // await inserDefaultSetting();
+    // await insertDefaultTemplateSetting();
+    // await inserDefaultVouchers();
+    // await inserDefaultUsersValidations();
+    // await inserDefaultBankUsers();
     await inserDefaultUsersCardsTypes();
 }
 

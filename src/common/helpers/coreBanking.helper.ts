@@ -1,6 +1,6 @@
 
 export const removeReservedAgency = (bankList: any[], agencyCode: string) => {
-    return bankList = bankList.filter(bank => bank.PAYS === agencyCode
+    bankList = bankList.filter(bank => bank.PAYS === agencyCode
         && bank.CODE_BANQUE !== '12000'
         && bank.CODE_BANQUE !== '12001'
         && bank.CODE_BANQUE !== '32000'
@@ -10,10 +10,11 @@ export const removeReservedAgency = (bankList: any[], agencyCode: string) => {
         && bank.CODE_BANQUE !== '94001'
         && bank.CODE_BANQUE !== '95001'
     );
+    return bankList;
 }
 
-export const traillingWhiteSpaces = (bankList: any[]): void => {
-    bankList.map(bank => {
+export const trailingWhiteSpaces = (bankList: any[]): void => {
+    bankList.forEach(bank => {
         bank.LIB_PAYS = bank.LIB_PAYS.trim();
         bank.CODE_BANQUE = bank.CODE_BANQUE.trim();
         bank.NOM_BANQUE = `${bank.NOM_BANQUE.trim()}`.toLocaleUpperCase();

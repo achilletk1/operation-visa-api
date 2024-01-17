@@ -53,7 +53,7 @@ export interface CbsEmail {
     NOMREST: string;
 }
 
-export interface cbsCard {
+export interface CbsCard {
     AGE: string;
     CPRO: string;
     NUM_CPTE: string;
@@ -65,7 +65,16 @@ export interface cbsCard {
     INTITULE_CMPTE: string;
 }
 
-export interface cbsProduct {
+export interface CbsProduct {
     CPRO: string;
     LIB: string;
+}
+
+export interface CbsBankBranch {
+    PAYS: string;
+    LIB_PAYS: string;
+    CODE_BANQUE: string;
+    NOM_BANQUE: string;
+    CODE_AGENCE: string;
+    NOM_AGENCE: string;
 }

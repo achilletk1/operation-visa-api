@@ -1,7 +1,8 @@
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
-import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, cbsProduct } from "./model";
-import { clientsDAO } from "./oracle-daos";
+import { CbsAccounts, CbsBankUser, CbsCard, CbsClientUser, CbsProduct } from "./model";
+import { clientsDAO, banksDAO } from "./oracle-daos";
 import { config } from "convict-config";
+import { CbsBankBranch } from './model';
 import { get, isEmpty } from "lodash";
 import { BaseService } from "common";
 
@@ -90,7 +91,7 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getClientCardsByCli(cli: string): Promise<cbsCard[]> {
+    async getClientCardsByCli(cli: string): Promise<CbsCard[]> {
         try {
             let data = await clientsDAO.getClientCardsByCli(cli);
 
@@ -107,7 +108,7 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getCardsTypeByCode(productCode: string): Promise<cbsCard[]> {
+    async getCardsTypeByCode(productCode: string): Promise<CbsCard[]> {
         try {
             let data = await clientsDAO.getCardsTypeByCode(productCode);
 
@@ -124,7 +125,7 @@ export class CbsService extends BaseService {
         }
     }
 
-    async getProductData(code: string): Promise<(cbsProduct | undefined)[]> {
+    async getProductData(code: string): Promise<(CbsProduct | undefined)[]> {
         try {
             let data = await clientsDAO.getProductData(code);
 
@@ -137,6 +138,21 @@ export class CbsService extends BaseService {
             return data;
         } catch (error: any) {
             this.logger.error(`Failed to get product data by code ${code} \n${error.stack}`);
+            throw error;
+        }
+    }
+
+    async getBankList(): Promise<CbsBankBranch[]> {
+        try {
+            let data = await banksDAO.getBankList();
+
+            if (data && data instanceof Array) {
+                data = data.map(bankBranch => removeSpacesFromResultSet(bankBranch));
+            }
+
+            return data;
+        } catch (error: any) {
+            this.logger.error(`Failed to get bank list \n${error.stack}`);
             throw error;
         }
     }

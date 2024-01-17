@@ -1,4 +1,4 @@
-import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone, cbsProduct } from "../model";
+import { CbsAccounts, CbsBankUser, CbsCard, CbsClientUser, CbsEmail, CbsPhone, CbsProduct } from "../model";
 import { executeQuery } from "common/oracle-daos/config";
 import { isDevOrStag } from "common/helpers";
 import { logger } from 'winston-config';
@@ -150,7 +150,7 @@ export const clientsDAO = {
         }
     },
 
-    getClientCardsByCli: async (cli: string): Promise<cbsCard[]> => {
+    getClientCardsByCli: async (cli: string): Promise<CbsCard[]> => {
         const methodPath = `${classPath}.getClientCardsByCli()`;
 
         logger.info(`init get client cards matching cli: ${cli}`, { methodPath });
@@ -196,7 +196,7 @@ export const clientsDAO = {
         // return result;
     },
 
-    getProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
+    getProductData: async (code: string): Promise<(CbsProduct | undefined)[]> => {
         const methodPath = `${classPath}.getProductData()`;
 
         logger.info(`init get product data matching cpro: ${code}`, { methodPath });

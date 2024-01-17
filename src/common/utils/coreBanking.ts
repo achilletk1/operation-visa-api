@@ -1,4 +1,4 @@
-import { removeReservedAgency, sortAgencies, traillingWhiteSpaces } from "common/helpers";
+import { removeReservedAgency, sortAgencies, trailingWhiteSpaces } from "common/helpers";
 import { config } from "convict-config";
 import fetch from 'node-fetch';
 
@@ -7,13 +7,6 @@ const cbsApiUrl = `${config.get('cbsApiUrl')}/api/v1`;
 export async function getCbsUserVariables() {
     const response = await fetch(`${cbsApiUrl}/clients/variables/system`);
     return await response.json();
-}
-
-export async function getBankList() {
-    const response = await fetch(`${config.get('cbsApiUrl')}/api/v1/agencies`);
-    const bankList = await response.json();
-    if (!bankList) { throw new Error('Bank account list is empty'); }
-    return bankList;
 }
 
 export async function getUserDataByCode(code: string, includeAccounts?: any, isChaFilter?: boolean) {
@@ -33,19 +26,17 @@ const filterAccountsByChar = (userData: any, isChaFilter: boolean) => {
 export const getAGEListByBankCode = (countryCode: string, bankCode: string, bankList: any) => {
     try {
         // Removes the leading and trailing white space and line terminator characters from fields.
-        traillingWhiteSpaces(bankList);
-        // Filter bank list bay contry code selected and exclude TRESOR, BEAC from list
+        trailingWhiteSpaces(bankList);
+        // Filter bank list bay country code selected and exclude TRESOR, BEAC from list
         bankList = removeReservedAgency(bankList, countryCode);
-        // Groupping bank Agnecies by bank code.
-        const conterCodeList = [];
-        for (const bankElmt of bankList) {
-            if (bankElmt.CODE_BANQUE === bankCode) {
-                conterCodeList.push({ CODE_AGENCE: bankElmt.CODE_AGENCE, NOM_AGENCE: bankElmt.NOM_AGENCE })
+        // Grouping bank Agencies by bank code.
+        const counterCodeList = [];
+        for (const bankElt of bankList) {
+            if (bankElt.CODE_BANQUE === bankCode) {
+                counterCodeList.push({ CODE_AGENCE: bankElt.CODE_AGENCE, NOM_AGENCE: bankElt.NOM_AGENCE })
             }
         }
-        return sortAgencies(conterCodeList);
-    } catch (error) {
-        throw error;
-    }
+        return sortAgencies(counterCodeList);
+    } catch (error) { throw error; }
 
 }

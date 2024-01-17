@@ -1,4 +1,4 @@
-import { CbsAccounts, CbsBankUser, cbsCard, CbsClientUser, CbsEmail, CbsPhone, cbsProduct } from "../../model";
+import { CbsAccounts, CbsBankUser, CbsCard, CbsClientUser, CbsEmail, CbsPhone, CbsProduct } from "../../model";
 import { logger } from "winston-config";
 
 const classPath = 'oracle-daos.helper.clients';
@@ -759,8 +759,119 @@ export const helper = {
         return Promise.resolve(result);
     },
 
-    getMockClientCards: async (): Promise<cbsCard[]> => {
-        const cards: cbsCard[] = [
+    getMockClientCards: async (): Promise<CbsCard[]> => {
+        const cards: CbsCard[] = [
+            {
+                AGE: "01700",
+                CPRO: '321',
+                CODE_CLIENT: "70017464",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******2849",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37307077836",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "GIMAC Express"
+            },
+            {
+                AGE: "01700",
+                CPRO: '430',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******6600",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "GIMAC CONFORT"
+            },
+            {
+                AGE: "01700",
+                CPRO: '420',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******8747",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "GIMAC MOOV"
+            },
+            {
+                AGE: "01700",
+                CPRO: '408',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******7533",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Serenity"
+            },
+            {
+                AGE: "01700",
+                CPRO: '206',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******5635",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Classic"
+            },
+            {
+                AGE: "01700",
+                CPRO: '207',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******2849",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Gold"
+            },
+            {
+                AGE: "01700",
+                CPRO: '208',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******9465",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Business"
+            },
+            {
+                AGE: "01700",
+                CPRO: '209',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******6676",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Business Prem"
+            },
+            {
+                AGE: "01700",
+                CPRO: '948',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445410******9441",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Platinum"
+            },
+            {
+                AGE: "01700",
+                CPRO: '958',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "445411******2652",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Infinite"
+            },
+
             {
                 AGE: "01700",
                 CPRO: '185',
@@ -782,7 +893,7 @@ export const helper = {
                 NUM_CPTE: "37207077837",
                 INTITULE_CMPTE: "COMPTES DE CHEQUES",
                 LIBELLE_TYPE: "CARTE EXPRESS EMV"
-            }
+            },
         ];
         return Promise.resolve(cards);
     },
@@ -791,17 +902,18 @@ export const helper = {
         const cartTypes = [
             {
                 productCode: '185',
+                label: "CARTE LEADER EMV ",
                 cardTypeTransactions: [
                     {
                         label: 'Retrait',
                         maxAmountPerDay: 300000,
-                        frequency: 'week',
+                        frequency: 'month',
                         maxTransactionsPerDay: 5,
                     },
                     {
                         label: 'Paiement',
                         maxAmountPerDay: 500000,
-                        frequency: 'week',
+                        frequency: 'month',
                         maxTransactionsPerDay: 5,
                     },
                 ],
@@ -834,6 +946,7 @@ export const helper = {
             },
             {
                 productCode: '186',
+                label: "CARTE EXPRESS EMV",
                 cardTypeTransactions: [
                     {
                         label: 'Achat TPE',
@@ -869,6 +982,518 @@ export const helper = {
                     },
                 ],
             },
+            {
+                productCode: '321',
+                label: "GIMAC Express",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 300000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Paiement',
+                        maxAmountPerDay: 500000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 10000,
+                    },
+                ],
+            },
+            {
+                productCode: '430',
+                label: "GIMAC CONFORT",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 750000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 4000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 8000,
+                    },
+                ],
+            },
+            {
+                productCode: '420',
+                label: "GIMAC MOOV",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 300000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 3000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 4000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 6000,
+                    },
+                ],
+            },
+            {
+                productCode: '408',
+                label: "VISA Serenity",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 1000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 9000,
+                    },
+                ],
+            },
+            {
+                productCode: '206',
+                label: "VISA Classic",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 1500000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 2000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 2000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 1500000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 9000,
+                    },
+                ],
+            },
+            {
+                productCode: '207',
+                label: "VISA Gold",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 200000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 5000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 5000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 2000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 4000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 8000,
+                    },
+                ],
+            },
+            {
+                productCode: '208',
+                label: "VISA Business",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 200000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 5000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 5000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 2000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 4000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                ],
+            },
+            {
+                productCode: '209',
+                label: "VISA Business Prem",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 400000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 10000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 10000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 5,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 4000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 5,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 5,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 5,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 15,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 15,
+                        amount : 8000,
+                    },
+                ],
+            },
+            {
+                productCode: '948',
+                label: "VISA Platinum",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 400000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 10,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 12000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 10,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 12000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 10,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 4000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 10,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 10,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 10,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 30,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 30,
+                        amount : 8500,
+                    },
+                ],
+            },
+            {
+                productCode: '958',
+                label: "VISA Infinite",
+                cardTypeTransactions: [
+                    {
+                        label: 'Retrait',
+                        maxAmountPerDay: 7000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 15,
+                    },
+                    {
+                        label: 'Achat TPE',
+                        maxAmountPerDay: 15000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 15,
+                    },
+                    {
+                        label: 'E-Commerce',
+                        maxAmountPerDay: 15000000,
+                        frequency: 'month',
+                        maxTransactionsPerDay: 15,
+                    },
+                    {
+                        label: 'Cash Advance',
+                        maxAmountPerDay: 7000000,
+                        frequency: 'week',
+                        maxTransactionsPerDay: 15,
+                    }
+                ],
+                profiles: [
+                    {
+                        label: 'Profile 1 (100%)',
+                        percentage: 100,
+                        maxTransactionsPerDay: 15,
+                        amount : 5000,
+                    },
+                    {
+                        label: 'Profile 2 (150%)',
+                        percentage: 150,
+                        maxTransactionsPerDay: 15,
+                        amount : 6000,
+                    },
+                    {
+                        label: 'Profile 3 (200%)',
+                        percentage: 200,
+                        maxTransactionsPerDay: 45,
+                        amount : 7000,
+                    },
+                    {
+                        label: 'Profile 4 (400%)',
+                        percentage: 400,
+                        maxTransactionsPerDay: 45,
+                        amount : 8000,
+                    },
+                ],
+            }  
         ];
 
         const result = cartTypes.find(cartType => cartType.productCode == productCode);
@@ -876,8 +1501,48 @@ export const helper = {
 
     },
 
-    getMockProductData: async (code: string): Promise<(cbsProduct | undefined)[]> => {
-        const products: cbsProduct[] = [
+    getMockProductData: async (code: string): Promise<(CbsProduct | undefined)[]> => {
+        const products: CbsProduct[] = [
+            {
+                CPRO: '321',
+                LIB: 'GIMAC Express',
+            },
+            {
+                CPRO: '430',
+                LIB: 'GIMAC CONFORT',
+            },
+            {
+                CPRO: '420',
+                LIB: 'GIMAC MOOV',
+            },
+            {
+                CPRO: '408',
+                LIB: 'VISA Serenity',
+            },
+            {
+                CPRO: '206',
+                LIB: 'VISA Classic',
+            },
+            {
+                CPRO: '207',
+                LIB: 'VISA Gold',
+            },
+            {
+                CPRO: '207',
+                LIB: 'VISA Business',
+            },
+            {
+                CPRO: '209',
+                LIB: 'VISA Business Prem',
+            },
+            {
+                CPRO: '948',
+                LIB: 'VISA Platinum',
+            },
+            {
+                CPRO: '958',
+                LIB: 'VISA Infinite',
+            },
             {
                 CPRO: '185',
                 LIB: "CARTE LEADER EMV ",
@@ -885,7 +1550,7 @@ export const helper = {
             {
                 CPRO: '186',
                 LIB: "CARTE EXPRESS EMV             ",
-            }
+            },
         ];
         return Promise.resolve([products.find(e => e.CPRO === code)]);
     },

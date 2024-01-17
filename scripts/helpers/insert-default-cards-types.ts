@@ -607,14 +607,14 @@ export const inserDefaultUsersCardsTypes = async () => {
     ]
     console.log('insert default cards types collection');
 
-    const collectionsExists = await db.listCollections({name:'card-type'}).toArray();
+    const collectionsExists = await db.listCollections({name:'visa_operations_card_type'}).toArray();
     console.log('collectionsExists', collectionsExists[0]?.name || 'not exists');
 
     if (!isEmpty(collectionsExists)) {
-        const respDelete = await db.collection("card-type").drop();
+        const respDelete = await db.collection("visa_operations_card_type").drop();
         console.log('response delete', respDelete);
     }
 
-    const response = await db.collection('card-type').insertMany(cartTypes);
+    const response = await db.collection('visa_operations_card_type').insertMany(cartTypes);
     console.log(response.insertedIds);
 };
