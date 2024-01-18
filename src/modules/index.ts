@@ -51,3 +51,5 @@ export * from './property-and-services-types';
 export * from './validation-level-settings';
 
 export * from './card-type';
+
+export * from './transaction-types'
