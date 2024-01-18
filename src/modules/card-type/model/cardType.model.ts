@@ -17,7 +17,7 @@ export interface CardTransactionsType {
 }
 
 export interface CardTypeTransactions extends CardTransactionsType {
-  amount?: number;
+  maxAmountPerDay?: number;
   frequency?: 'week' | 'month';
   maxTransactionsPerDay?: number;
 }
@@ -27,5 +27,5 @@ export interface CardProfile {
   label?: string;
   percentage?: number;
   maxTransactionsPerDay?: number;
-  purchasePrice?: number
+  amount?: number
 }
