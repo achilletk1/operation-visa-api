@@ -894,6 +894,17 @@ export const helper = {
                 INTITULE_CMPTE: "COMPTES DE CHEQUES",
                 LIBELLE_TYPE: "CARTE EXPRESS EMV"
             },
+            {
+                AGE: "01700",
+                CPRO: '408',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "604855******6538",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Serenity"
+            }
         ];
         return Promise.resolve(cards);
     },
