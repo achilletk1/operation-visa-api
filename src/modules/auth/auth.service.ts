@@ -42,10 +42,10 @@ export class AuthService extends BaseService {
 
             if (idapUser) {
 
-                // const setting = await SettingsController.settingsService.findOne({ filter: { key: 'otp_status' } });
+                const setting = await SettingsController.settingsService.findOne({ filter: { key: 'otp_status' } });
 
-                // // check if 2FA is disable Globally
-                // if (!setting.data) { return this.generateAuthToken(user); }
+                // check if 2FA is disable Globally
+                if (!setting.data) { return this.generateAuthToken(user); }
 
                 // check if 2FA OTP is disable for this specific user
                 if ('otp2fa' in user && !user.otp2fa) { return this.generateAuthToken(user); }
