@@ -29,9 +29,9 @@ export const generateMailByTemplate = (content: any) => {
     } catch (error) { throw error; }
 };
 
-export function getStatusExpression(status: OpeVisaStatus): string {
-    const dataLabel: any = { 100: 'NON RENSEGNEE', 200: 'VALIDÉE', 300: 'REJETÉE', 400: 'EN COURS' };
-    return dataLabel[status];
+export function getStatusExpression(status: OpeVisaStatus | undefined): string {
+    const dataLabel: any = { 100: 'NON RENSEGNEE', 200: 'VALIDÉE', 300: 'REJETÉE', 400: 'EN COURS', 0: '' };
+    return dataLabel[status || 0];
 }
 
 export function generateNotification(object: string, format: NotificationFormat, message: string, receiver: string | undefined, id?: string, attachments?: any, key?: any): Notification {

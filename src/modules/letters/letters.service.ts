@@ -16,7 +16,7 @@ export class LettersService extends CrudService<Letter> {
 
     async getLettersVariables() {
         try {
-            const variables = await getCbsUserVariables() as any[];
+            const variables = getCbsUserVariables();
             variables.push(...['SYSTEM_TODAY_LONG', 'SYSTEM_TODAY_SHORT', 'START']);
             return variables;
         } catch (error) { throw error; }
