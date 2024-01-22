@@ -12,6 +12,8 @@ import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
 import { isEmpty, get } from "lodash";
 import { TravelMonth } from "./model";
+import { notificationEmmiter, UploadedDocumentsOnExceededFolderEvent } from "modules/notifications";
+import moment from "moment";
 
 export interface IsEdit {
     isEdit?: boolean;
@@ -45,9 +47,12 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 500 && authUser?.category < 700;
 
-            const actualTravelMonth: TravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
+            const actualTravelMonth: TravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id } })) as unknown as TravelMonth;
 
             if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
+
+            const travel = await TravelController.travelService.findOne({ filter: { _id: actualTravelMonth.travelId?.toString() } });
+            if (!travel) { throw new Error('TravelNotFound'); }
 
             if (!isEmpty(travelMonth.transactions)) {
                 for (let transaction of (travelMonth?.transactions || []) as (VisaTransaction & IsEdit)[]) {
@@ -62,6 +67,28 @@ export class TravelMonthService extends CrudService<TravelMonth> {
                     transaction.attachments = saveAttachmentTravelMonth(transaction?.attachments, _id, travelMonth?.dates?.created);
                 }
             }
+
+            if ((travelMonth?.isUntimely)) {
+                let firstIndexToValidateTransaction;
+                if (travelMonth.transactions?.length) {
+                    firstIndexToValidateTransaction = travelMonth?.transactions?.findIndex((elt, i) => { elt.isExceed && (elt.status != (actualTravelMonth?.transactions || [])[i]?.status && elt.status === OpeVisaStatus.TO_VALIDATED) });
+                    if (firstIndexToValidateTransaction > -1) {
+                        if (travelMonth && travelMonth?.editors?.length) {
+                            const lastEditorDate = travelMonth.editors[travelMonth.editors.length - 1 || 0]?.date || 0;
+                            if (Math.abs(moment().diff(lastEditorDate, 'minutes')) >= 30) {
+                                notificationEmmiter.emit(
+                                    'uploaded-documents-on-exceeded-folder-mail',
+                                    new UploadedDocumentsOnExceededFolderEvent(
+                                        { ref: travel?.travelRef?.toString() || '', fullName: travel.user?.fullName?.toString() },
+                                        'Mois de voyage :' + travelMonth.month, 'TravelMonth', firstIndexToValidateTransaction
+                                    )
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
             return await TravelMonthController.travelMonthService.update({ _id }, travelMonth);
         } catch (error) { throw error; }
     }
@@ -75,7 +102,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             await Promise.all(travelMonths.map(async (travelMonth) => {
                 const _id = get(travelMonth, '_id');
-                const actualTravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
+                const actualTravelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id } })) as unknown as TravelMonth;
                 if (!actualTravelMonth) { throw new Error('TravelMonthNotFound'); }
 
                 if (!isEmpty(travelMonth.transactions)) {
@@ -106,11 +133,11 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             const { status, rejectReason, validator, references } = data;
 
 
-            let travelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id }})) as unknown as TravelMonth;
+            let travelMonth = (await TravelMonthController.travelMonthService.baseRepository.findOne({ filter: { _id } })) as unknown as TravelMonth;
 
             if (!travelMonth) { throw new Error('TravelMonthNotFound'); }
 
-            const travel = await TravelController.travelService.findOne({ filter: { _id: travelMonth?.travelId }});
+            const travel = await TravelController.travelService.findOne({ filter: { _id: travelMonth?.travelId } });
 
             if (!travel) { throw new Error('TravelNotFound'); }
 
@@ -164,7 +191,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
             })
 
             travelMonth.expenseDetailsStatus = getOnpStatementStepStatus(travelMonth, 'expenseDetail');
-            
+
             travelMonth = { ...travelMonth, ...tobeUpdated };
             travelMonth.status = getTravelStatus(travelMonth);
             travelMonth.expenseDetailAmount = getTotal(travelMonth.transactions, 'stepAmount');

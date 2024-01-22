@@ -6,7 +6,7 @@ class TransactionsProcessingCron extends BaseCron {
     cronExpressionPath = 'crons.transactionProcessing';  // At every 3rd minute 
     service = VisaOperationsController.visaOperationsService.startTransactionsProcessing;
     startOnStagingBci = true;
-    startOnDev = true;
+    startOnDev = false;
 }
 
 export default new TransactionsProcessingCron();

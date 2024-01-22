@@ -138,3 +138,22 @@ export const getOperationTypeLabel = (operationType: OperationType | '') => {
         default: return 'Autres';
     }
 };
+
+// export function checkIfSendNotification(current: Travel | OnlinePaymentMonth | TravelMonth, databaseData: Travel | TravelMonth | OnlinePaymentMonth |any ) {
+//   if ((current?.isUntimely)) {
+//     let firstToValidateTransactionIndex;
+//     if (current.transactions?.length && databaseData?.transactions?.length) {
+//       firstToValidateTransactionIndex = current?.transactions?.findIndex((elt: any, i: number) => { elt.isExceed && (elt.status != databaseData?.transactions[i]?.status && elt.status === OpeVisaStatus.TO_VALIDATED) });
+//       if (firstToValidateTransactionIndex > -1) {
+//         if (current && current?.editors?.length) {
+//           const lastEditorDate = current.editors[current.editors.length - 1 || 0]?.date || 0;
+//           if (Math.abs(moment().diff(lastEditorDate, 'minutes')) >= 30) {
+//             return { respons: true, line: firstToValidateTransactionIndex }
+//           }
+//         }
+//       }
+//     }
+//   }
+//   return { respons: false }
+
+// }

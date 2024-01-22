@@ -385,6 +385,13 @@ export const config = convict({
             env: 'CLIENT_IN_DEMEURE',
             arg: 'client_in_demeure'
         },
+        unjustifiedOperation: {
+            doc: 'cron update the delay status of the file to "Out of time.',
+            format: String,
+            default: '',
+            env: 'OUT_OF_TIME',
+            arg: 'out_of_time'
+        },
     },
 });
 

@@ -2,6 +2,7 @@ import { generateTravelByProcessing, generateNotificationData, checkTravelNumber
 import { FormalNoticeEvent, ListOfUsersToBloquedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
+import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { VisaOperationsRepository } from "./visa-operations.repository";
 import { VisaOperationsController } from "./visa-operations.controller";
 import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
@@ -112,56 +113,55 @@ export class VisaOperationsService extends CrudService<any> {
 
     async startRevivalMail(): Promise<any> {
         try {
-            if (VisaOperationsService.queueStateRevival === QueueState.PENDING) {
-                VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
-                // TODO 
-                const travels = await TravelController.travelService.findAllAggregate([{ $match: { status: { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
+            if (VisaOperationsService.queueStateRevival !== QueueState.PENDING) { return; }
+            VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
+            // TODO
+            const travels = await TravelController.travelService.findAllAggregate([{ $match: { status: { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
 
-                if (isEmpty(travels)) {
-                    VisaOperationsService.queueStateRevival = QueueState.PENDING;
-                    return;
-                }
-                console.log('===============-==================================-==================================');
-                console.log('===============-==============  START REVIVAL TRAITMENT ================-============');
-                console.log('===============-========================================================-============');
-
-                const letter = (await LettersController.lettersService.findAllAggregate([{ $match: {} }]))[0] as Letter;
-                if (!letter) throw new Error('LetterNotFound');
-
-                const visaTemplate = (await TemplatesController.templatesService.findAllAggregate([{ $match: { key: 'transactionOutsideNotJustified' } }]))[0] as TemplateForm;
-
-                for (const travel of travels) {
-                    if (isEmpty(travel?.transactions)) continue;
-                    const firstDate = Math.min(...travel?.transactions?.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
-                    const currentDate = new Date().valueOf();
-                    if (!travel?.user?.email) continue;
-
-                    // TODO set lang dynamically
-                    const lang = 'fr';
-
-                    if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                        notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang));
-                        // await Promise.all([
-                        //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
-                        //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
-                        // ]);
-
-                        await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEDEED });
-                    }
-                    if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                        notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
-                        // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
-                        // await Promise.all([
-                        //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
-                        //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
-                        // ]);
-                    }
-                }
+            if (isEmpty(travels)) {
                 VisaOperationsService.queueStateRevival = QueueState.PENDING;
-                console.log('===============-==================================-==================================');
-                console.log('===============-==============  END REVIVAL TRAITMENT ==================-============');
-                console.log('===============-========================================================-============');
+                return;
             }
+            console.log('===============-==================================-==================================');
+            console.log('===============-==============  START REVIVAL TRAITMENT ================-============');
+            console.log('===============-========================================================-============');
+
+            const letter = (await LettersController.lettersService.findAllAggregate([{ $match: {} }]))[0] as Letter;
+            if (!letter) throw new Error('LetterNotFound');
+
+            const visaTemplate = (await TemplatesController.templatesService.findAllAggregate([{ $match: { key: 'transactionOutsideNotJustified' } }]))[0] as TemplateForm;
+
+            for (const travel of travels) {
+                if (isEmpty(travel?.transactions)) continue;
+                const firstDate = Math.min(...(travel.transactions || []).map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
+                const currentDate = new Date().valueOf();
+                if (!travel?.user?.email) continue;
+
+                // TODO set lang dynamically
+                const lang = 'fr';
+
+                if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
+                    notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang));
+                    // await Promise.all([
+                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
+                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
+                    // ]);
+
+                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEDEED });
+                }
+                if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
+                    notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
+                    // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
+                    // await Promise.all([
+                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
+                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
+                    // ]);
+                }
+            }
+            VisaOperationsService.queueStateRevival = QueueState.PENDING;
+            console.log('===============-==================================-==================================');
+            console.log('===============-==============  END REVIVAL TRAITMENT ==================-============');
+            console.log('===============-========================================================-============');
         } catch (e: any) {
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
             console.log('===============-==================================-==================================');
@@ -187,6 +187,32 @@ export class VisaOperationsService extends CrudService<any> {
         }
     }
 
+    async detectOperationExceededCeiling(): Promise<void> {
+        try {
+            // TODO create aggregation to get folder (travel, travelMonth, onlinePaymentMonth, Importation) which match criteria like
+            // It doesn't have property isUntimely
+            // The first transaction, in transactions array, is more than 30 days old
+            // It has not yet justify proofTravel for travel (folder.proofTravel.status not JUSTIFY, not CLOSED)
+            // It has one transaction, in transactions array, which have property isExceed with value true
+            // It has not yet justify expensesDetails step (folder.status not JUSTIFY, not CLOSED)
+
+            // const travelsMonths = await TravelMonthController.travelMonthService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as TravelMonth[];
+            // const travelFilter = { $or: [
+            //     {_id: { $in: travelsMonths.map(e => new ObjectId(e.travelId?.toString())) } },
+            //     { $and: [
+            //         { isUntimely: { $exists: false } },
+            //         { $or: [{ "transactions.isExceed": true }, { "proofTravel.status": { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } }]
+            //     }] }
+            // ] };
+            // const shortTravels = await TravelController.travelService.findAllAggregate([{ $match: travelFilter }]) as Travel[];
+            // const onlinePayments = await OnlinePaymentController.onlinePaymentService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as OnlinePaymentMonth[];
+            // if (![...travelsMonths, ...shortTravels, ...onlinePayments].length) return;
+            // await VisaOperationsController.visaOperationsService.UpdateDelayStatusFileOutTime(travelsMonths, shortTravels, onlinePayments);
+        } catch (e: any) {
+            this.logger.error(`detect users not justified transaction failed \n${e.stack}\n`);
+        }
+    }
+
     private async travelDataGroupedByCli(cli: string, travelTransactions: any[]): Promise<TravelDataGrouped[]> {
 
         let currentIndex = 0
@@ -201,7 +227,7 @@ export class VisaOperationsService extends CrudService<any> {
             // find travel which dates matchs with the current transaction date
             let travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
 
-            if (!travel || isEmpty(travel)) {
+            if (isEmpty(travel)) {
 
                 // Insert the first transaction and continue
                 if (currentIndex === 0 && isEmpty(transactionsGroupedByTravel[currentIndex])) {
@@ -342,7 +368,7 @@ export class VisaOperationsService extends CrudService<any> {
                 toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
                 toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "SMS", 'firstTransaction'));
             }
-    
+
             toBeUpdated.transactions = travel.transactions;
             toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(travel?.ceiling));
         }
@@ -404,6 +430,41 @@ export class VisaOperationsService extends CrudService<any> {
         } catch (e: any) {
             this.logger.error(`error during when getAndCreateUserIfItDoesntExists for visa-transactions integration \n${e.stack}\n`);
         }
+    }
+
+    private async UpdateDelayStatusFileOutTime(travelsMonths: TravelMonth[] = [], travels: Travel[] = [], onlinePayments: OnlinePaymentMonth[] = []): Promise<void> {
+        try {
+            let totalAmount!: number;
+
+            // const template = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
+            for (const travelMonth of travelsMonths) {
+                totalAmount = getTotal(travelMonth?.transactions);
+                const travel = travels.find(e => e._id.toString() === travelMonth.travelId?.toString());
+                if ((travel?.ceiling && totalAmount > travel.ceiling) && (travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > 30)) {
+                    TravelMonthController.travelMonthService.update(travelMonth?._id, { isUntimely: true })
+                }
+            }
+
+            for (const travel of travels) {
+                if (travel.isUntimely || [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel.status as OpeVisaStatus) || [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
+                    continue;
+                }
+                totalAmount = getTotal(travel?.transactions);
+                if ((travel.ceiling && totalAmount > travel.ceiling) && (travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > 30)) {
+                    TravelController.travelService.update(travel?._id, { isUntimely: true })
+                }
+            }
+
+            for (const onlinePayment of onlinePayments) {
+                // const rs = moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days')
+                // const rsa = onlinePayments._id
+                totalAmount = getTotal(onlinePayment?.transactions);
+                if ((onlinePayment.ceiling && totalAmount > onlinePayment.ceiling) && (onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > 30)) {
+                    OnlinePaymentController.onlinePaymentService.updateOnlinePaymentsById(onlinePayment._id, { isUntimely: true })
+                }
+            }
+
+        } catch (error) { throw error; }
     }
 
 }

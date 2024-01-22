@@ -53,6 +53,7 @@
         "transactionProcessing": "* * * * *",
         "deleteTemporaryFile": "0 */3 * * *",
         "removeOnlinePaymentsWithExceedings": "* * * * *",
-        "clientInDemeure": "0 00 1 */3 *"
+        "clientInDemeure": "0 00 1 */3 *",
+        "unjustifiedOperation":"0 5 * * *"
     }
 }

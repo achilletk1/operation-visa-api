@@ -28,6 +28,7 @@ export class OnlinePaymentMonth {
     editors?: any[];
     rejectReason?: string;
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
+    isUntimely?: boolean;
 }
 
 // export class OnlinePaymentStatement {

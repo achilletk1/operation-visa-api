@@ -29,7 +29,10 @@ export class CardTypeService extends CrudService<CardType> {
 
     async insertCardType(cardType: CardType): Promise<any> {
         try {
-            return (await CardTypeController.cardTypeService.create(cardType))?.data?.toString();
+            const { productCode } = cardType;
+            const currCardType = await CardTypeController.cardTypeService.baseRepository.findOne({ filter: { productCode } });
+            if (currCardType) { throw new Error('CardTypeAlreadyExist'); };
+            return await CardTypeController.cardTypeService.create(cardType);
         } catch (error) { throw error; }
     }
 

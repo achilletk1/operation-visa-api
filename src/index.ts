@@ -18,10 +18,3 @@ startDatabase().then(async () => {
     console.error(err.stack);
     logger.error("Database connection failed \n", err.stack || '');
 });
-
-// cronService.instantiate();
-// // cronService.startRemoveOnpWithoutExceeding();
-// cronService.startTransactionsProcessing();
-// // cronService.detectListOfUsersToBlocked();
-// // cronService.startRemoveTemporaryFiles();
-// // cronService.startRevivalMail();

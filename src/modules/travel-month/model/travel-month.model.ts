@@ -19,5 +19,6 @@ export class TravelMonth {
     expenseDetailsLevel?: number;
     validators?: Validator[];
     editors?: Editor[];
+    isUntimely?: boolean;
 
 }

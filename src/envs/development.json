@@ -55,7 +55,8 @@
         "transactionProcessing": "*/3 * * * *",
         "deleteTemporaryFile": "0 */3 * * *",
         "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
-        "clientInDemeure":"*/3 */1 * * *"
+        "clientInDemeure":"*/3 */1 * * *",
+        "unjustifiedOperation":"* * * * *"
     },
     "gotenbergUrl": "http://143.42.97.18:7900",
     "emailTest": "achille.tachum@londo-tech.com",

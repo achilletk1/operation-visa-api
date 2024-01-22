@@ -35,3 +35,5 @@ export * from './online-payement-declaration';
 export * from './online-payment-status-changed';
 
 export * from './transaction-outside-not-justified';
+
+export * from './uploaded-documents-on-exceeded-folder';

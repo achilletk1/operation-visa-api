@@ -1,3 +1,4 @@
+import { UploadedDocumentsOnExceededFolderEvent, UploadedDocumentsOnExceededFolderMailNotification } from './notifications/mail/uploaded-documents-on-exceeded-folder';
 import { TransactionOutsideNotJustifiedEvent, TransactionOutsideNotJustifiedMailNotification } from './notifications/mail/transaction-outside-not-justified';
 import { OnlinePaymentStatusChangedEvent, OnlinePaymentStatusChangedMailNotification } from './notifications/mail/online-payment-status-changed';
 import { OnlinePayementDeclarationEvent, OnlinePayementDeclarationMailNotification } from './notifications/mail/online-payement-declaration';
@@ -95,6 +96,10 @@ notificationEmmiter.on('list-of-users-to-bloqued-mail', async (data: ListOfUsers
 
 notificationEmmiter.on('auth-token-email', async (data: AuthTokenEmailEvent) => {
     await (new AuthTokenEmailNotification(data)).sendNotification();
+});
+
+notificationEmmiter.on('uploaded-documents-on-exceeded-folder-mail', async (data: UploadedDocumentsOnExceededFolderEvent) => {
+    await (new UploadedDocumentsOnExceededFolderMailNotification(data)).sendNotification();
 });
 
 

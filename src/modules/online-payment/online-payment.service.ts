@@ -1,6 +1,6 @@
+import { notificationEmmiter, OnlinePayementDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
-import { notificationEmmiter, OnlinePayementDeclarationEvent } from 'modules/notifications';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { generateValidator, getValidationsFolder } from "common/helpers";
 import { OnlinePaymentRepository } from "./online-payment.repository";
@@ -139,9 +139,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 600 && authUser?.category < 700;
 
-            const actualOninePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id } }) as OnlinePaymentMonth;
+            const actualOnlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id } }) as OnlinePaymentMonth;
 
-            if (isEmpty(actualOninePayment)) { throw new Error('OnlinePayment'); }
+            if (isEmpty(actualOnlinePayment)) { throw new Error('OnlinePayment'); }
 
             if (!isEmpty(onlinePaymentMonth?.transactions)) {
                 for (let transaction of onlinePaymentMonth?.transactions || []) {
@@ -161,9 +161,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             if (!isEmpty(onlinePaymentMonth?.othersAttachements)) {
                 onlinePaymentMonth.othersAttachements = saveAttachmentOnlinePayment(onlinePaymentMonth?.othersAttachements, onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
                 // for (let othersAttachement of onlinePaymentMonth?.othersAttachements || []) {
-    
+
                 //     if (isEmpty(othersAttachement?.attachments)) { continue; }
-    
+
                 //     othersAttachement.attachments = saveAttachmentTravel(othersAttachement?.attachments || [], onlinePaymentMonth?._id, onlinePaymentMonth?.dates?.created);
                 // }
             }
@@ -208,6 +208,32 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             });
             onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
             onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth?.transactions);
+
+            if ((onlinePaymentMonth?.isUntimely)) {
+                let firstIndexToValidateTransaction;
+                if (onlinePaymentMonth.transactions?.length) {
+                    firstIndexToValidateTransaction = onlinePaymentMonth?.transactions?.findIndex((elt, i) => { elt.isExceed && (elt.status != (actualOnlinePayment?.transactions || [])[i]?.status && elt.status === OpeVisaStatus.TO_VALIDATED) });
+                    if (firstIndexToValidateTransaction > -1) {
+                        if (onlinePaymentMonth && onlinePaymentMonth?.editors?.length) {
+                            const lastEditorDate = onlinePaymentMonth.editors[onlinePaymentMonth.editors.length - 1 || 0]?.date || 0;
+                            if (Math.abs(moment().diff(lastEditorDate, 'minutes')) >= 30) {
+
+                                notificationEmmiter.emit('uploaded-documents-on-exceeded-folder-mail',
+                                    new UploadedDocumentsOnExceededFolderEvent(
+                                        {
+                                            ref: onlinePaymentMonth.currentMonth?.toString(),
+                                            fullName: onlinePaymentMonth.user?.fullName?.toString()
+                                        },
+                                        'Mois de payement en ligne',
+                                        'onlinePayment',
+                                        firstIndexToValidateTransaction
+                                    )
+                                );
+                            }
+                        }
+                    }
+                }
+            }
 
             return await OnlinePaymentController.onlinePaymentService.update({ _id }, onlinePaymentMonth);
         } catch (error) { throw error; }

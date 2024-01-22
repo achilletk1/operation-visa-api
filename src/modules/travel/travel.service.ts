@@ -1,10 +1,10 @@
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
+import { notificationEmmiter, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
 import { generateValidator, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
-import { notificationEmmiter, TravelDeclarationEvent } from 'modules/notifications';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { OpeVisaStatus, Validator } from "modules/visa-operations";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
@@ -163,6 +163,10 @@ export class TravelService extends CrudService<Travel> {
             const authUser = httpContext.get('user');
             const adminAuth = authUser?.category >= 500 && authUser?.category < 700;
 
+            const currentTravel = await TravelController.travelService.findOne({ filter: { _id: travel?._id?.toString() } });
+
+            if (isEmpty(currentTravel)) { return new Error('TravelNotFound'); }
+
             if (travel?.proofTravel && travel?.proofTravel?.isEdit) {
                 // travel.proofTravel.status = OpeVisaStatus.TO_COMPLETED;
                 delete travel.proofTravel.isEdit;
@@ -224,6 +228,30 @@ export class TravelService extends CrudService<Travel> {
             });
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
             travel.expenseDetailAmount = getTotal(travel?.transactions);
+
+            if (travel?.isUntimely) {
+                let step = undefined;
+                let firstIndexToValidateTransaction;
+                if (currentTravel.proofTravel.status != travel.proofTravel.status && travel.proofTravel.status === OpeVisaStatus.TO_VALIDATED) { step = 'proofTravel'; }
+                if (travel.transactions?.length) {
+                    firstIndexToValidateTransaction = travel?.transactions?.findIndex((elt, i) => { elt.isExceed && (elt.status != currentTravel?.transactions[i]?.status && elt.status === OpeVisaStatus.TO_VALIDATED) });
+                    if (firstIndexToValidateTransaction > -1) { step = (!step) ? 'expenseDetail' : 'expenseDetailAndProofTravel' }
+                }
+                if (travel && travel?.editors?.length && step) {
+                    const lastEditorDate = travel.editors[travel?.editors?.length - 1 || 0]?.date || 0;
+                    if (Math.abs(moment().diff(lastEditorDate, 'minutes')) >= 30) {
+                        notificationEmmiter.emit(
+                            'uploaded-documents-on-exceeded-folder-mail',
+                            new UploadedDocumentsOnExceededFolderEvent(
+                                { ref: travel?.travelRef?.toString() || '', fullName: travel.user?.fullName?.toString() },
+                                'Voyage',
+                                step,
+                                firstIndexToValidateTransaction
+                            )
+                        );
+                    }
+                }
+            }
 
             return await TravelController.travelService.update({ _id: id }, travel);
         } catch (error) { throw error; }
