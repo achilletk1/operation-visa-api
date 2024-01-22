@@ -35,7 +35,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const { label } = data;
             content = Buffer.from(content).toString('base64');
 
-            const fileName = label.replace('.xlsx' || '.xls', '');
+            const fileName = label?.replace('.xlsx' || '.xls', '');
             try { found = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { label } }); } catch(e) {}
             if (found) { throw new Error('FileAlreadyExist'); }
             const isNameCorrect = verifyTransactionFileName(fileName);

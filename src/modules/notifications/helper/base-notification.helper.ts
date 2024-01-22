@@ -95,7 +95,7 @@ const goToTheLine = (str: string, isSms?: boolean) => {
     str = str ?? '';
     return str.includes(reg)
     ? isSms
-        ? str.replace(new RegExp(reg, 'g'), '\n')
+        ? str?.replace(new RegExp(reg, 'g'), '\n')
         : new handlebars.SafeString(str.split(reg).join('<br>'))
     : str;
 }
