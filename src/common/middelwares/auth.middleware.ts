@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload, verify } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import httpContext from 'express-http-context';
 import { logger } from 'winston-config';
 import { config } from 'convict-config';
-import { log } from 'handlebars';
 
 export const whiteList: { path: string, method?: string }[] = [
     { path: '/auth', method: 'POST' },
@@ -38,7 +37,7 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
     const accessToken = authorization.split(' ')[1];
 
     try {
-        const payloadata = verify(accessToken, `${config.get('oauthSalt')}`) as JwtPayload;
+        const payloadata: JwtPayload = jwt.verify(accessToken, `${config.get('oauthSalt')}`) as JwtPayload;
         delete payloadata.exp;
         delete payloadata.iat;
         const user = payloadata.payload;

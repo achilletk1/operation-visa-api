@@ -960,7 +960,8 @@ export const helper = {
                 LIB: "CARTE EXPRESS EMV             ",
             },
         ];
-        return Promise.resolve([products.find(e => e.CPRO === code)]);
+        const product = products.find(e => e.CPRO === code);
+        return Promise.resolve(product ? [product] : []);
     },
 
 };

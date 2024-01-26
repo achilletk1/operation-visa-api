@@ -76,30 +76,34 @@ export const getRandomString = (size: number, numberOnly?: boolean) => {
   const chars = numberOnly ?
     '0123456789' :
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZ';
-  let randomstring = '';
+  let randomString = '';
   for (let i = 0; i < size; i++) {
-    const rnum = Math.floor(Math.random() * chars.length);
-    randomstring += chars.substring(rnum, rnum + 1);
+    const rowNum = Math.floor(Math.random() * chars.length);
+    randomString += chars.substring(rowNum, rowNum + 1);
   }
-  return randomstring;
+  return randomString;
 }
 
 export function parseNumberFields(fields?: any) {
   for (const key in fields) {
     if (!fields.hasOwnProperty(key)) { continue; }
     if (RegExp(/[a-z]/i).test(fields[key])) { continue; }
-    if (key === 'internalRef') { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('niu')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('clientCode')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('contryCode')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('bankCode')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('tel')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('ncp')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('originator.ncp')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('country.code')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('age')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    if (key.includes('vouchercode')) { fields[key] = `${fields[key]}`.trim(); continue; }
-    fields[key] = (isString(fields[key]) && /^[0-9]+$/.test(fields[key])) ? +fields[key] : fields[key];
+    if (
+      key === 'internalRef' ||
+      key.includes('niu') ||
+      key.includes('tel') ||
+      key.includes('ncp') ||
+      key.includes('age') ||
+      key.includes('bankCode') ||
+      key.includes('clientCode') ||
+      key.includes('contryCode') ||
+      key.includes('vouchercode') ||
+      key.includes('country.code') ||
+      key.includes('originator.ncp')
+    ) {
+        fields[key] = `${fields[key]}`.trim(); continue;
+    }
+    fields[key] = (isString(fields[key]) && /^\d+$/.test(fields[key])) ? +fields[key] : fields[key];
   }
 
 }
@@ -130,7 +134,8 @@ const formatContent = (str: string, values: any, isTest?: boolean): string => {
 export const goToTheLine = (str: string, isSms?: boolean) => {
   const reg = '//';
   str = str ?? '';
-  return str?.includes(reg) ? isSms ? str?.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str?.split(reg).join('<br>')) : str;
+  const regExpress = isSms ? str?.replace(new RegExp(reg, 'g'), '\n') : new handlebars.SafeString(str?.split(reg).join('<br>'));
+  return str?.includes(reg) ? regExpress : str;
 }
 
 // export const setResponseController = (data?: unknown): QueryResult => {
@@ -139,13 +144,13 @@ export const goToTheLine = (str: string, isSms?: boolean) => {
 //   }
 //   return data;
 // }
-class httpError {
+class HttpError {
   code = 500;
   message = 'internal server error';
   stack: unknown;
 }
 
-export class httpForbidden extends httpError {
+export class HttpForbidden extends HttpError {
   constructor(message: string, stack = null) {
     super();
     this.code = 403;
@@ -155,21 +160,24 @@ export class httpForbidden extends httpError {
 }
 
 export const convertParams = (query: QueryOptions): QueryOptions => {
-  if (query.filter) {
-    for (const key in query.filter) {
-      if ('excepts' in query.filter && query.filter.excepts.includes(key)) continue;
-      if (['true'].includes(query.filter[key])) { query.filter[key] = true; }
-      if (query.filter[key] === 'false') { query.filter[key] = false; }
-      if (RegExp(/[a-z]/i).test(query.filter[key])) { continue; }
-      if (key === 'user.clientCode') { continue; }
-      query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
-    }
+  
+  query.limit && (query.limit = +query.limit);
+  
+  query.offset && (query.offset = +query.offset);
+  
+  if (!query.filter) { return query; }
 
-    delete query.filter?.excepts;
+  for (const key in query.filter) {
+    if ('excepts' in query.filter && query.filter.excepts.includes(key)) continue;
+    (['true'].includes(query.filter[key]))  && (query.filter[key] = true);
+    (query.filter[key] === 'false') && (query.filter[key] = false);
+    if (RegExp(/[a-z]/i).test(query.filter[key]) || key === 'user.clientCode') {
+      continue;
+    }
+    query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
   }
 
-  if (query.limit) { query.limit = +query.limit; }
-  if (query.offset) { query.limit = +query.offset; }
+  delete query.filter?.excepts;
 
   return query;
 }
@@ -206,8 +214,6 @@ export enum QueueState {
 export class Queue {
 
   private _state = QueueState.PENDING;
-
-  constructor() { }
 
   public get state() {
     return this._state;
@@ -256,8 +262,8 @@ export function generateAttachmentFromVoucher(voucher: Voucher, withoutVoucherId
       created: undefined,
       updated: undefined,
     },
-    isRequired: voucher?.isRequired || false,
-    extension: voucher?.extension || '*',
+    isRequired: voucher?.isRequired ?? false,
+    extension: voucher?.extension ?? '*',
   };
   if (!withoutVoucherId) { attachment.voucherId = voucher?._id; }
   return attachment;
@@ -266,7 +272,7 @@ export function generateAttachmentFromVoucher(voucher: Voucher, withoutVoucherId
 export function generateValidator(validator: Validator, user: User, status: OpeVisaStatus, rejectReason: string, signature?: string, indexes?: number[]): Validator {
   return {
     _id: validator?._id,
-    fullName: user?.fullName || `${user?.fname} ${user?.lname}`,
+    fullName: user?.fullName ?? `${user?.fname} ${user?.lname}`,
     clientCode: user?.clientCode,
     userCode: user?.userCode,
     signature: signature ?? undefined,
@@ -280,14 +286,14 @@ export function generateValidator(validator: Validator, user: User, status: OpeV
 
 export function getValidationsFolder(folder: Travel | OnlinePaymentMonth | TravelMonth) {
   const validators = [];
-  if ((folder as Travel)?.proofTravel && 'validators' in (folder as Travel)?.proofTravel) {
-    (folder as Travel)?.proofTravel?.validators?.forEach(elt => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
-    validators.push(...(folder as Travel)?.proofTravel?.validators || []);
+  if ('proofTravel' in folder && folder.proofTravel && 'validators' in folder.proofTravel) {
+    folder.proofTravel?.validators?.forEach(elt => { /*elt.status = travel?.proofTravel?.status;*/ elt.step = 'Preuve de voyage' })
+    validators.push(...folder.proofTravel?.validators ?? []);
   }
 
   if ('validators' in folder) {
     folder?.validators?.forEach(elt => { elt.step = 'État détaillé des dépenses' })
-    validators.push(...folder?.validators || []);
+    validators.push(...folder?.validators ?? []);
   }
   return validators;
 }

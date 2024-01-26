@@ -16,6 +16,8 @@ router.get('/labels', importsController.getImportationsLabels);
 
 router.get('/:id', importsController.findOneById);
 
+router.put('/status/:id', importsController.updateImportationStatusById);
+
 router.put('/:id', importsController.update);
 
 export const importsRoute = router;

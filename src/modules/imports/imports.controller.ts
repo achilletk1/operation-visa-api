@@ -37,4 +37,9 @@ export class ImportsController {
         catch (error) { next(error); }
     }
 
+    async updateImportationStatusById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ImportsController.importsService.updateImportationStatusById(req.params.id, req.body)); }
+        catch (error) { next(error); }
+    }
+
 }

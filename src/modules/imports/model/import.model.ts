@@ -1,4 +1,4 @@
-import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from "modules/visa-operations";
+import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment, Validator } from "modules/visa-operations";
 import { Editor, User } from "modules/users";
 
 export class Import {
@@ -11,12 +11,13 @@ export class Import {
   status?: OpeVisaStatus;
   subject?: string;
   desc?: string;
-  finalPayment?: boolean | Event;
   // tslint:disable-next-line: variable-name
   created_at?: number;
   // tslint:disable-next-line: variable-name
   updated_at?: number;
   editors?: Editor[];
+  finalPayment?: boolean | Event;
+  validators?: Validator[];
 }
 
 export class ImportOperation {
