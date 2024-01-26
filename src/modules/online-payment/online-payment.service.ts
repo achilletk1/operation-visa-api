@@ -274,7 +274,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         } catch (error) { throw error; }
     }
 
-    async getOnlinePaymentReport(params: { status: any, start: number, end: number }) {
+    async getOnlinePaymentReport(params: { status: any, start: number, end: number, regionCode:string }) {
         try { return await OnlinePaymentService.onlinePaymentRepository.getOnlinePaymentReport(params); }
         catch (error) { throw error; }
     }

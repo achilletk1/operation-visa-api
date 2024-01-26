@@ -14,15 +14,15 @@ export class ReportingService extends BaseService {
     async getConsolidateData(fields: any) {
         try {
             parseNumberFields(fields);
-            const { statemenType, travelType, status, start, end } = fields
+            const { statemenType, travelType, status, start, end, regionCode } = fields
             const data = statemenType === 'TRAVEL' ?
-                await TravelController.travelService.getTravelReport({ travelType, status, start, end }) :
-                await OnlinePaymentController.onlinePaymentService.getOnlinePaymentReport({ status, start, end });
+                await TravelController.travelService.getTravelReport({ travelType, status, start, end, regionCode }) :
+                await OnlinePaymentController.onlinePaymentService.getOnlinePaymentReport({ status, start, end, regionCode });
 
             return [
-                { type: 101, total: data[0]?.total[0] },
-                { type: 102, total: data[0]?.nbreTransactions[0], },
-                { type: 103, total: data[0]?.amountTransactions[0], },
+                { type: 101, total: data[0]?.total[0] || 0 },
+                { type: 102, total: data[0]?.nbreTransactions[0] || 0, },
+                { type: 103, total: data[0]?.amountTransactions[0] || 0, },
             ];
         } catch (error) { throw error; }
 

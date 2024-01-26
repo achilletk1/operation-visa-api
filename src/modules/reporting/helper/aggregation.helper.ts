@@ -6,7 +6,12 @@ export const generateConsolidateData = (param: { status: any, start: number, end
 
     const { start, end, status, travelType } = param
 
-    const match: any = { '$match': { status: { $in: [status] } } }
+    const match: any = { '$match': {} }
+
+    //const match: any = { '$match': { status: { $in: [status] } } }
+    if (status) {
+        match['$match']['status'] = { $in: [status] };
+    }
 
     if (start && end) {
         match['$match']['dates.created'] = { $gte: start, $lte: end };

@@ -6,7 +6,7 @@ export class OnlinePaymentRepository extends BaseRepository {
 
     constructor() { super(); this.collectionName = 'visa_operations_online_payments'; }
 
-    async getOnlinePaymentReport(params: { status: any, start: number, end: number }) {
+    async getOnlinePaymentReport(params: { status: any, start: number, end: number, regionCode:string }) {
         return await this.findAllAggregate(generateConsolidateData(params));
     }
 

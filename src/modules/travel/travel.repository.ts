@@ -7,11 +7,11 @@ export class TravelRepository extends BaseRepository {
 
     constructor() { super(); this.collectionName = 'visa_operations_travels'; }
 
-    async getTravelReport(params: { status: any, start: number, end: number, travelType?: any }) {
+    async getTravelReport(params: { status: any, start: number, end: number, travelType?: any, regionCode: string }) {
         return await this.findAllAggregate(generateConsolidateData(params));
     }
 
-    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string ,regionCode:string}) {
+    async getStatusOperationTravelReport(params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string, regionCode: string }) {
         return await this.findAllAggregate(statusOperation(params));
     }
 

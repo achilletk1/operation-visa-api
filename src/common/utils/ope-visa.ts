@@ -91,7 +91,7 @@ export function getOnpStatus(transaction: VisaTransaction[] | undefined) {
 };
 
 export const getStatementByStatus = (statement: any[]) => {
-    const tabStatus = [100, 200, 300, 400, 500]
+    const tabStatus = [100, 101, 200, 300, 400, 500, 600, 700]
     let data = []
     for (const iterator of tabStatus) {
         const found = statement.filter(v => {
