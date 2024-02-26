@@ -36,6 +36,7 @@ export class SettingsService extends CrudService<Setting> {
         try {
             const authUser = httpContext.get('user');
             if (authUser?.category < 500) { return new Error('Forbidden'); }
+            filter.created_at = { $exists: true };
             return await SettingsController.settingsService.findAll({ filter });
         } catch (error) { throw error; }
     }
