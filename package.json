@@ -8,7 +8,7 @@
     "start": "nodemon --ext ts,js,json,xlsx,html -r ts-node/register/transpile-only src/index",
     "start:nod": "nodemon --exec ts-node src/index",
     "start:dev": "cross-env NODE_ENV=development node src/index",
-    "start:staging": "cross-env NODE_ENV=staging node src/index",
+    "start:staging": "cross-env NODE_ENV=staging node -r ts-node/register/transpile-only src/index",
     "start:staging-bci": "cross-env NODE_ENV=staging-bci node -r ts-node/register/transpile-only src/index",
     "start:prod": "cross-env NODE_ENV=production node -r ts-node/register/transpile-only src/index.ts",
     "build": "tsc -p . && npm run copy-files",
