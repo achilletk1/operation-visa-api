@@ -13,10 +13,13 @@ import { Letter, LettersController } from "modules/letters";
 import { QueueState } from "common/helpers";
 import { CrudService } from "common/base";
 import { getTotal } from "common/utils";
-import { OpeVisaStatus } from "./enum";
+import { ExpenseCategory, OpeVisaStatus } from "./enum";
 import { ObjectId } from "mongodb";
 import { isEmpty } from "lodash";
 import moment from "moment";
+import { SettingsController } from "modules/settings";
+import { settingsKeys } from "modules/settings/model";
+import { Import, ImportsController } from "..";
 
 interface TravelDataGrouped {
     transactions: VisaTransaction[];
@@ -196,18 +199,30 @@ export class VisaOperationsService extends CrudService<any> {
             // It has one transaction, in transactions array, which have property isExceed with value true
             // It has not yet justify expensesDetails step (folder.status not JUSTIFY, not CLOSED)
 
-            // const travelsMonths = await TravelMonthController.travelMonthService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as TravelMonth[];
-            // const travelFilter = { $or: [
-            //     {_id: { $in: travelsMonths.map(e => new ObjectId(e.travelId?.toString())) } },
-            //     { $and: [
-            //         { isUntimely: { $exists: false } },
-            //         { $or: [{ "transactions.isExceed": true }, { "proofTravel.status": { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } }]
-            //     }] }
-            // ] };
-            // const shortTravels = await TravelController.travelService.findAllAggregate([{ $match: travelFilter }]) as Travel[];
-            // const onlinePayments = await OnlinePaymentController.onlinePaymentService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as OnlinePaymentMonth[];
-            // if (![...travelsMonths, ...shortTravels, ...onlinePayments].length) return;
-            // await VisaOperationsController.visaOperationsService.UpdateDelayStatusFileOutTime(travelsMonths, shortTravels, onlinePayments);
+            const travelsMonths = await TravelMonthController.travelMonthService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as TravelMonth[];
+            const travelFilter = {
+                $or: [
+                    { _id: { $in: travelsMonths.map(e => new ObjectId(e.travelId?.toString())) } },
+                    {
+                        $and: [
+                            { isUntimely: { $exists: false } },
+                            {
+                                $or: [{ "transactions.isExceed": true }, { "proofTravel.status": { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } }]
+                            }]
+                    },
+                    {
+                        $and: [
+                            { isUntimely: { $exists: false } },
+                            { "transactions.status": { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } }
+                        ]
+                    }
+
+                ]
+            };
+            const shortTravels = await TravelController.travelService.findAllAggregate([{ $match: travelFilter }]) as Travel[];
+            const onlinePayments = await OnlinePaymentController.onlinePaymentService.findAllAggregate([{ $match: { "transactions.isExceed": true, isUntimely: { $exists: false } } }]) as OnlinePaymentMonth[];
+            if (![...travelsMonths, ...shortTravels, ...onlinePayments].length) return;
+            await VisaOperationsController.visaOperationsService.UpdateDelayStatusFileOutTime(travelsMonths, shortTravels, onlinePayments);
         } catch (e: any) {
             this.logger.error(`detect users not justified transaction failed \n${e.stack}\n`);
         }
@@ -436,32 +451,82 @@ export class VisaOperationsService extends CrudService<any> {
         try {
             let totalAmount!: number;
 
-            // const template = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
+            const settings = await SettingsController.settingsService.findAll({
+                filter: {
+                    key: {
+                        $in: [settingsKeys.SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL, settingsKeys.SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES,
+                        settingsKeys.LONG_TRAVEL_DEADLINE_PROOF_TRAVEL, settingsKeys.LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH,
+                        settingsKeys.ONLINE_PAYMENT_DEADLINE_JUSTIFY, settingsKeys.IMPORT_GOODS_DEADLINE_JUSTIFY, settingsKeys.IMPORT_SERVICE_DEADLINE_JUSTIFY,
+                        settingsKeys.IMPORT_GOODS_DEADLINE_JUSTIFY, settingsKeys.IMPORT_SERVICE_DEADLINE_JUSTIFY]
+                    }
+                }
+            });
+
+            const deadlineProofLongTravel = (settings.data.find(e => e.key === settingsKeys.LONG_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+            const deadlineStatementExpensesLongTravel = (settings.data.find(e => e.key === settingsKeys.LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH))?.data;
+
+            const deadlineProofShortTravel = (settings.data.find(e => e.key === settingsKeys.SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+            const deadlineStatementExpensesShortTravel = (settings.data.find(e => e.key === settingsKeys.SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES))?.data;
+
+            const settingOnlinePayment = (settings.data.find(e => e.key === settingsKeys.ONLINE_PAYMENT_DEADLINE_JUSTIFY))?.data;
+            const deadlineOnlinePayment = settingOnlinePayment?.dataPeriod === 'month' ? settingOnlinePayment?.value * 30 : settingOnlinePayment?.value;
+
+            const goodsDeadline = (settings.data.find(e => e.key === settingsKeys.IMPORT_GOODS_DEADLINE_JUSTIFY))?.data;
+            const servicesDeadline = (settings.data.find(e => e.key === settingsKeys.IMPORT_SERVICE_DEADLINE_JUSTIFY))?.data;
+
             for (const travelMonth of travelsMonths) {
                 totalAmount = getTotal(travelMonth?.transactions);
                 const travel = travels.find(e => e._id.toString() === travelMonth.travelId?.toString());
-                if ((travel?.ceiling && totalAmount > travel.ceiling) && (travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > 30)) {
-                    TravelMonthController.travelMonthService.update(travelMonth?._id, { isUntimely: true })
+
+                if ((travel?.ceiling && totalAmount > travel.ceiling) && (travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > deadlineStatementExpensesLongTravel)) {
+                    await TravelMonthController.travelMonthService.update({ _id: travelMonth?._id }, { isUntimely: true })
+                }
+
+                if ((moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel)) {
+                    await TravelMonthController.travelMonthService.update({ _id: travelMonth?._id }, { isUntimely: true })
                 }
             }
 
-            for (const travel of travels) {
+            const longTravels = travels.filter(travel => travel.travelType === TravelType.LONG_TERM_TRAVEL);
+            const shortTravels = travels.filter(travel => travel.travelType === TravelType.SHORT_TERM_TRAVEL)
+
+            for (const travel of longTravels) {
+                if ((moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel)) {
+                    await TravelController.travelService.update({ _id: travel?._id }, { isUntimely: true })
+                }
+            }
+
+            for (const travel of shortTravels) {
                 if (travel.isUntimely || [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel.status as OpeVisaStatus) || [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
                     continue;
                 }
                 totalAmount = getTotal(travel?.transactions);
-                if ((travel.ceiling && totalAmount > travel.ceiling) && (travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > 30)) {
-                    TravelController.travelService.update(travel?._id, { isUntimely: true })
+
+                if ((moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofShortTravel) && (travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel)) {
+                    await TravelController.travelService.update({ _id: travel?._id }, { isUntimely: true })
                 }
             }
 
+            let importations: any[] = await ImportsController.importsService.findAllAggregate([{ $match: { "status": { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } } }]) as Import[];
+            importations = importations.map(e => e._id);
+
             for (const onlinePayment of onlinePayments) {
-                // const rs = moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days')
-                // const rsa = onlinePayments._id
                 totalAmount = getTotal(onlinePayment?.transactions);
-                if ((onlinePayment.ceiling && totalAmount > onlinePayment.ceiling) && (onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > 30)) {
-                    OnlinePaymentController.onlinePaymentService.updateOnlinePaymentsById(onlinePayment._id, { isUntimely: true })
+                if ((onlinePayment.ceiling && totalAmount > onlinePayment.ceiling) && (onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > deadlineOnlinePayment)) {
+                    await OnlinePaymentController.onlinePaymentService.update({ _id: onlinePayment._id }, { isUntimely: true })
                 }
+
+                // check importations deadlines
+                if (onlinePayment.transactions) {
+                    for (const transaction of onlinePayment.transactions) {
+                        if (transaction.importation && transaction.importation.finalPayment && importations.includes(transaction.importation._id)) {
+                            const deadline = transaction.importation.type?.code === ExpenseCategory.IMPORT_OF_GOODS ? goodsDeadline : servicesDeadline;
+                            if ((moment().diff(moment(transaction.justify_at), 'days') > deadline))
+                                await ImportsController.importsService.update({ _id: transaction.importation._id }, { isUntimely: true })
+                        }
+                    }
+                }
+
             }
 
         } catch (error) { throw error; }

@@ -12,4 +12,5 @@ export const startCrons = () => {
     DeleteTemporaryFilesCron.start();
     RemoveOnpWithoutExceedingCron.start();
     DetectListOfUsersToBlockedCron.start();
+    DetectOperationExceededCron.start()
 }

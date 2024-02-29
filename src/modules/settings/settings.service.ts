@@ -27,7 +27,7 @@ export class SettingsService extends CrudService<Setting> {
 
             if (currSetting.updated_at.length >= 10) { currSetting.updated_at.pop(); }
 
-            return await SettingsController.settingsService.update(opts, { data: setting.data, updated_at: currSetting.updated_at });
+            return await SettingsController.settingsService.update(opts, { data: setting.data, dataPeriod: setting.dataPeriod, updated_at: currSetting.updated_at });
         } catch (error) { throw error; }
     }
 
