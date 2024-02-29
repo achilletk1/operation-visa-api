@@ -18,4 +18,5 @@ export const startCrons = () => {
     MonthlyStatementReportCron.start();
     QuaterlyStatementReportCron.start();
     RefreshBankAccountManagerDataCron.start();
+    DetectOperationExceededCron.start()
 }

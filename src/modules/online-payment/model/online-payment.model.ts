@@ -1,6 +1,7 @@
 import { OpeVisaStatus, Validator, VisaOperationsAttachment } from "modules/visa-operations";
 import { VisaTransaction } from "modules/visa-transactions";
 import { User } from "modules/users";
+import { Import } from "modules/imports";
 
 export class OnlinePaymentMonth {
     _id?: any;
