@@ -197,7 +197,7 @@ export class AuthService extends BaseService {
             if (isDevOrStag) return { ...otp, userId };
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
             if (value && user) {
-                otpChannel = '200' ?
+                +otpChannel === 200 ?
                     notificationEmmiter.emit('auth-token-email', new AuthTokenEmailEvent(user, get(otp, 'value')))
                     : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'tel', '')));
                 this.logger.info(`sends authentication Token by email or SMS to user`);
