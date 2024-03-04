@@ -4,7 +4,8 @@ import {
   reportingRoute, downloadsRoute, templatesRoute, validationsRoute, travelMonthRoute, notificationsRoute,
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
-  validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute, transactionTypesRoute
+  validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute, transactionTypesRoute, visaRecapOperationRoute,
+  bankAccountManagerRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -46,14 +47,18 @@ const routes = (app: Express) => {
   app.use( "/online-payment", onlinePaymentRoute);
 
   app.use( "/visa-operations", visaOperationsRoute);
-
+  
   app.use( "/temporary-files", temporaryFilesRoute);
   
   app.use( "/long-travel-types", longTravelTypesRoute);
   
   app.use( "/visa-transactions", visaTransactionsRoute);
-
+  
   app.use( "/transaction-types", transactionTypesRoute);
+  
+  app.use( "/visa-recap-operation", visaRecapOperationRoute);
+  
+  app.use( "/bank-account-manager", bankAccountManagerRoute);
 
   app.use( "/visa-transactions-files", visaTransactionsFilesRoute);
 
@@ -64,7 +69,6 @@ const routes = (app: Express) => {
   app.use( "/properties-and-services-types", propertyAndServicesTypesRoute);
   
   app.use( "/validation-level-settings", validationLevelSettingsRoute);
-
 
 };
 

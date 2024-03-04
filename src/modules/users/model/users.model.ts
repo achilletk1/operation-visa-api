@@ -40,6 +40,11 @@ export class User {
     updated_at?: number;
     otp2fa?: boolean;
     accounts?: CbsAccounts[];
+    userGesCode?: string; // this is the manager code of the bank customer's account manager
+    gesCode?: string; // this is the back-office user manager code (only for back-office user)
+    bankUserCode?: string;
+    bankProfileCode?: string;
+    bankProfileName?: string;
 
     constructor(userCode: string, fname: string) {
         this.userCode = userCode;

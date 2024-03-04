@@ -40,6 +40,8 @@ export * from './long-travel-types';
 
 export * from './visa-transactions';
 
+export * from './bank-account-manager';
+
 export * from './visa-transactions-files';
 
 export * from './request-ceiling-increase';
@@ -52,4 +54,6 @@ export * from './validation-level-settings';
 
 export * from './card-type';
 
-export * from './transaction-types'
+export * from './transaction-types';
+
+export * from './visa-recap-operation-statement';

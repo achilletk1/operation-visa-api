@@ -1,7 +1,7 @@
 import { VisaOperationsAttachment } from "modules/visa-operations";
 import { NotificationFormat, NotificationStatus } from "../enum";
 
-export interface MailAttachment { name: string; content: string; contentType: string; }
+export interface MailAttachment { name: string; content: string | Buffer; contentType: string; }
 
 export interface Notification {
     _id?: string;

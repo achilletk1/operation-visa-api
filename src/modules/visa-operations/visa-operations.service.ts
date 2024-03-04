@@ -1,5 +1,5 @@
 import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction } from "./helper";
-import { FormalNoticeEvent, ListOfUsersToBloquedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
+import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
@@ -116,7 +116,7 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueStateRevival !== QueueState.PENDING) { return; }
             VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
             // TODO
-            const travels = await TravelController.travelService.findAllAggregate([{ $match: { status: { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEDEED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
+            const travels = await TravelController.travelService.findAllAggregate([{ $match: { status: { $nin: [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.EXCEEDED, OpeVisaStatus.REJECTED] }, travelType: 100 } }]) as Travel[];
 
             if (isEmpty(travels)) {
                 VisaOperationsService.queueStateRevival = QueueState.PENDING;
@@ -147,7 +147,7 @@ export class VisaOperationsService extends CrudService<any> {
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
                     // ]);
 
-                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEDEED });
+                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEEDED });
                 }
                 if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
                     notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
@@ -173,14 +173,14 @@ export class VisaOperationsService extends CrudService<any> {
 
     async detectListOfUsersToBlocked(): Promise<void> {
         try {
-            const travelsExcedeed = (await TravelController.travelService.findAll({ filter: { status: { $in: [OpeVisaStatus.EXCEDEED] } } }))?.data;
-            const onlinePaymentsExcedeed = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { status: { $in: [OpeVisaStatus.EXCEDEED] } } }))?.data;
-            let transactionsExcedeed: VisaTransaction[] = [];
-            if (isEmpty([...travelsExcedeed, ...onlinePaymentsExcedeed])) return;
-            transactionsExcedeed = await VisaOperationsController.visaOperationsService.getCustomerAccountToBlocked([...travelsExcedeed, ...onlinePaymentsExcedeed]);
+            const travelsExceeded = (await TravelController.travelService.findAll({ filter: { status: { $in: [OpeVisaStatus.EXCEEDED] } } }))?.data;
+            const onlinePaymentsExceeded = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { status: { $in: [OpeVisaStatus.EXCEEDED] } } }))?.data;
+            let transactionsExceeded: VisaTransaction[] = [];
+            if (isEmpty([...travelsExceeded, ...onlinePaymentsExceeded])) return;
+            transactionsExceeded = await VisaOperationsController.visaOperationsService.getCustomerAccountToBlocked([...travelsExceeded, ...onlinePaymentsExceeded]);
 
-            if (!isEmpty(transactionsExcedeed)) {
-                notificationEmmiter.emit('list-of-users-to-bloqued-mail', new ListOfUsersToBloquedEvent(transactionsExcedeed))
+            if (!isEmpty(transactionsExceeded)) {
+                notificationEmmiter.emit('list-of-users-to-blocked-mail', new ListOfUsersToBlockedEvent(transactionsExceeded))
             }
         } catch (e: any) {
             this.logger.error(`detect users not justified transaction failed \n${e.stack}\n`);

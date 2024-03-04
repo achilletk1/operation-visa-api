@@ -1,5 +1,5 @@
+import { CbsAccounts, CbsBankAccountManager, CbsBankUser, CbsCard, CbsClientUser, CbsProduct } from "./model";
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
-import { CbsAccounts, CbsBankUser, CbsCard, CbsClientUser, CbsProduct } from "./model";
 import { clientsDAO, banksDAO } from "./oracle-daos";
 import { config } from "convict-config";
 import { CbsBankBranch } from './model';
@@ -136,6 +136,22 @@ export class CbsService extends BaseService {
             return data;
         } catch (error: any) {
             this.logger.error(`Failed to get bank list \n${error.stack}`);
+            throw error;
+        }
+    }
+
+    async getBankAccountManager(): Promise<CbsBankAccountManager[]> {
+        try {
+            let data = await clientsDAO.getBankAccountManager();
+
+            if (data && data instanceof Array) {
+                data = data.map(bankBranch => removeSpacesFromResultSet(bankBranch));
+                if (data.length === 0) { throw new Error('EmptyResponse'); }
+            }
+
+            return data;
+        } catch (error: any) {
+            this.logger.error(`Failed to get bank account-manager \n${error.stack}`);
             throw error;
         }
     }

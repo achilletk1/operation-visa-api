@@ -1,10 +1,10 @@
-import { ListOfUsersToBloquedEvent } from "./list-of-users-to-bloqued.event";
+import { ListOfUsersToBlockedEvent } from "./list-of-users-to-bloqued.event";
 import { BaseMailNotification } from "modules/notifications/base";
 import { QueuePriority } from "modules/notifications";
 
-export class ListOfUsersToBloquedMailNotification extends BaseMailNotification<ListOfUsersToBloquedEvent> {
+export class ListOfUsersToBloquedMailNotification extends BaseMailNotification<ListOfUsersToBlockedEvent> {
 
-    constructor(notificationData: ListOfUsersToBloquedEvent) {
+    constructor(notificationData: ListOfUsersToBlockedEvent) {
         super('list-of-users-to-bloqued', notificationData, QueuePriority.HIGH, undefined, undefined, 'fr', true);
         
         this.key = 'customer_in_demeure';
@@ -12,7 +12,7 @@ export class ListOfUsersToBloquedMailNotification extends BaseMailNotification<L
         this.subject = `[OPERATION VISA] Liste des clients en situation de blocage de carte`;
     }
 
-    static async init(notificationData: ListOfUsersToBloquedEvent) {
+    static async init(notificationData: ListOfUsersToBlockedEvent) {
         await notificationData.generateAttachments();
         return new ListOfUsersToBloquedMailNotification(notificationData);
     }

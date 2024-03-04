@@ -12,7 +12,7 @@ import { get, isEmpty } from "lodash";
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
     const totalAmount = getTotal(data?.transactions || []);
     if (totalAmount > ceiling) {
-        data.status = [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.VALIDATION_CHAIN].includes(Number(data?.status)) ? data?.status : OpeVisaStatus.EXCEDEED;
+        data.status = [OpeVisaStatus.CLOSED, OpeVisaStatus.JUSTIFY, OpeVisaStatus.VALIDATION_CHAIN].includes(Number(data?.status)) ? data?.status : OpeVisaStatus.EXCEEDED;
         const userData = travel ? travel : data;
 
         // TODO send increase notification after status change to exceeded

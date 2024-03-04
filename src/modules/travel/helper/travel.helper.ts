@@ -41,10 +41,10 @@ export function getTravelStatus(travel: Travel | TravelMonth, ceilingTravelMonth
 
     // if (status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.EXCEDEED; }
 
-    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
+    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEEDED)) { return OpeVisaStatus.REJECTED; }
 
     if (status.includes(OpeVisaStatus.TO_VALIDATED) &&
-        !status.includes(OpeVisaStatus.EXCEDEED) &&
+        !status.includes(OpeVisaStatus.EXCEEDED) &&
         !status.includes(OpeVisaStatus.TO_COMPLETED) &&
         !status.includes(OpeVisaStatus.EMPTY)
     ) {
@@ -52,7 +52,7 @@ export function getTravelStatus(travel: Travel | TravelMonth, ceilingTravelMonth
     }
 
     if (status.includes(OpeVisaStatus.TO_COMPLETED) &&
-        !status.includes(OpeVisaStatus.EXCEDEED)) {
+        !status.includes(OpeVisaStatus.EXCEEDED)) {
         return OpeVisaStatus.TO_COMPLETED;
     }
     return OpeVisaStatus.TO_COMPLETED;

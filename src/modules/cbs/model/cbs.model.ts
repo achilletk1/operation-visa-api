@@ -22,6 +22,7 @@ export interface BaseCbsUser {
 
 export interface CbsClientUser extends BaseCbsUser {
     AGE: string;
+    GES: string;
     LANG: string;
     CLI: string;
     LIBELLE_AGENCE: string;
@@ -32,6 +33,7 @@ export interface CbsClientUser extends BaseCbsUser {
 
 export interface CbsBankUser extends CbsClientUser {
     GES: string;
+    GES_CODE: string;
     CODE_GESTIONNAIRE: string;
     CODE_PROFIL: string;
     CODE_UTILISATEUR: string;
@@ -77,4 +79,14 @@ export interface CbsBankBranch {
     NOM_BANQUE: string;
     CODE_AGENCE: string;
     NOM_AGENCE: string;
+}
+
+export interface CbsBankAccountManager {
+    PROFIL_UTI: string;
+    LIB_PROFIL_UTI: string;
+    CODE_UTI: string;
+    FULLNAME: string;
+    CODE_GES: string;
+    AGE: string;
+    CLI: string;
 }

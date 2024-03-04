@@ -5,7 +5,7 @@ import { config } from "convict-config";
 import { logger } from 'winston-config';
 import moment from "moment";
 
-export class ListOfUsersToBloquedEvent implements ListOfUsersToBloquedMailData {
+export class ListOfUsersToBlockedEvent implements ListOfUsersToBlockedMailData {
     id = '';
     date!: string;
     receiver!: string;
@@ -22,11 +22,11 @@ export class ListOfUsersToBloquedEvent implements ListOfUsersToBloquedMailData {
         try {
             const content = await generatePdfContainBlockedUser(this.usersList);
             this.attachments = !!content ? [{ name: `client-en-demeure ${this.date}`, content, contentType: 'application/pdf' }] : [];
-        } catch (error: any) { logger.error(`Error during attachment generation of list-of-users-to-bloqued mail notification \n${error.stack}`); }
+        } catch (error: any) { logger.error(`Error during attachment generation of list-of-users-to-blocked mail notification \n${error.stack}`); }
     }
 }
 
-interface ListOfUsersToBloquedMailData {
+interface ListOfUsersToBlockedMailData {
     id: string;
     date: string;
     usersList: any[];

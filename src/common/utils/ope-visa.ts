@@ -41,7 +41,7 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
     // renvoi le statut à compléter
     if (status.includes(OpeVisaStatus.TO_COMPLETED)
         && !status.includes(OpeVisaStatus.REJECTED)
-        && !status.includes(OpeVisaStatus.EXCEDEED)) {
+        && !status.includes(OpeVisaStatus.EXCEEDED)) {
         return OpeVisaStatus.TO_COMPLETED
     }
 
@@ -50,16 +50,16 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
         && !status.includes(OpeVisaStatus.TO_COMPLETED)
         // && !status.includes(OpeVisaStatus.EMPTY)
         && !status.includes(OpeVisaStatus.REJECTED)
-        && !status.includes(OpeVisaStatus.EXCEDEED)
+        && !status.includes(OpeVisaStatus.EXCEEDED)
     ) {
         return OpeVisaStatus.TO_VALIDATED;
     }
 
     // renvoi le statut rejeté
-    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.REJECTED; }
+    if (status.includes(OpeVisaStatus.REJECTED) && !status.includes(OpeVisaStatus.EXCEEDED)) { return OpeVisaStatus.REJECTED; }
 
     // renvoi en chaine de validation
-    if (status.includes(OpeVisaStatus.VALIDATION_CHAIN) && !status.includes(OpeVisaStatus.EXCEDEED)) { return OpeVisaStatus.VALIDATION_CHAIN; }
+    if (status.includes(OpeVisaStatus.VALIDATION_CHAIN) && !status.includes(OpeVisaStatus.EXCEEDED)) { return OpeVisaStatus.VALIDATION_CHAIN; }
 
     // renvoi le statut justifié
     if (status.includes(OpeVisaStatus.JUSTIFY)
@@ -67,14 +67,14 @@ export function getOnpStatementStepStatus(data: any, step?: 'onp' | 'othersAttac
         && !status.includes(OpeVisaStatus.EMPTY)
         && !status.includes(OpeVisaStatus.REJECTED)
         && !status.includes(OpeVisaStatus.TO_VALIDATED)
-        && !status.includes(OpeVisaStatus.EXCEDEED)
+        && !status.includes(OpeVisaStatus.EXCEEDED)
         && !status.includes(OpeVisaStatus.VALIDATION_CHAIN)
         && !status.includes(OpeVisaStatus.CLOSED)) {
         return OpeVisaStatus.JUSTIFY;
     }
 
     // renvoi le statut hors délais
-    if (status.includes(500)) { return OpeVisaStatus.EXCEDEED; }
+    if (status.includes(500)) { return OpeVisaStatus.EXCEEDED; }
 
     return OpeVisaStatus.TO_COMPLETED;
 };
@@ -115,7 +115,7 @@ export const getStatuslabel = (status: OpeVisaStatus | '') => {
         case OpeVisaStatus.TO_VALIDATED: return 'A valider';
         case OpeVisaStatus.JUSTIFY: return 'Justifié';
         case OpeVisaStatus.REJECTED: return 'Rejeté';
-        case OpeVisaStatus.EXCEDEED: return 'Hors délais';
+        case OpeVisaStatus.EXCEEDED: return 'Hors délais';
         case OpeVisaStatus.VALIDATION_CHAIN: return 'En cours de validation';
         case OpeVisaStatus.CLOSED: return 'Clôturé';
         default: return 'A compléter';

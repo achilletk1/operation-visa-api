@@ -1,4 +1,4 @@
-import { CbsAccounts, CbsBankUser, CbsCard, CbsClientUser, CbsEmail, CbsPhone, CbsProduct } from "../model";
+import { CbsAccounts, CbsBankAccountManager, CbsBankUser, CbsCard, CbsClientUser, CbsEmail, CbsPhone, CbsProduct } from "../model";
 import { executeQuery } from "common/oracle-daos/config";
 import { isDevOrStag } from "common/helpers";
 import { logger } from 'winston-config';
@@ -18,7 +18,7 @@ export const clientsDAO = {
 
             const query = (scope === 'front-office')
                 ? ` select
-                        trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
+                        trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli, p.ges,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
                         (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
@@ -26,12 +26,12 @@ export const clientsDAO = {
                     where p.cli = '${cli}'`
                 : ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli,
-                        a.ges,
+                        a.ges, p.ges as ges_code,
                         a.cge as code_gestionnaire,
                         a.puti as code_profil,
                         a.cuti as code_utilisateur,
                         trim(a.lib) as noms_complet,
-                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_du_profil,
+                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) libelle_agence,
                         (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
@@ -65,8 +65,8 @@ export const clientsDAO = {
                     (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) lib_age
                 from infoc.bkcom p
                 where p.cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200') and p.cfe = 'N' and p.ife = 'N' and p.cli = '${cli}'`
-                // :
-                //     `select ncp, inti, age, sde, sin + infoc.getmaut(ncp, age, dev, clc) as "SOLDE", clc, (select lib2 from infoc.bknom where infoc.bknom.ctab = '005' and infoc.bknom.cacc = infoc.bkcom.dev) currency from infoc.bkcom where cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200')  and cfe = 'N' and ife = 'N' and cli = '${cli}'`;
+            // :
+            //     `select ncp, inti, age, sde, sin + infoc.getmaut(ncp, age, dev, clc) as "SOLDE", clc, (select lib2 from infoc.bknom where infoc.bknom.ctab = '005' and infoc.bknom.cacc = infoc.bkcom.dev) currency from infoc.bkcom where cha in ('371100', '371300', '372100', '372120', '372200', '373000', '373200')  and cfe = 'N' and ife = 'N' and cli = '${cli}'`;
 
             const result = await executeQuery(query);
 
@@ -197,5 +197,26 @@ export const clientsDAO = {
 
         return result;
     },
+
+    getBankAccountManager: async (): Promise<CbsBankAccountManager[]> => {
+        try {
+            const methodPath = `${classPath}.getBankAccountManager()`;
+
+            logger.info(`init get all bank-account-manager to refresh local data`, { methodPath });
+
+            if (isDevOrStag) { return await helper.getMockBankAccountManagerData(); }
+
+            const query = `
+                select a.puti profil_uti, b.lib1 lib_profil_puti, a.cuti code_uti, a.lib as fullname, a.cge code_ges, a.age, a.cli
+                from evuti a , bknom b
+                wherea.sus='N' and b.ctab=994 and a.puti=b.cacc and a.cge IS NOT NULL
+                order by a.puti, a.cuti`;
+            // and a.puti in ('R204', 'R206', 'R208', 'R211', 'R215', 'R217', 'R219', 'R220')
+
+            const result: CbsBankAccountManager[] = await executeQuery(query);
+
+            return result;
+        } catch (error) { throw error; }
+    }
 
 };

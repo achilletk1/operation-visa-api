@@ -28,7 +28,11 @@ export * from './travel-status-changed';
 
 export * from './increase-ceiling-bank';
 
+export * from './monthly-recap-statement';
+
 export * from './list-of-users-to-bloqued';
+
+export * from './quaterly-recap-statement';
 
 export * from './online-payement-declaration';
 

@@ -1,18 +1,18 @@
 import { mkdirSync, writeFileSync, unlinkSync, readFileSync, rmSync,existsSync } from 'fs';
 import { config } from 'convict-config';
 
-export function writeFile(content: any, path: string, filename: string) {
+export function writeFile(content: any, path: string, filename: string, isUtf8?: boolean) {
     try {
         const filePath = `${path}/${filename}`;
         mkdirSync(`${config.get('fileStoragePath')}/${path}`, { recursive: true });
-        writeFileSync(`${config.get('fileStoragePath')}/${removeSpace(filePath)}`, content, 'base64');
+        writeFileSync(`${config.get('fileStoragePath')}/${removeSpace(filePath)}`, content, (!isUtf8) ? 'base64' : 'utf8');
         return filePath;
     } catch (error) { throw error; }
 }
 
-export function readFile(path: string) {
+export function readFile(path: string, isUtf8?: boolean) {
     if(!existsSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`))  return null
-    try { return readFileSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`, { encoding: 'base64' }); }
+    try { return readFileSync(`${config.get('fileStoragePath')}/${removeSpace(path)}`, { encoding: (!isUtf8) ? 'base64' : 'utf8' }); }
     catch (error) { throw error; }
 }
 

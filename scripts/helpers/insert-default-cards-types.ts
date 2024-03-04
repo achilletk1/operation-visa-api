@@ -10,88 +10,88 @@ export const inserDefaultUsersCardsTypes = async () => {
     const db = await getDatabase();
 
     const cartTypes = [
-        {
-            productCode: '185',
-            label: "CARTE LEADER EMV ",
-            cardTypeTransactions: [
-                {
-                    label: 'Retrait',
-                    maxAmountPerDay: 300000,
-                    frequency: 'month',
-                    maxTransactionsPerDay: 5,
-                },
-                {
-                    label: 'Paiement',
-                    maxAmountPerDay: 500000,
-                    frequency: 'month',
-                    maxTransactionsPerDay: 5,
-                },
-            ],
-            profiles: [
-                {
-                    label: 'Profile 1 (100%)',
-                    percentage: 100,
-                    maxTransactionsPerDay: 5,
-                    amount : 5000,
-                },
-                {
-                    label: 'Profile 2 (150%)',
-                    percentage: 150,
-                    maxTransactionsPerDay: 5,
-                    amount : 6000,
-                },
-                {
-                    label: 'Profile 3 (200%)',
-                    percentage: 200,
-                    maxTransactionsPerDay: 15,
-                    amount : 7000,
-                },
-                {
-                    label: 'Profile 4 (400%)',
-                    percentage: 400,
-                    maxTransactionsPerDay: 15,
-                    amount : 8000,
-                },
-            ],
-        },
-        {
-            productCode: '186',
-            label: "CARTE EXPRESS EMV",
-            cardTypeTransactions: [
-                {
-                    label: 'Achat TPE',
-                    maxAmountPerDay: 1000000,
-                    frequency: 'week',
-                    maxTransactionsPerDay: 5,
-                },
-                {
-                    label: 'E-Commerce',
-                    maxAmountPerDay: 1000000,
-                    frequency: 'week',
-                    maxTransactionsPerDay: 5,
-                },
-            ],
-            profiles: [
-                {
-                    label: 'Profile 1 (100%)',
-                    percentage: 100,
-                    maxTransactionsPerDay: 5,
-                    amount : 5000,
-                },
-                {
-                    label: 'Profile 2 (150%)',
-                    percentage: 150,
-                    maxTransactionsPerDay: 5,
-                    amount : 6000,
-                },
-                {
-                    label: 'Profile 3 (200%)',
-                    percentage: 200,
-                    maxTransactionsPerDay: 15,
-                    amount : 7000,
-                },
-            ],
-        },
+        // {
+        //     productCode: '185',
+        //     label: "CARTE LEADER EMV ",
+        //     cardTypeTransactions: [
+        //         {
+        //             label: 'Retrait',
+        //             maxAmountPerDay: 300000,
+        //             frequency: 'month',
+        //             maxTransactionsPerDay: 5,
+        //         },
+        //         {
+        //             label: 'Paiement',
+        //             maxAmountPerDay: 500000,
+        //             frequency: 'month',
+        //             maxTransactionsPerDay: 5,
+        //         },
+        //     ],
+        //     profiles: [
+        //         {
+        //             label: 'Profile 1 (100%)',
+        //             percentage: 100,
+        //             maxTransactionsPerDay: 5,
+        //             amount : 5000,
+        //         },
+        //         {
+        //             label: 'Profile 2 (150%)',
+        //             percentage: 150,
+        //             maxTransactionsPerDay: 5,
+        //             amount : 6000,
+        //         },
+        //         {
+        //             label: 'Profile 3 (200%)',
+        //             percentage: 200,
+        //             maxTransactionsPerDay: 15,
+        //             amount : 7000,
+        //         },
+        //         {
+        //             label: 'Profile 4 (400%)',
+        //             percentage: 400,
+        //             maxTransactionsPerDay: 15,
+        //             amount : 8000,
+        //         },
+        //     ],
+        // },
+        // {
+        //     productCode: '186',
+        //     label: "CARTE EXPRESS EMV",
+        //     cardTypeTransactions: [
+        //         {
+        //             label: 'Achat TPE',
+        //             maxAmountPerDay: 1000000,
+        //             frequency: 'week',
+        //             maxTransactionsPerDay: 5,
+        //         },
+        //         {
+        //             label: 'E-Commerce',
+        //             maxAmountPerDay: 1000000,
+        //             frequency: 'week',
+        //             maxTransactionsPerDay: 5,
+        //         },
+        //     ],
+        //     profiles: [
+        //         {
+        //             label: 'Profile 1 (100%)',
+        //             percentage: 100,
+        //             maxTransactionsPerDay: 5,
+        //             amount : 5000,
+        //         },
+        //         {
+        //             label: 'Profile 2 (150%)',
+        //             percentage: 150,
+        //             maxTransactionsPerDay: 5,
+        //             amount : 6000,
+        //         },
+        //         {
+        //             label: 'Profile 3 (200%)',
+        //             percentage: 200,
+        //             maxTransactionsPerDay: 15,
+        //             amount : 7000,
+        //         },
+        //     ],
+        // },
         {
             productCode: '321',
             label: "GIMAC Express",

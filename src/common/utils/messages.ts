@@ -19,6 +19,7 @@ export const errorMsg = {
     ACCOUNT_EXISTE: "This account already exists",
     NOT_AUTHORIZE: "You do not have permission to perform this action",
     EXPIRE_TIME: "Expired code validity period",
+    EXPIRE_LINK :"Expired link validity period",
     NOT_ACCEPTABLE: "This data is not acceptable",
     INSUFFICIENT_BALANCE: "Your account balance is insufficient to place this order",
     res: {

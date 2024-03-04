@@ -84,11 +84,13 @@ export class AuthService extends BaseService {
 
             const { otp } = user;
 
-            if (otpValue != '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
+            if (otpValue === '000000' && isProd) { throw new Error('OTPNoMatch'); }
+
+            if (otpValue !== '000000' && otp?.value !== otpValue) { throw new Error('OTPNoMatch'); }
 
             const currTime = new Date().valueOf();
 
-            if (otpValue != '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
+            if (otpValue !== '000000' && get(otp, 'expiresAt', 0) <= currTime) { throw new Error('OTPExpired'); }
 
             return this.generateAuthToken(user);
         } catch (error) { throw error; }
@@ -192,7 +194,7 @@ export class AuthService extends BaseService {
             }
 
             await UsersController.usersService.update({ _id: userId }, { otp });
-            if (isDevOrStag || isStagingBci) return { ...otp, userId }
+            if (isDevOrStag) return { ...otp, userId };
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
             if (value && user) {
                 otpChannel = '200' ?
@@ -200,6 +202,8 @@ export class AuthService extends BaseService {
                     : notificationEmmiter.emit('token-sms', new TokenSmsEvent(get(otp, 'value'), get(user, 'tel', '')));
                 this.logger.info(`sends authentication Token by email or SMS to user`);
             }
+
+            if (isStagingBci) { return { ...otp, userId }; }
 
             return {};
         } catch (error) { throw error; }
@@ -219,6 +223,8 @@ export class AuthService extends BaseService {
             if (!user) { throw new Error(errorMsg.USER_NOT_FOUND); }
 
             const { otp: userOTP } = user;
+
+            if (otp === '999999' && isProd) { throw new Error('OTPNoMatch'); }
 
             if (otp !== '999999' && userOTP?.value !== otp) { throw new Error('OTPNoMatch'); }
 

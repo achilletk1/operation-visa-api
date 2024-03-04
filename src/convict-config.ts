@@ -296,7 +296,7 @@ export const config = convict({
     emailTest: {
         doc: 'email test to send notification',
         format: String,
-        default: 'kevin.moutassi@londo-tech.com',
+        default: 'achille.tachum@londo-tech.com',
         env: 'EMAIL_TEST'
     },
     phoneTest: {
@@ -391,6 +391,24 @@ export const config = convict({
             default: '',
             env: 'OUT_OF_TIME',
             arg: 'out_of_time'
+        },
+        quaterlyStatementReportMailsScheduler: {
+            doc: 'Time shedule for quaterly report mails cron',
+            format: String,
+            default: '0 0 1 */3 *',
+            env: 'DAILY_REPORT_MAIL_SCHEDULER'
+        },
+        monthlyStatementReportMailsScheduler: {
+            doc: 'Time shedule for monthly report mails cron',
+            format: String,
+            default: '0 0 1 * *',
+            env: 'MONTHLY_REPORT_MAIL_SCHEDULER'
+        },
+        refreshBankAccountManagerData: {
+            doc: 'Time shedule for refreshing data of bank-account-manager cron',
+            format: String,
+            default: '7 */1 * * *',
+            env: 'CRON_REFRESH_BANK_ACCOUNT_MANAGER_DATA'
         },
     },
 });

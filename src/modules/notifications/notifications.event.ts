@@ -2,7 +2,8 @@ import { UploadedDocumentsOnExceededFolderEvent, UploadedDocumentsOnExceededFold
 import { TransactionOutsideNotJustifiedEvent, TransactionOutsideNotJustifiedMailNotification } from './notifications/mail/transaction-outside-not-justified';
 import { OnlinePaymentStatusChangedEvent, OnlinePaymentStatusChangedMailNotification } from './notifications/mail/online-payment-status-changed';
 import { OnlinePayementDeclarationEvent, OnlinePayementDeclarationMailNotification } from './notifications/mail/online-payement-declaration';
-import { ListOfUsersToBloquedEvent, ListOfUsersToBloquedMailNotification } from './notifications/mail/list-of-users-to-bloqued';
+import { MonthlyRecapStatementEvent, MonthlyRecapStatementMailNotification } from './notifications/mail/monthly-recap-statement';
+import { ListOfUsersToBlockedEvent, ListOfUsersToBloquedMailNotification } from './notifications/mail/list-of-users-to-bloqued';
 import { TravelStatusChangedEvent, TravelStatusChangedMailNotification } from './notifications/mail/travel-status-changed';
 import { IncreaseCeilingBankEvent, IncreaseCeilingBankMailNotification } from './notifications/mail/increase-ceiling-bank';
 import { CeilingCaeAssignedEvent, CeilingCaeAssignedMailNotification } from './notifications/mail/ceiling-cae-assigned';
@@ -89,7 +90,7 @@ notificationEmmiter.on('visa-template-mail', async (data: TransactionOutsideNotJ
     await (new TransactionOutsideNotJustifiedMailNotification(data)).sendNotification();
 });
 
-notificationEmmiter.on('list-of-users-to-bloqued-mail', async (data: ListOfUsersToBloquedEvent) => {
+notificationEmmiter.on('list-of-users-to-blocked-mail', async (data: ListOfUsersToBlockedEvent) => {
     await data.generateAttachments();
     await (new ListOfUsersToBloquedMailNotification(data)).sendNotification();
 });
@@ -100,6 +101,16 @@ notificationEmmiter.on('auth-token-email', async (data: AuthTokenEmailEvent) => 
 
 notificationEmmiter.on('uploaded-documents-on-exceeded-folder-mail', async (data: UploadedDocumentsOnExceededFolderEvent) => {
     await (new UploadedDocumentsOnExceededFolderMailNotification(data)).sendNotification();
+});
+
+notificationEmmiter.on('monthly-statement-recap-mail', async (data: MonthlyRecapStatementEvent) => {
+    await data.generateAttachments();
+    await (new MonthlyRecapStatementMailNotification(data)).sendNotification();
+});
+
+notificationEmmiter.on('quarterly-statement-recap-mail', async (data: MonthlyRecapStatementEvent) => {
+    await data.generateAttachments();
+    await (new MonthlyRecapStatementMailNotification(data)).sendNotification();
 });
 
 

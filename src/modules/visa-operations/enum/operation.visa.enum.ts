@@ -4,7 +4,7 @@ export enum OpeVisaStatus {
     TO_VALIDATED = 400,
     VALIDATION_CHAIN = 700,
     REJECTED = 300,
-    EXCEDEED = 500,
+    EXCEEDED = 500,
     JUSTIFY = 200,
     CLOSED = 600,
 
