@@ -404,7 +404,7 @@ export const config = convict({
             default: '0 0 1 * *',
             env: 'MONTHLY_REPORT_MAIL_SCHEDULER'
         },
-        refreshBankAccountManagerData: {
+        refreshBankAccountManager: {
             doc: 'Time shedule for refreshing data of bank-account-manager cron',
             format: String,
             default: '7 */1 * * *',

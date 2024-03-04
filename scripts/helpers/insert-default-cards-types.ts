@@ -269,7 +269,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '206',
+            productCode: '708',
             label: "VISA Classic",
             cardTypeTransactions: [
                 {
@@ -325,7 +325,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '207',
+            productCode: '808',
             label: "VISA Gold",
             cardTypeTransactions: [
                 {
