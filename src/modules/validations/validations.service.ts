@@ -79,10 +79,10 @@ export class ValidationsService extends CrudService<UserValidator> {
             if (authUser.category < 500) { throw new Error('Forbidden'); }
 
             const { userId } = userValidator;
-            const user = await UsersController.usersService.findOne({ filter: { userId } });
+            const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
 
             if (!user) { throw new Error('UserNotFoud') }
-            const validatorExist = await ValidationsController.validationsService.findOne({ filter: { _id: userId } });
+            const { data } = await ValidationsController.validationsService.findAll({ filter: { userId } });
 
 
             const opts = { filter: { userId: { $ne: userId }, enabled: true }, projection: { _id: 0, level: 1 } };
@@ -90,10 +90,11 @@ export class ValidationsService extends CrudService<UserValidator> {
             const isGapInValidation = this.validationListHasGap(validationsLevelList, Number(userValidator?.level));
             if (isGapInValidation) { throw new Error('ValidationLevelGap'); }
 
-            userValidator.dates = !validatorExist ? { created: new Date().valueOf() } : { ...userValidator.dates, updated: new Date().valueOf() };
-            const result = !validatorExist
+            userValidator.dates = !data ? { created: new Date().valueOf() } : { ...userValidator.dates, updated: new Date().valueOf() };
+            const result = isEmpty(data)
                 ? await ValidationsController.validationsService.create(userValidator)
-                : await ValidationsController.validationsService.update({ _id: get(validatorExist, '_id') }, { ...userValidator });
+                : await ValidationsController.validationsService.update({ _id: data[0]?._id }, { ...userValidator });
+            return result
         } catch (error) { throw error; }
     }
 

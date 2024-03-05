@@ -42,4 +42,5 @@ export interface VisaTransaction {
     expenseCategory?: ExpenseCategory;
     importation?: Partial<Import>; // { _id, type, subject, finalPayment }
     selected?: boolean; // variable to select transaction for validation or rejection
+    justify_at?: number;
 }

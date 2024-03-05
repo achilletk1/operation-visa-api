@@ -18,12 +18,12 @@ const runScripts = async () => {
     // await inserDefaultLongTravelsTypes();
     // await inserDefaultLetter();
     // await inserDefaultPropertyType();
-    // await inserDefaultSetting();
+    await inserDefaultSetting();
     // await insertDefaultTemplateSetting();
     // await inserDefaultVouchers();
     // await inserDefaultUsersValidations();
     // await inserDefaultBankUsers();
-    await inserDefaultUsersCardsTypes();
+    // await inserDefaultUsersCardsTypes();
 }
 
 (async () => {
