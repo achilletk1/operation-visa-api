@@ -82,11 +82,10 @@ export interface CbsBankBranch {
 }
 
 export interface CbsBankAccountManager {
-    PROFIL_UTI: string;
-    LIB_PROFIL_UTI: string;
-    CODE_UTI: string;
+    AGE_UTI: string;
     FULLNAME: string;
     CODE_GES: string;
     AGE: string;
-    CLI: string;
+    EMAIL: string;
+    TEL: string;
 }

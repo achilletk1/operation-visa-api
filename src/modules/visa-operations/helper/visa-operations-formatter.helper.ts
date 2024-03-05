@@ -70,6 +70,7 @@ export const generateNotificationData = (data: any, type: 'SMS' | 'EMAIL', templ
         data: { transactions: data.transactions, ceiling: data.ceiling, amount: data.totalAmount },
         lang: get(data, 'user.lang'),
         id: get(data, '_id').toString(),
+        clientCode: get(data, 'user.clientCode'),
         key: template,
     }
     if (template === 'firstTransaction' && type === 'EMAIL') {

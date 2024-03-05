@@ -1,5 +1,6 @@
 import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction } from "./helper";
 import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
+import { BankAccountManager, BankAccountManagerController } from "modules/bank-account-manager";
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
@@ -137,11 +138,17 @@ export class VisaOperationsService extends CrudService<any> {
                 const currentDate = new Date().valueOf();
                 if (!travel?.user?.email) continue;
 
+                let user: User; let bankAccountManager!: BankAccountManager;
+                try {
+                    user = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode, category: UserCategory.DEFAULT } });
+                    bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
+                } catch (error) { }
+
                 // TODO set lang dynamically
                 const lang = 'fr';
 
                 if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                    notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang));
+                    notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang, bankAccountManager?.EMAIL));
                     // await Promise.all([
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
@@ -150,7 +157,7 @@ export class VisaOperationsService extends CrudService<any> {
                     await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OpeVisaStatus.EXCEEDED });
                 }
                 if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                    notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang));
+                    notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang, bankAccountManager?.EMAIL));
                     // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
                     // await Promise.all([
                     //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),

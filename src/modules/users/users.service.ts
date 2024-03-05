@@ -211,12 +211,4 @@ export class UsersService extends CrudService<User>  {
         } catch (error) { throw (error); }
     }
 
-    async getAndUpdateBankAccountManager() {
-        try {
-            const bankAccountManagers = await CbsController.cbsService.getBankAccountManager();
-        } catch (e: any) {
-            this.logger.error(`error during getAndUpdateBankAccountManager process \n ${e.stack}`);    
-        }
-    }
-
 }

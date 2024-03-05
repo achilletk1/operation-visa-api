@@ -207,10 +207,12 @@ export const clientsDAO = {
             if (isDevOrStag) { return await helper.getMockBankAccountManagerData(); }
 
             const query = `
-                select a.puti profil_uti, b.lib1 lib_profil_puti, a.cuti code_uti, a.lib as fullname, a.cge code_ges, a.age, a.cli
-                from evuti a , bknom b
-                wherea.sus='N' and b.ctab=994 and a.puti=b.cacc and a.cge IS NOT NULL
-                order by a.puti, a.cuti`;
+                select ges code_ges, nom fullname, age_uti, email, ntel tel, age
+                from infoc.bkgestionnaire`;
+            // select a.puti profil_uti, b.lib1 lib_profil_puti, a.cuti code_uti, a.lib as fullname, a.cge code_ges, a.age, a.cli
+            // from evuti a , bknom b
+            // wherea.sus='N' and b.ctab=994 and a.puti=b.cacc and a.cge IS NOT NULL
+            // order by a.puti, a.cuti ////////////////////////
             // and a.puti in ('R204', 'R206', 'R208', 'R211', 'R215', 'R217', 'R219', 'R220')
 
             const result: CbsBankAccountManager[] = await executeQuery(query);

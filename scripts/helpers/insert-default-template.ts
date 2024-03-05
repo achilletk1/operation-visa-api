@@ -43,7 +43,6 @@ export const insertDefaultTemplateSetting = async () => {
                 created: new Date().valueOf(),
             }
         },
-
         {
             templateType: 200,
             key: 'firstTransaction',
@@ -52,7 +51,7 @@ export const insertDefaultTemplateSetting = async () => {
             fr: {
                 email: `
                 Nous vous informons que vous avez effectué une transaction hors zone CEMAC.////
-                À cet effet, nous vous prions de nous transmettre les  de votre voyage hors zone un délai maximum de 30 jours à compter du {{DATE}} comme le précise là  N004/GR/2022. //// 
+                À cet effet, nous vous prions de nous transmettre les justificatifs de votre voyage hors zone un délai maximum de 30 jours à compter du {{DATE}} comme le précise la lettre circulaire  N004/GR/2022 du gouverneur de la BEAC. //// 
                 Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
                 Nous vous remercions pour votre. fidélité.`,
 
@@ -76,7 +75,6 @@ export const insertDefaultTemplateSetting = async () => {
                 created: new Date().valueOf(),
             }
         },
-
         {
             templateType: 200,
             key: 'transactionOutsideNotJustified',
@@ -108,7 +106,72 @@ export const insertDefaultTemplateSetting = async () => {
             dates: {
                 created: new Date().valueOf(),
             }
-        }
+        },
+        {
+            templateType: 200,
+            key: 'remindTransactionNotJustifiedAfterShortTime',
+            label: 'Première relance de justificatifs en attente pour opérations sur carte hors CEMAC',
+            desc: 'Notification de première relance pour des transactions hors zone CEMAC non justifiée',
+            fr: {
+                email: `
+                Nous avons remarqué des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites opérations dans un délai maximum de 30 jours à compter du {{DATE}}. Comme le précise la circulaire BEAC N004/GR/2022.////
+                Nous vous invitons à contacter notre service clientèle dès que possible pour avoir plus d'informations et de détails sur la procédure à suivre.////
+                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Nous vous remercions pour votre fidélité.`,
+
+                sms: `Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs liés à vos opérations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref délai.// Rapprochez-vous de votre agence pour plus d'informations`,
+                obj: `Première relance de justificatifs en attente pour opérations sur carte hors CEMAC`
+
+            },
+            en: {
+                email: `
+                We have noticed some unjustified transactions on your bank account. As specified in BEAC circular N004/GR/2022 we are obliged to block your bank card.////
+                We invite you to contact our customer service department as soon as possible to discuss this matter and find a solution.////
+                We apologize for any inconvenience this may cause and hope that we can resolve this issue quickly.//////
+                regards`,
+                sms: `Dear customer,// we are obliged to block your credit card in view of the unjustified transactions within the time limit.// Please contact us to discuss`,
+                obj: `Bank card block notification`
+            },
+            sendType: 200,
+            period: 38,
+            enabled: true,
+            dates: {
+                created: new Date().valueOf(),
+            }
+        },
+        {
+            templateType: 200,
+            key: 'remindTransactionNotJustifiedAfterLongTime',
+            label: 'Deuxième relance de justificatifs en attente pour opérations sur carte hors CEMAC',
+            desc: 'Notification de deuxième relance pour des transactions hors zone CEMAC non justifiée',
+            fr: {
+                email: `
+                Nous avons remarqué des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites opérations dans un délai maximum de 30 jours à compter du {{DATE}}. Comme le précise la circulaire BEAC N004/GR/2022.////
+                Nous vous invitons à contacter notre service clientèle dès que possible pour avoir plus d'informations et de détails sur la procédure à suivre.////
+                Afin d'éviter que nous soyons contraint à bloquer votre carte ! ////
+                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Nous vous remercions pour votre fidélité.`,
+
+                sms: `Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs liés à vos opérations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref délai.// Rapprochez-vous de votre agence pour plus d'informations`,
+                obj: `Deuxième relance de justificatifs en attente pour opérations sur carte hors CEMAC`
+
+            },
+            en: {
+                email: `
+                We have noticed some unjustified transactions on your bank account. As specified in BEAC circular N004/GR/2022 we are obliged to block your bank card.////
+                We invite you to contact our customer service department as soon as possible to discuss this matter and find a solution.////
+                We apologize for any inconvenience this may cause and hope that we can resolve this issue quickly.//////
+                regards`,
+                sms: `Dear customer,// we are obliged to block your credit card in view of the unjustified transactions within the time limit.// Please contact us to discuss`,
+                obj: `Bank card block notification`
+            },
+            sendType: 200,
+            period: 38,
+            enabled: true,
+            dates: {
+                created: new Date().valueOf(),
+            }
+        },
     ]
 
     console.log('Insert default Templates  collection');

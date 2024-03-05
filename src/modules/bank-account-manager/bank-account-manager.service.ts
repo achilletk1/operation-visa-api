@@ -1,7 +1,7 @@
 import { BankAccountManagerRepository } from "./bank-account-manager.repository";
 import { BankAccountManagerController } from './bank-account-manager.controller';
-import { CbsBankAccountManager, CbsController } from "modules/cbs";
 import { BankAccountManager } from "./model";
+import { CbsController } from "modules/cbs";
 import { CrudService } from "common/base";
 
 export class BankAccountManagerService extends CrudService<BankAccountManager>  {
@@ -15,7 +15,7 @@ export class BankAccountManagerService extends CrudService<BankAccountManager>  
 
     async getAndUpdateBankAccountManager() {
         try {
-            const bankAccountManagers: CbsBankAccountManager[] = await CbsController.cbsService.getBankAccountManager();
+            const bankAccountManagers: BankAccountManager[] = await CbsController.cbsService.getBankAccountManager();
             await BankAccountManagerController.bankAccountManagerService.deleteMany({});
             await BankAccountManagerController.bankAccountManagerService.createMany(bankAccountManagers);
         } catch (e: any) {

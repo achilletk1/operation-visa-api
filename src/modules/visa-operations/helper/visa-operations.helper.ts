@@ -1,6 +1,8 @@
 import { DetectTransactionsEvent, notificationEmmiter, TemplateSmsEvent, VisaExcedingEvent } from 'modules/notifications';
 import { generateTravelMonthByProcessing, generateNotificationData } from "./visa-operations-formatter.helper";
+import { BankAccountManager, BankAccountManagerController } from 'modules/bank-account-manager';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
+import { User, UserCategory, UsersController } from 'modules/users';
 import { OnlinePaymentMonth } from "modules/online-payment";
 import { VisaTransaction } from "modules/visa-transactions";
 import { Travel, TravelController } from "modules/travel";
@@ -51,14 +53,19 @@ export const updateTravel = async (travel: Travel, toBeUpdated: any) => {
 }
 
 export const sendEmailNotifications = async (notification: any) => {
-    const { data, lang, receiver, id, key } = notification.data;
+    const { data, lang, receiver, id, key, clientCode } = notification.data;
+    let user: User; let bankAccountManager!: BankAccountManager;
+    try {
+        user = await UsersController.usersService.findOne({ filter: { clientCode, category: UserCategory.DEFAULT } });
+        bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
+    } catch (error) { }
 
     if (key === 'firstTransaction')
-        notificationEmmiter.emit('detect-transactions-mail', new DetectTransactionsEvent(data, receiver, lang, id));
+        notificationEmmiter.emit('detect-transactions-mail', new DetectTransactionsEvent(data, receiver, lang, id, bankAccountManager?.EMAIL));
     // await NotificationsController.notificationsService.sendEmailDetectTransactions(data, receiver, lang, id);
 
     if (key === 'ceilingOverrun')
-        notificationEmmiter.emit('visa-exceding-mail', new VisaExcedingEvent(data, receiver, lang, id));
+        notificationEmmiter.emit('visa-exceding-mail', new VisaExcedingEvent(data, receiver, lang, id, bankAccountManager?.EMAIL));
     // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
 }
 

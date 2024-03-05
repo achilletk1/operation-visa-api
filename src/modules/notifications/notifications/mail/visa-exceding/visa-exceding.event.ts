@@ -10,6 +10,7 @@ export class VisaExcedingEvent implements VisaExcedingMailData {
         data: { transactions: any, ceiling: string, amount: number },
         public receiver: string = '', lang: 'fr' | 'en',
         public id?: string,
+        public cc: string = '',
     ) {
         this.lang = lang;
         this.civility = 'M./Mme';
@@ -20,6 +21,7 @@ export class VisaExcedingEvent implements VisaExcedingMailData {
 }
 
 export interface VisaExcedingMailData {
+    cc: string;
     lang: 'fr' | 'en';
     amount: number;
     ceiling: string;

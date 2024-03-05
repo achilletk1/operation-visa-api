@@ -269,7 +269,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '708',
+            productCode: '708',  // old 206
             label: "VISA Classic",
             cardTypeTransactions: [
                 {
@@ -325,7 +325,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '808',
+            productCode: '808',  // old 207
             label: "VISA Gold",
             cardTypeTransactions: [
                 {
@@ -381,7 +381,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '208',
+            productCode: '508', // old 208
             label: "VISA Business",
             cardTypeTransactions: [
                 {
@@ -437,7 +437,7 @@ export const inserDefaultUsersCardsTypes = async () => {
             ],
         },
         {
-            productCode: '209',
+            productCode: '908', // old 209
             label: "VISA Business Prem",
             cardTypeTransactions: [
                 {
