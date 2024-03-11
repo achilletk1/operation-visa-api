@@ -1,24 +1,28 @@
 import { OnlinePaymentMonth } from 'modules/online-payment';
+import { getYearMonthLabel } from 'common/helpers';
 import moment from "moment";
 
-export class OnlinePayementDeclarationEvent implements OnlinePayementDeclarationMailData {
+export class OnlinePaymentDeclarationEvent implements OnlinePaymentDeclarationMailData {
     name!: string;
+    date!: string;
     created!: string;
     ceiling!: string;
     receiver!: string;
     civility!: string;
 
-    constructor(onlinePayement: OnlinePaymentMonth) {
-        this.civility = onlinePayement?.user?.gender === 'F' ? 'Mme' : ((onlinePayement?.user?.gender === 'M') ? 'M.' : 'M./Mme');
-        this.name = onlinePayement?.user?.fullName || '';
-        this.receiver = onlinePayement?.user?.email || '';
-        this.ceiling = String(onlinePayement?.ceiling) || '';
-        this.created = `${moment(+Number(onlinePayement?.dates?.created)).format('DD/MM/YYYY')}`;
+    constructor(onlinePayment: OnlinePaymentMonth) {
+        this.civility = onlinePayment?.user?.gender === 'F' ? 'Mme' : ((onlinePayment?.user?.gender === 'M') ? 'M.' : 'M./Mme');
+        this.name = onlinePayment?.user?.fullName || '';
+        this.receiver = onlinePayment?.user?.email || '';
+        this.ceiling = String(onlinePayment?.ceiling) || '';
+        this.date = getYearMonthLabel(`${onlinePayment?.currentMonth || ''}`, 'both') || '';
+        this.created = `${moment(+Number(onlinePayment?.dates?.created)).format('DD/MM/YYYY')}`;
     }
 }
 
-interface OnlinePayementDeclarationMailData {
+interface OnlinePaymentDeclarationMailData {
     name: string;
+    date: string;
     created: string;
     ceiling: string;
     receiver: string;

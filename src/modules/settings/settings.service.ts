@@ -23,11 +23,11 @@ export class SettingsService extends CrudService<Setting> {
             const authUser = httpContext.get('user') as User;
 
             currSetting.updated_at = isEmpty(currSetting?.updated_at) ? [] : currSetting?.updated_at;
-            currSetting.updated_at.unshift({ user: { _id: authUser._id, fullName: authUser.fullName }, date: new Date().valueOf() });
+            currSetting.updated_at.unshift({ user: { _id: authUser?._id, fullName: authUser.fullName }, date: new Date().valueOf() });
 
             if (currSetting.updated_at.length >= 10) { currSetting.updated_at.pop(); }
 
-            return await SettingsController.settingsService.update(opts, { data: setting.data, dataPeriod: setting.dataPeriod, updated_at: currSetting.updated_at });
+            return await SettingsController.settingsService.update(opts, { data: setting.data, updated_at: currSetting.updated_at });
         } catch (error) { throw error; }
     }
 

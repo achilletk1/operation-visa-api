@@ -1,5 +1,6 @@
 import { VisaTransaction } from "modules/visa-transactions";
 import { getYearMonthLabel } from "common/helpers";
+import { config } from "convict-config";
 import handlebars from "handlebars";
 import moment from "moment";
 
@@ -68,6 +69,9 @@ const getVariablesValue = (data: { transactions: VisaTransaction[], amount: numb
         MOIS_DEPART: getYearMonthLabel(transaction?.currentMonth?.toString() || '', 'both'),
         DATE_COURANTE: moment().locale(`${lang || 'fr'}`).format('DD/MM/YYYY'),
         DATE_COURANTE_LONG: moment().locale(`${lang || 'fr'}`).format('dddd, Do MMMM YYYY'),
+        // TODO change 30value to parametrize data come from setting collection
+        DATELINE: moment(date).add('days', 30).format('DD/MM/YYYY'),
+        APP_LINK: config.get('baseUrl')
     }
 
     return mapping;

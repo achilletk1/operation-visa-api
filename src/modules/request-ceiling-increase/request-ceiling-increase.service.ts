@@ -29,7 +29,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
         try {
             const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { cardType: { ...ceiling.cardType }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
 
-            if (data.length > 0) throw new Error('ApplicationNotProcessed');
+            if (data.length) throw new Error('ApplicationNotProcessed');
 
             const insertionId = (await RequestCeilingIncreaseController.requestCeilingIncreaseService.create(ceiling))?.data?.toString();
             const insertedCeiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id: insertionId } });
@@ -40,7 +40,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
                 if (!content) { continue; }
                 attachment.content = content;
                 attachment = saveAttachment(insertedCeiling._id, attachment, insertedCeiling.dates?.created, 'ceilingIncreaseRequest');
-                attachment.dates = { created: new Date().valueOf() }
+                attachment.dates = { created: new Date().valueOf() };
                 deleteDirectory(`temporaryFiles/${attachment?.temporaryFile?._id}`);
                 delete attachment.temporaryFile;
             }

@@ -1,4 +1,5 @@
 import { RequestCeilingIncrease } from "modules/request-ceiling-increase";
+import { OperationTypeLabel } from "modules/visa-operations";
 import { formatNumber } from "common/helpers";
 import { get } from "lodash";
 
@@ -14,6 +15,7 @@ export class ValidCeilingEvent implements ValidCeilingMailData {
     transactionType!: string;
 
     constructor(ceiling: RequestCeilingIncrease) {
+        const { ATN_WITHDRAWAL, ONLINE_PAYMENT, ELECTRONIC_PAYMENT_TERMINAL } = OperationTypeLabel;
         this.receiver = ceiling?.user?.email || '';
         this.account = ceiling?.account?.ncp || '';
         this.greetings = this.getGreetings(ceiling);
@@ -22,7 +24,7 @@ export class ValidCeilingEvent implements ValidCeilingMailData {
         this.clientCode = ceiling?.user?.clientCode || '';
         this.currCeiling = formatNumber(String(ceiling?.currentCeiling?.amount)) + ' XAF' || '';
         this.desiredCeiling = formatNumber(String(ceiling?.desiredCeiling?.amount)) + ' XAF' || '';
-        this.transactionType = ceiling?.currentCeiling?.type === 200 ? 'PAIEMENT INTERNET' : 'PAIEMENT TPE, RETRAIT DAB';
+        this.transactionType = ceiling?.currentCeiling?.type === 200 ? ONLINE_PAYMENT : `${ELECTRONIC_PAYMENT_TERMINAL}, ${ATN_WITHDRAWAL}`;
     }
 
     getGreetings(ceiling: RequestCeilingIncrease) {

@@ -1,4 +1,4 @@
-import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment, Validator } from "modules/visa-operations";
+import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment, Validator, OperationTypeLabel } from "modules/visa-operations";
 import { Editor, User } from "modules/users";
 
 export class Import {
@@ -18,6 +18,7 @@ export class Import {
   editors?: Editor[];
   finalPayment?: boolean | Event;
   validators?: Validator[];
+  isUntimely?: boolean;
 }
 
 export class ImportOperation {
@@ -34,5 +35,5 @@ export class ImportOperation {
   cardCode?: string;
   country?: string;
   beneficiary?: string;
-  type?: 'PAIEMENT INTERNET' | 'PAIEMENT TPE' | 'RETRAIT DAB';
+  type?: OperationTypeLabel;
 }

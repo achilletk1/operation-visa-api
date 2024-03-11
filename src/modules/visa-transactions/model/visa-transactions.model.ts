@@ -1,5 +1,5 @@
+import { ExpenseCategory, OpeVisaStatus, OperationTypeLabel, VisaOperationsAttachment } from "modules/visa-operations";
 import { Import } from "modules/imports";
-import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from "modules/visa-operations";
 
 export interface VisaTransaction {
     _id?: string;
@@ -17,7 +17,7 @@ export interface VisaTransaction {
     amountCompens?: number;
     currencyCompens?: string;
     date?: string;
-    type?: 'RETRAIT DAB' | 'PAIEMENT TPE' | 'PAIEMENT INTERNET';
+    type?: OperationTypeLabel;
     ncp?: string;
     age?: string;
     card?: {

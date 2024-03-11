@@ -36,6 +36,7 @@
     },
     "pdfApiUrl": "http://pdf:5000",
     "timeout": 110000,
+    "fileStoragePath": "./filesrec",
     "cbsApiUrl": "https://cbs:3000",
     "clientName": "BICEC",
     "template": {

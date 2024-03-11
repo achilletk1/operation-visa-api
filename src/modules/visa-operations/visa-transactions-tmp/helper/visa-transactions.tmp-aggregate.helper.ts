@@ -1,3 +1,5 @@
+import { OperationTypeLabel } from "modules/visa-operations/enum";
+
 export const formatedVisaTransactionsTmps = [
     {
         $addFields: {
@@ -5,8 +7,8 @@ export const formatedVisaTransactionsTmps = [
                 $cond: {
                     if: {
                         $or: [
-                            { $eq: ["$TYPE_TRANS", "RETRAIT DAB",] },
-                            { $eq: ["$TYPE_TRANS", "PAIEMENT TPE",], },
+                            { $eq: ["$TYPE_TRANS", OperationTypeLabel.ATN_WITHDRAWAL,] },
+                            { $eq: ["$TYPE_TRANS", OperationTypeLabel.ELECTRONIC_PAYMENT_TERMINAL,], },
                         ],
                     },
                     then: true,

@@ -1,4 +1,4 @@
-import { ExpenseCategory, OperationType, OpeVisaStatus } from "modules/visa-operations";
+import { ExpenseCategory, OperationType, OperationTypeLabel, OpeVisaStatus } from "modules/visa-operations";
 import { VisaTransaction } from 'modules/visa-transactions';
 import { isEmpty } from "lodash";
 
@@ -132,9 +132,9 @@ export const getExpenseCategoryLabel = (category: ExpenseCategory | '') => {
 
 export const getOperationTypeLabel = (operationType: OperationType | '') => {
     switch (operationType) {
-        case OperationType.ATN_WITHDRAWAL: return 'Retrait GAB';
-        case OperationType.ELECTRONIC_PAYMENT_TERMINAL: return 'Paiement TPE';
-        case OperationType.ONLINE_PAYMENT: return 'Paiement en ligne';
+        case OperationType.ATN_WITHDRAWAL: return OperationTypeLabel.ATN_WITHDRAWAL;
+        case OperationType.ELECTRONIC_PAYMENT_TERMINAL: return OperationTypeLabel.ELECTRONIC_PAYMENT_TERMINAL;
+        case OperationType.ONLINE_PAYMENT: return OperationTypeLabel.ONLINE_PAYMENT;
         default: return 'Autres';
     }
 };

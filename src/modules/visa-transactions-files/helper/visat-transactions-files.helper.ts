@@ -1,11 +1,13 @@
+import { OperationTypeLabel } from "modules/visa-operations";
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaTransactionsController } from "modules/visa-transactions";
 
 export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[]) {
     let arrayIndex;
+    const { ATN_WITHDRAWAL, ELECTRONIC_PAYMENT_TERMINAL, ONLINE_PAYMENT } = OperationTypeLabel;
     const found = dataArray.find((element, index) => {
         arrayIndex = index;
-        return !['PAIEMENT TPE', 'RETRAIT DAB', 'PAIEMENT INTERNET'].includes(element['TYPE_TRANS']);
+        return ![ELECTRONIC_PAYMENT_TERMINAL, ATN_WITHDRAWAL, ONLINE_PAYMENT].includes(element['TYPE_TRANS'] as OperationTypeLabel);
     });
     if (!found) { return null; }
     return { found, arrayIndex };
@@ -76,16 +78,16 @@ export const fileCheckSumColumn = [
 
 export const columnTitles =
         [
-            'AGENCE',
+            // 'AGENCE',
             'COMPTE',
-            'CHAPITRE',
+            // 'CHAPITRE',
             'CLIENT',
-            'NOM_CLIENT',
-            'CODE_GESTIONNAIRE',
-            'NOM_GESTIONNAIRE',
-            'CODE_LANGUE_CLIENT',
-            'TELEPHONE_CLIENT',
-            'EMAIL_CLIENT',
+            // 'NOM_CLIENT',
+            // 'CODE_GESTIONNAIRE',
+            // 'NOM_GESTIONNAIRE',
+            // 'CODE_LANGUE_CLIENT',
+            // 'TELEPHONE_CLIENT',
+            // 'EMAIL_CLIENT',
             'NOM_CARTE',
             'CARTE',
             'PRODUIT',

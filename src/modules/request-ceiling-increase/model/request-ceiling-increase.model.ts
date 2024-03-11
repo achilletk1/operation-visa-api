@@ -1,8 +1,9 @@
+import { VisaOperationsAttachment } from "modules/visa-operations";
 import { RequestCeilingValidator } from "./validator.model";
 import { Status } from "../enum";
 
-export interface RequestCeilingIncrease {
-    _id: string;
+export class RequestCeilingIncrease {
+    _id!: string;
     user?: {
         _id?: string;
         clientCode?: string;
@@ -33,17 +34,21 @@ export interface RequestCeilingIncrease {
         }
         assignered?: Assignered;
     };
+    validity?: {
+        period: 'months' | 'days' | string,
+        duration: number;
+      };
     validator?: RequestCeilingValidator;
     status?: Status;
-    desc: string;
+    desc!: string;
     signature: any;
-    othersAttachements?: any[];
     dates?: {
         created?: number;
         assigned?: number;
         accepted?: number;
         rejected?: number;
     };
+    othersAttachements?: VisaOperationsAttachment[];
     cardType?: any;
     cardProfileType?: any;
 }

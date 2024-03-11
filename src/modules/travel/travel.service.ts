@@ -209,7 +209,7 @@ export class TravelService extends CrudService<Travel> {
             travel.status = getTravelStatus({ ...travel } as Travel);
             travel.editors = travel?.editors?.length ? travel.editors : [];
             travel?.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: steps.toString() || 'Preuve de voyage'
@@ -337,7 +337,7 @@ export class TravelService extends CrudService<Travel> {
 
             travel.editors = travel?.editors?.length ? travel.editors : [];
             travel?.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: stepData.toString()

@@ -151,9 +151,9 @@ export class ValidationsService extends CrudService<UserValidator> {
                 //         ? await NotificationsController.notificationsService.sendEmailOnlinePayementStatusChanged(data as OnlinePaymentMonth, get(data, 'user.email'))
                 //         : null;
                 type === 'travel'
-                    ? notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(data as Travel))
+                    ? notificationEmmiter.emit('travel-status-changed-mail', new TravelStatusChangedEvent(data as Travel, rejectReason))
                     : type === 'onlinePayment'
-                        ? notificationEmmiter.emit('online-payment-status-changed-mail', new OnlinePaymentStatusChangedEvent(data as OnlinePaymentMonth))
+                        ? notificationEmmiter.emit('online-payment-status-changed-mail', new OnlinePaymentStatusChangedEvent(data as OnlinePaymentMonth, rejectReason))
                         : null;
             }
 

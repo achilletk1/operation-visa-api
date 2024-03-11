@@ -15,17 +15,17 @@ export const inserDefaultLetter = async () => {
 
                 headRightText: "{{NOM_CLIENT}}//{{EMAIL_CLIENT}}//{{TELEPHONE_CLIENT}} //Fait à Douala le {{DATE_COURANTE_LONG}}",
 
-                letterRef: "",
+                letterRef: "N/Réf: RG/MD/DBD/032023",
 
-                objectText: "Mise en demeure pour non-production des justificatifs de la réalité de votre déplacement après utilisation de votre carte bancaire hors de la zone CEMAC",
+                objectText: "Mise en demeure",
 
                 salutationText: "Monsieur/Madame,",
 
-                introductionText: "Nous vous informons que dans le cadre de votre voyage hors CEMAC, vous avez effectué des transactions avec votre carte bancaire sans fournir des justificatifs de déplacement hors CEMAC à priori ou à postériori la BICEC.",
+                introductionText: "",
 
-                bodyText: "En effet, il ressort de la lecture combinée de l’article 77 du Règlement N°2/02/18/CEMAC/UMAC/CM portant réglementation des changes, de l’instruction n° 008/GR/2019 de la BEAC et de la circulaire n°004/GR/2022 de la BEAC relatifs aux conditions et modalités d’utilisation à l’extérieur des instruments de paiement électronique, que l’utilisation desdits instruments à l’extérieur de la CEMAC est soumise à la transmission des documents de voyage y afférents",
+                bodyText: "Conformément à la règlementation de change 02/18/CEMAC/UMAC/CM et les circulaires subséquentes relatives qui précisent les conditions et modalités d'utilisation à l'extérieur des instruments de paiement électronique ainsi que le règlement à distance des transactions, nous avons le regret de constater que les pièces justificatives en liaison avec les opérations à distances effectuées par vos soins n'ont pas été transmises à votre agence BICEC.",
 
-                conclusionText: "Afin de satisfaire aux exigences légales prévues par la règlementation suscitée, nous vous prions de bien vouloir nous fournir les justificatifs dans un délai de huit (08) jours à compter de la date de réception de la présente lettre.",
+                conclusionText: "En conséquence, nous vous mettons en demeure de produire toutes les pièces justificatives liées à ces opérations à distance.//Sans réponse de votre part dans un délai de huit (08) jours dès réception de la présente, nous nous verrons contraints de suspendre l'utilisation de tous vos instruments de paiement électronique conséquemment aux dispositions de la règlementation précédemment citée.////Veuillez agréer, Madame, Monsieur, dans cet intervalle, l'expression de nos sentiments distingués.",
 
                 footerText: "Avenue du Général De Gaulle, (237) 233 43 12 26,  contact@bicec.com",
 
@@ -37,17 +37,17 @@ export const inserDefaultLetter = async () => {
 
                 headRightText: "{{NOM_CLIENT}}//{{EMAIL_CLIENT}}//{{TELEPHONE_CLIENT}}//Douala, {{DATE_COURANTE_LONG}}",
 
-                letterRef: "",
+                letterRef: "N/Réf: RG/MD/DBD/032023",
 
-                objectText: "Formal notice for failure to produce proof of the reality of your trip after using the card outside the CEMAC zone",
+                objectText: "Formal notice",
 
                 salutationText: " Mr./Mrs",
 
-                introductionText: "We inform you that during your trip outside CEMAC, you have made transactions with your bank card without providing proof of travel outside CEMAC a priori or a posteriori BICEC.",
+                introductionText: "",
 
-                bodyText: "Indeed, it emerges from the combined reading of Article 77 of Regulation No. 2/02/18/CEMAC/UMAC/CM on exchange regulations, Instruction No. 008/GR/2019 of the BEAC and Circular No. 004/GR/2022 of the BEAC relating to the terms and conditions of external use of electronic payment instruments, that the use of such instruments outside CEMAC is subject to the transmission of the related travel documents.",
+                bodyText: "In accordance with the regulation of exchange 02/18/CEMAC/UMAC/CM and the relative subsequent circulars which specify the conditions and methods of use with the outside of the electronic instruments of payment as well as the remote payment of the transactions, we regret to note that the supporting documents in connection with the remote operations carried out by your care were not transmitted to your branch BICEC.",
 
-                conclusionText: "In order to comply with the legal requirements set out in the aforementioned regulations, we kindly ask you to provide us with the supporting documents within eight (08) days of the date of receipt of this letter.",
+                conclusionText: "As a result, we are giving you formal notice to produce all the supporting documents relating to these remote transactions.//Failing a response from you within eight (08) days of receipt of this letter, we shall be obliged to suspend the use of all your electronic payment instruments in accordance with the provisions of the aforementioned regulations.//// Please accept, Sir or Madam, the assurances of our highest consideration.",
 
                 footerText: "Avenue du Général De Gaulle, (237) 233 43 12 26,  contact@bicec.com",
 
@@ -66,7 +66,7 @@ export const inserDefaultLetter = async () => {
                 Nous vous remercions de votre compréhension et votre coopération.//////
                 Cordialement`
                 ,
-                obj: "Lettre de mise en demeure",
+                obj: "Mise en demeure",
             },
             en: {
                 mail: `
@@ -77,7 +77,7 @@ export const inserDefaultLetter = async () => {
                 You can do it thanks to our application available on https://fly-banking.bicec.com, also by approaching the nearest BICEC branch.////
                 Thank you for your understanding and cooperation.//////
                 Regards`,
-                obj: "Formal notice letter",
+                obj: "Formal notice",
             },
             // "Nous vous envoyons ce mail afin de notifier de la mise en demeure qui par rapport votre voyage qui demeure non justifié à ce jour.// Vous trouverez en annexe une copie de la lettre de mise en demeure."
         },

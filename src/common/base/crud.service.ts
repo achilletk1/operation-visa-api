@@ -63,9 +63,9 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async findAllAggregate(aggregation: object[]): Promise<Document[]> {
+  async findAllAggregate<T>(aggregation: object[]): Promise<T[]> {
     try {
-      return await this.baseRepository.findAllAggregate(aggregation ?? []);
+      return await this.baseRepository.findAllAggregate(aggregation ?? []) as T[];
     } catch (error) { throw error; }
   }
 
@@ -102,7 +102,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
     } catch (error) { throw error; }
   }
 
-  async updateMany(filter: QueryFilter, data: Document, unsetData: Document): Promise<QueryResult> {
+  async updateMany(filter: QueryFilter, data: Document, unsetData: Document = {}): Promise<QueryResult> {
     try {
       // const existVerify = await this.baseRepository.findOne({ filter });
       // if (!existVerify) throw new Error(errorMsg.NOT_FOUND + ' ' + JSON.stringify(filter));

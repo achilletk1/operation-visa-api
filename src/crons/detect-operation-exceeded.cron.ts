@@ -6,7 +6,7 @@ class DetectOperationExceededCron extends BaseCron {
     cronExpressionPath = 'crons.unjustifiedOperation';  // At 05:00 every day
     service = VisaOperationsController.visaOperationsService.detectOperationExceededCeiling;
     startOnStagingBci = false;
-    startOnDev = true;
+    startOnDev = false;
 }
 
 export default new DetectOperationExceededCron();

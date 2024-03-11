@@ -1,3 +1,4 @@
+import { OperationTypeLabel } from 'modules/index';
 import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
 
@@ -8,12 +9,13 @@ export const inserDefaultVisaCeilings = async () => {
     console.log('----------------------------------------');
 
     const db = await getDatabase();
+    const { ATN_WITHDRAWAL, ONLINE_PAYMENT, ELECTRONIC_PAYMENT_TERMINAL } = OperationTypeLabel;
 
     const ceilings = [
         {
             type: 100,
             value: 5000000,
-            description: 'Voyages courtes durées (PAIEMENT TPE & RETRAIT GAB)',
+            description: `Voyages courtes durées (${ELECTRONIC_PAYMENT_TERMINAL} & ${ATN_WITHDRAWAL})`,
             date: {
                 created: new Date().valueOf()
             }
@@ -21,7 +23,7 @@ export const inserDefaultVisaCeilings = async () => {
         {
             type: 200,
             value: 1000000,
-            description: 'Paiement en ligne ou élèctronique',
+            description: 'Paiement en ligne',
             date: {
                 created: new Date().valueOf()
             }
@@ -29,7 +31,7 @@ export const inserDefaultVisaCeilings = async () => {
         {
             type: 300,
             value: 5000000,
-            description: 'Voyages longues durées (PAIEMENT TPE, RETRAIT GAB, paiement élèctronique)',
+            description: `Voyages longues durées (${ELECTRONIC_PAYMENT_TERMINAL}, ${ATN_WITHDRAWAL}, ${ONLINE_PAYMENT})`,
             date: {
                 created: new Date().valueOf()
             }

@@ -10,7 +10,7 @@ export class TravelStatusChangedEvent implements TravelStatusChangedMailData {
     receiver!: string;
     civility!: string;
 
-    constructor(travel: Travel) {
+    constructor(travel: Travel, public reason: string) {
         this.civility = travel?.user?.gender === 'F' ? 'Mme' : ((travel?.user?.gender === 'M') ? 'M.' : 'M./Mme');
         this.name = travel?.user?.fullName || '';
         this.receiver = travel?.user?.email || '';
@@ -24,6 +24,7 @@ interface TravelStatusChangedMailData {
     end: string;
     name: string;
     start: string;
+    reason: string;
     status: string;
     receiver: string;
     civility: string;

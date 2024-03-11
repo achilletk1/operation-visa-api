@@ -1,5 +1,6 @@
-import { CeilingAssignedEvent, CeilingAssignedMailData } from "../ceiling-assigned";
 import { Assignered, RequestCeilingIncrease } from "modules/request-ceiling-increase";
+import { CeilingAssignedEvent, CeilingAssignedMailData } from "../ceiling-assigned";
+import { OperationTypeLabel } from "modules/visa-operations";
 import { formatNumber } from "common/helpers";
 
 export class CeilingCaeAssignedEvent extends CeilingAssignedEvent implements CeilingCaeAssignedMailData {
@@ -11,6 +12,7 @@ export class CeilingCaeAssignedEvent extends CeilingAssignedEvent implements Cei
     requiredCeiling!: string;
 
     constructor(ceiling: RequestCeilingIncrease, userAssigned: Assignered) {
+        const { ATN_WITHDRAWAL, ONLINE_PAYMENT, ELECTRONIC_PAYMENT_TERMINAL } = OperationTypeLabel;
         super(ceiling, userAssigned);
         this.tel = String(ceiling?.user?.tel);
         this.receiver = userAssigned?.email || '';
@@ -20,7 +22,7 @@ export class CeilingCaeAssignedEvent extends CeilingAssignedEvent implements Cei
         this.greetings = this.getCaeGreetings(userAssigned);
         this.currCeiling = formatNumber(String(ceiling?.currentCeiling?.amount)) || '';
         this.requiredCeiling = formatNumber(String(ceiling?.desiredCeiling?.amount)) || '';
-        this.transactionType = ceiling?.currentCeiling?.type === 200 ? 'PAIEMENT INTERNET' : 'PAIEMENT TPE, RETRAIT DAB';
+        this.transactionType = ceiling?.currentCeiling?.type === 200 ? ONLINE_PAYMENT : `${ELECTRONIC_PAYMENT_TERMINAL}, ${ATN_WITHDRAWAL}`;
     }
 
     getCaeGreetings(userAssigned: Assignered): string {

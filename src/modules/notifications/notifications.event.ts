@@ -1,7 +1,7 @@
 import { UploadedDocumentsOnExceededFolderEvent, UploadedDocumentsOnExceededFolderMailNotification } from './notifications/mail/uploaded-documents-on-exceeded-folder';
 import { TransactionOutsideNotJustifiedEvent, TransactionOutsideNotJustifiedMailNotification } from './notifications/mail/transaction-outside-not-justified';
 import { OnlinePaymentStatusChangedEvent, OnlinePaymentStatusChangedMailNotification } from './notifications/mail/online-payment-status-changed';
-import { OnlinePayementDeclarationEvent, OnlinePayementDeclarationMailNotification } from './notifications/mail/online-payement-declaration';
+import { OnlinePaymentDeclarationEvent, OnlinePaymentDeclarationMailNotification } from './notifications/mail/online-payement-declaration';
 import { MonthlyRecapStatementEvent, MonthlyRecapStatementMailNotification } from './notifications/mail/monthly-recap-statement';
 import { ListOfUsersToBlockedEvent, ListOfUsersToBloquedMailNotification } from './notifications/mail/list-of-users-to-bloqued';
 import { TravelStatusChangedEvent, TravelStatusChangedMailNotification } from './notifications/mail/travel-status-changed';
@@ -28,8 +28,8 @@ notificationEmmiter.on('travel-declaration-mail', async (data: TravelDeclaration
     await (new TravelDeclarationMailNotification(data)).sendNotification();
 });
 
-notificationEmmiter.on('online-payement-declaration-mail', async (data: OnlinePayementDeclarationEvent) => {
-    await (new OnlinePayementDeclarationMailNotification(data)).sendNotification();
+notificationEmmiter.on('online-payment-declaration-mail', async (data: OnlinePaymentDeclarationEvent) => {
+    await (new OnlinePaymentDeclarationMailNotification(data)).sendNotification();
 });
 
 notificationEmmiter.on('valid-ceiling-mail', async (data: ValidCeilingEvent) => {

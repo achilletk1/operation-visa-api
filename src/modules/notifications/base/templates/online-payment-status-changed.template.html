@@ -37,7 +37,7 @@
                                                             <tr>
                                                                 <td align="left"
                                                                     style="color:#4a4a4a;padding:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:1.2;font-weight:700">
-                                                                    Bonjour {{civility}} {{name}}</td>
+                                                                    Cher {{civility}} {{name}}</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -49,10 +49,12 @@
                                                                     style="padding:0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:12px;font-weight:100;color:#333">
                                                                     <p
                                                                         style="margin:0;padding:24px 0 24px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
-                                                                        Nous vous informons que la déclaration de
-                                                                        paiement en ligne du mois de
-                                                                        <strong>{{date}}</strong> a été <strong>
-                                                                            {{status}}</strong>.
+                                                                        Nous vous informons que vos justificatifs de paiement en ligne du mois de <strong>{{date}}</strong> transmis par vos soins  ont été 
+                                                                        <strong>{{status}}</strong><br>
+                                                                        {{#if reason}}
+                                                                        Pour le(s) motif(s) suivants  {{reason}}
+                                                                        Nous vous prions de vous connecter sur la plateforme {{actionUrl}} afin de déposer les justificatifs susmentionnés.
+                                                                        {{/if}}
                                                                         <br> <br> Nous vous remercions pour votre
                                                                         fidélité.
                                                                     </p><br><br>

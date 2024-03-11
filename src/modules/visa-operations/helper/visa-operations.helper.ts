@@ -1,15 +1,19 @@
 import { DetectTransactionsEvent, notificationEmmiter, TemplateSmsEvent, VisaExcedingEvent } from 'modules/notifications';
 import { generateTravelMonthByProcessing, generateNotificationData } from "./visa-operations-formatter.helper";
 import { BankAccountManager, BankAccountManagerController } from 'modules/bank-account-manager';
+import { OnlinePaymentController, OnlinePaymentMonth } from "modules/online-payment";
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { User, UserCategory, UsersController } from 'modules/users';
-import { OnlinePaymentMonth } from "modules/online-payment";
+import { SettingsController, settingsKeys } from 'modules/settings';
 import { VisaTransaction } from "modules/visa-transactions";
 import { Travel, TravelController } from "modules/travel";
+import { Import } from 'modules/imports';
 import { OpeVisaStatus } from "../enum";
 import { getTotal } from "common/utils";
 import { logger } from "winston-config";
 import { get, isEmpty } from "lodash";
+import { ObjectId } from 'mongodb';
+import moment from 'moment';
 
 export const verifyExcedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
     const totalAmount = getTotal(data?.transactions || []);
@@ -88,4 +92,67 @@ export const markExceedTransaction = (transactions: VisaTransaction[], ceiling: 
         })
     }
     return transactions;
+}
+
+export const getDeadlines = async () => {
+    try {
+        const {
+            SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL, SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES,
+            LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH, LONG_TRAVEL_DEADLINE_PROOF_TRAVEL,
+            IMPORT_SERVICE_DEADLINE_JUSTIFY, IMPORT_GOODS_DEADLINE_JUSTIFY, ONLINE_PAYMENT_DEADLINE_JUSTIFY
+        } = settingsKeys;
+
+        const settings = await SettingsController.settingsService.findAll({
+            filter: {
+                key: {
+                    $in: [
+                        SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL, SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES,
+                        LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH, LONG_TRAVEL_DEADLINE_PROOF_TRAVEL,
+                        IMPORT_SERVICE_DEADLINE_JUSTIFY, IMPORT_GOODS_DEADLINE_JUSTIFY, ONLINE_PAYMENT_DEADLINE_JUSTIFY,
+                    ]
+                }
+            }
+        });
+
+        const deadlineProofLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+        const deadlineStatementExpensesLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH))?.data;
+
+        const deadlineProofShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+        const deadlineStatementExpensesShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES))?.data;
+
+        const settingOnlinePayment = (settings.data.find(e => e.key === ONLINE_PAYMENT_DEADLINE_JUSTIFY))?.data;
+        const deadlineOnlinePayment = settingOnlinePayment?.dataPeriod === 'month' ? settingOnlinePayment?.value * 30 : settingOnlinePayment?.value;
+
+        const goodsDeadline = (settings.data.find(e => e.key === IMPORT_GOODS_DEADLINE_JUSTIFY))?.data;
+        const servicesDeadline = (settings.data.find(e => e.key === IMPORT_SERVICE_DEADLINE_JUSTIFY))?.data;
+
+        return {
+            deadlineProofLongTravel, deadlineStatementExpensesLongTravel, deadlineProofShortTravel,
+            deadlineStatementExpensesShortTravel, deadlineOnlinePayment, servicesDeadline, goodsDeadline,
+        } ; 
+    } catch (error) { throw error; }
+}
+
+export const getStartDateOfClearance = async (importation: Import) => {
+    try {
+        let folder: Travel | OnlinePaymentMonth | TravelMonth = {};
+
+        // search in travel-month collection
+        await getImportationParentFolder('travel-month', TravelMonthController.travelMonthService, folder, importation);
+        // search in travel collection
+        await getImportationParentFolder('travel', TravelController.travelService, folder, importation);
+        // search in online-payment collection
+        await getImportationParentFolder('online-payment', OnlinePaymentController.onlinePaymentService, folder, importation);
+
+        return moment(folder?.transactions?.find(e => e.importation?.finalPayment === true && e.importation._id === importation?._id?.toString())?.date, 'DD/MM/YYYY HH:mm:ss').valueOf();
+        
+    } catch (error) { throw error; }
+}
+
+const getImportationParentFolder = async (type: string, service: any, folder: Travel | OnlinePaymentMonth | TravelMonth, importation: Import) => {
+    try {
+        const filter = { _id: { $in: [] as ObjectId[] }, 'transactions.importation.finalPayment': true, 'transactions.importation._id': importation?._id?.toString() };
+        filter._id.$in = importation?.transactions?.filter(e => e?.parent?.type === type).map(e => new ObjectId(e?.parent?._id?.toString())) ?? [];
+        try { filter._id.$in.length && (folder = await service.findOne({ filter })); } catch(e) {}
+    } catch (error) { throw error; }
 }

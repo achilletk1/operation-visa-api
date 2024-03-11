@@ -184,7 +184,7 @@ export class TravelMonthService extends CrudService<TravelMonth> {
 
             travelMonth.editors = !isEmpty(travelMonth.editors) ? travelMonth.editors : [];
             travelMonth.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: 'État détaillé des dépenses'

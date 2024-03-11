@@ -34,9 +34,10 @@
         "url": "https://alert01.intra.bci/api/v1",
         "timeout": 180000
     },
-    "pdfApiUrl": "http://pdf:5000",
+    "pdfApiUrl": "http://gotenberg:3000",
     "timeout": 110000,
-    "cbsApiUrl": "https://cbs:3000",
+    "fileStoragePath": "./filesrec",
+    "cbsApiUrl": "http://cbs:3000",
     "clientName": "BICEC",
     "template": {
         "image": "https://firebasestorage.googleapis.com/v0/b/cash-management-website.appspot.com/o/logo-bicec.jpg?alt=media&token=2231b3f3-0040-49f2-801b-0c665197884f",
@@ -57,7 +58,7 @@
     "ceilingIncreaseEmail": "achille.tachum@londo-tech.com",
     "crons": {
         "revivalMail":"*/30 * * * *",
-        "transactionProcessing": "*/3 * * * *",
+        "transactionProcessing": "* * * * *",
         "deleteTemporaryFile": "0 */3 * * *",
         "removeOnlinePaymentsWithExceedings": "0 00 2 * *",
         "clientInDemeure": "0 00 1 */3 *",

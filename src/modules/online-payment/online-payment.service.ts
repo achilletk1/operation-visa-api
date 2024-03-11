@@ -1,4 +1,4 @@
-import { notificationEmmiter, OnlinePayementDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
+import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
@@ -102,7 +102,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePayment.othersAttachements = onlinepaymentMonth.othersAttachements;
             //  const updateData = { 'dates.updated': new Date().valueOf(), statements: onlinePayment.statements }
             const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id.toString() }, onlinePayment);
-            notificationEmmiter.emit('online-payement-declaration-mail', new OnlinePayementDeclarationEvent({ ...onlinePayment, _id: id }));
+            notificationEmmiter.emit('online-payment-declaration-mail', new OnlinePaymentDeclarationEvent({ ...onlinePayment, _id: id }));
             // Promise.all([
             //     await NotificationsController.notificationsService.sendEmailOnlinePayementDeclaration({ ...onlinePayment, _id: id }, user.email)
             // ]);
@@ -163,7 +163,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
             onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth?.editors : [];
             onlinePaymentMonth?.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: "État détaillé des dépenses"
@@ -259,7 +259,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             onlinePaymentMonth.editors = !isEmpty(onlinePaymentMonth.editors) ? onlinePaymentMonth?.editors : [];
             onlinePaymentMonth.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: "liste des déclaration d'achat en ligne"

@@ -76,7 +76,7 @@ export class ImportsService extends CrudService<Import> {
 
             importation.editors = [
                 ...(oldImportation?.editors ?? []),
-                { _id: authUser._id, fullName: authUser?.fullName, date: new Date().valueOf(), steps, },
+                { _id: authUser?._id, fullName: authUser?.fullName, date: new Date().valueOf(), steps, },
             ];
 
             return await ImportsController.importsService.update({ _id }, importation);
@@ -126,7 +126,7 @@ export class ImportsService extends CrudService<Import> {
 
             importation.editors = importation?.editors?.length ? importation?.editors : [];
             importation.editors?.push({
-                _id: authUser._id,
+                _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
                 steps: "Apurement du dossier d'importation"

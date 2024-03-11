@@ -67,7 +67,7 @@ export class BaseRepository implements RepositoryInterface {
     } catch (error) { throw error; }
   }
 
-  async updateMany(filter: QueryFilter, setDocument: Document, unsetDocument: Document): Promise<UpdateResult> {
+  async updateMany(filter: QueryFilter, setDocument: Document, unsetDocument: Document = {}): Promise<UpdateResult> {
     try {
       this.setMongoId(filter);
 
