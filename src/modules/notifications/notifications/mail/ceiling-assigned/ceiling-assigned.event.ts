@@ -1,41 +1,26 @@
-import { Assignered, RequestCeilingIncrease } from "modules/request-ceiling-increase";
+import { AssignTo, RequestCeilingIncrease } from "modules/request-ceiling-increase";
+import { IncreaseCeilingEvent, IncreaseCeilingMailData } from "../increase-ceiling";
 import moment from "moment";
 
-export class CeilingAssignedEvent implements CeilingAssignedMailData {
-    tel!: string;
+export class CeilingAssignedEvent extends IncreaseCeilingEvent implements CeilingAssignedMailData {
     date!: string;
     hour!: string;
-    email!: string;
-    receiver!: string;
-    greetings!: string;
-    assignered!: string;
+    assignTo!: string;
 
-    constructor(ceiling: RequestCeilingIncrease, userAssigned: Assignered) {
-        const { fname, lname, tel, email } = userAssigned;
-        this.tel = `${tel}`;
-        this.email = `${email}`;
-        this.assignered = `${fname} ${lname}`;
-        this.receiver = ceiling?.user?.email || '';
-        this.greetings = this.getGreetings(ceiling);
+    constructor(ceiling: RequestCeilingIncrease, userAssigned: AssignTo) {
+        super(ceiling);
+        this.tel = `${userAssigned?.tel || ''}`;
+        this.email = `${userAssigned?.email || ''}`;
+        this.assignTo= `${userAssigned?.fname || ''} ${userAssigned?.lname || ''}`;
         this.hour = moment(ceiling?.dates?.assigned).format('HH:mm');
         this.date = moment(ceiling?.dates?.assigned).format('DD/MM/YYYY');
     }
 
-    getGreetings(ceiling: RequestCeilingIncrease) {
-        const userFullName = ceiling?.user?.fullName || '';
-        const gender = ceiling?.user?.gender === 'm' ? 'M.' : ((ceiling?.user?.gender === 'f') ? 'Mme' : 'M./Mme');
-        return `Bonjour ${gender} ${userFullName},`;
-    }
-
 }
 
-export interface CeilingAssignedMailData {
-    tel: string;
+export interface CeilingAssignedMailData extends IncreaseCeilingMailData {
     date: string;
     hour: string;
-    email: string;
-    receiver: string;
-    greetings: string;
-    assignered: string;
+    assignTo: string;
 }
 

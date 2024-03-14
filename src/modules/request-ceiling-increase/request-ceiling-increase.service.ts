@@ -2,7 +2,7 @@ import { CeilingAssignedEvent, CeilingCaeAssignedEvent, IncreaseCeilingBankEvent
 import { RequestCeilingIncreaseRepository } from "./request-ceiling-increase.repository";
 import { RequestCeilingIncreaseController } from "./request-ceiling-increase.controller";
 import { deleteDirectory, readFile, saveAttachment } from "common/utils";
-import { Assignered, RequestCeilingIncrease } from "./model";
+import { AssignTo, RequestCeilingIncrease } from "./model";
 import { SettingsController } from "modules/settings";
 import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
@@ -75,7 +75,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
             const { _id, fname, lname } = user;
             const assigner = { _id, fname, lname };
-            const assignered: Assignered = { fname: assignedUser.fname, lname: assignedUser.lname, email: assignedUser.email, tel: assignedUser.tel };
+            const assignered: AssignTo = { fname: assignedUser.fname, lname: assignedUser.lname, email: assignedUser.email, tel: assignedUser.tel };
             const assignment = { assigner, assignered };
 
             const data = await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id: id }, {

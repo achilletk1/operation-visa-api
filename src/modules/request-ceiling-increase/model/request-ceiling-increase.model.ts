@@ -32,7 +32,7 @@ export class RequestCeilingIncrease {
             fname?: string;
             lname?: string;
         }
-        assignered?: Assignered;
+        assignered?: AssignTo;
     };
     validity?: {
         period: 'months' | 'days' | string,
@@ -53,7 +53,7 @@ export class RequestCeilingIncrease {
     cardProfileType?: any;
 }
 
-export interface Assignered {
+export interface AssignTo {
     _id?: string;
     tel: string;
     fname: string;

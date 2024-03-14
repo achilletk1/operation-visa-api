@@ -13,17 +13,17 @@ export const insertDefaultTemplateSetting = async () => {
         {
             templateType: 200,
             key: 'ceilingOverrun',
-            label: 'Dépassement de plafond sur les transactions Hors zone CEMAC',
-            desc: 'Mail de Dépassement de plafond sur les transactions hors zone CEMAC',
+            label: 'Depassement de plafond sur les transactions Hors zone CEMAC',
+            desc: 'Mail de Depassement de plafond sur les transactions hors zone CEMAC',
             fr: {
                 email: `
-                Nous tenons à vous informer que le montant total ({{MONTANT}} XAF) des opérations hors zone CEMAC que vous avez effectués le mois de {{MOIS_DEPART}} a dépassé le plafond autorisé par la BEAC qui est de{{PLAFOND}} XAF.////\n
-                Nous vous prions à cet effet de nous transmettre les details de vos dépenses avec leurs justificatifs dans un délai maximum de 30 jours à compter du {{DATE}} comme le précise la circulaire BEAC n°004/GR/2022.////\n
-                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING  : via le lien {{APP_LINK}} //////\n
-                Nous vous remercions pour votre fidélité.`,
+                Nous tenons a vous informer que le montant total ({{MONTANT}} XAF) des operations hors zone CEMAC que vous avez effectues le mois de {{MOIS_DEPART}} a depasse le plafond autorise par la BEAC qui est de{{PLAFOND}} XAF.////\n
+                Nous vous prions a cet effet de nous transmettre les details de vos depenses avec leurs justificatifs dans un delai maximum de 30 jours a compter du {{DATE}} comme le precise la circulaire BEAC n°004/GR/2022.////\n
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING  : via le lien {{APP_LINK}} //////\n
+                Nous vous remercions pour votre fidelite.`,
 
-                sms: "Chère client,// vos opérations de {{MOIS_DEPART}} de {{MONTANT}} XAF depasse la limite autorisé, veuillez nous fournir vos justificatifs avant le {{DATELINE}}via le lien {{APP_LINK}}. Merci pour votre fidélité.",
-                obj: "Dépassement de plafond sur les transactions Hors zone CEMAC",
+                sms: "Chere client,// vos operations de {{MOIS_DEPART}} de {{MONTANT}} XAF depasse la limite autorise, veuillez nous fournir vos justificatifs avant le {{DATELINE}}via le lien {{APP_LINK}}. Merci pour votre fidelite.",
+                obj: "Depassement de plafond sur les transactions Hors zone CEMAC",
             },
 
             en: {
@@ -46,17 +46,17 @@ export const insertDefaultTemplateSetting = async () => {
         {
             templateType: 200,
             key: 'firstTransaction',
-            label: 'Première transaction hors zone CEMAC détectée',
-            desc: 'Mail de première transaction hors zone CEMAC détectée',
+            label: 'Premiere transaction hors zone CEMAC detectee',
+            desc: 'Mail de premiere transaction hors zone CEMAC detectee',
             fr: {
                 email: `
-                Vous avez effectué une transaction hors zone CEMAC avec votre carte {{PRODUIT}} le {{DATE}}.////
-                Conformément à la réglémentation de change de la CEMAC (N°2/02/18/CEMAC/UMAC/CM), nous vous prions de nous fournir les justificatifs de votre voyage hors zone CEMAC avant le {{DATELINE}}.////
-                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien {{APP_LINK}} //////
+                Vous avez effectue une transaction hors zone CEMAC avec votre carte {{PRODUIT}} le {{DATE}}.////
+                Conformement a la reglementation de change de la CEMAC (N°2/02/18/CEMAC/UMAC/CM), nous vous prions de nous fournir les justificatifs de votre voyage hors zone CEMAC avant le {{DATELINE}}.////
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien {{APP_LINK}} //////
                 Pour toutes questions contacter votre gestionnaire client.`,
 
-                sms: "Cher client, vous avez effectué une transaction hors zone CEMAC avec votre carte {{PRODUIT}} le {{DATE}}. Veuillez fournir les justificatifs avant le {{DEADLINE}} via le lien {{APP_LINK}}. Merci de votre fidelite.",
-                obj: "Détection d'une transaction Hors zone CEMAC"
+                sms: "Cher client, vous avez effectue une transaction hors zone CEMAC avec votre carte {{PRODUIT}} le {{DATE}}. Veuillez fournir les justificatifs avant le {{DATELINE}} via le lien {{APP_LINK}}. Merci de votre fidelite.",
+                obj: "Detection d'une transaction Hors zone CEMAC"
             },
             en: {
                 email: `
@@ -65,7 +65,7 @@ export const insertDefaultTemplateSetting = async () => {
                 You can do this remotely by connecting to the FLY BANKING digital platform: via the link {{APP_LINK}} //////
                 If you have any questions, please contact your customer manager.`,
 
-                sms: "Dear customer, you made a transaction outside the CEMAC zone with your {{PRODUIT}} card on {{DATE}}. Please provide the supporting documents before {{DEADLINE}} via the {{APP_LINK}} link. Thank you for your loyalty.",
+                sms: "Dear customer, you made a transaction outside the CEMAC zone with your {{PRODUIT}} card on {{DATE}}. Please provide the supporting documents before {{DATELINE}} via the {{APP_LINK}} link. Thank you for your loyalty.",
                 obj: "Detection of frist transaction outside the CEMAC zone"
             },
             sendType: 200,
@@ -79,15 +79,15 @@ export const insertDefaultTemplateSetting = async () => {
             templateType: 200,
             key: 'transactionOutsideNotJustified',
             label: 'Blocage de votre carte bancaire',
-            desc: 'Notification transactions hors zone CEMAC non justifiée',
+            desc: 'Notification transactions hors zone CEMAC non justifiee',
             fr: {
                 email: `
-                Nous avons remarqué des transactions non justifiées dans les délais sur votre compte bancaire.////
-                Comme le précise la circulaire BEAC N004/GR/2022 nous sommes au regret  de vous informer du bloquage, en dehors de la zone CEMAC, de tous vos instruments de paiement électronique.////
-                Nous vous prions à cet effet de nous transmettre les details de vos dépenses avec leurs justificatifs.////
-                Veuillez vous rapprocher de votre gestionnaire pour plus de détails.`,
+                Nous avons remarque des transactions non justifiees dans les delais sur votre compte bancaire.////
+                Comme le precise la circulaire BEAC N004/GR/2022 nous sommes au regret  de vous informer du bloquage, en dehors de la zone CEMAC, de tous vos instruments de paiement electronique.////
+                Nous vous prions a cet effet de nous transmettre les details de vos depenses avec leurs justificatifs.////
+                Veuillez vous rapprocher de votre gestionnaire pour plus de details.`,
 
-                sms: "Cher client, nous sommes au regret de vous informer du bloquage hors de la zone CEMAC de tous vos instruments de paiement conformement à la reglement des changes en vigeur, Veuillez vous rapprocher de votre gestionnaire pour plus de détails.",
+                sms: "Cher client, nous sommes au regret de vous informer du bloquage hors de la zone CEMAC de tous vos instruments de paiement conformement a la reglement des changes en vigeur, Veuillez vous rapprocher de votre gestionnaire pour plus de details.",
                 obj: "Notification de blocage de carte bancaire"
 
             },
@@ -110,17 +110,17 @@ export const insertDefaultTemplateSetting = async () => {
         {
             templateType: 200,
             key: 'remindTransactionNotJustifiedAfterShortTime',
-            label: 'Première relance de justificatifs en attente pour opérations sur carte hors CEMAC',
-            desc: 'Notification de première relance pour des transactions hors zone CEMAC non justifiée',
+            label: 'Premiere relance de justificatifs en attente pour operations sur carte hors CEMAC',
+            desc: 'Notification de premiere relance pour des transactions hors zone CEMAC non justifiee',
             fr: {
                 email: `
-                Nous avons remarqué des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites opérations dans un délai maximum de 30 jours à compter du {{DATE}}. Comme le précise la circulaire BEAC N004/GR/2022.////
-                Nous vous invitons à contacter notre service clientèle dès que possible pour avoir plus d'informations et de détails sur la procédure à suivre.////
-                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
-                Nous vous remercions pour votre fidélité.`,
+                Nous avons remarque des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites operations dans un delai maximum de 30 jours a compter du {{DATE}}. Comme le precise la circulaire BEAC N004/GR/2022.////
+                Nous vous invitons a contacter notre service clientele des que possible pour avoir plus d'informations et de details sur la procedure a suivre.////
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Nous vous remercions pour votre fidelite.`,
 
-                sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs liés à vos opérations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref délai.// Rapprochez-vous de votre agence pour plus d'informations",
-                obj: "Première relance de justificatifs en attente pour opérations sur carte hors CEMAC"
+                sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs lies a vos operations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref delai.// Rapprochez-vous de votre agence pour plus d'informations",
+                obj: "Premiere relance de justificatifs en attente pour operations sur carte hors CEMAC"
 
             },
             en: {
@@ -142,18 +142,18 @@ export const insertDefaultTemplateSetting = async () => {
         {
             templateType: 200,
             key: 'remindTransactionNotJustifiedAfterLongTime',
-            label: 'Deuxième relance de justificatifs en attente pour opérations sur carte hors CEMAC',
-            desc: 'Notification de deuxième relance pour des transactions hors zone CEMAC non justifiée',
+            label: 'Deuxieme relance de justificatifs en attente pour operations sur carte hors CEMAC',
+            desc: 'Notification de deuxieme relance pour des transactions hors zone CEMAC non justifiee',
             fr: {
                 email: `
-                Nous avons remarqué des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites opérations dans un délai maximum de 30 jours à compter du {{DATE}}. Comme le précise la circulaire BEAC N004/GR/2022.////
-                Nous vous invitons à contacter notre service clientèle dès que possible pour avoir plus d'informations et de détails sur la procédure à suivre.////
-                Afin d'éviter que nous soyons contraint à bloquer votre carte ! ////
-                Vous pouvez le faire à distance en vous connectant à la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
-                Nous vous remercions pour votre fidélité.`,
+                Nous avons remarque des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites operations dans un delai maximum de 30 jours a compter du {{DATE}}. Comme le precise la circulaire BEAC N004/GR/2022.////
+                Nous vous invitons a contacter notre service clientele des que possible pour avoir plus d'informations et de details sur la procedure a suivre.////
+                Afin d'eviter que nous soyons contraint a bloquer votre carte ! ////
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Nous vous remercions pour votre fidelite.`,
 
-                sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs liés à vos opérations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref délai.// Rapprochez-vous de votre agence pour plus d'informations",
-                obj: "Deuxième relance de justificatifs en attente pour opérations sur carte hors CEMAC"
+                sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs lies a vos operations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref delai.// Rapprochez-vous de votre agence pour plus d'informations",
+                obj: "Deuxieme relance de justificatifs en attente pour operations sur carte hors CEMAC"
 
             },
             en: {

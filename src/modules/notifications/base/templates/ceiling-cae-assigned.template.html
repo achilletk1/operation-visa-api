@@ -255,10 +255,9 @@
 
                                                                         <p
                                                                             style="margin-bottom:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
-                                                                            La demande d'augmentation de plafond du
-                                                                            client {{userFullName}} vous a été assignée.
-                                                                            Le détail des informations est présenté
-                                                                            ci-dessous:
+                                                                            La demande de relèvement de plafond du client {{userFullName}} sur sa
+                                                                            carte {{cardType}} pour une durée de {{validity}} mois vers le {{desiredProfile}} vous a été assignée.<br>
+                                                                            Le détail des informations est présenté ci-dessous:
                                                                         </p><br><br>
                                                                         <p
                                                                             style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
@@ -273,55 +272,53 @@
                                                                                 <th>{{userFullName}}</th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">NATURE
+                                                                                <th class="border-key">
+                                                                                    TELEPHONE
                                                                                 </th>
-                                                                                <th class="border-data">
-                                                                                    {{transactionType}}</th>
+                                                                                <th class="border-value">
+                                                                                    {{tel}}</th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">PLAFOND
-                                                                                    COURANT</th>
-                                                                                <th class="border-data">
-                                                                                    {{currCeiling}}
+                                                                                <th class="border-key">EMAIL
                                                                                 </th>
+                                                                                <th class="border-value">
+                                                                                    {{email}}</th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">PLAFOND
-                                                                                    DÉSIRÉ</th>
-                                                                                <th class="border-data">
-                                                                                    {{requiredCeiling}}
+                                                                                <th class="border-key">RACINE CLIENT
                                                                                 </th>
+                                                                                <th class="border-value">
+                                                                                    {{clientCode}}</th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">CODE CLIENT
-                                                                                </th>
-                                                                                <th class="border-data">
-                                                                                    {{clientCode}}
-                                                                                </th>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th class="border-data">TÉLÉPHONE
-                                                                                </th>
-                                                                                <th class="border-data">
-                                                                                    {{tel}}
+                                                                                <th class="border-key">NUMÉRO DE CARTE</th>
+                                                                                <th class="border-value">
+                                                                                    {{cardNumber}}
                                                                                 </th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">EMAIL</th>
-                                                                                <th class="border-data">
-                                                                                    {{email}}
+                                                                                <th class="border-key">TYPE DE CARTE </th>
+                                                                                <th class="border-value">
+                                                                                    {{cardType}}
                                                                                 </th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">DATE</th>
-                                                                                <th class="border-data">
-                                                                                    {{date}}
+                                                                                <th class="border-key">PROFIL DÉSIRÉ
+                                                                                </th>
+                                                                                <th class="border-value">
+                                                                                    {{desiredProfile}}
                                                                                 </th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <th class="border-data">HEURE</th>
-                                                                                <th class="border-data">
-                                                                                    {{hour}}
+                                                                                <td class="border-key">VALIDITÉ</td>
+                                                                                <td class="border-value">
+                                                                                    {{validity}} mois
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="border-key">COUT MENSUEL</th>
+                                                                                <th class="border-value">
+                                                                                    {{cost}}
                                                                                 </th>
                                                                             </tr>
 

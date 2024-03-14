@@ -253,8 +253,7 @@
                                                                         style="padding:0;font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:12px;font-weight:100;color:#333">
                                                                         <p
                                                                             style="margin-bottom:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:300">
-                                                                            Votre demande d'augmentation de plafond a
-                                                                            bien été validée avec les
+                                                                            Votre demande de relèvement de plafond a été rejétée avec les
                                                                             informations ci-dessous:
                                                                         </p><br><br>
                                                                         <table class="table"
@@ -264,65 +263,48 @@
                                                                                 <th class="title">VALEURS</th>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td class="border-key">NOM et PRÉNOM
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{userFullName}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">CODE CLIENT
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{clientCode}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">COMPTE</td>
-                                                                                <td class="border-value">
-                                                                                    {{account}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">TYPE DE
-                                                                                    COMPTE
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{accountType}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">NATURE
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{transactionType}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">PLAFOND
-                                                                                    COURANT
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{currCeiling}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="border-key">PLAFOND
-                                                                                    DÉSIRÉ
-                                                                                </td>
-                                                                                <td class="border-value">
-                                                                                    {{desiredCeiling}}
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
                                                                                 <td class="border-key">RAISON DU REJET
                                                                                 </td>
                                                                                 <td class="border-value">
                                                                                     {{rejectReason}}
                                                                                 </td>
                                                                             </tr>
+                                                                            <tr>
+                                                                                <td class="border-key">NUMÉRO DE CARTE</td>
+                                                                                <td class="border-value">
+                                                                                    {{cardNumber}}
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="border-key">TYPE DE CARTE </td>
+                                                                                <td class="border-value">
+                                                                                    {{cardType}}
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="border-key">PROFIL DÉSIRÉ
+                                                                                </td>
+                                                                                <td class="border-value">
+                                                                                    {{desiredProfile}}
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="border-key">VALIDITÉ</td>
+                                                                                <td class="border-value">
+                                                                                    {{validity}} mois
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="border-key">COUT MENSUEL</td>
+                                                                                <td class="border-value">
+                                                                                    {{cost}}
+                                                                                </td>
+                                                                            </tr>
+                                                                            
 
                                                                         </table><br><br>
+                                                                        Nous vous prions de vous rapprocher de votre agence pour tout besoin d'information supplémentaire.
+                                                                        <br><br>
                                                                         <p style="font-family: Helvetica, sans-serif;font-size: 100%;margin: 0;padding: 0;margin-top: 0">
                                                                             <!--[if mso]>
                                                                                 <v:roundrect href="{{actionUrl}}" style="width:273px;height:40px;v-text-anchor:middle;" arcsize="50%" stroke="f" fillcolor="{{color}}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word">

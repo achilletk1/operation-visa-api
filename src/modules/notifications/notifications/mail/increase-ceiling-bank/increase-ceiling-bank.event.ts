@@ -12,6 +12,6 @@ export class IncreaseCeilingBankEvent extends IncreaseCeilingEvent implements In
 
 }
 
-interface IncreaseCeilingBankMailData extends IncreaseCeilingMailData {
+export interface IncreaseCeilingBankMailData extends IncreaseCeilingMailData {
     clientCode: string;
 }
