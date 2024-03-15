@@ -36,4 +36,5 @@ export interface VisaOperationsAttachment extends BaseAttachment {
     fileName?: string; // name of the file at the upload
     name?: string; // internal name to identify the file in the server
     temporaryFile?: TemporaryFile;
+    label?: string; // title of the file at the upload
 }

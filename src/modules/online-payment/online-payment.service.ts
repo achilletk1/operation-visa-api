@@ -2,7 +2,7 @@ import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOn
 import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
-import { generateValidator, getValidationsFolder } from "common/helpers";
+import { generateValidator, getAgenciesQuery, getValidationsFolder } from "common/helpers";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
@@ -30,6 +30,23 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             delete filter?.start;
             delete filter?.end;
             return await OnlinePaymentController.onlinePaymentService.findAll({ filter });
+        } catch (error) { throw error; }
+    }
+
+    async getOnlinePaymentsAgencies(query: any) {
+        try {
+            const { offset, limit, status, start, end } = query
+            query.offset = +offset;
+            query.limit = +limit;
+            query.status = +status;
+            if (start && end) {
+                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
+                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
+            };
+            const data = await this.findAllAggregate(getAgenciesQuery(query));
+            delete query.offset; query.limit;
+            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            return { data, total };
         } catch (error) { throw error; }
     }
 

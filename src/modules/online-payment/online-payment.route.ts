@@ -10,6 +10,8 @@ export const onlinePaymentController = new OnlinePaymentController();
 
 router.get('/', onlinePaymentController.getOnlinePaymentsBy);
 
+router.get('/agencies', onlinePaymentController.getOnlinePaymentsAgencies);
+
 router.get('/all', onlinePaymentController.getOnlinePaymentsBy);
 
 router.put('/update/:id', onlinePaymentController.updateOnlinePaymentsById);

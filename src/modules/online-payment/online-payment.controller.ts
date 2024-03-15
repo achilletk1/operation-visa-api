@@ -18,6 +18,11 @@ export class OnlinePaymentController {
         catch (error) { next(error); }
     }
 
+    async getOnlinePaymentsAgencies(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsAgencies(req.query)); }
+        catch (error) { next(error); }
+    }
+
     async getValidationsOnlinePaymentMonth(req: Request, res: Response, next: NextFunction) {
         try { res.send(await OnlinePaymentController.onlinePaymentService.getValidationsOnlinePaymentMonth(req.params.id as string)); }
         catch (error) { next(error); }

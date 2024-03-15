@@ -10,6 +10,8 @@ router.get('/', travelController.getTravels);
 
 router.get('/all', travelController.getTravels);
 
+router.get('/agencies', travelController.getTravelsAgencies);
+
 router.get('/validators/:id', travelController.getValidationsTravel);
 
 router.put('/steps/status/:id', travelController.updateTravelStepStatusById);

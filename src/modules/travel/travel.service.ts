@@ -2,7 +2,7 @@ import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail
 import { notificationEmmiter, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
-import { generateValidator, getValidationsFolder, parseNumberFields } from "common/helpers";
+import { generateValidator, getAgenciesQuery, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
@@ -41,6 +41,24 @@ export class TravelService extends CrudService<Travel> {
         try {
             query.filter = this.formatFilters(query.filter || {});
             return await TravelController.travelService.findAll(query);
+        } catch (error) { throw error; }
+    }
+
+    async getTravelsAgencies(query: any) {
+        try {
+            const { offset, limit, status, travelType, start, end } = query
+            query.offset = +offset;
+            query.limit = +limit;
+            query.status = +status;
+            query.travelType = +travelType;
+            if (start && end) {
+                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
+                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
+            };
+            const data = await this.findAllAggregate(getAgenciesQuery(query));
+            delete query.offset; query.limit;
+            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            return { data, total };
         } catch (error) { throw error; }
     }
 
@@ -428,7 +446,7 @@ export class TravelService extends CrudService<Travel> {
     }
 
     private formatFilters(filter: QueryFilter): QueryFilter {
-        const { clientCode, userId, name } = filter;
+        const { clientCode, userId, name, age, start, end } = filter;
 
         if (userId) {
             delete filter.userId;
@@ -441,6 +459,16 @@ export class TravelService extends CrudService<Travel> {
         if (name) {
             delete filter.name;
             filter['user.fullName'] = name;
+        }
+
+        // if (age) {
+        //     delete filter.age;
+        //     filter['user.clientCode'] = clientCode;
+        // }
+        if (start && end) {
+            delete filter.start;
+            delete filter.end;
+            filter['dates.created'] = { $gte: moment(start, 'DD-MM-YYYY').startOf('day').valueOf(), $lte: moment(end, 'DD-MM-YYYY').endOf('day').valueOf() };
         }
 
         return filter;

@@ -8,6 +8,8 @@ router.post('/', importsController.create);
 
 router.get('/', importsController.findAll);
 
+router.get('/agencies', importsController.getImportationsAgencies);
+
 router.get('/all', importsController.findAll);
 
 router.get('/projected-for-select', importsController.getImportsProjected);
