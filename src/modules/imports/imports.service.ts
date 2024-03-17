@@ -1,7 +1,7 @@
 
 import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from 'modules/visa-operations';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
-import { generateAttachmentFromVoucher, generateValidator } from 'common/helpers';
+import { generateAttachmentFromVoucher, generateValidator, getAgenciesQuery } from 'common/helpers';
 import { ImportsController } from './imports.controller';
 import { ImportsRepository } from './imports.repository';
 import { saveAttachmentImportation } from './helper';
@@ -10,6 +10,7 @@ import httpContext from 'express-http-context';
 import { Voucher } from 'modules/vouchers';
 import { CrudService } from "common/base";
 import { Import } from './model';
+import moment from 'moment';
 
 const expenseCategories = [{
     code: ExpenseCategory.IMPORT_OF_GOODS,
@@ -140,4 +141,21 @@ export class ImportsService extends CrudService<Import> {
         } catch (error) { throw error; }
     }
 
+    async getImportationsAgencies(query: any) {
+        try {
+            const { offset, limit, status, start, end, importType} = query
+            query.offset = +offset;
+            query.limit = +limit;
+            if(status){ query.status = +status;}
+            if(importType){ query.importType = +importType;}
+            if (start && end) {
+                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
+                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
+            };
+            const data = await this.findAllAggregate(getAgenciesQuery(query));
+            delete query.offset; query.limit;
+            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            return { data, total };
+        } catch (error) { throw error; }
+    }
 }

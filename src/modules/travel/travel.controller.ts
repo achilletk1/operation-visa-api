@@ -17,6 +17,11 @@ export class TravelController {
         catch (error) { next(error); }
     }
 
+    async getTravelsAgencies(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await TravelController.travelService.getTravelsAgencies(req.query )); }
+        catch (error) { next(error); }
+    }
+
     async findOneById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await TravelController.travelService.findOne({ filter: { _id: req.params.id } })); }
         catch (error) { next(error); }

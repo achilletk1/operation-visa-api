@@ -1,5 +1,5 @@
 import { averageTimeJustifyTravelData, chartDataTravel, generateConsolidateData, statusOperation } from "modules/reporting";
-import { getNotficationsQuery, travelsForPocessingQuery } from "./helper";
+import { getNotficationsQuery, travelsForPocessingQuery } from "./helper/travel-aggregation.helper";
 import { BaseRepository } from "common/base";
 import { TravelType } from "./enum";
 
