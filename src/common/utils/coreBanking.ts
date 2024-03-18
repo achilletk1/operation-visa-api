@@ -9,7 +9,7 @@ export function getCbsUserVariables(): string[] {
     return variables;
 }
 
-export const getAGEListByBankCode = (countryCode: string, bankCode: string, bankList: any) => {
+export const getAGEListByBankCode = (countryCode: string, bankCode: string, bankList: any): { CODE_AGENCE: string; NOM_AGENCE: string; }[] => {
     try {
         // Removes the leading and trailing white space and line terminator characters from fields.
         trailingWhiteSpaces(bankList);

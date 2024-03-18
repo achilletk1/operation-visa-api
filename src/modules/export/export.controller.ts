@@ -44,7 +44,7 @@ export class ExportController {
 
     async generateOnlinePaymentExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateOnlinePaymentExporData(req.params.code as string);
+            const data = await ExportController.exportService.generateOnlinePaymentExportData(req.params.code as string);
             responseWithAttachment(res, data.contentType, `online-payment_${new Date().getTime()}.xlsx`, data.fileContent);
         } catch (error) { next(error); }
     }
@@ -56,19 +56,19 @@ export class ExportController {
 
     async generateOnlinePaymenOperationstExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateOnlinePaymenOperationstExporData(req.params.code as string);
+            const data = await ExportController.exportService.generateOnlinePaymentOperationsExportData(req.params.code as string);
             responseWithAttachment(res, data.contentType, `payment-operations_${new Date().getTime()}.xlsx`, data.fileContent);
         } catch (error) { next(error); }
     }
 
     async generateTravelsCeillingExportLinks(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await ExportController.exportService.generateTravelsCeillingExportLinks(req.params.id as any)); }
+        try { res.send(await ExportController.exportService.generateTravelsCeilingExportLinks(req.params.id as any)); }
         catch (error) { next(error); }
     }
 
     async generateTravelsCeillingExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateTravelsCeillingExporData(req.params.code as string);
+            const data = await ExportController.exportService.generateTravelsCeilingExportData(req.params.code as string);
             responseWithAttachment(res, data.contentType, `ceilling_${new Date().getTime()}.xlsx`, data.fileContent);
         } catch (error) { next(error); }
     }
@@ -92,7 +92,7 @@ export class ExportController {
 
     async generateTravelsExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateTravelsExporData(req.params.code as string);
+            const data = await ExportController.exportService.generateTravelsExportData(req.params.code as string);
             responseWithAttachment(res, data.contentType, `travels_${new Date().getTime()}.xlsx`, data.fileContent);
         } catch (error) { next(error); }
     }
@@ -104,7 +104,7 @@ export class ExportController {
 
     async generateVisaTransactionsFilesExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateVisaTransactionsFilesExporData(req.params.id as string, req.params.code as string);
+            const data = await ExportController.exportService.generateVisaTransactionsFilesExportData(req.params.id as string, req.params.code as string);
             responseWithAttachment(res, data.contentType, data.fileName, data.fileContent);
         } catch (error) { next(error); }
     }
@@ -116,7 +116,7 @@ export class ExportController {
 
     async generateDeclarationFolderExporData(req: Request, res: Response, next: NextFunction) {
         try {
-            const data = await ExportController.exportService.generateDeclarationFolderExporData(req.params.code as string);
+            const data = await ExportController.exportService.generateDeclarationFolderExportData(req.params.code as string);
             responseWithAttachment(res, data.contentType, data.fileName, data.fileContent);
         } catch (error) { next(error); }
     }

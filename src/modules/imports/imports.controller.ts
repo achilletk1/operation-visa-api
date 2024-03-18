@@ -38,14 +38,13 @@ export class ImportsController {
     }
 
     async getImportationsAgencies(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ImportsController.importsService.getImportationsAgencies(req.query)) }
+        try { res.send(await ImportsController.importsService.getImportationsAgencies({ filter: req.query })) }
         catch (error) { next(error); }
     }
 
     async updateImportationStatusById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await ImportsController.importsService.updateImportationStatusById(req.params.id, req.body)); }
         catch (error) { next(error); }
-
     }
 
 }

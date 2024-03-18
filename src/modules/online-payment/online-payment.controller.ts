@@ -14,12 +14,12 @@ export class OnlinePaymentController {
     }
 
     async getOnlinePaymentsBy(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy(req.query)); }
+        try { res.send(await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsBy({ filter: req.query })); }
         catch (error) { next(error); }
     }
 
     async getOnlinePaymentsAgencies(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsAgencies(req.query)); }
+        try { res.send(await OnlinePaymentController.onlinePaymentService.getOnlinePaymentsAgencies({ filter: req.query })); }
         catch (error) { next(error); }
     }
 

@@ -110,7 +110,7 @@ export function generateCeillingExportXlsx(onlinePaymentCeilling: any) {
 
         if ('transactions' in result) {
             transactions = result.transactions;
-            console.log(JSON.stringify(transactions, null, 2))
+            // console.log(JSON.stringify(transactions, null, 2));
         }
 
         if (Array.isArray(transactions)) {

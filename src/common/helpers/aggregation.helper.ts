@@ -2,15 +2,10 @@ import { isEmpty } from "lodash";
 
 
 export const getAgenciesQuery = (params: any) => {
-    let { offset, limit, travelType, clientCode, fullName, status, ageLabel, start, end, importType } = params;
+    let { offset, limit, filter, start, end } = params;
 
-    const match: any = { $match: {} };
+    const match = { $match: filter };
 
-    if (travelType) { match['$match']['travelType'] = travelType };
-    if (status) { match['$match']['status'] = status };
-    if (clientCode) { match['$match']['user.clientCode'] = clientCode };
-    if (fullName) { match['$match']['user.fullName'] = fullName };
-    if (importType) { match['$match']['type.code'] = importType };
     if (start && end) {
         match['$match']['dates.created'] = { $gte: start, $lte: end };
     }
@@ -33,22 +28,22 @@ export const getAgenciesQuery = (params: any) => {
             {
                 $unwind: {
                     path: '$userInfos',
-                    preserveNullAndEmptyArrays: false
+                    preserveNullAndEmptyArrays: true
                 }
             },
             { $set: { 'user.age': '$userInfos.age' } },
-            { $unset: ['userInfos'] },
+            { $unset: ['userId', 'userInfos'] },
             { $sort: { _id: -1 } },
         ];
 
-    // ageLabel = 'BICEC BASSA';
-    if (ageLabel) { match['$match']['user.age.label'] = { $regex: ageLabel } };
-    if (!isEmpty(match['$match'])) { query.push(match) }
+    // example of ageLabel = 'BICEC BASSA';
+    if (filter['user.age.label']) { match['$match']['user.age.label'] = { $regex: `${filter['user.age.label']}` }; }
+    if (!isEmpty(match['$match'])) { query.push(match); }
 
     if (offset && limit) {
-        query.push({ '$skip': offset });
-        query.push({ '$limit': limit })
-    };
-    
-    return query
+        query.push({ '$skip': ((offset || 1) - 1) * (limit || 0) });
+        query.push({ '$limit': limit });
+    }
+
+    return query;
 }

@@ -1,14 +1,14 @@
 
+import { convertParams, extractPaginationData, generateAttachmentFromVoucher, generateValidator, getAgenciesQuery } from 'common/helpers';
 import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from 'modules/visa-operations';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
-import { generateAttachmentFromVoucher, generateValidator, getAgenciesQuery } from 'common/helpers';
 import { ImportsController } from './imports.controller';
 import { ImportsRepository } from './imports.repository';
+import { CrudService, QueryOptions } from "common/base";
 import { saveAttachmentImportation } from './helper';
 import { UsersController } from "modules/users";
 import httpContext from 'express-http-context';
 import { Voucher } from 'modules/vouchers';
-import { CrudService } from "common/base";
 import { Import } from './model';
 import moment from 'moment';
 
@@ -141,20 +141,20 @@ export class ImportsService extends CrudService<Import> {
         } catch (error) { throw error; }
     }
 
-    async getImportationsAgencies(query: any) {
+    async getImportationsAgencies(query: QueryOptions) {
         try {
-            const { offset, limit, status, start, end, importType} = query
-            query.offset = +offset;
-            query.limit = +limit;
-            if(status){ query.status = +status;}
-            if(importType){ query.importType = +importType;}
-            if (start && end) {
-                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
-                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
-            };
-            const data = await this.findAllAggregate(getAgenciesQuery(query));
+            query = convertParams(query || {});
+            query = extractPaginationData(query || {});
+            if (query?.filter?.start && query?.filter?.end) {
+                delete query?.filter?.start; delete query?.filter?.end;
+                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                    end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
+                } as QueryOptions;
+            }
+
+            const data = await ImportsController.importsService.findAllAggregate<Import>(getAgenciesQuery(query));
             delete query.offset; query.limit;
-            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            const total = (await ImportsController.importsService.findAllAggregate<Import>(getAgenciesQuery(query))).length;
             return { data, total };
         } catch (error) { throw error; }
     }

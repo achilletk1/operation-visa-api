@@ -37,7 +37,7 @@ export const getOrCreateTravelMonth = async (travel: Travel, month: string) => {
     try { travelMonth = await TravelMonthController.travelMonthService.findOne({ filter: { travelId: travel?._id, month: month } }); } catch(e) {}
 
     if (isEmpty(travelMonth)) {
-        travelMonth = generateTravelMonthByProcessing(travel?._id.toString(), String(travel?.user?._id), month);
+        travelMonth = generateTravelMonthByProcessing(travel?._id.toString(), String(travel?.user?._id), +month);
         const result = await TravelMonthController.travelMonthService.create(travelMonth);
         travelMonth._id = result?.data;
     }

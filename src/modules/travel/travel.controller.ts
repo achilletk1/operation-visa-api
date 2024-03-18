@@ -1,5 +1,6 @@
-import { TravelService } from "./travel.service";
 import { NextFunction, Request, Response } from 'express';
+import { TravelService } from "./travel.service";
+import { get } from "lodash";
 
 export class TravelController {
 
@@ -18,7 +19,7 @@ export class TravelController {
     }
 
     async getTravelsAgencies(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await TravelController.travelService.getTravelsAgencies(req.query )); }
+        try { res.send(await TravelController.travelService.getTravelsAgencies({ filter: req.query })); }
         catch (error) { next(error); }
     }
 
@@ -48,7 +49,7 @@ export class TravelController {
     }
 
     async getTravelsLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await TravelController.travelService.findAllAggregate([{ $project: { _id: 0, clientCode: "$user.clientCode", fullName: "$user.fullName" } }])); }
+        try { res.send(await TravelController.travelService.findAllAggregate([{ $match: { travelType: { $in: get(req.query, 'travelType') ? [+get(req.query, 'travelType', '')] : [100, 200] } } }, { $project: { _id: 0, clientCode: "$user.clientCode", fullName: "$user.fullName" } }])); }
         catch (error) { next(error); }
     }
 

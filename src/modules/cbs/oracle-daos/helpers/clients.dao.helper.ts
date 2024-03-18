@@ -904,6 +904,17 @@ export const helper = {
                 NUM_CPTE: "37207077837",
                 INTITULE_CMPTE: "COMPTES DE CHEQUES",
                 LIBELLE_TYPE: "VISA Serenity"
+            },
+            {
+                AGE: "01700",
+                CPRO: '550',
+                CODE_CLIENT: "70017464       ",
+                NOMREST: "ABONI OLANDA JERRY",
+                NUM_CARTE: "604855******6538",
+                DATE_FIN_VALIDITE: "2022-02-28",
+                NUM_CPTE: "37207077837",
+                INTITULE_CMPTE: "COMPTES DE CHEQUES",
+                LIBELLE_TYPE: "VISA Achille"
             }
         ];
         return Promise.resolve(cards);
@@ -958,6 +969,10 @@ export const helper = {
             {
                 CPRO: '186',
                 LIB: "CARTE EXPRESS EMV             ",
+            },
+            {
+                CPRO: '550',
+                LIB: "VISA Achille             ",
             },
         ];
         const product = products.find(e => e.CPRO === code);

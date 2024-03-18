@@ -48,7 +48,7 @@ export const generateTravelByProcessing = (cli: string, transaction: VisaTransac
     }
 }
 
-export const generateTravelMonthByProcessing = (travelId: string, userId: string, month: string): TravelMonth => {
+export const generateTravelMonthByProcessing = (travelId: string, userId: string, month: number): TravelMonth => {
     return {
         status: OpeVisaStatus.TO_COMPLETED,
         userId,

@@ -35,7 +35,7 @@ export class RequestCeilingIncrease {
         assignered?: AssignTo;
     };
     validity?: {
-        period: 'months' | 'days' | string,
+        period: number; // 'months' | 'days' | string,
         duration: number;
       };
     validator?: RequestCeilingValidator;

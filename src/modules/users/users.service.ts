@@ -80,7 +80,7 @@ export class UsersService extends CrudService<User>  {
             if (scope === 'back-office') {
                 const userLdap: any = await getLdapUser(createData.userCode);
                 let userCbs: CbsBankUser | null = null;
-                if (createData.clientCode) { userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client as CbsBankUser; }
+                (createData.clientCode) && (userCbs = (await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope))?.client as CbsBankUser);
                 user = {
                     ...user, userGesCode: userCbs?.GES_CODE,
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,

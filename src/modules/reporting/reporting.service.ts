@@ -38,7 +38,7 @@ export class ReportingService extends BaseService {
         } catch (error) { throw error; }
     }
 
-    async getAgencies({ filter }: any): Promise<any> {
+    async getAgencies({ filter }: any): Promise<{ CODE_AGENCE: string; NOM_AGENCE: string; }[]> {
         try {
             const bankList = await CbsController.cbsService.getBankList();
             return getAGEListByBankCode(filter?.CountryCode, filter?.bankCode, bankList);

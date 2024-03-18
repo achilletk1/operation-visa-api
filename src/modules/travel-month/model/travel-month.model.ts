@@ -1,5 +1,5 @@
-import { VisaTransaction } from "modules/visa-transactions";
 import { OpeVisaStatus, Validator } from "modules/visa-operations";
+import { VisaTransaction } from "modules/visa-transactions";
 import { Editor } from "modules/users";
 
 export class TravelMonth {
@@ -7,7 +7,7 @@ export class TravelMonth {
     status?: OpeVisaStatus;
     userId?: string;
     travelId?: string;
-    month?: string;
+    month?: number;
     dates!: {
         created: number;
         updated?: number;

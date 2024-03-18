@@ -1,8 +1,8 @@
+import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
 import { notificationEmmiter, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
-import { generateValidator, getAgenciesQuery, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
@@ -44,20 +44,20 @@ export class TravelService extends CrudService<Travel> {
         } catch (error) { throw error; }
     }
 
-    async getTravelsAgencies(query: any) {
+    async getTravelsAgencies(query: QueryOptions) {
         try {
-            const { offset, limit, status, travelType, start, end } = query
-            query.offset = +offset;
-            query.limit = +limit;
-            query.status = +status;
-            query.travelType = +travelType;
-            if (start && end) {
-                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
-                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
-            };
-            const data = await this.findAllAggregate(getAgenciesQuery(query));
-            delete query.offset; query.limit;
-            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            query = convertParams(query || {});
+            query = extractPaginationData(query || {});
+            if (query?.filter?.start && query?.filter?.end) {
+                delete query?.filter?.start; delete query?.filter?.end;
+                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                    end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
+                } as QueryOptions;
+            }
+
+            const data = await TravelController.travelService.findAllAggregate<Travel>(getAgenciesQuery(query));
+            delete query?.offset; delete query?.limit;
+            const total = (await TravelController.travelService.findAllAggregate<Travel>(getAgenciesQuery(query))).length;
             return { data, total };
         } catch (error) { throw error; }
     }
@@ -414,7 +414,7 @@ export class TravelService extends CrudService<Travel> {
             const monthDiff = moment(travel?.proofTravel?.dates?.end).diff(travel?.proofTravel?.dates?.start, 'M');
             for (let index = 0; index < monthDiff; index++) {
 
-                const month = moment(travel?.proofTravel?.dates?.start).add(index, 'M').format('YYYYMM').toString();
+                const month = +moment(travel?.proofTravel?.dates?.start).add(index, 'M').format('YYYYMM').toString();
 
                 const transactionsMonth = travel.transactions.filter((elt) => elt.currentMonth === +month);
 

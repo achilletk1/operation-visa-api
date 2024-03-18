@@ -1,16 +1,16 @@
 import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
-import { deleteDirectory, getOnpStatementStepStatus, getOnpStatus, getTotal, readFile, saveAttachment } from "common/utils";
+import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getValidationsFolder } from "common/helpers";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
-import { generateValidator, getAgenciesQuery, getValidationsFolder } from "common/helpers";
+import { getOnpStatementStepStatus, getOnpStatus, getTotal } from "common/utils";
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
+import { CrudService, QueryOptions } from "common/base";
 import { OpeVisaStatus } from "modules/visa-operations";
 import { saveAttachmentOnlinePayment } from "./helper";
 import httpContext from 'express-http-context';
 import { OnlinePaymentMonth } from "./model";
-import { CrudService } from "common/base";
 import { get, isEmpty } from "lodash";
 import moment from "moment";
 
@@ -23,29 +23,27 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         super(OnlinePaymentService.onlinePaymentRepository);
     }
 
-    async getOnlinePaymentsBy(filter: any) {
+    async getOnlinePaymentsBy(query: QueryOptions) {
         try {
-            this.formatFilters(filter);
-            if (filter?.start && filter?.end) filter['dates.created'] = { $gte: moment(filter?.start, 'YYYY-MM-DD').startOf('day').valueOf(), $lte: moment(filter?.end, 'YYYY-MM-DD').endOf('day').valueOf() };
-            delete filter?.start;
-            delete filter?.end;
-            return await OnlinePaymentController.onlinePaymentService.findAll({ filter });
+            this.formatFilters(query.filter || {});
+            return await OnlinePaymentController.onlinePaymentService.findAll(query);
         } catch (error) { throw error; }
     }
 
-    async getOnlinePaymentsAgencies(query: any) {
+    async getOnlinePaymentsAgencies(query: QueryOptions) {
         try {
-            const { offset, limit, status, start, end } = query
-            query.offset = +offset;
-            query.limit = +limit;
-            query.status = +status;
-            if (start && end) {
-                query.start = moment(start, 'DD-MM-YYYY').startOf('day').valueOf();
-                query.end = moment(end, 'DD-MM-YYYY').endOf('day').valueOf()
-            };
-            const data = await this.findAllAggregate(getAgenciesQuery(query));
-            delete query.offset; query.limit;
-            const total = (await this.findAllAggregate(getAgenciesQuery(query))).length;
+            query = convertParams(query || {});
+            query = extractPaginationData(query || {});
+            if (query?.filter?.start && query?.filter?.end) {
+                delete query?.filter?.start; delete query?.filter?.end;
+                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                    end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
+                } as QueryOptions;
+            }
+
+            const data = await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>(getAgenciesQuery(query));
+            delete query.offset; delete query.limit;
+            const total = (await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>(getAgenciesQuery(query))).length;
             return { data, total };
         } catch (error) { throw error; }
     }
@@ -317,7 +315,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     }
 
     private formatFilters(filters: any) {
-        const { clientCode, userId, year, month } = filters;
+        const { clientCode, userId, year, month, start, end } = filters;
 
         if (userId) {
             delete filters.userId;
@@ -333,6 +331,13 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         if (clientCode) {
             delete filters.clientCode;
             filters['user.clientCode'] = clientCode;
+        }
+
+
+        if (start && end) {
+            delete filters?.start;
+            delete filters?.end;
+            filters['dates.created'] = { $gte: moment(start, 'YYYY-MM-DD').startOf('day').valueOf(), $lte: moment(end, 'YYYY-MM-DD').endOf('day').valueOf() };
         }
     }
 

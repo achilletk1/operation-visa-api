@@ -1,5 +1,6 @@
 import { RequestCeilingIncrease } from "modules/request-ceiling-increase";
 import { formatNumber } from "common/helpers";
+import moment from "moment";
 
 export class IncreaseCeilingEvent implements IncreaseCeilingMailData {
     tel!: string;
@@ -13,7 +14,7 @@ export class IncreaseCeilingEvent implements IncreaseCeilingMailData {
     cardNumber!: string;
     userFullName!: string;
     desiredProfile!: string;
-
+    startDateValidity!: string;
 
     constructor(ceiling: RequestCeilingIncrease) {
         this.tel = ceiling?.user?.tel || '';
@@ -25,6 +26,7 @@ export class IncreaseCeilingEvent implements IncreaseCeilingMailData {
         this.cardType = ceiling?.cardType?.LIBELLE_TYPE || '';
         this.desiredProfile = ceiling?.cardProfileType?.label || '';
         this.validity = `${ceiling?.validity?.duration || 'N-A'}`;
+        this.startDateValidity = `${moment(ceiling?.validity?.period).format('DD/MM/YYYY') || 'N-A'}`;
         this.cost = formatNumber(String(ceiling?.cardProfileType?.amount)) + ' XAF' || '';
         this.greetings = this.getGreetings(ceiling);
     }
@@ -48,4 +50,5 @@ export interface IncreaseCeilingMailData {
     cardNumber: string;
     userFullName: string;
     desiredProfile: string;
+    startDateValidity: string;
 }

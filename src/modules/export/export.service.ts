@@ -5,7 +5,6 @@ import { isDevOrStag, parseNumberFields, timeout } from "common/helpers";
 import { FilesController } from 'modules/visa-transactions-files/files';
 import { OnlinePaymentController } from "modules/online-payment";
 import { NotificationsController } from "modules/notifications";
-import { VisaTransaction } from "modules/visa-transactions";
 import { TravelController } from 'modules/travel';
 import { camelCase, get, isEmpty } from "lodash";
 import { UsersController } from "modules/users";
@@ -129,7 +128,7 @@ export class ExportService extends BaseService {
         return { link: `${basePath}/${code}` };
     }
 
-    async generateOnlinePaymentExporData(code: string) {
+    async generateOnlinePaymentExportData(code: string) {
         let options;
         try {
             options = decryptObj(code);
@@ -174,7 +173,7 @@ export class ExportService extends BaseService {
         return { link: `${basePath}/${code}` };
     }
 
-    async generateOnlinePaymenOperationstExporData(code: string) {
+    async generateOnlinePaymentOperationsExportData(code: string) {
         let options;
         try {
             options = decryptObj(code);
@@ -198,7 +197,7 @@ export class ExportService extends BaseService {
         return data;
     }
 
-    async generateTravelsCeillingExportLinks(travelId: string) {
+    async generateTravelsCeilingExportLinks(travelId: string) {
         const travle = await TravelController.travelService.findOne({ filter: { _id: travelId } });
         if (isEmpty(travle?.transactions)) { throw new Error('OnlineCeillingNotFound'); }
 
@@ -215,7 +214,7 @@ export class ExportService extends BaseService {
         return { link: `${basePath}/${code}` };
     }
 
-    async generateTravelsCeillingExporData(code: string) {
+    async generateTravelsCeilingExportData(code: string) {
         let options;
         try {
             options = decryptObj(code);
@@ -333,7 +332,7 @@ export class ExportService extends BaseService {
         }
     }
 
-    async generateTravelsExporData(code: string) {
+    async generateTravelsExportData(code: string) {
         let options;
         try {
             options = decryptObj(code);
@@ -379,7 +378,7 @@ export class ExportService extends BaseService {
         } catch (error) { throw error; }
     }
 
-    async generateVisaTransactionsFilesExporData(id: string, code: string) {
+    async generateVisaTransactionsFilesExportData(id: string, code: string) {
         try {
             let options;
 
@@ -426,7 +425,7 @@ export class ExportService extends BaseService {
         } catch (error) { throw error; }
     }
 
-    async generateDeclarationFolderExporData(code: string): Promise<any> {
+    async generateDeclarationFolderExportData(code: string): Promise<any> {
         try {
             let options;
 

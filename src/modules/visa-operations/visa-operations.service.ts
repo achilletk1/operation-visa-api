@@ -1,4 +1,4 @@
-import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance } from "./helper";
+import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel as verifyExceedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance } from "./helper";
 import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { BankAccountManager, BankAccountManagerController } from "modules/bank-account-manager";
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
@@ -376,7 +376,7 @@ export class VisaOperationsService extends CrudService<any> {
 
             onlinePayment.transactions = !element.onlinePaymentId ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
 
-            toBeUpdated.notifications = verifyExcedingOnTravel(onlinePayment, +Number(onlinePayment?.ceiling));
+            toBeUpdated.notifications = verifyExceedingOnTravel(onlinePayment, +Number(onlinePayment?.ceiling));
             toBeUpdated.transactions = onlinePayment.transactions;
             toBeUpdated.transactions = markExceedTransaction(toBeUpdated.transactions, +Number(onlinePayment?.ceiling));
             if (isEmpty(toBeUpdated.notifications)) {
@@ -390,7 +390,7 @@ export class VisaOperationsService extends CrudService<any> {
     private async addTransactionsInTravel(travel: Travel, transactions: VisaTransaction[], toBeUpdated: ToBeUpdated, month: string = '') {
         if (travel?.travelType === TravelType.SHORT_TERM_TRAVEL) {
             travel.transactions = isEmpty(travel?.transactions) ? [...transactions] : [...travel?.transactions, ...transactions];
-            toBeUpdated.notifications = verifyExcedingOnTravel(travel, +Number(travel?.ceiling));
+            toBeUpdated.notifications = verifyExceedingOnTravel(travel, +Number(travel?.ceiling));
             const totalAmount = getTotal(travel?.transactions);
             if (travel?.transactions?.length === transactions?.length) { // to detect first transaction
                 toBeUpdated.notifications.push(generateNotificationData({ ...travel, totalAmount }, "EMAIL", 'firstTransaction'));
