@@ -1,4 +1,4 @@
-import { OperationTypeLabel } from 'modules/index';
+import { OperationTypeLabel } from '../../src/modules/visa-operations/enum/operation.enum';
 import { getDatabase } from '../../src/database/mongodb';
 import { isEmpty } from 'lodash';
 
