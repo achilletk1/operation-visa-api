@@ -26,7 +26,8 @@ export class IncreaseCeilingEvent implements IncreaseCeilingMailData {
         this.cardType = ceiling?.cardType?.LIBELLE_TYPE || '';
         this.desiredProfile = ceiling?.cardProfileType?.label || '';
         this.validity = `${ceiling?.validity?.duration || 'N-A'}`;
-        this.startDateValidity = `${moment(ceiling?.validity?.period).format('DD/MM/YYYY') || 'N-A'}`;
+        this.startDateValidity = `${(moment(ceiling?.validity?.periodStart).format('DD/MM/YYYY') +
+        ' au ' + moment(ceiling?.validity?.periodEnd).format('DD/MM/YYYY')) || 'N-A'}`;
         this.cost = formatNumber(String(ceiling?.cardProfileType?.amount)) + ' XAF' || '';
         this.greetings = this.getGreetings(ceiling);
     }

@@ -34,10 +34,7 @@ export class RequestCeilingIncrease {
         }
         assignered?: AssignTo;
     };
-    validity?: {
-        period: number; // 'months' | 'days' | string,
-        duration: number;
-      };
+    validity?: Validity;
     validator?: RequestCeilingValidator;
     status?: Status;
     desc!: string;
@@ -52,6 +49,12 @@ export class RequestCeilingIncrease {
     cardType?: any;
     cardProfileType?: any;
 }
+
+export interface Validity {
+    periodStart: number; // date on milliseconds
+    periodEnd: number; // date on milliseconds
+    duration: number;
+};
 
 export interface AssignTo {
     _id?: string;

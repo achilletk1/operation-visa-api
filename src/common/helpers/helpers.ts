@@ -298,6 +298,21 @@ export function getValidationsFolder(folder: Travel | OnlinePaymentMonth | Trave
   return validators;
 }
 
+export function getPartialUser(user: User): Partial<User> {
+  return {
+    _id: user._id,
+    clientCode: user.clientCode,
+    email: user.email,
+    tel: user.tel,
+    gender: user.gender,
+    fullName: user?.fullName || user?.fname + ' ' + user?.lname,
+    age: user.age,
+    userGesCode: user.userGesCode,
+    category: user.category,
+    cbsCategory: user.cbsCategory,
+  };
+}
+
 declare type ObjectType<T> = {
   [key: string]: T
 }

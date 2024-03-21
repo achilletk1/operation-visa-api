@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash';
+import { User } from '../model';
 import moment from "moment";
 import XLSX from 'xlsx';
 
@@ -47,7 +48,7 @@ export function formatUserFilters(fields: any) {
     return fields;
 };
 
-export function generateUsersExportXlsx(users: any[]) {
+export function generateUsersExportXlsx(users: User[]) {
 
     let result = users;
 
@@ -71,9 +72,9 @@ export function generateUsersExportXlsx(users: any[]) {
                 `${user?.fullName || 'N/A'}`,
                 `${user?.email || 'N/A'}`,
                 `${user?.tel || 'N/A'}`,
-                `${categories[user.visaOpecategory] || 'N/A'}`,
+                `${categories[user?.visaOpeCategory || 0] || 'N/A'}`,
                 `${moment(user?.created_at).format('DD/MM/YYYY')}`,
-                `${enabled[user?.enabled] || 'N/A'}`,
+                `${user?.enabled ? 'ACTIF' : 'INACTIF' || 'N/A'}`,
             ];
             excelData.push(elt);
         });

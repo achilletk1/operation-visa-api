@@ -1,7 +1,7 @@
 import { CbsAccounts } from "modules/cbs/model";
 import { UserCategory } from "../enum";
 
-export enum visaOpecategory {
+export enum visaOpeCategory {
     CODIR = 100,
     CHEF_DE_REGION = 200,
     GESTIONNAIRE = 300,
@@ -13,6 +13,7 @@ export class User {
     _id?: string;
     userCode?: string;
     category?: UserCategory;
+    cbsCategory?: '1' | '2' | '3';  // 1 = PARTICULIER; 2 = SOCIETE; 3 = ENTREPRISE INDIVIDUELLE; 
     fname?: string;
     lname?: string;
     fullName?: string;
@@ -30,12 +31,13 @@ export class User {
     gender?: 'm' | 'f' | string;
     visaOpValidation?: {
         level?: number;
-        fullRigth?: boolean;
+        fullRight?: boolean;
         joinValidation?: boolean;
         enabled?: boolean
     };
     editors?: Editor[];
-    visaOpecategory?: visaOpecategory;
+    connectionHistory?: ConnectionHistory[];
+    visaOpeCategory?: visaOpeCategory;
     created_at?: number;
     updated_at?: number;
     otp2fa?: boolean;
@@ -80,7 +82,7 @@ export class Wallet {
 
 }
 
-export interface Claimuser {
+export interface ClaimUser {
     _id?: string;
     fname: string;
     lname: string;
@@ -110,3 +112,15 @@ export interface Editor {
     fullName?: string;
     steps?: string;
 }
+
+export interface ConnectionHistory {
+    time?: number;
+    language?: string;
+    browser?: string;
+    isMobile?: string;
+    platform?: string;
+    userAgent?: string;
+    host?: string;
+    method?: string;
+    app?: string;
+  }

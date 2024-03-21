@@ -71,7 +71,7 @@ export class Travel {
         rejectReason?: string;
         validators?: Validator[];
         isEdit?: boolean;
-        nbrefOfMonth?: number;
+        nbreOfMonth?: number;
     };
     // expenseDetails!: ExpenseDetail[];
     expenseDetailsStatus!: OpeVisaStatus;

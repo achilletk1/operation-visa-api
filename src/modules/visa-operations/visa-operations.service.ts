@@ -405,7 +405,7 @@ export class VisaOperationsService extends CrudService<any> {
             transactions = markExceedTransaction(transactions, +Number(travel?.ceiling));
             const travelMonth = await getOrCreateTravelMonth(travel, month);
 
-            toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbrefOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
+            toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbreOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
             await updateTravelMonth(travelMonth, transactions, toBeUpdated, travel);
         }
     }

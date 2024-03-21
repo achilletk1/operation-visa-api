@@ -15,27 +15,32 @@ export const helper = {
                 NRC: 'AZERTYUIOPLKJHGF    ',
                 NIDF: '23456789IURTYUHGE   ',
                 AGE: '01100   ',
-                SOLDE: 1000000
+                SOLDE: 1000000,
+                TCLI: '2'
             },
             '70071770': {
                 NOMREST: 'LONDO TECHNOLOGY',
                 NRC: 'AZERTYUIOPLKJHGF    ',
-                NIDF: '234567UHG89IERTYU   '
+                NIDF: '234567UHG89IERTYU   ',
+                TCLI: '2'
             },
             '02478800': {
                 NOMREST: 'MUNYENGUE SARL',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
-                NIDF: 'TGUZF1UGDT9KAQ   '
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                TCLI: '2'
             },
             '70030525': {
                 NOMREST: 'MUNYENGUE SARL',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
-                NIDF: 'TGUZF1UGDT9KAQ   '
+                NIDF: 'TGUZF1UGDT9KAQ   ',
+                TCLI: '2'
             },
             '12598000': {
                 NOMREST: 'MTN CONGO SA',
                 NRC: 'GWB5O3RPI4WWUCJHGFV    ',
-                NIDF: 'TGUZF1UGDT9KLO   '
+                NIDF: 'TGUZF1UGDT9KLO   ',
+                TCLI: '2'
             },
             '70089549': {
                 NOMREST: 'MVOGO Dominique',
@@ -43,7 +48,8 @@ export const helper = {
                 PRE: 'Dominique    ',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
-                AGE: '14456   '
+                AGE: '14456   ',
+                TCLI: '1'
             },
             '70017185': {
                 NOMREST: 'TACHUM Achille    ',
@@ -58,6 +64,7 @@ export const helper = {
                 LIBELLE_AGENCE: 'DIRECTION GENERALE',
                 TEL: '237693405447',
                 EMAIL: 'achille.tachum@londo-tech.com',
+                TCLI: '1'
             },
             '87654321': {
                 NOMREST: 'TACHUM Achille',
@@ -66,7 +73,8 @@ export const helper = {
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '14456   ',
-                SEXT: 'm'
+                SEXT: 'm',
+                TCLI: '1'
             },
             '70052448': {
                 NOMREST: 'ESSIAKOU BALLA Saïd',
@@ -74,7 +82,8 @@ export const helper = {
                 PRE: 'SAID    ',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
-                AGE: '12023   '
+                AGE: '12023   ',
+                TCLI: '1'
             },
             '02478803': {
                 NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
@@ -82,7 +91,8 @@ export const helper = {
                 PRE: 'FRANCK    ',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
-                AGE: '12023   '
+                AGE: '12023   ',
+                TCLI: '2'
             },
             '02478804': {
                 NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
@@ -90,7 +100,8 @@ export const helper = {
                 PRE: 'FRANCK    ',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
-                AGE: '12023   '
+                AGE: '12023   ',
+                TCLI: '2'
             },
             '02478805': {
                 NOMREST: 'PORT AUTONOME DE KRIBI (PAK)',
@@ -98,7 +109,8 @@ export const helper = {
                 PRE: 'FRANCK    ',
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
-                AGE: '12023   '
+                AGE: '12023   ',
+                TCLI: '1'
             },
             '70089548': {
                 NOMREST: 'SIGNE KARL-DIMITRI',
@@ -107,7 +119,7 @@ export const helper = {
                 NRC: 'GWB5O3RPI4WWUCJ/DV    ',
                 NIDF: 'TGUZF1UGDT9KAQ   ',
                 AGE: '12023   ',
-
+                TCLI: '1'
             },
             '70089547': {
                 NOMREST: 'FOMAZOU Idriss Stellor',
@@ -115,7 +127,8 @@ export const helper = {
                 PRE: 'Stellor    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70030524': {
                 NOMREST: 'Henri MAKAKI',
@@ -123,7 +136,8 @@ export const helper = {
                 PRE: 'Henri    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70089523': {
                 NOMREST: 'Henri MAKAKI',
@@ -131,7 +145,8 @@ export const helper = {
                 PRE: 'Henri    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70089528': {
                 NOMREST: 'Kevin MOUTASSI',
@@ -140,7 +155,7 @@ export const helper = {
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
                 AGE: '12000   ',
-
+                TCLI: '1'
             },
             '70089525': {
                 NOMREST: 'Brice LETUTOUR',
@@ -153,6 +168,7 @@ export const helper = {
                 LIBELLE_AGENCE: 'DIRECTION GENERALE',
                 TEL: '237693405447',
                 EMAIL: 'achille.tachum@londo-tech.com',
+                TCLI: '1'
             },
             '70089578': {
                 NOMREST: 'Brice LETUTOUR',
@@ -160,7 +176,8 @@ export const helper = {
                 PRE: 'LETUTOUR    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70089545': {
                 NOMREST: 'Welisane MANGA',
@@ -168,7 +185,8 @@ export const helper = {
                 PRE: 'MANGA    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70089546': {
                 NOMREST: 'Rolain KONO',
@@ -176,7 +194,8 @@ export const helper = {
                 PRE: 'KONO    ',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70089587': {
                 NOMREST: 'MOUTASSI NZOGUE Armel Kevin',
@@ -184,22 +203,26 @@ export const helper = {
                 PRE: 'Armel Kevin',
                 NRC: 'GWB5O3RPI4WWUOJ/DV    ',
                 NIDF: 'TGUZF1UGDTvKAQ   ',
-                AGE: '12000   '
+                AGE: '12000   ',
+                TCLI: '1'
             },
             '70060244': {
                 NOMREST: 'TANTIE FOODS S.A.',
                 NRC: 'GWB5O3RPI4WWUOJ/LT    ',
                 NIDF: 'TGUZF1UGDTvKAJ   ',
+                TCLI: '3'
             },
             '70060149': {
                 NOMREST: 'CHOCOCAM S.A.',
                 NRC: 'GWB5O3RPI4WWUOJ/GR    ',
                 NIDF: 'TGUZF1UGDTvKAK   ',
+                TCLI: '2'
             },
             '70056585': {
                 NOMREST: 'NEWTELNET CONSULTING SARL',
                 NRC: 'B5O3RPI4WWUOJ/AD    ',
                 NIDF: 'TGUZF1UGDTvKAM   ',
+                TCLI: '3'
             }
         }
 
@@ -297,6 +320,7 @@ export const helper = {
                 DATE_VALIDITE_PIECE_IDENTITE: '10/08/2024',
                 LIEU_DELIVRANCE_PIECE_IDENTITE: 'BRAZZAVILLE',
                 ORGANISME_DELIVRANCE_PIECE_IDENTITE: 'DIC',
+                TCLI: '1'
             },
             '37307027068': {
                 NOMREST: 'TACHUM KAMGA Achille',
@@ -321,6 +345,7 @@ export const helper = {
                 LIEU_DELIVRANCE_PIECE_IDENTITE: 'KINSHASA',
                 ORGANISME_DELIVRANCE_PIECE_IDENTITE: 'CONSULAT',
                 CHA: '372100',
+                TCLI: '1'
             },
         }
 
@@ -342,7 +367,8 @@ export const helper = {
                 IDTYPE: 'PASSEPORT',
                 IDNUM: '00258963',
                 CHA: '372100',
-                CLI: '70017185'
+                CLI: '70017185',
+                TCLI: '1'
             },
             {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
@@ -362,6 +388,7 @@ export const helper = {
                 IDNUM: '002589634785',
                 CLI: '37207027067',
                 CHA: '372100',
+                TCLI: '1'
             },
             {
                 NOMREST: 'MOUTASSI NZOGUE Kevin Armel',
@@ -382,6 +409,7 @@ export const helper = {
                 IDNUM: '002589634785',
                 CLI: '00000000',
                 CHA: '372100',
+                TCLI: '1'
             },
             {
                 NOMREST: 'TACHUM KAMGA Achille',
@@ -400,7 +428,8 @@ export const helper = {
                 IDTYPE: 'PASSEPORT',
                 IDNUM: '00258963',
                 CHA: '372100',
-                CLI: '02478805'
+                CLI: '02478805',
+                TCLI: '1'
             },
             {
                 NOMREST: 'TACHUM KAMGA Achille',
@@ -419,7 +448,8 @@ export const helper = {
                 IDTYPE: 'PASSEPORT',
                 IDNUM: '00258963',
                 CHA: '372100',
-                CLI: '02478803'
+                CLI: '02478803',
+                TCLI: '1'
             },
         ]
 

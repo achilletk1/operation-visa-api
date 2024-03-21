@@ -25,11 +25,20 @@ export const inserDefaultBankUsers = async () => {
             password: await bcrypt.hash('123456', config.get('saltRounds')),
             enabled: true,
             pwdReseted: true,
-            gender: "f",
+            gender: "F",
             option: 3,
             dates: {
                 created: new Date().valueOf(),
             },
+            lang: 'fr',
+            visaOpeCategory: 500,
+            otp2fa: true,
+            gesCode: null,
+            age: { label: 'DIRECTION GENERALE', code: '06815' },
+            bankUserCode: '4029',
+            bankProfileCode: 'S130',
+            bankProfileName: 'ORGANISATEUR',
+            cbsCategory: '1',
         },
     ]
 

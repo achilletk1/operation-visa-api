@@ -18,6 +18,9 @@ export interface BaseCbsUser {
     NID: string;
     VID: string;
     SEXT: string;
+    TCLI: '1' | '2' | '3';  // 1 = PARTICULIER; 2 = SOCIETE; 3 = ENTREPRISE INDIVIDUELLE;
+    CODE_PROFIL: string;
+    LIBELLE_PROFIL: string;
 }
 
 export interface CbsClientUser extends BaseCbsUser {
@@ -35,10 +38,8 @@ export interface CbsBankUser extends CbsClientUser {
     GES: string;
     GES_CODE: string;
     CODE_GESTIONNAIRE: string;
-    CODE_PROFIL: string;
     CODE_UTILISATEUR: string;
     NOMS_COMPLET: string;
-    LIBELLE_PROFIL: string;
 }
 
 export interface CbsPhone {

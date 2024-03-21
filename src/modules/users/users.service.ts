@@ -86,19 +86,20 @@ export class UsersService extends CrudService<User>  {
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
                     userCode: userLdap.userCode, email: userLdap.email || userCbs?.EMAIL, tel: userLdap.tel || userCbs?.TEL, category: UserCategory.ADMIN,
                     gender: userCbs ? userCbs?.SEXT : '', lang: userCbs && userCbs?.LANG && userCbs?.LANG !== '001' ? 'en' : 'fr',
-                    visaOpecategory: createData.visaOpecategory, otp2fa: createData.otp2fa, gesCode: userCbs?.CODE_GESTIONNAIRE,
+                    visaOpeCategory: createData.visaOpeCategory, otp2fa: createData.otp2fa, gesCode: userCbs?.CODE_GESTIONNAIRE,
                     age: { label: userCbs?.LIBELLE_AGENCE, code: userCbs?.AGE }, bankUserCode: userCbs?.CODE_UTILISATEUR,
-                    bankProfileCode: userCbs?.CODE_PROFIL, bankProfileName: userCbs?.LIBELLE_PROFIL
+                    bankProfileCode: userCbs?.CODE_PROFIL, bankProfileName: userCbs?.LIBELLE_PROFIL, cbsCategory: userCbs?.TCLI
                 };
             }
 
             if (scope === 'front-office') {
                 const { client, accounts } = await CbsController.cbsService.getUserDataByCode(createData.clientCode, scope);
                 user = {
-                    ...user, userGesCode: client?.GES,
+                    ...user, userGesCode: client?.GES, cbsCategory: client?.TCLI,
                     lname: client?.NOM, fname: client?.PRE, fullName: client?.NOMREST, email: client?.EMAIL,
                     tel: client?.TEL, gender: client?.SEXT, lang: client?.LANG && client?.LANG !== '001' ? 'en' : 'fr',
                     category: createData.category, accounts, age: { label: client?.LIBELLE_AGENCE, code: client?.AGE },
+                    bankProfileCode: client?.CODE_PROFIL, bankProfileName: client?.LIBELLE_PROFIL,
                 };
             }
 
