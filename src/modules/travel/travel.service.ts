@@ -50,7 +50,8 @@ export class TravelService extends CrudService<Travel> {
             query = extractPaginationData(query || {});
             if (query?.filter?.start && query?.filter?.end) {
                 delete query?.filter?.start; delete query?.filter?.end;
-                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                query = {
+                    ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }

@@ -31,13 +31,19 @@ export const getAgenciesQuery = (params: any) => {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            { $set: { 'user.age': '$userInfos.age' } },
+            {
+                $set: {
+                    'user.age': '$userInfos.age',
+                    'user.cbsCategory': '$userInfos.cbsCategory',
+                }
+            },
             { $unset: ['userId', 'userInfos'] },
             { $sort: { _id: -1 } },
         ];
 
     // example of ageLabel = 'BICEC BASSA';
     if (filter['user.age.label']) { match['$match']['user.age.label'] = { $regex: `${filter['user.age.label']}` }; }
+    if (filter['user.cbsCategory']) { match['$match']['user.cbsCategory'] = `${filter['user.cbsCategory']}` }
     if (!isEmpty(match['$match'])) { query.push(match); }
 
     if (offset && limit) {

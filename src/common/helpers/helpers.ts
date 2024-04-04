@@ -171,7 +171,7 @@ export const convertParams = (query: QueryOptions): QueryOptions => {
     if ('excepts' in query.filter && query.filter.excepts.includes(key)) continue;
     (['true'].includes(query.filter[key]))  && (query.filter[key] = true);
     (query.filter[key] === 'false') && (query.filter[key] = false);
-    if (RegExp(/[a-z]/i).test(query.filter[key]) || key === 'user.clientCode') {
+    if (RegExp(/[a-z]/i).test(query.filter[key]) || ['user.clientCode', 'user.cbsCategory'].includes(key) ) {
       continue;
     }
     query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
