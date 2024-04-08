@@ -460,6 +460,11 @@ export class VisaOperationsService extends CrudService<any> {
         }
     }
 
+    // l add this method to getting public access on this methode (getOrCreateUserIfItDoesntExists) 
+    async newGetOrCreateUserIfItDoesntExists(clientCode:string){
+        await this.getOrCreateUserIfItDoesntExists(clientCode);
+    }
+
     private async updateDelayStatusFileOutTime(travelsMonths: TravelMonth[] = [], travels: Travel[] = [], onlinePayments: OnlinePaymentMonth[] = [], importations: Import[] = []): Promise<void> {
         try {
             const {

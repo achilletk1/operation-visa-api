@@ -1,4 +1,5 @@
-import { OperationTypeLabel } from "modules/visa-operations";
+import { UsersController } from "modules/users";
+import { OperationTypeLabel, VisaOperationsController } from "modules/visa-operations";
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaTransactionsController } from "modules/visa-transactions";
 
@@ -46,7 +47,7 @@ export function verifyTransactionFileName(fileName: string) {
 };
 
 export function verifyTransactionFile(dataArray: VisaTransactionsTmp[]) {
-    
+
     const header = Object.keys(dataArray.find(e => Object.keys(e).length === columnTitles.length) || dataArray[0]);
 
     const containsAll = columnTitles.find(element => !header.includes(element));
@@ -55,7 +56,7 @@ export function verifyTransactionFile(dataArray: VisaTransactionsTmp[]) {
 };
 
 export async function verifyTransactionFileDuplicateData(dataArray: VisaTransactionsTmp[]) {
-    
+
     const matchs: string[] = []; const indexes: number[] = [];
     dataArray.forEach(e => matchs.push(''.concat(e.CLIENT, e.MONTANT_XAF, e.DEVISE, e.DATE, e.HEURE, e.TYPE_TRANS, e.CARTE, e.PAYS)));
 
@@ -64,6 +65,31 @@ export async function verifyTransactionFileDuplicateData(dataArray: VisaTransact
 
     return indexes;
 };
+
+export async function addUserDataInVisaTransactionFile(visaTransactionsTmp: VisaTransactionsTmp[]) {
+    // recovery all client code
+    let clientCodes = [...new Set(visaTransactionsTmp.map(e => e.CLIENT))];
+    let users = (await UsersController.usersService.findAll({ filter: { clientCode: { $in: clientCodes } } }))?.data;
+    const existingClientCodeUser = users.map(usr => usr.clientCode);
+    // search client code who don't have user
+    const clientCodeOfNotExistingUser = clientCodes.filter(el => !existingClientCodeUser.includes(el));
+    // create all user who don't exist
+    for (const clientCode of clientCodeOfNotExistingUser) {
+        await VisaOperationsController.visaOperationsService.newGetOrCreateUserIfItDoesntExists(clientCode);
+    }
+    users = (await UsersController.usersService.findAll({ filter: { clientCode: { $in: clientCodes } } }))?.data;
+    visaTransactionsTmp.forEach(e => {
+        const user = users.find(usr => usr.clientCode === e.CLIENT);
+        e['AGENCE'] = user?.age?.code || '';
+        e['CHAPITRE'] = (user?.accounts || [])[0]?.CHA || '';
+        e['NOM_CLIENT'] = user?.fullName || '';
+        e['CODE_GESTIONNAIRE'] = user?.userGesCode || '';
+        e['NOM_GESTIONNAIRE'] = '';
+        e['TELEPHONE_CLIENT'] = user?.tel || '';
+        e['EMAIL_CLIENT'] = user?.email || '';
+        e['TELEPHONE_CLIENT'] = e['TELEPHONE_CLIENT'].replace(/[+]/g, '');
+    });
+}
 
 export const fileCheckSumColumn = [
     'CLIENT',
@@ -77,49 +103,49 @@ export const fileCheckSumColumn = [
 ];
 
 export const columnTitles =
-        [
-            // 'AGENCE',
-            'COMPTE',
-            // 'CHAPITRE',
-            'CLIENT',
-            // 'NOM_CLIENT',
-            // 'CODE_GESTIONNAIRE',
-            // 'NOM_GESTIONNAIRE',
-            // 'CODE_LANGUE_CLIENT',
-            // 'TELEPHONE_CLIENT',
-            // 'EMAIL_CLIENT',
-            'NOM_CARTE',
-            'CARTE',
-            'PRODUIT',
-            'DATE',
-            'HEURE',
-            'MONTANT',
-            'DEVISE',
-            'MONTANT_COMPENS',
-            'DEVISE_COMPENS',
-            'MONTANT_XAF',
-            'TYPE_TRANS',
-            'CATEGORIE',
-            'PAYS',
-            'ACQUEREUR',
-        ];
-        // [
-        //     'DATE',
-        //     'HEURE',
-        //     'CLIENT',
-        //     'COMPTE',
-        //     'NOM DETENTEUR',
-        //     'CARTE',
-        //     'PRODUIT',
-        //     'NATURE',
-        //     'MONTANT_TRANS',
-        //     'DEVISE_TRANS',
-        //     'MONTANT_COMPENS',
-        //     'EUR',
-        //     'MONTANT_XAF',
-        //     'COURS_CHANGE',
-        //     'COMMISSION',
-        //     'BENEFICIAIRE',
-        //     'PAYS',
-        //     'CATEGORIE',
-        // ];
+    [
+        // 'AGENCE',
+        'COMPTE',
+        // 'CHAPITRE',
+        'CLIENT',
+        // 'NOM_CLIENT',
+        // 'CODE_GESTIONNAIRE',
+        // 'NOM_GESTIONNAIRE',
+        // 'CODE_LANGUE_CLIENT',
+        // 'TELEPHONE_CLIENT',
+        // 'EMAIL_CLIENT',
+        'NOM_CARTE',
+        'CARTE',
+        'PRODUIT',
+        'DATE',
+        'HEURE',
+        'MONTANT',
+        'DEVISE',
+        'MONTANT_COMPENS',
+        'DEVISE_COMPENS',
+        'MONTANT_XAF',
+        'TYPE_TRANS',
+        'CATEGORIE',
+        'PAYS',
+        'ACQUEREUR',
+    ];
+// [
+//     'DATE',
+//     'HEURE',
+//     'CLIENT',
+//     'COMPTE',
+//     'NOM DETENTEUR',
+//     'CARTE',
+//     'PRODUIT',
+//     'NATURE',
+//     'MONTANT_TRANS',
+//     'DEVISE_TRANS',
+//     'MONTANT_COMPENS',
+//     'EUR',
+//     'MONTANT_XAF',
+//     'COURS_CHANGE',
+//     'COMMISSION',
+//     'BENEFICIAIRE',
+//     'PAYS',
+//     'CATEGORIE',
+// ];
