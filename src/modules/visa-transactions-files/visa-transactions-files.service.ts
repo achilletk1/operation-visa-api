@@ -1,9 +1,9 @@
-import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn } from "./helper";
+import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn, addUserDataInVisaTransactionFile } from "./helper";
 import { VisaTransactionsFilesRepository } from "./visa-transactions-files.repository";
 import { VisaTransactionsFilesController } from './visa-transactions-files.controller';
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaOperationsController } from 'modules/visa-operations';
-import { UsersController } from 'modules/users';
+import { User, UsersController } from 'modules/users';
 import { VisaTransactionsFile } from "./model";
 import httpContext from 'express-http-context';
 import { excelToJson } from "common/helpers";
@@ -36,7 +36,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             content = Buffer.from(content).toString('base64');
 
             const fileName = label?.replace('.xlsx' || '.xls', '');
-            try { found = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { label } }); } catch(e) {}
+            try { found = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { label } }); } catch (e) { }
             if (found) { throw new Error('FileAlreadyExist'); }
             const isNameCorrect = verifyTransactionFileName(fileName);
             if (!isNameCorrect) { throw new Error('IncorrectFileName'); }
@@ -94,13 +94,13 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const authUser = httpContext.get('user');
             if (!authUser) { throw new Error('Forbbiden'); }
             let transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
-
+            console.log('arrive bien');
             const { user, content, label } = transactionsFile;
             const fileName = label?.replace('.xlsx' || '.xls', '');
             if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
 
             const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
-            visaTransactionsTmp.forEach(e => { e['TELEPHONE_CLIENT'] = e['TELEPHONE_CLIENT'].replace(/[+]/g, ''); });
+            await addUserDataInVisaTransactionFile(visaTransactionsTmp);
             await VisaOperationsController.visaTransactionsTmpService.createMany(visaTransactionsTmp);
 
             const code = `${get(transactionsFile, '_id')?.toString()}-${fileName}`
@@ -142,4 +142,6 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
 
     getVisaTransationsFilesColumnTitles = () => columnTitles;
 
+
 }
+
