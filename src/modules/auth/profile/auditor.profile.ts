@@ -5,7 +5,7 @@ import {
     LongTravelTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsRead, CeilingSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsRead, ShareAuthorizationsRead,
 } from "../enum";
 
-let _auditor: any = {
+let _auditor = {
     ...BackUsersAuthorizationsRead,
     ...TravelsAuthorizationsRead,
     ...ShortTravelAuthorizationsRead,

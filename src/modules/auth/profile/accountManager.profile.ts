@@ -6,7 +6,7 @@ import {
     ImportationsAuthorizationsWrite, ReportingAuthorizationsRead, FormalNoticeAuthorizationsRead, FormalNoticeAuthorizationsWrite, ShareAuthorizationsRead,
 } from "../enum";
 
-let _bankAccountManager: any = {
+let _accountManager = {
     ...FrontUsersAuthorizationsRead,
     ...FrontUsersAuthorizationsWrite,
     ...TravelsAuthorizationsRead,
@@ -31,11 +31,11 @@ let _bankAccountManager: any = {
     ...ShareAuthorizationsRead,
 };
 
-Object.entries(_bankAccountManager).forEach(([k, v]: any) => {
-    (/^[A-Z_-]+$/.test(k)) && (_bankAccountManager[k] = k);
-    (/^[A-Z_-]+$/.test(`${v}`)) && (delete _bankAccountManager[k]);
+Object.entries(_accountManager).forEach(([k, v]: any) => {
+    (/^[A-Z_-]+$/.test(k)) && (_accountManager[k] = k);
+    (/^[A-Z_-]+$/.test(`${v}`)) && (delete _accountManager[k]);
 });
 
-export const bankAccountManager = _bankAccountManager;
+export const accountManager = _accountManager;
 
-export type BankAccountManagerAuth = keyof typeof _bankAccountManager;
+export type AccountManagerAuth = keyof typeof _accountManager;

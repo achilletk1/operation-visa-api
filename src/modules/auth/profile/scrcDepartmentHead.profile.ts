@@ -10,7 +10,7 @@ import {
     LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
 } from "../enum";
 
-let _scrcDepartmentHead: any = {
+let _scrcDepartmentHead = {
     ...FrontUsersAuthorizationsRead,
     ...FrontUsersAuthorizationsWrite,
     ...BackUsersAuthorizationsRead,

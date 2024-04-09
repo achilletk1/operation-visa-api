@@ -1,9 +1,9 @@
 import {
+    ImportationsAuthorizationsRead, ReportingAuthorizationsRead, NotificationListAuthorizationsRead, ShareAuthorizationsRead, FormalNoticeAuthorizationsRead,
     TravelsAuthorizationsRead, ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
-    ImportationsAuthorizationsRead, ReportingAuthorizationsRead, InstantNotificationAuthorizationsRead, NotificationListAuthorizationsRead, ShareAuthorizationsRead, FormalNoticeAuthorizationsRead,
 } from "../enum";
 
-let _controller: any = {
+let _controller = {
     ...TravelsAuthorizationsRead,
     ...ShortTravelAuthorizationsRead,
     ...LongTravelAuthorizationsRead,

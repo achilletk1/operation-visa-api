@@ -66,7 +66,7 @@ export const inserDefaultLetter = async () => {
                 Nous vous remercions de votre compréhension et votre coopération.//////
                 Cordialement`
                 ,
-                obj: "Mise en demeure",
+                obj: "Mise en demeure"
             },
             en: {
                 mail: `
@@ -77,17 +77,17 @@ export const inserDefaultLetter = async () => {
                 You can do it thanks to our application available on https://fly-banking.bicec.com, also by approaching the nearest BICEC branch.////
                 Thank you for your understanding and cooperation.//////
                 Regards`,
-                obj: "Formal notice",
-            },
+                obj: "Formal notice"
+            }
             // "Nous vous envoyons ce mail afin de notifier de la mise en demeure qui par rapport votre voyage qui demeure non justifié à ce jour.// Vous trouverez en annexe une copie de la lettre de mise en demeure."
         },
         smsText: {
             fr: {
-                sms: "Chers Client,// Nous avons constaté la non-production de la preuve de votre voyage à l'étranger, dû à la transaction effectuée le {{DATE}} en {{PAYS}}. //En conséquence, nous sommes dans l'obligation de vous adresser une lettre mise en demeure, que vous recevrez par mail.// Vous pouvez le faire grâce à notre application disponible sur https://fly-banking.bicec.com, également en vous rapprochant de l'agence BICEC la plus proche.",
+                sms: "Chers Client,// Nous avons constaté la non-production de la preuve de votre voyage à l'étranger, dû à la transaction effectuée le {{DATE}} en {{PAYS}}. //En conséquence, nous sommes dans l'obligation de vous adresser une lettre mise en demeure, que vous recevrez par mail.// Vous pouvez le faire grâce à notre application disponible sur https://fly-banking.bicec.com, également en vous rapprochant de l'agence BICEC la plus proche."
             },
             en: {
-                sms: "Dear Customer,// We have noted the non-production of proof of your trip abroad, due to the transaction carried out on {{DATE}} in {{PAYS}}. // As a result, we are obliged to send you a letter of formal notice, which you will receive by e-mail.// You can do this using our application available at https://fly-banking.bicec.com, or by contacting your nearest BICEC branch.",
-            },
+                sms: "Dear Customer,// We have noted the non-production of proof of your trip abroad, due to the transaction carried out on {{DATE}} in {{PAYS}}. // As a result, we are obliged to send you a letter of formal notice, which you will receive by e-mail.// You can do this using our application available at https://fly-banking.bicec.com, or by contacting your nearest BICEC branch."
+            }
         },
         period: 30
     }

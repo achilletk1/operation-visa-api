@@ -6,7 +6,7 @@ import {
     OnlinePaymentsAuthorizationsRead, OnlinePaymentsAuthorizationsWrite, CeilingIncreaseAuthorizationsRead, CeilingIncreaseAuthorizationsWrite, ImportationsAuthorizationsRead,
 } from "../enum";
 
-let _agencyHead: any = {
+let _agencyHead = {
     ...FrontUsersAuthorizationsRead,
     ...FrontUsersAuthorizationsWrite,
     ...BackUsersAuthorizationsRead,

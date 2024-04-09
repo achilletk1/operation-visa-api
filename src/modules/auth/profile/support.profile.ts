@@ -1,6 +1,6 @@
 import {
-    BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, GeneralsSettingAuthorizationsWrite, GeneralsSettingAuthorizationsRead,
     ValidationLevelSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsWrite, ShareAuthorizationsRead,
+    BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, GeneralsSettingAuthorizationsWrite, GeneralsSettingAuthorizationsRead,
 } from "../enum";
 
 const _support = {

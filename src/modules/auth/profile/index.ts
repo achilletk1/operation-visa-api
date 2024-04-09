@@ -12,7 +12,6 @@ export * from './administrator.profile';
 
 export * from './scrcStudyManager.profile';
 
-export * from './bankAccountManager.profile';
+export * from './accountManager.profile';
 
 export * from './scrcDepartmentHead.profile';
-
