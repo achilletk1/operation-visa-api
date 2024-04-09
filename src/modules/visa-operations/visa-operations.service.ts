@@ -450,7 +450,7 @@ export class VisaOperationsService extends CrudService<any> {
     private async getOrCreateUserIfItDoesntExists(clientCode: string) {
         try {
             let user: User | null = null;
-            try { user = await UsersController.usersService.findOne({ filter: { clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } }); } catch (e) { }
+            try { user = await UsersController.usersService.findOne({ filter: { clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } }); } catch (e) { }
             if (user) { return user; }
 
             const createData = { clientCode, enabled: true, category: UserCategory.DEFAULT };

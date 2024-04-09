@@ -1,8 +1,10 @@
+import { getAuthorizationsByProfile, getUserProfile } from 'modules/auth/helper';
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import httpContext from 'express-http-context';
 import { logger } from 'winston-config';
 import { config } from 'convict-config';
+
 
 export const whiteList: { path: string, method?: string }[] = [
     { path: '/auth', method: 'POST' },
@@ -43,7 +45,12 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
         const user = payloadata.payload;
         
         httpContext.set('user', user);
-        
+
+        let profile = getUserProfile(user);
+        if (!profile) { throw new Error('Forbidden') }
+        const authorizations = getAuthorizationsByProfile(profile);
+        httpContext.set('authorizations', authorizations);
+
         next();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

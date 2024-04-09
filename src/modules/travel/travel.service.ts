@@ -141,7 +141,7 @@ export class TravelService extends CrudService<Travel> {
     async insertTravelFromSystem(travel: Travel): Promise<any> {
         try {
 
-            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } });
+            const user = await UsersController.usersService.findOne({ filter: { clientCode: get(travel, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } });
 
             if (user) {
                 travel.user = {

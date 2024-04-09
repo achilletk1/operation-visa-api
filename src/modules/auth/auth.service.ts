@@ -135,7 +135,7 @@ export class AuthService extends BaseService {
             // const client = clientDatas[0];
 
             const { data } = !contactCBS
-                ? await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } })
+                ? await UsersController.usersService.findAll({ filter: { 'accounts.NCP': `${ncp}`, excepts: ['accounts.NCP'], category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } })
                 : { data: [] };
 
             if (!contactCBS && !isEmpty(data) && !data[0]?.enabled) { throw new Error('DisableUser'); }

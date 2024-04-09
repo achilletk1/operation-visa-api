@@ -237,6 +237,33 @@ export enum ManagementCommitteeAuthorizationsWrite {
     MANAGEMENT_COMMITTEE_DATA_WRITE
 }
 
+// READ
+export enum HeadOfRegionRead {
+    HEAD_OF_REGION_DATA_VIEW
+}
+// WRITE
+export enum HeadOfRegionWrite {
+    HEAD_OF_REGION_DATA_WRITE
+}
+
+// READ
+export enum HeadOfPersonnalAgencyRead {
+    HEAD_OF_PERSONNAL_AGENCY_VIEW
+}
+// WRITE
+export enum HeadOfPersonnalAgencyWrite {
+    HEAD_OF_PERSONNAL_AGENCY_WRITE
+}
+
+// READ
+export enum PersonnalManagerRead {
+    PERSONNAL_MANAGER_DATA_VIEW
+}
+// WRITE
+export enum PersonnalManagerWrite {
+    PERSONNAL_MANAGER_DATA_WRITE
+}
+
 
 
 // controller

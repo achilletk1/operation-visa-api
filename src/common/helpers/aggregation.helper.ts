@@ -1,7 +1,13 @@
+import { authorizations } from 'modules/auth/profile';
+import { Agencies } from 'modules/visa-operations/enum';
+import httpContext from 'express-http-context';
 import { isEmpty } from "lodash";
 
 
+
 export const getAgenciesQuery = (params: any) => {
+    const authorizationsUser = httpContext.get('authorizations');
+
     let { offset, limit, filter, start, end } = params;
 
     const match = { $match: filter };
@@ -41,6 +47,13 @@ export const getAgenciesQuery = (params: any) => {
             { $sort: { _id: -1 } },
         ];
 
+    match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+
+    console.log('authorizations.PERSONNAL_MANAGER_DATA_WRITE: ', authorizations.PERSONNAL_MANAGER_DATA_WRITE)
+    if([authorizations.PERSONNAL_MANAGER_DATA_WRITE, authorizations.PERSONNAL_MANAGER_DATA_VIEW].includes(authorizationsUser)){  
+        match['$match']['user.age.code'] = `${Agencies.PERSONNAL}` 
+    }
+    
     // example of ageLabel = 'BICEC BASSA';
     if (filter['user.age.label']) { match['$match']['user.age.label'] = { $regex: `${filter['user.age.label']}` }; }
     if (filter['user.cbsCategory']) { match['$match']['user.cbsCategory'] = `${filter['user.cbsCategory']}` }

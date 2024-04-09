@@ -43,6 +43,6 @@ Object.entries(_authorizations).forEach(([k, v]: any) => {
     (/^[A-Z_-]+$/.test(`${v}`)) && (delete _authorizations[k]);
 });
 
-export const authorizations = _authorizations;
+export const admin = _authorizations;
 
 export type AdminAuth = keyof typeof _authorizations;
