@@ -14,9 +14,9 @@ export function formatUserFilters(fields: any) {
     delete fields.start;
     delete fields.end;
 
-    if (category && +category === 100499) { fields.category = { '$in': [100, 200] }; }
+    if (category && +category === 100499) { fields.category = { '$gte': 100, '$lte': 499 }; }
 
-    if (category && +category === 500699) { fields.category = { '$in': [500, 600, 601, 602, 603, 604, 700, 701] }; }
+    if (category && +category === 500699) { fields.category = { '$gte': 500, '$lte': 699 }; }
 
     const range = (start && end) ? { start: moment(start).startOf('day').valueOf(), end: moment(end).endOf('day').valueOf() } :
         undefined;
