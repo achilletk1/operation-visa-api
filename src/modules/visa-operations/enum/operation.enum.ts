@@ -20,3 +20,9 @@ export enum OperationStatus {
 export enum Agencies{
     PERSONNAL='06802'
 }
+export enum OperationType{
+    WITHDRAWAL = 'RETRAIT',
+    PURCHASE = 'ACHAT',
+    REV_PURCHASE = 'Rev Purchase',
+    REV_WITHDRAWAL = 'Rev Withdrawal',
+}

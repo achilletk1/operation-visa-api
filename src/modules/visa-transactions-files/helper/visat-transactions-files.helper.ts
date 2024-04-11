@@ -1,21 +1,27 @@
 import { UsersController } from "modules/users";
 import { OperationTypeLabel, VisaOperationsController } from "modules/visa-operations";
+import { OperationType } from "modules/visa-operations";
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaTransactionsController } from "modules/visa-transactions";
 
-export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[]) {
+export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[], fileName: string) {
     let arrayIndex;
-    const { ATN_WITHDRAWAL, ELECTRONIC_PAYMENT_TERMINAL, ONLINE_PAYMENT } = OperationTypeLabel;
-    const found = dataArray.find((element, index) => {
+    let found;
+    const dataFileName = fileName?.toLowerCase()?.split('_');
+    const { PURCHASE, WITHDRAWAL, REV_PURCHASE, REV_WITHDRAWAL } = OperationType;
+    const operationType = [PURCHASE, REV_PURCHASE];
+    (dataFileName.includes('terminaux')) && (operationType.push(WITHDRAWAL, REV_WITHDRAWAL));
+    found = dataArray.find((element, index) => {
         arrayIndex = index;
-        return ![ELECTRONIC_PAYMENT_TERMINAL, ATN_WITHDRAWAL, ONLINE_PAYMENT].includes(element['TYPE_TRANS'] as OperationTypeLabel);
+        return !operationType.includes(element['TYPE_TRANS'] as OperationType);
     });
     if (!found) { return null; }
     return { found, arrayIndex };
 };
 
 export function verifyTransactionFileContent(dataArray: VisaTransactionsTmp[], fileName: string) {
-    const month = fileName.split('_')[3].slice(0, 6);
+    const indexOfDate = (fileName?.toLowerCase()?.includes('terminaux')) ? 6 : 4;
+    const month = fileName.split('_')[indexOfDate].slice(0, 6);
     return dataArray.findIndex(element => {
         let currentMonths = `${element['DATE']}`.split('/');
         // currentMonth.shift();
@@ -43,7 +49,7 @@ export function verifyTransactionNotEmptyFile(dataArray: VisaTransactionsTmp[]) 
 export function verifyTransactionFileName(fileName: string) {
     fileName = fileName.toLowerCase();
     const data = fileName.split('_');
-    return data[0] === 'bicec' && data[1] === 'hors' && data[2] === 'cemac' && /20\d{2}(0[ 1-9 ]|1[ 0-2 ])+/.test(data[3]);
+    return data[0] === 'bicec' && data.includes('internet') && data.includes('1m') || data[0] === 'bicec' && data.includes('terminaux') && data.includes('5m');
 };
 
 export function verifyTransactionFile(dataArray: VisaTransactionsTmp[]) {
@@ -88,6 +94,16 @@ export async function addUserDataInVisaTransactionFile(visaTransactionsTmp: Visa
         e['TELEPHONE_CLIENT'] = user?.tel || '';
         e['EMAIL_CLIENT'] = user?.email || '';
         e['TELEPHONE_CLIENT'] = e['TELEPHONE_CLIENT'].replace(/[+]/g, '');
+    });
+}
+
+export async function setLocalMethodPayement(fileName?: string, visaTransactionsTmp?: VisaTransactionsTmp[]) {
+    const { WITHDRAWAL, PURCHASE } = OperationType;
+    const { ATN_WITHDRAWAL, ELECTRONIC_PAYMENT_TERMINAL, ONLINE_PAYMENT } = OperationTypeLabel;
+    const finalType = fileName?.toLowerCase()?.includes('terminaux') ? ELECTRONIC_PAYMENT_TERMINAL : ONLINE_PAYMENT;
+    visaTransactionsTmp?.forEach(e => {
+        (e['TYPE_TRANS'] === WITHDRAWAL) && (e['TYPE_TRANS'] = ATN_WITHDRAWAL);
+        (e['TYPE_TRANS'] === PURCHASE) && (e['TYPE_TRANS'] = finalType);
     });
 }
 

@@ -1,9 +1,7 @@
-import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn, addUserDataInVisaTransactionFile } from "./helper";
+import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn, addUserDataInVisaTransactionFile, setLocalMethodPayement } from "./helper";
 import { VisaTransactionsFilesRepository } from "./visa-transactions-files.repository";
 import { VisaTransactionsFilesController } from './visa-transactions-files.controller';
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
-import { VisaOperationsController } from 'modules/visa-operations';
-import { User, UsersController } from 'modules/users';
 import { VisaTransactionsFile } from "./model";
 import httpContext from 'express-http-context';
 import { excelToJson } from "common/helpers";
@@ -12,6 +10,9 @@ import { FilesController } from "./files";
 import { config } from "convict-config";
 import { get } from "lodash";
 import moment from "moment";
+import { OperationType, OperationTypeLabel } from "modules/visa-operations/enum";
+import { VisaOperationsController } from "modules/visa-operations/visa-operations.controller";
+import { UsersController } from "modules/users/users.controller";
 
 export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFile> {
 
@@ -55,7 +56,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
                 const error: any = new Error('IncorrectFileMonth');
                 error['index'] = monthsMatch + 2; throw error;
             }
-            const typesMatch = verifyTransactionFileTypeContent(dataArray);
+            const typesMatch = verifyTransactionFileTypeContent(dataArray, label);
             if (typesMatch) {
                 const error: any = new Error('IncorrectFileType');
                 [error['index'], error['type']] = [(typesMatch?.arrayIndex || 0) + 2, typesMatch.found.TYPE_TRANS];
@@ -94,13 +95,13 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const authUser = httpContext.get('user');
             if (!authUser) { throw new Error('Forbbiden'); }
             let transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
-            console.log('arrive bien');
             const { user, content, label } = transactionsFile;
             const fileName = label?.replace('.xlsx' || '.xls', '');
             if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
-
             const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
+
             await addUserDataInVisaTransactionFile(visaTransactionsTmp);
+            await setLocalMethodPayement(fileName, visaTransactionsTmp);
             await VisaOperationsController.visaTransactionsTmpService.createMany(visaTransactionsTmp);
 
             const code = `${get(transactionsFile, '_id')?.toString()}-${fileName}`
