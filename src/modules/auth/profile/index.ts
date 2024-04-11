@@ -15,3 +15,11 @@ export * from './scrcStudyManager.profile';
 export * from './accountManager.profile';
 
 export * from './scrcDepartmentHead.profile';
+
+export * from './managementCommittee.profile';
+
+export * from './headOfRegion.profile';
+
+export * from './personnalManager.profile';
+
+export * from './headOfPersonnalAgency.profile'

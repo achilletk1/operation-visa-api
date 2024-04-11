@@ -17,4 +17,6 @@ export enum OperationStatus {
     REJECTED = 202, //  refusé
 }
 
-
+export enum Agencies{
+    PERSONNAL='06802'
+}

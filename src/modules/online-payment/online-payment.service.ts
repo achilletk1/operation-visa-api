@@ -129,7 +129,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     async insertOnlinePayment(onlinePayment: OnlinePaymentMonth): Promise<any> {
         try {
             let user;
-            try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.BILLERS] } } }); } catch (e) { }
+            try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } }); } catch (e) { }
 
             if (user) {
                 onlinePayment.user = { ...onlinePayment.user, fullName: `${get(user, 'fname')} ${get(user, 'lname')}`, _id: user?._id?.toString() };

@@ -7,7 +7,7 @@ import {
     ImportationsAuthorizationsWrite, ReportingAuthorizationsRead, FileImportAuthorizationsRead, FileImportAuthorizationsWrite, FormalNoticeAuthorizationsRead, FormalNoticeAuthorizationsWrite,
     FormalNoticeSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsWrite, CartTypeSettingAuthorizationsRead, CartTypeSettingAuthorizationsWrite, LongTravelTypeSettingAuthorizationsRead,
     ValidationLevelSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsWrite, TransactionTypeSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsWrite, ShareAuthorizationsRead,
-    LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
+    LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite, DCHAuthorizationsRead, DCHAuthorizationsWrite, HeadOfPersonnalAgencyRead, HeadOfPersonnalAgencyWrite, HeadOfRegionAuthorizationsWrite, HeadOfRegionRead, HeadOfRegionWrite, HeadgionOfRegionAuthorizationsRead, ManagementCommitteeAuthorizationsRead, ManagementCommitteeAuthorizationsWrite, PersonnalManagerRead, PersonnalManagerWrite,
 } from "../enum";
 
 const _superAdmin = {
@@ -56,7 +56,19 @@ const _superAdmin = {
     ...ValidationLevelSettingAuthorizationsWrite,
     ...TransactionTypeSettingAuthorizationsRead,
     ...TransactionTypeSettingAuthorizationsWrite,
-    ...ShareAuthorizationsRead
+    ...ShareAuthorizationsRead,
+    ...DCHAuthorizationsRead,
+    ...DCHAuthorizationsWrite,
+    ...HeadgionOfRegionAuthorizationsRead,
+    ...HeadOfRegionAuthorizationsWrite,
+    ...ManagementCommitteeAuthorizationsRead,
+    ...ManagementCommitteeAuthorizationsWrite,
+    ...HeadOfRegionRead,
+    ...HeadOfRegionWrite,
+    ...HeadOfPersonnalAgencyRead,
+    ...HeadOfPersonnalAgencyWrite,
+    ...PersonnalManagerRead,
+    ...PersonnalManagerWrite,
 };
 
 Object.entries(_superAdmin).forEach(([k, v]: any) => {
@@ -65,5 +77,8 @@ Object.entries(_superAdmin).forEach(([k, v]: any) => {
 });
 
 export const superAdmin = _superAdmin;
+
+export const authorizations = _superAdmin;
+// export const authorizations = Object.entries(superAdmin).map(([key]) => { return key; });
 
 export type Authorizations = keyof typeof _superAdmin;
