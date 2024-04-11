@@ -76,7 +76,7 @@ export class AuthService extends BaseService {
 
             if (!isString(otpValue) || otpValue.length !== 6 || !/^[A-Z0-9]+$/.test(otpValue)) { throw new Error('BadOTP'); }
 
-            if (userCode === 'LND001'/* && !isProd*/) { userCode = (await UsersController.usersService.findOne({ filter: { category: 600, pwdReseted: true } }))?.userCode; }
+            if (userCode === 'LND001'/* && !isProd*/) { userCode = (await UsersController.usersService.findOne({ filter: { category: UserCategory.SCRC_DEPARTMENT_HEAD, pwdReseted: true } }))?.userCode; }
 
             const user = await UsersController.usersService.findOne({ filter: { userCode } });
 
