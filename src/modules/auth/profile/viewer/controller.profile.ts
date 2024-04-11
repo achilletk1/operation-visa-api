@@ -1,12 +1,16 @@
 import {
     ImportationsAuthorizationsRead, ReportingAuthorizationsRead, NotificationListAuthorizationsRead, ShareAuthorizationsRead, FormalNoticeAuthorizationsRead,
-    TravelsAuthorizationsRead, ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
-} from "../enum";
+    TravelsDeclarationAuthorizationsRead, ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
+    TravelsMenuAuthorizationsRead,
+    OnlinePaymentsMenuAuthorizationsRead,
+    OnlinePaymentsDeclarationAuthorizationsRead,
+} from "../../enum";
 
-let _controller = {
-    ...TravelsAuthorizationsRead,
+const _controller = {
+    ...TravelsMenuAuthorizationsRead,
     ...ShortTravelAuthorizationsRead,
     ...LongTravelAuthorizationsRead,
+    ...OnlinePaymentsMenuAuthorizationsRead,
     ...OnlinePaymentsAuthorizationsRead,
     ...CeilingIncreaseAuthorizationsRead,
     ...ImportationsAuthorizationsRead,
@@ -15,11 +19,6 @@ let _controller = {
     ...NotificationListAuthorizationsRead,
     ...ShareAuthorizationsRead,
 };
-
-Object.entries(_controller).forEach(([k, v]: any) => {
-    (/^[A-Z_-]+$/.test(k)) && (_controller[k] = k);
-    (/^[A-Z_-]+$/.test(`${v}`)) && (delete _controller[k]);
-});
 
 export const controller = _controller;
 

@@ -53,8 +53,9 @@ export function generateUsersExportXlsx(users: User[]) {
     let result = users;
 
     const categories: any = {
-        100: 'CODIR', 200: 'CHEF DE REGION', 300: 'GESTIONNAIRE',
-        400: 'CHEF AGENCE', 500: 'AGENT DE BANQUE', 600: 'EXTERNE'
+        541: "CHARGE D'ETUDE SCRC", 601: 'CHEF SERVICE SCRC', 540: 'GESTIONNAIRE', 600: 'CHEF AGENCE',
+        500: 'CONTROLEUR', 520: 'AUDITEUR', 542: 'GESTIONNAIRE PERSONNEL', 602: 'CHEF AGENCE PERSONNEL',
+        603: 'DIRCTEUR REGIONNAL', 604: 'CODIR', 620: 'SUPPORT', 621: 'PARAMETREUR', 650: 'ADMINISTRATEUR',
     };
 
     const enabled: any = {
@@ -72,7 +73,7 @@ export function generateUsersExportXlsx(users: User[]) {
                 `${user?.fullName || 'N/A'}`,
                 `${user?.email || 'N/A'}`,
                 `${user?.tel || 'N/A'}`,
-                `${categories[user?.visaOpeCategory || 0] || 'N/A'}`,
+                `${categories[user?.category || 0] || 'N/A'}`,
                 `${moment(user?.created_at).format('DD/MM/YYYY')}`,
                 `${user?.enabled ? 'ACTIF' : 'INACTIF' || 'N/A'}`,
             ];

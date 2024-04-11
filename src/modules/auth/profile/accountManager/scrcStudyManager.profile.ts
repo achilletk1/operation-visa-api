@@ -1,22 +1,18 @@
 import {
-    BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, 
-    GeneralsSettingAuthorizationsWrite, VouchersSettingAuthorizationsRead, VouchersSettingAuthorizationsWrite, TemplateSettingAuthorizationsRead, TemplateSettingAuthorizationsWrite,
-    GeneralsSettingAuthorizationsRead, ReportingAuthorizationsRead, FileImportAuthorizationsRead, FileImportAuthorizationsWrite, FormalNoticeAuthorizationsRead, FormalNoticeAuthorizationsWrite,
+    BackUsersAuthorizationsRead,  VouchersSettingAuthorizationsRead, VouchersSettingAuthorizationsWrite, TemplateSettingAuthorizationsRead, TemplateSettingAuthorizationsWrite,
+    ValidationLevelSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsWrite, FileImportAuthorizationsRead, FileImportAuthorizationsWrite,
     FormalNoticeSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsWrite, CartTypeSettingAuthorizationsRead, CartTypeSettingAuthorizationsWrite, LongTravelTypeSettingAuthorizationsRead,
-    ValidationLevelSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsWrite, TransactionTypeSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsWrite, ShareAuthorizationsRead,
     LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
-} from "../enum";
+    SettingsMenuAuthorizationsRead,
+} from "../../enum";
+import { accountManager } from ".";
 
-const _authorizations = {
+const _scrcStudyManager = {
+    ...accountManager,
     ...BackUsersAuthorizationsRead,
-    ...BackUsersAuthorizationsWrite,
-    ...ReportingAuthorizationsRead,
+    ...SettingsMenuAuthorizationsRead,
     ...FileImportAuthorizationsRead,
     ...FileImportAuthorizationsWrite,
-    ...FormalNoticeAuthorizationsRead,
-    ...FormalNoticeAuthorizationsWrite,
-    ...GeneralsSettingAuthorizationsRead,
-    ...GeneralsSettingAuthorizationsWrite,
     ...VouchersSettingAuthorizationsRead,
     ...VouchersSettingAuthorizationsWrite,
     ...TemplateSettingAuthorizationsRead,
@@ -32,17 +28,10 @@ const _authorizations = {
     ...CeilingSettingAuthorizationsRead,
     ...CeilingSettingAuthorizationsWrite,
     ...ValidationLevelSettingAuthorizationsRead,
-    ...ValidationLevelSettingAuthorizationsWrite,
     ...TransactionTypeSettingAuthorizationsRead,
     ...TransactionTypeSettingAuthorizationsWrite,
-    ...ShareAuthorizationsRead
 };
 
-Object.entries(_authorizations).forEach(([k, v]: any) => {
-    (/^[A-Z_-]+$/.test(k)) && (_authorizations[k] = k);
-    (/^[A-Z_-]+$/.test(`${v}`)) && (delete _authorizations[k]);
-});
+export const scrcStudyManager = _scrcStudyManager;
 
-export const admin = _authorizations;
-
-export type AdminAuth = keyof typeof _authorizations;
+export type ScrcStudyManagerAuth = keyof typeof _scrcStudyManager;

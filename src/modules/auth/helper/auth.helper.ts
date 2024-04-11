@@ -1,66 +1,60 @@
 import {
-    accountManager, agencyHead, auditor, superAdmin, controller, scrcDepartmentHead, hadOfPersonnalAgency,
-    scrcStudyManager, admin, support, managementCommittee, headOfRegion, personnalManager
+    accountManager, agencyHead, auditor, superAdmin, controller, scrcDepartmentHead, hadOfPersonnelAgency,
+    scrcStudyManager, administrator, support, managementCommittee, headOfRegion, personnelManager, parameter,
 } from "../profile";
 import { UserCategory } from "modules/users/enum";
 import { User } from "modules/users";
 import { isEmpty } from "lodash";
 
-type Profile = 'admin' | 'superadmin' | 'support' | 'codir' | 'headOfRegion'
-    | 'agencyHead' | 'headOfPersonnalAgency' | 'srcdepartmentHead' | 'personnalManager'
-    | 'scrcstudymanagment' | 'accountManager' | 'auditor' | 'controller';
+type Profile = 'administrator' | 'superAdmin' | 'support' | 'managementCommittee' | 'headOfRegion'
+    | 'agencyHead' | 'headOfPersonnelAgency' | 'scrcDepartmentHead' | 'personnelManager'
+    | 'scrcStudyManager' | 'accountManager' | 'auditor' | 'controller' | 'parameter';
+
+const {
+    CONTROLLER, AUDITOR, ACCOUNT_MANAGER, PERSONNEL_MANAGER, SCRC_STUDY_MANAGEMENT, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY,
+    SCRC_DEPARTMENT_HEAD, HEAD_OF_REGION, MANAGEMENT_COMMITTEE, SUPPORT, PARAMETER, ADMIN, SUPER_ADMIN
+} = UserCategory;
 
 export const getUserProfile = (user: User): Profile | null => {
     if (isEmpty(user)) return null;    
-    if (user?.category === UserCategory.SUPER_ADMIN) return 'superadmin';
-    if ((user?.category || 0) >= 621 && (user?.category || 0) <= 650) return 'admin';
-    if (user?.category === UserCategory.SUPPORT) return 'support';
-    if (user?.category === UserCategory.MANAGMENT_COMMITEE) return 'codir';
-    if (user?.category === UserCategory.HEAD_OF_REGION) return 'headOfRegion';
-    if (user?.category === UserCategory.HEAD_OF_PERSONNAL_AGENCY) return 'headOfPersonnalAgency';
-    if (user?.category === UserCategory.SRC_DEPARTMENT_HEAD) return 'srcdepartmentHead';
-    if (user?.category === UserCategory.AGENCY_HEAD) return 'agencyHead';
-    if (user?.category === UserCategory.PERSONNAL_MANAGER) return 'personnalManager';
-    if (user?.category === UserCategory.SCRC_STUDY_MANAGMENT) return 'scrcstudymanagment';
-    if (user?.category === UserCategory.ACCOUNT_MANAGER) return 'accountManager';
-    if (user?.category === UserCategory.AUDITOR) return 'auditor';
-    if (user?.category === UserCategory.CONTROLLER) return 'controller';
+    user.category = user?.category ?? CONTROLLER;
+    if (user?.category === SUPER_ADMIN) return 'superAdmin';
+    if (user?.category >= ADMIN && user?.category < SUPER_ADMIN) return 'administrator';
+    if (user?.category === PARAMETER) return 'parameter';
+    if (user?.category === SUPPORT) return 'support';
+    if (user?.category === MANAGEMENT_COMMITTEE) return 'managementCommittee';
+    if (user?.category === HEAD_OF_REGION) return 'headOfRegion';
+    if (user?.category === SCRC_DEPARTMENT_HEAD) return 'scrcDepartmentHead';
+    if (user?.category === HEAD_OF_PERSONNEL_AGENCY) return 'headOfPersonnelAgency';
+    if (user?.category === AGENCY_HEAD) return 'agencyHead';
+    if (user?.category === SCRC_STUDY_MANAGEMENT) return 'scrcStudyManager';
+    if (user?.category === PERSONNEL_MANAGER) return 'personnelManager';
+    if (user?.category === ACCOUNT_MANAGER) return 'accountManager';
+    if (user?.category === AUDITOR) return 'auditor';
+    if (user?.category === CONTROLLER) return 'controller';
 
-    return null
-
+    return null;
 }
 
 export const getAuthorizationsByProfile = (profile: Profile): any => {
     const _authorizations = {
-        admin: Object.entries(admin).map(([key]) => { return key; }),
-        superadmin: Object.entries(superAdmin).map(([key]) => { return key; }),
-        support: Object.entries(support).map(([key]) => { return key; }),
-        codir: Object.entries(managementCommittee).map(([key]) => { return key; }),
-        headOfRegion: Object.entries(headOfRegion).map(([key]) => { return key; }),
-        agencyHead: Object.entries(agencyHead).map(([key]) => { return key; }),
-        headOfPersonnalAgency: Object.entries(hadOfPersonnalAgency).map(([key]) => { return key; }),
-        srcdepartmentHead: Object.entries(scrcDepartmentHead).map(([key]) => { return key; }),
-        personnalManager: Object.entries(personnalManager).map(([key]) => { return key; }),
-        scrcstudymanagment: Object.entries(scrcStudyManager).map(([key]) => { return key; }),
-        accountManager: Object.entries(accountManager).map(([key]) => { return key; }),
-        auditor: Object.entries(auditor).map(([key]) => { return key; }),
-        controller: Object.entries(controller).map(([key]) => { return key; }),
+        superAdmin: getArrayKey(superAdmin),
+        administrator: getArrayKey(administrator),
+        parameter: getArrayKey(parameter),
+        support: getArrayKey(support),
+        managementCommittee: getArrayKey(managementCommittee),
+        headOfRegion: getArrayKey(headOfRegion),
+        scrcDepartmentHead: getArrayKey(scrcDepartmentHead),
+        headOfPersonnelAgency: getArrayKey(hadOfPersonnelAgency),
+        agencyHead: getArrayKey(agencyHead),
+        scrcStudyManager: getArrayKey(scrcStudyManager),
+        personnelManager: getArrayKey(personnelManager),
+        accountManager: getArrayKey(accountManager),
+        auditor: getArrayKey(auditor),
+        controller: getArrayKey(controller),
     };
 
     return _authorizations[profile]
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const getArrayKey = (dataArray: any) => Object.entries(dataArray).map(([key]) => { return key; });

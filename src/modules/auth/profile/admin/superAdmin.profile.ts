@@ -1,5 +1,5 @@
 import {
-    FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, TravelsAuthorizationsRead,
+    FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, TravelsDeclarationAuthorizationsRead,
     TravelsAuthorizationsWrite, ShortTravelAuthorizationsRead, ShortTravelAuthorizationsWrite, LongTravelAuthorizationsRead, LongTravelAuthorizationsWrite,
     OnlinePaymentsAuthorizationsRead, OnlinePaymentsAuthorizationsWrite, CeilingIncreaseAuthorizationsRead, CeilingIncreaseAuthorizationsWrite, ImportationsAuthorizationsRead,
     GeneralsSettingAuthorizationsWrite, VouchersSettingAuthorizationsRead, VouchersSettingAuthorizationsWrite, TemplateSettingAuthorizationsRead, TemplateSettingAuthorizationsWrite,
@@ -7,20 +7,27 @@ import {
     ImportationsAuthorizationsWrite, ReportingAuthorizationsRead, FileImportAuthorizationsRead, FileImportAuthorizationsWrite, FormalNoticeAuthorizationsRead, FormalNoticeAuthorizationsWrite,
     FormalNoticeSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsWrite, CartTypeSettingAuthorizationsRead, CartTypeSettingAuthorizationsWrite, LongTravelTypeSettingAuthorizationsRead,
     ValidationLevelSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsWrite, TransactionTypeSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsWrite, ShareAuthorizationsRead,
-    LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite, DCHAuthorizationsRead, DCHAuthorizationsWrite, HeadOfPersonnalAgencyRead, HeadOfPersonnalAgencyWrite, HeadOfRegionAuthorizationsWrite, HeadOfRegionRead, HeadOfRegionWrite, HeadgionOfRegionAuthorizationsRead, ManagementCommitteeAuthorizationsRead, ManagementCommitteeAuthorizationsWrite, PersonnalManagerRead, PersonnalManagerWrite,
-} from "../enum";
+    LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
+    DCHAuthorizationsRead, DCHAuthorizationsWrite, HeadOfPersonnelAgencyPermissionRead, HeadOfPersonnelAgencyPermissionWrite, HeadOfRegionPermissionRead, HeadOfRegionPermissionWrite, ManagementCommitteeAuthorizationsRead,
+    ManagementCommitteeAuthorizationsWrite, PersonnelManagerPermissionRead, PersonnelManagerPermissionWrite, TravelsMenuAuthorizationsRead, OnlinePaymentsMenuAuthorizationsRead, OnlinePaymentsDeclarationAuthorizationsRead,
+    SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead,
+} from "../../enum";
 
 const _superAdmin = {
+    ...UsersMenuAuthorizationsRead,
     ...FrontUsersAuthorizationsRead,
     ...FrontUsersAuthorizationsWrite,
     ...BackUsersAuthorizationsRead,
     ...BackUsersAuthorizationsWrite,
-    ...TravelsAuthorizationsRead,
+    ...TravelsMenuAuthorizationsRead,
+    ...TravelsDeclarationAuthorizationsRead,
     ...TravelsAuthorizationsWrite,
     ...ShortTravelAuthorizationsRead,
     ...ShortTravelAuthorizationsWrite,
     ...LongTravelAuthorizationsRead,
     ...LongTravelAuthorizationsWrite,
+    ...OnlinePaymentsMenuAuthorizationsRead,
+    ...OnlinePaymentsDeclarationAuthorizationsRead,
     ...OnlinePaymentsAuthorizationsRead,
     ...OnlinePaymentsAuthorizationsWrite,
     ...CeilingIncreaseAuthorizationsRead,
@@ -34,6 +41,7 @@ const _superAdmin = {
     ...NotificationListAuthorizationsWrite,
     ...FormalNoticeAuthorizationsRead,
     ...FormalNoticeAuthorizationsWrite,
+    ...SettingsMenuAuthorizationsRead,
     ...GeneralsSettingAuthorizationsRead,
     ...GeneralsSettingAuthorizationsWrite,
     ...FileImportAuthorizationsRead,
@@ -59,26 +67,24 @@ const _superAdmin = {
     ...ShareAuthorizationsRead,
     ...DCHAuthorizationsRead,
     ...DCHAuthorizationsWrite,
-    ...HeadgionOfRegionAuthorizationsRead,
-    ...HeadOfRegionAuthorizationsWrite,
     ...ManagementCommitteeAuthorizationsRead,
     ...ManagementCommitteeAuthorizationsWrite,
-    ...HeadOfRegionRead,
-    ...HeadOfRegionWrite,
-    ...HeadOfPersonnalAgencyRead,
-    ...HeadOfPersonnalAgencyWrite,
-    ...PersonnalManagerRead,
-    ...PersonnalManagerWrite,
+    ...HeadOfRegionPermissionRead,
+    ...HeadOfRegionPermissionWrite,
+    ...HeadOfPersonnelAgencyPermissionRead,
+    ...HeadOfPersonnelAgencyPermissionWrite,
+    ...PersonnelManagerPermissionRead,
+    ...PersonnelManagerPermissionWrite,
 };
 
-Object.entries(_superAdmin).forEach(([k, v]: any) => {
-    (/^[A-Z_-]+$/.test(k)) && (_superAdmin[k] = k);
-    (/^[A-Z_-]+$/.test(`${v}`)) && (delete _superAdmin[k]);
-});
+// Object.entries(_superAdmin).forEach(([k, v]: any) => {
+//     (/^[A-Z_-]+$/.test(k)) && (_superAdmin[k] = k);
+//     (/^[A-Z_-]+$/.test(`${v}`)) && (delete _superAdmin[k]);
+// });
 
 export const superAdmin = _superAdmin;
 
-export const authorizations = _superAdmin;
+export const authorizations = superAdmin;
 // export const authorizations = Object.entries(superAdmin).map(([key]) => { return key; });
 
 export type Authorizations = keyof typeof _superAdmin;

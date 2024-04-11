@@ -31,7 +31,7 @@ export const inserDefaultBankUsers = async () => {
                 created: new Date().valueOf(),
             },
             lang: 'fr',
-            visaOpeCategory: 500,
+            visaOpeCategory: 541,
             otp2fa: true,
             gesCode: null,
             age: { label: 'DIRECTION GENERALE', code: '06815' },

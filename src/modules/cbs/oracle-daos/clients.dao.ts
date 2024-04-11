@@ -209,8 +209,10 @@ export const clientsDAO = {
             if (isDevOrStag) { return await helper.getMockBankAccountManagerData(); }
 
             const query = `
-                select ges code_ges, nom fullname, age_uti, email, ntel tel, age
-                from infoc.bkgestionnaire`;
+                select a.ges code_ges, a.nom fullname, a.age_uti age_uti, a.email email, a.ntel tel, a.age age,
+                (select puti b from evuti b.sus='N' and b.cge IS NOT NULL and b.cge = a.ges) code_profile
+                from infoc.bkgestionnaire a`;
+            // , (select lib1 b from bknom b.ctab=994 and profile_uti=b.cacc) code_profile
             // select a.puti profil_uti, b.lib1 lib_profil_puti, a.cuti code_uti, a.lib as fullname, a.cge code_ges, a.age, a.cli
             // from evuti a , bknom b
             // wherea.sus='N' and b.ctab=994 and a.puti=b.cacc and a.cge IS NOT NULL

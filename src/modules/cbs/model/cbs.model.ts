@@ -89,4 +89,5 @@ export interface CbsBankAccountManager {
     AGE: string;
     EMAIL: string;
     TEL: string;
+    CODE_PROFILE: string;
 }

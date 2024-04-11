@@ -6,7 +6,7 @@ import { isEmpty } from "lodash";
 
 
 export const getAgenciesQuery = (params: any) => {
-    const authorizationsUser = httpContext.get('authorizations');
+    const authorizationsUser: string[] = httpContext.get('authorizations');
 
     let { offset, limit, filter, start, end } = params;
 
@@ -49,8 +49,12 @@ export const getAgenciesQuery = (params: any) => {
 
     match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
 
-    console.log('authorizations.PERSONNAL_MANAGER_DATA_WRITE: ', authorizations.PERSONNAL_MANAGER_DATA_WRITE)
-    if([authorizations.PERSONNAL_MANAGER_DATA_WRITE, authorizations.PERSONNAL_MANAGER_DATA_VIEW].includes(authorizationsUser)){  
+    if(authorizationsUser.includes(
+        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
+        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
+    )){  
         match['$match']['user.age.code'] = `${Agencies.PERSONNAL}` 
     }
     
