@@ -36,6 +36,8 @@ export * from './visa-operations';
 
 export * from './temporary-files';
 
+export * from './supplier-vouchers'
+
 export * from './long-travel-types';
 
 export * from './visa-transactions';
