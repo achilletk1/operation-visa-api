@@ -1,3 +1,4 @@
+import { inserDefaultBankAccountManager } from './helpers/insert-default-bank-acount-manager';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
 import { inserDefaultUsersValidations } from './helpers/insert-default-user-validation';
 import { inserDefaultUsersCardsTypes } from './helpers/insert-default-cards-types';
@@ -13,7 +14,7 @@ import readline from 'readline';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    // await dropTestCollections();
+    await dropTestCollections();
     await inserDefaultVisaCeilings();
     await inserDefaultLongTravelsTypes();
     await inserDefaultLetter();
@@ -24,6 +25,7 @@ const runScripts = async () => {
     await inserDefaultUsersValidations();
     await inserDefaultBankUsers();
     await inserDefaultUsersCardsTypes();
+    await inserDefaultBankAccountManager();
 }
 
 (async () => {
