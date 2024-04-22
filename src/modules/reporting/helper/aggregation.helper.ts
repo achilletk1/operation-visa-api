@@ -1,10 +1,11 @@
+import { matchUserAuthorizationsDatas } from 'common/helpers';
 import { Agencies } from 'modules/visa-operations/enum';
 import { authorizations } from 'modules/auth/profile';
 import httpContext from 'express-http-context';
-import { logger } from "winston-config";
-import { get, isArray } from "lodash";
-import moment from "moment";
 import { UserCategory } from 'modules/users';
+import { logger } from "winston-config";
+import { get } from "lodash";
+import moment from "moment";
 
 const defaultQuery: any =
     [
@@ -53,8 +54,8 @@ export const generateConsolidateData = (param: { status: any, start: number, end
         match['$match']['travelType'] = travelType;
     }
 
-    // match authorizations datas
-    matchUserDatas(match);
+    // match user authorizations datas
+    matchUserAuthorizationsDatas(match);
 
     const query = [
         ...defaultQuery,
@@ -130,7 +131,7 @@ export const statusOperation = (params: { filterStatus: any, start: number, end:
     // }
 
     // match authorizations datas
-    matchUserDatas(match);
+    matchUserAuthorizationsDatas(match);
     let query: any[] = [
         ...defaultQuery,
         { ...match },
@@ -185,7 +186,7 @@ export const averageTimeJustifyTravelData = (params: { status: any, start: numbe
     }
 
     // match authorizations datas
-    matchUserDatas(match);
+    matchUserAuthorizationsDatas(match);
 
     let query = [
         ...defaultQuery,
@@ -251,7 +252,7 @@ export const chartDataTravel = (params: { start: number, end: number, travelType
     }
 
     // match authorizations datas
-    matchUserDatas(match);
+    matchUserAuthorizationsDatas(match);
 
     const query = [
         ...defaultQuery,
@@ -279,7 +280,7 @@ export const reportingFilterQuery = (range: any, type: number): any => {
 
     let match: any = { '$match': {} }
     // match authorizations datas
-    matchUserDatas(match);
+    matchUserAuthorizationsDatas(match);
 
     const query = [...defaultQuery, { ...match }];
     const start = get(range, 'start');
@@ -324,16 +325,20 @@ export const reportingFilterQuery = (range: any, type: number): any => {
 export function matchUserDatas(match: any): any {
     const user = httpContext.get('user');
     const authorizationsUser: string[] = httpContext.get('authorizations');
+    const { SUPER_ADMIN, ADMIN, SUPPORT, PERSONNEL_MANAGER, ACCOUNT_MANAGER, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY } = UserCategory;
 
-    match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+    if ([SUPER_ADMIN, ADMIN, SUPPORT].includes(user?.category)) { return; }
 
-    if (authorizationsUser.includes(
+    match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] };
+
+    (authorizationsUser.includes(
         authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
         authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
         authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
         authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
-    )) {
-        match['$match']['user.age.code'] = `${Agencies.PERSONNAL}`
-    }
-    if (user.category === UserCategory.SUPER_ADMIN) { match['$match']['user.age.code'] = null }
+    )) && (match['$match']['user.age.code'] = `${Agencies.PERSONNAL}`);
+
+    ([PERSONNEL_MANAGER, ACCOUNT_MANAGER].includes(user?.category)) && (match['$match']['user.userGesCode'] === `${user?.gesCode}`);
+    ([HEAD_OF_PERSONNEL_AGENCY, AGENCY_HEAD].includes(user?.category)) && (match['$match']['user.age.code'] = `${user?.age?.code}`);
+
 }

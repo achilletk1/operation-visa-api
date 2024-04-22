@@ -9,8 +9,6 @@ import XLSX from 'xlsx';
 
 
 export function formatUserFilters(fields: any) {
-    const user = httpContext.get('user');
-    const authorizationsUser: string[] = httpContext.get('authorizations');
 
     const { SUPER_ADMIN, ADMIN, SUPPORT } = UserCategory;
 
@@ -33,18 +31,8 @@ export function formatUserFilters(fields: any) {
 
     if (fields?.nameFilter) { } // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
 
-
-    //match authorizations datas
-    fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] };
-
-    (authorizationsUser.includes(
-        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
-        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
-        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
-        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
-    )) && (fields['age.code'] = `${Agencies.PERSONNAL}`);
-
-    ([SUPER_ADMIN, ADMIN, SUPPORT].includes(user.category)) && (fields['age.code'] = null);
+    // match user authorizations datas
+    matchUserAuthorizationsDatas(fields);
 
     (isEmpty(fields)) && (fields = { enabled: true });
 
@@ -96,6 +84,26 @@ export function generateUsersExportXlsx(users: User[]) {
 
     }
 
+}
+
+function matchUserAuthorizationsDatas(fields: any): any {
+    const authUser = httpContext.get('user');
+    const authorizationsUser: string[] = httpContext.get('authorizations');
+    const { SUPER_ADMIN, ADMIN, SUPPORT, PERSONNEL_MANAGER, ACCOUNT_MANAGER, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY } = UserCategory;
+
+    if ([SUPER_ADMIN, ADMIN, SUPPORT].includes(authUser?.category)) { return; }
+
+    fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] };
+
+    (authorizationsUser.includes(
+        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
+        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
+    )) && (fields['age.code'] = `${Agencies.PERSONNAL}`);
+
+    ([PERSONNEL_MANAGER, ACCOUNT_MANAGER].includes(authUser?.category)) && (fields['userGesCode'] === `${authUser?.gesCode}`);
+    ([HEAD_OF_PERSONNEL_AGENCY, AGENCY_HEAD].includes(authUser?.category)) && (fields['age.code'] = `${authUser?.age?.code}`);
 }
 
 interface cardType {
