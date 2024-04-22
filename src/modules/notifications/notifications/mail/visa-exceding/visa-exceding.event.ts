@@ -1,5 +1,5 @@
 
-export class VisaExcedingEvent implements VisaExcedingMailData {
+export class VisaExceedingEvent implements VisaExceedingMailData {
     lang!: 'fr' | 'en';
     amount!: number;
     ceiling!: string;
@@ -20,7 +20,7 @@ export class VisaExcedingEvent implements VisaExcedingMailData {
     }
 }
 
-export interface VisaExcedingMailData {
+export interface VisaExceedingMailData {
     cc: string;
     lang: 'fr' | 'en';
     amount: number;

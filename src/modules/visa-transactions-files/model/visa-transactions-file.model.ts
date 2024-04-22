@@ -5,6 +5,7 @@ export interface VisaTransactionsFile {
     label?: string;
     code?: string; // clé d'enregistrement dans redis
     month?: string; // Année et mois des operations du fichier exple: 202202
+    length?: number; // Nombre de ligne du fichier importer
     date?: { created: number, updated: number };
     pending?: number;
     content?: any;

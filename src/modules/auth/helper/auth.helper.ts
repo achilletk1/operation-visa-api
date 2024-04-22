@@ -8,11 +8,11 @@ import { isEmpty } from "lodash";
 
 type Profile = 'administrator' | 'superAdmin' | 'support' | 'managementCommittee' | 'headOfRegion'
     | 'agencyHead' | 'headOfPersonnelAgency' | 'scrcDepartmentHead' | 'personnelManager'
-    | 'scrcStudyManager' | 'accountManager' | 'auditor' | 'controller' | 'parameter';
+    | 'scrcStudyManager' | 'accountManager' | 'auditor' | 'controller' | 'parameter' | 'default' | 'enterprise';
 
 const {
     CONTROLLER, AUDITOR, ACCOUNT_MANAGER, PERSONNEL_MANAGER, SCRC_STUDY_MANAGEMENT, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY,
-    SCRC_DEPARTMENT_HEAD, HEAD_OF_REGION, MANAGEMENT_COMMITTEE, SUPPORT, PARAMETER, ADMIN, SUPER_ADMIN
+    SCRC_DEPARTMENT_HEAD, HEAD_OF_REGION, MANAGEMENT_COMMITTEE, SUPPORT, PARAMETER, ADMIN, SUPER_ADMIN, DEFAULT, ENTERPRISE
 } = UserCategory;
 
 export const getUserProfile = (user: User): Profile | null => {
@@ -32,6 +32,8 @@ export const getUserProfile = (user: User): Profile | null => {
     if (user?.category === ACCOUNT_MANAGER) return 'accountManager';
     if (user?.category === AUDITOR) return 'auditor';
     if (user?.category === CONTROLLER) return 'controller';
+    if (user?.category === ENTERPRISE) return 'enterprise';
+    if (user?.category === DEFAULT) return 'default';
 
     return null;
 }
@@ -52,6 +54,8 @@ export const getAuthorizationsByProfile = (profile: Profile): any => {
         accountManager: getArrayKey(accountManager),
         auditor: getArrayKey(auditor),
         controller: getArrayKey(controller),
+        default: [],
+        enterprise: [],
     };
 
     return _authorizations[profile]

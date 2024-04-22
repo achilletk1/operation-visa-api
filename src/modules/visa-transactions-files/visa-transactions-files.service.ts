@@ -1,7 +1,9 @@
-import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn, addUserDataInVisaTransactionFile, setLocalMethodPayement } from "./helper";
+import { columnTitles, verifyTransactionFile, verifyTransactionFileContent, verifyTransactionFileDataContent, verifyTransactionFileName, verifyTransactionFileTypeContent, verifyTransactionNotEmptyFile, verifyTransactionFileDuplicateData, fileCheckSumColumn, addUserDataInVisaTransactionFile, setLocalMethodPayment } from "./helper";
+import { VisaOperationsController } from "modules/visa-operations/visa-operations.controller";
 import { VisaTransactionsFilesRepository } from "./visa-transactions-files.repository";
 import { VisaTransactionsFilesController } from './visa-transactions-files.controller';
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
+import { UsersController } from "modules/users/users.controller";
 import { VisaTransactionsFile } from "./model";
 import httpContext from 'express-http-context';
 import { excelToJson } from "common/helpers";
@@ -10,9 +12,6 @@ import { FilesController } from "./files";
 import { config } from "convict-config";
 import { get } from "lodash";
 import moment from "moment";
-import { OperationType, OperationTypeLabel } from "modules/visa-operations/enum";
-import { VisaOperationsController } from "modules/visa-operations/visa-operations.controller";
-import { UsersController } from "modules/users/users.controller";
 
 export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFile> {
 
@@ -76,9 +75,11 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             }
 
             if (!email) { email = get(user, 'email') };
+            const indexOfDate = fileName?.toLowerCase()?.includes('terminaux') ? 6 : 4;
             const transactionsFile = {
                 label, content, email, status: 100,
-                month: +fileName.split('_')[3].slice(0, 6),
+                month: +fileName.split('_')[indexOfDate]?.slice(0, 6),
+                length: dataArray.length,
                 date: { created: new Date().valueOf(), },
                 user: { _id: authUser?._id?.toString(), fullName: authUser?.fullName, },
                 pending: moment().add(config.get('visaTransactionFilePendingValue'), 'minutes').valueOf(),
@@ -101,7 +102,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
             const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
 
             await addUserDataInVisaTransactionFile(visaTransactionsTmp);
-            await setLocalMethodPayement(fileName, visaTransactionsTmp);
+            await setLocalMethodPayment(fileName, visaTransactionsTmp);
             await VisaOperationsController.visaTransactionsTmpService.createMany(visaTransactionsTmp);
 
             const code = `${get(transactionsFile, '_id')?.toString()}-${fileName}`
@@ -141,7 +142,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
         } catch (error) { throw error; }
     }
 
-    getVisaTransationsFilesColumnTitles = () => columnTitles;
+    getVisaTransactionsFilesColumnTitles = () => columnTitles;
 
 
 }

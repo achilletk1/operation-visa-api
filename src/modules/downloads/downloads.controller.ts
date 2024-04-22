@@ -4,9 +4,16 @@ export class DownloadsController {
 
     constructor() {}
 
-    async downloadFile(req: Request, res: Response, next: NextFunction) {
+    async downloadFileTerminals(req: Request, res: Response, next: NextFunction) {
         try {
-            const file = `${__dirname}/files/BICEC_hors_Cemac_202203.xlsx`;
+            const file = `${__dirname}/files/BICEC_HORS_CEMAC_TERMINAUX_SEUIL_5M_202203.xlsx`;
+            res.download(file);
+        } catch (error) { next(error); }
+    }
+
+    async downloadFileInternet(req: Request, res: Response, next: NextFunction) {
+        try {
+            const file = `${__dirname}/files/BICEC_INTERNET_SEUIL_1M_202203.xlsx`;
             res.download(file);
         } catch (error) { next(error); }
     }

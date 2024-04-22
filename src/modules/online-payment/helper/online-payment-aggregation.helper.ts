@@ -1,4 +1,4 @@
-export const getNotficationsQuery = [
+export const getNotificationsQuery = [
     {
         $match:
         {

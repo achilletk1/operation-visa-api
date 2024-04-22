@@ -22,7 +22,7 @@ export class VisaTransactionsFilesController {
         catch (error) { next(error); }
     }
 
-    async getVisaTransationsFilesLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getVisaTransactionsFilesLabels(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send((await VisaTransactionsFilesController.visaTransactionsFilesService.findAll({ projection: { label: 1, _id: 0 } }))?.data); }
         catch (error) { next(error); }
     }
@@ -47,8 +47,8 @@ export class VisaTransactionsFilesController {
         catch (error) { next(error); }
     }
 
-    async getVisaTransationsFilesColumnTitles(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(VisaTransactionsFilesController.visaTransactionsFilesService.getVisaTransationsFilesColumnTitles()); }
+    async getVisaTransactionsFilesColumnTitles(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(VisaTransactionsFilesController.visaTransactionsFilesService.getVisaTransactionsFilesColumnTitles()); }
         catch (error) { next(error); }
     }
 

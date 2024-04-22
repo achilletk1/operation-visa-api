@@ -6,7 +6,7 @@ import { isEmpty } from "lodash";
 
 
 export const getAgenciesQuery = (params: any) => {
-    const authorizationsUser: string[] = httpContext.get('authorizations');
+    const authorizationsUser: string[] = httpContext.get('authorizations') ?? [];
 
     let { offset, limit, filter, start, end } = params;
 

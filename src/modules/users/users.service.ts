@@ -1,12 +1,12 @@
 import { UsersEvent, notificationEmmiter } from "modules/notifications";
 import { formatUserFilters, generateUsersExportXlsx } from "./helper";
 import { getLdapUser } from "common/helpers/ldap.helpers";
+import { CrudService, QueryOptions, QueryProjection } from "common/base";
 import { UsersRepository } from "./users.repository";
 import { UsersController } from './users.controller';
 import { CbsController, CbsBankUser } from "modules";
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
-import { CrudService } from "common/base";
 import { config } from "convict-config";
 import { UserCategory } from "./enum";
 import { isEmpty } from "lodash";
@@ -23,14 +23,14 @@ export class UsersService extends CrudService<User>  {
         super(UsersService.userRepository);
     }
 
-    async getUsers(filters: any, projection?: any) {
+    async getUsers(filters: any, projection?: QueryProjection) {
         try {
             const authUser = httpContext.get('user');
-            if (authUser?.category < 500) { return new Error('Forbidden'); }
+            if (authUser?.category < 500) { throw new Error('Forbidden'); }
 
             const filter = formatUserFilters(filters);
-            const opts: any = { filter };
-            if (projection) { opts.projection = projection; }
+            const opts: QueryOptions = { filter };
+            (projection) && (opts.projection = projection);
             return await UsersController.usersService.findAll(opts);
         } catch (error) { throw error; }
     }

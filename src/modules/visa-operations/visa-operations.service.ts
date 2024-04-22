@@ -1,13 +1,13 @@
-import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExcedingOnTravel as verifyExceedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance } from "./helper";
+import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExceedingOnTravel as verifyExceedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance, getLastDateOfTravel, sortTransactionsByDateInAscendingOrder, getOnlinePaymentTransactionForTravel } from "./helper";
 import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { BankAccountManager, BankAccountManagerController } from "modules/bank-account-manager";
+import { Travel, TravelController, TravelType, TravelsForProcessing } from 'modules/travel';
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
 import { OnlinePaymentController, OnlinePaymentMonth } from 'modules/online-payment';
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { VisaOperationsRepository } from "./visa-operations.repository";
 import { VisaOperationsController } from "./visa-operations.controller";
 import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
-import { Travel, TravelController, TravelType } from 'modules/travel';
 import { TemplateForm, TemplatesController } from "modules/templates";
 import { User, UserCategory, UsersController } from 'modules/users';
 import { ExpenseCategory, OpeVisaStatus as OVS } from "./enum";
@@ -32,10 +32,10 @@ interface OnlinePaymentGrouped {
     onlinePaymentId?: string;
 }
 
-interface ToBeUpdated {
+export interface ToBeUpdated {
     notifications: any;
     transactions?: any[];
-    'proofTravel.nbrefOfMonth'?: number;
+    'proofTravel.nbreOfMonth'?: number;
 }
 
 export class VisaOperationsService extends CrudService<any> {
@@ -55,29 +55,29 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueState === QueueState.PENDING) {
                 VisaOperationsService.queueState = QueueState.PROCESSING;
 
-                const aggregatedTransactions: VisaTransactionsTmpAggregate[] = await VisaOperationsController.visaTransactionsTmpService.getFormatedVisaTransactionsTmps();
+                const aggregatedTransactions: VisaTransactionsTmpAggregate[] = await VisaOperationsController.visaTransactionsTmpService.getFormattedVisaTransactionsTmp();
 
                 if (isEmpty(aggregatedTransactions)) { VisaOperationsService.queueState = QueueState.PENDING; return; }
                 console.log('===============-==================================-==================================');
-                console.log('===============-==============  START TRAITMENT ====================-============');
+                console.log('===============-==============  START TREATMENT ====================-============');
                 console.log('===============-========================================================-============');
 
                 const transactions: VisaTransaction[] = [];
                 for (const element of aggregatedTransactions) {
-                    let { _id: cli, travel, onlinepayment } = element;
+                    let { _id: cli, travel, onlinepayment: onlinePayment } = element;
 
                     // get or create user if it doesn't exists
-                    const isExist = await VisaOperationsController.visaOperationsService.getOrCreateUserIfItDoesntExists(cli);
+                    const isExist = await VisaOperationsController.visaOperationsService.getOrCreateUserIfItDoesNtExists(cli);
                     if (!isExist) { continue; }
 
-                    transactions.push(...travel, ...onlinepayment);
+                    transactions.push(...travel, ...onlinePayment);
 
-                    // Travel traitment
+                    // Travel treatment
                     const transactionsGroupedByTravel = await VisaOperationsController.visaOperationsService.travelDataGroupedByCli(cli, travel);
-                    // Online payment traitment
-                    const transactionsGroupedByOnlinePayment = await VisaOperationsController.visaOperationsService.onlinePaymentGroupedByCli(cli, onlinepayment);
-
                     await VisaOperationsController.visaOperationsService.travelTreatment(cli, transactionsGroupedByTravel);
+                    
+                    // Online payment treatment
+                    const transactionsGroupedByOnlinePayment = await VisaOperationsController.visaOperationsService.onlinePaymentGroupedByCli(cli, onlinePayment);
                     await VisaOperationsController.visaOperationsService.onlinePaymentTreatment(cli, transactionsGroupedByOnlinePayment);
                 }
 
@@ -97,18 +97,18 @@ export class VisaOperationsService extends CrudService<any> {
 
                 VisaOperationsService.queueState = QueueState.PENDING;
                 console.log('===============-==================================-==================================');
-                console.log('===============-==============  END TRAITMENT ====================-============');
+                console.log('===============-==============  END TREATMENT ====================-============');
                 console.log('===============-========================================================-============');
             } else {
-                console.log('===============-==============  A TRAITMENT IS IN PROCESSING ====================-============')
+                console.log('===============-==============  A TREATMENT IS IN PROCESSING ====================-============')
             }
 
         } catch (error: any) {
             VisaOperationsService.queueState = QueueState.PENDING;
             console.log('===============-==================================-==================================');
-            console.log('===============-==============  ERROR DURING TRAITMENT ====================-============');
+            console.log('===============-==============  ERROR DURING TREATMENT ====================-============');
             console.log('===============-========================================================-============');
-            this.logger.error(`error during startTransactionTraitment \n${error.stack}\n`);
+            this.logger.error(`error during startTransactionTreatment \n${error.stack}\n`);
             return error;
         }
     }
@@ -118,7 +118,7 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueStateRevival !== QueueState.PENDING) { return; }
             VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
             // TODO
-            const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY, OVS.EXCEEDED] }, travelType: 100 } }]) ?? [];
+            const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: 100 } }]) ?? [];
 
             if (travels.length) { VisaOperationsService.queueStateRevival = QueueState.PENDING; return; }
             console.log('===============-==================================-==================================');
@@ -153,7 +153,7 @@ export class VisaOperationsService extends CrudService<any> {
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
                     // ]);
 
-                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OpeVisaStatus.EXCEDEED, */status: OVS.EXCEEDED });
+                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
                 if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
                     notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang, bankAccountManager?.EMAIL));
@@ -166,12 +166,12 @@ export class VisaOperationsService extends CrudService<any> {
             }
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
             console.log('===============-==================================-==================================');
-            console.log('===============-==============  END REVIVAL TRAITMENT ==================-============');
+            console.log('===============-==============  END REVIVAL TREATMENT ==================-============');
             console.log('===============-========================================================-============');
         } catch (e: any) {
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
             console.log('===============-==================================-==================================');
-            console.log('===============-==============  ERROR DURING REVIVAL TRAITMENT =========-============');
+            console.log('===============-==============  ERROR DURING REVIVAL TREATMENT =========-============');
             console.log('===============-========================================================-============');
             this.logger.error(`error during revival mail cron execution \n${e.stack}\n`);
         }
@@ -179,8 +179,8 @@ export class VisaOperationsService extends CrudService<any> {
 
     async detectListOfUsersToBlocked(): Promise<void> {
         try {
-            const travelsExceeded = (await TravelController.travelService.findAll({ filter: { status: { $in: [OVS.EXCEEDED] } } }))?.data;
-            const onlinePaymentsExceeded = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { status: { $in: [OVS.EXCEEDED] } } }))?.data;
+            const travelsExceeded = (await TravelController.travelService.findAll({ filter: { 'transactions.isExceed': { $exists: true } } }))?.data;
+            const onlinePaymentsExceeded = (await OnlinePaymentController.onlinePaymentService.findAll({ filter: { status: { 'transactions.isExceed': { $exists: true } } } }))?.data;
             let transactionsExceeded: VisaTransaction[] = [];
             if (isEmpty([...travelsExceeded, ...onlinePaymentsExceeded])) return;
             transactionsExceeded = await VisaOperationsController.visaOperationsService.getCustomerAccountToBlocked([...travelsExceeded, ...onlinePaymentsExceeded]);
@@ -241,19 +241,18 @@ export class VisaOperationsService extends CrudService<any> {
         }
     }
 
-    private async travelDataGroupedByCli(cli: string, travelTransactions: any[]): Promise<TravelDataGrouped[]> {
+    private async travelDataGroupedByCli(cli: string, travelTransactions: VisaTransaction[]): Promise<TravelDataGrouped[]> {
 
         let currentIndex = 0
         const transactionsGroupedByTravel: TravelDataGrouped[] = [];
 
         // sort transactions by date in ascending order
-        travelTransactions = travelTransactions.sort((a, b) => {
-            return moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() < moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? -1 : moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() > moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? 1 : 0;
-        });
+        travelTransactions = sortTransactionsByDateInAscendingOrder(travelTransactions);
+
         for (const transaction of travelTransactions) {
 
             // find travel which dates matchs with the current transaction date
-            let travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
+            let travel: TravelsForProcessing = await TravelController.travelService.getTravelsForProcessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
 
             if (isEmpty(travel)) {
 
@@ -265,10 +264,16 @@ export class VisaOperationsService extends CrudService<any> {
 
                 // get the first date of the current transactions Grouped By Travel's transactions
                 const firstDate = Math.min(...transactionsGroupedByTravel[currentIndex]?.transactions.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf())));
-                const maxDate = moment(firstDate).endOf('month').valueOf();
+                const maxDate = await getLastDateOfTravel(firstDate, cli);
+                // let travel!: Travel;
+                // try { travel = await TravelController.travelService.findOne({ filter: { 'user.clientCode': cli, 'proofTravel.dates.start': { $gt: firstDate } } }); } catch (e) { }
+                // const firstDatePlus29Days = moment(firstDate).add(29, 'days').valueOf();
+                // const maxDate = travel && travel?.proofTravel?.dates?.start && travel?.proofTravel?.dates?.start <= firstDatePlus29Days
+                //     ? travel?.proofTravel?.dates?.start : firstDatePlus29Days;
+                // // const maxDate = moment(firstDate).endOf('month').valueOf();
 
                 // verify if the date of the current transaction is out of current transactions Grouped By Travel's range or if current transactions Grouped By Travel does'nt containt travel
-                if (transaction?.date > maxDate) {
+                if (moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() > maxDate) {
                     currentIndex++;
                 }
 
@@ -289,14 +294,18 @@ export class VisaOperationsService extends CrudService<any> {
 
             transactionsGroupedByTravel[currentIndex]?.transactions.push(transaction);
 
-            transactionsGroupedByTravel[currentIndex].travelId = travel?._id.toString();
+            transactionsGroupedByTravel[currentIndex].travelId = travel?._id?.toString();
         }
         return transactionsGroupedByTravel;
     }
 
-    private async onlinePaymentGroupedByCli(cli: string, onlinepaymentTransactions: any[]): Promise<OnlinePaymentGrouped[]> {
+    private async onlinePaymentGroupedByCli(cli: string, onlinepaymentTransactions: VisaTransaction[]): Promise<OnlinePaymentGrouped[]> {
         if (!onlinepaymentTransactions) { return onlinepaymentTransactions; }
 
+        // sort transactions by date in ascending order
+        onlinepaymentTransactions = onlinepaymentTransactions.sort((a, b) => {
+            return moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() < moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? -1 : moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() > moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? 1 : 0;
+        });
         const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))];
 
         const transactionsGroupedByOnlinePayment: OnlinePaymentGrouped[] = [];
@@ -304,14 +313,21 @@ export class VisaOperationsService extends CrudService<any> {
         for (const month of months) {
             let onlinePayment: OnlinePaymentMonth | null = null;
             const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
-            const firstDate = moment(month, 'YYYYMM').startOf('month').valueOf();
-            const travel = await TravelController.travelService.getTravelsForPocessing({ cli, date: moment(firstDate, 'DD/MM/YYYY HH:mm:ss').valueOf(), travelType: { $in: [TravelType.LONG_TERM_TRAVEL, TravelType.SHORT_TERM_TRAVEL] } });
+            
+            const onlinePaymentTransactions: VisaTransaction[] = []; let travelTransactions: VisaTransaction[] = []; let travelId: string | undefined = undefined;
+            for (const transaction of selectedTransactions) {
+                const travel: TravelsForProcessing = await TravelController.travelService.getTravelsForProcessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
+                if (isEmpty(travel)) { onlinePaymentTransactions.push(transaction); continue; }
+                (travelId) && (travelId !== travel?._id?.toString()) && transactionsGroupedByOnlinePayment.push({ transactions: travelTransactions, onlinePaymentId: undefined, travelId, month }) && (travelTransactions = []);
+                travelId = travel?._id?.toString();
+                travelTransactions.push(transaction);
+            }
 
-            if (isEmpty(travel)) {
+            if (onlinePaymentTransactions.length) {
                 try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } }); } catch (e) { }
             }
 
-            transactionsGroupedByOnlinePayment.push({ transactions: selectedTransactions, onlinePaymentId: onlinePayment?._id.toString() || null, travelId: travel?._id.toString() || null, month });
+            transactionsGroupedByOnlinePayment.push({ transactions: onlinePaymentTransactions, onlinePaymentId: onlinePayment?._id?.toString() || undefined, travelId: undefined, month });
         }
 
         return transactionsGroupedByOnlinePayment;
@@ -320,11 +336,11 @@ export class VisaOperationsService extends CrudService<any> {
     private async travelTreatment(cli: string, transactionsGroupedByTravel: TravelDataGrouped[]) {
         for (const element of transactionsGroupedByTravel) {
             if (isEmpty(element?.transactions)) { return }
-            const dates = element?.transactions.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
+            const dates = element?.transactions?.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
             const firstDate = moment(Math.min(...dates)).startOf('day').valueOf();
-            const lastDate = moment(firstDate).add(30, 'days').endOf('days').valueOf();
-
-            let travel: Travel = new Travel();
+            const lastDate = await getLastDateOfTravel(firstDate, cli, true);
+            
+            let travel!: Travel;
             const toBeUpdated: ToBeUpdated = { notifications: [] };
             if (!element?.travelId) {
                 travel = generateTravelByProcessing(cli, element?.transactions[0], { start: firstDate, end: lastDate });
@@ -334,12 +350,19 @@ export class VisaOperationsService extends CrudService<any> {
             if (!travel || travel instanceof Error) { continue; }
             travel.notifications = [];
 
+            // TODO check if it exists onlinePaymentMonth, which content transactions between period of travel
+            // If it exist, you must extract this operation on this onlinePaymentMonth, save onlinePaymentMonth
+            // Insert this operation on travel, sort ascending all transactions by date, and call method to add transactions on travel
+
+            const onlinePaymentTransactions = await getOnlinePaymentTransactionForTravel(cli, firstDate, lastDate);
+            element?.transactions?.push(...onlinePaymentTransactions); 
+
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
                 await this.addTransactionsInTravel(travel, element?.transactions, toBeUpdated);
             }
 
             if (travel.travelType === TravelType.LONG_TERM_TRAVEL) {
-                const months = [...new Set(element.transactions.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))] as string[];
+                const months = [...new Set(element.transactions.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))];
                 for (const month of months) {
                     let selectedTransactions = element.transactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
                     await this.addTransactionsInTravel(travel, selectedTransactions, toBeUpdated);
@@ -374,7 +397,10 @@ export class VisaOperationsService extends CrudService<any> {
                     : await OnlinePaymentController.onlinePaymentService.insertOnlinePayment(onlinePayment);
             } catch (e) { }
 
-            onlinePayment.transactions = !element.onlinePaymentId ? [...element?.transactions] : [...travel?.transactions, ...element?.transactions];
+            onlinePayment.transactions = !element.onlinePaymentId ? [...element?.transactions] : [...(travel?.transactions || []), ...element?.transactions];
+
+            // sort transactions by date in ascending order
+            onlinePayment.transactions = sortTransactionsByDateInAscendingOrder(onlinePayment.transactions);
 
             toBeUpdated.notifications = verifyExceedingOnTravel(onlinePayment, +Number(onlinePayment?.ceiling));
             toBeUpdated.transactions = onlinePayment.transactions;
@@ -390,6 +416,8 @@ export class VisaOperationsService extends CrudService<any> {
     private async addTransactionsInTravel(travel: Travel, transactions: VisaTransaction[], toBeUpdated: ToBeUpdated, month: string = '') {
         if (travel?.travelType === TravelType.SHORT_TERM_TRAVEL) {
             travel.transactions = isEmpty(travel?.transactions) ? [...transactions] : [...travel?.transactions, ...transactions];
+            // sort transactions by date in ascending order
+            travel.transactions = sortTransactionsByDateInAscendingOrder(travel.transactions);
             toBeUpdated.notifications = verifyExceedingOnTravel(travel, +Number(travel?.ceiling));
             const totalAmount = getTotal(travel?.transactions);
             if (travel?.transactions?.length === transactions?.length) { // to detect first transaction
@@ -405,7 +433,7 @@ export class VisaOperationsService extends CrudService<any> {
             transactions = markExceedTransaction(transactions, +Number(travel?.ceiling));
             const travelMonth = await getOrCreateTravelMonth(travel, month);
 
-            toBeUpdated['proofTravel.nbrefOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbreOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
+            toBeUpdated['proofTravel.nbreOfMonth'] = checkTravelNumberOfMonths(month, travel?.proofTravel?.nbreOfMonth || 0, travel?.proofTravel?.dates?.start as number); // in case of new month creation check the number of months in the long term travel
             await updateTravelMonth(travelMonth, transactions, toBeUpdated, travel);
         }
     }
@@ -429,25 +457,25 @@ export class VisaOperationsService extends CrudService<any> {
     }
 
     // The list of customers whose accounts must be blocked
-    private async getCustomerAccountToBlocked(datas: (Travel | OnlinePaymentMonth)[]) {
+    private async getCustomerAccountToBlocked(folders: (Travel | OnlinePaymentMonth)[]) {
         try {
-            let transactionExcedeed: VisaTransaction[] = [];
+            let transactionExceeded: VisaTransaction[] = [];
             const template = await TemplatesController.templatesService.findOne({ filter: { key: 'transactionOutsideNotJustified' } });
 
-            for (const data of datas) {
+            for (const data of folders) {
                 const firsDate = Math.min(...(data?.transactions || [])?.map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
                 const transaction = data?.transactions?.find(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() === firsDate);
 
                 const dateDiffInDays = moment().diff(moment(firsDate), 'days');
 
-                if (template && dateDiffInDays > +template?.period && transaction) { transactionExcedeed.push(transaction); } else { continue; }
+                if (template && dateDiffInDays > +template?.period && transaction) { transactionExceeded.push(transaction); } else { continue; }
             }
 
-            return transactionExcedeed || [];
+            return transactionExceeded || [];
         } catch (error) { throw error; }
     }
 
-    private async getOrCreateUserIfItDoesntExists(clientCode: string) {
+    private async getOrCreateUserIfItDoesNtExists(clientCode: string) {
         try {
             let user: User | null = null;
             try { user = await UsersController.usersService.findOne({ filter: { clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } }); } catch (e) { }
@@ -456,13 +484,13 @@ export class VisaOperationsService extends CrudService<any> {
             const createData = { clientCode, enabled: true, category: UserCategory.DEFAULT };
             return await UsersController.usersService.createUser(createData, 'front-office');
         } catch (e: any) {
-            this.logger.error(`error during when getAndCreateUserIfItDoesntExists for visa-transactions integration \n${e.stack}\n`);
+            this.logger.error(`error during when getAndCreateUserIfItDoesNtExists for visa-transactions integration \n${e.stack}\n`);
         }
     }
 
-    // l add this method to getting public access on this methode (getOrCreateUserIfItDoesntExists) 
-    async newGetOrCreateUserIfItDoesntExists(clientCode:string){
-        await this.getOrCreateUserIfItDoesntExists(clientCode);
+    // l add this method to getting public access on this method (getOrCreateUserIfItDoesNtExists) 
+    async newGetOrCreateUserIfItDoesNtExists(clientCode:string){
+        await this.getOrCreateUserIfItDoesNtExists(clientCode);
     }
 
     private async updateDelayStatusFileOutTime(travelsMonths: TravelMonth[] = [], travels: Travel[] = [], onlinePayments: OnlinePaymentMonth[] = [], importations: Import[] = []): Promise<void> {

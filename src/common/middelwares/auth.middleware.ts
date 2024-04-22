@@ -39,17 +39,17 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
     const accessToken = authorization.split(' ')[1];
 
     try {
-        const payloadata: JwtPayload = jwt.verify(accessToken, `${config.get('oauthSalt')}`) as JwtPayload;
-        delete payloadata.exp;
-        delete payloadata.iat;
-        const user = payloadata.payload;
+        const payloadData: JwtPayload = jwt.verify(accessToken, `${config.get('oauthSalt')}`) as JwtPayload;
+        delete payloadData.exp;
+        delete payloadData.iat;
+        const user = payloadData.payload;
         
         httpContext.set('user', user);
 
         let profile = getUserProfile(user);
         if (!profile) { throw new Error('Forbidden') }
         const authorizations = getAuthorizationsByProfile(profile);
-        httpContext.set('authorizations', authorizations);
+        authorizations && authorizations.length && httpContext.set('authorizations', authorizations);
 
         next();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

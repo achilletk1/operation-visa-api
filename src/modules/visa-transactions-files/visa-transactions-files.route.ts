@@ -6,9 +6,9 @@ export const visaTransactionsFilesController = new VisaTransactionsFilesControll
 
 router.get('/', visaTransactionsFilesController.findAll);
 
-router.get('/labels', visaTransactionsFilesController.getVisaTransationsFilesLabels);
+router.get('/labels', visaTransactionsFilesController.getVisaTransactionsFilesLabels);
 
-router.get('/columnTitles', visaTransactionsFilesController.getVisaTransationsFilesColumnTitles);
+router.get('/columnTitles', visaTransactionsFilesController.getVisaTransactionsFilesColumnTitles);
 
 router.get('/import/array/:id', visaTransactionsFilesController.getTransactionFilesDataArray);
 

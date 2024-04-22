@@ -21,7 +21,7 @@ export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[
 
 export function verifyTransactionFileContent(dataArray: VisaTransactionsTmp[], fileName: string) {
     const indexOfDate = (fileName?.toLowerCase()?.includes('terminaux')) ? 6 : 4;
-    const month = fileName.split('_')[indexOfDate].slice(0, 6);
+    const month = fileName?.split('_')[indexOfDate]?.slice(0, 6);
     return dataArray.findIndex(element => {
         let currentMonths = `${element['DATE']}`.split('/');
         // currentMonth.shift();
@@ -81,7 +81,7 @@ export async function addUserDataInVisaTransactionFile(visaTransactionsTmp: Visa
     const clientCodeOfNotExistingUser = clientCodes.filter(el => !existingClientCodeUser.includes(el));
     // create all user who don't exist
     for (const clientCode of clientCodeOfNotExistingUser) {
-        await VisaOperationsController.visaOperationsService.newGetOrCreateUserIfItDoesntExists(clientCode);
+        await VisaOperationsController.visaOperationsService.newGetOrCreateUserIfItDoesNtExists(clientCode);
     }
     users = (await UsersController.usersService.findAll({ filter: { clientCode: { $in: clientCodes } } }))?.data;
     visaTransactionsTmp.forEach(e => {
@@ -97,7 +97,7 @@ export async function addUserDataInVisaTransactionFile(visaTransactionsTmp: Visa
     });
 }
 
-export async function setLocalMethodPayement(fileName?: string, visaTransactionsTmp?: VisaTransactionsTmp[]) {
+export async function setLocalMethodPayment(fileName?: string, visaTransactionsTmp?: VisaTransactionsTmp[]) {
     const { WITHDRAWAL, PURCHASE } = OperationType;
     const { ATN_WITHDRAWAL, ELECTRONIC_PAYMENT_TERMINAL, ONLINE_PAYMENT } = OperationTypeLabel;
     const finalType = fileName?.toLowerCase()?.includes('terminaux') ? ELECTRONIC_PAYMENT_TERMINAL : ONLINE_PAYMENT;

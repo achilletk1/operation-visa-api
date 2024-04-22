@@ -14,7 +14,7 @@ import { ValidationTokenEvent, ValidationTokenMailNotification } from './notific
 import { IncreaseCeilingEvent, IncreaseCeilingMailNotification } from './notifications/mail/increase-ceiling';
 import { CeilingAssignedEvent, CeilingAssignedMailNotification } from './notifications/mail/ceiling-assigned';
 import { RejectCeilingEvent, RejectCeilingMailNotification } from './notifications/mail/reject-ceiling';
-import { VisaExcedingEvent, VisaExcedingMailNotification } from './notifications/mail/visa-exceding';
+import { VisaExceedingEvent, VisaExceedingMailNotification } from './notifications/mail/visa-exceding';
 import { ValidCeilingEvent, ValidCeilingMailNotification } from './notifications/mail/valid-ceiling';
 import { FormalNoticeEvent, FormalNoticeMailNotification } from './notifications/mail/formal-notice';
 import { AuthTokenEmailEvent, AuthTokenEmailNotification } from './notifications/mail/auth-token';
@@ -78,8 +78,8 @@ notificationEmmiter.on('detect-transactions-mail', async (data: DetectTransactio
     await (new DetectTransactionsMailNotification(data)).sendNotification();
 });
 
-notificationEmmiter.on('visa-exceding-mail', async (data: VisaExcedingEvent) => {
-    await (new VisaExcedingMailNotification(data)).sendNotification();
+notificationEmmiter.on('visa-exceding-mail', async (data: VisaExceedingEvent) => {
+    await (new VisaExceedingMailNotification(data)).sendNotification();
 });
 
 notificationEmmiter.on('formal-notice-mail', async (data: FormalNoticeEvent) => {

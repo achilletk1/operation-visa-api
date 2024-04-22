@@ -1,12 +1,12 @@
 import { BaseRepository } from "common/base";
-import { formatedVisaTransactionsTmps } from "./helper";
+import { formattedVisaTransactionsTmp } from "./helper";
 import { VisaTransactionsTmpAggregate } from "./model";
 
 export class VisaTransactionsTmpRepository extends BaseRepository {
 
     constructor() { super(); this.collectionName = 'visa_transactions_tmp'; }
 
-    async getFormatedVisaTransactionsTmps() {
-        return await this.findAllAggregate(formatedVisaTransactionsTmps) as VisaTransactionsTmpAggregate[];
+    async getFormattedVisaTransactionsTmp() {
+        return await this.findAllAggregate(formattedVisaTransactionsTmp) as VisaTransactionsTmpAggregate[];
     }
 }

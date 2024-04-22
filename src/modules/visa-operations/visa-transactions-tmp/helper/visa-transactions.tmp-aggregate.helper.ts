@@ -1,6 +1,6 @@
 import { OperationTypeLabel } from "modules/visa-operations/enum";
 
-export const formatedVisaTransactionsTmps = [
+export const formattedVisaTransactionsTmp = [
     {
         $addFields: {
             travel: {

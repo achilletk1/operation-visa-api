@@ -314,6 +314,11 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
         catch (error) { throw error; }
     }
 
+    async getOnlinePaymentWhichHaveTransactionsInPeriod() {
+        try { return await OnlinePaymentService.onlinePaymentRepository.getOnlinePaymentWhichHaveTransactionsInPeriod(); }
+        catch (error) { throw error; }
+    }
+
     private formatFilters(filters: any) {
         const { clientCode, userId, year, month, start, end } = filters;
 

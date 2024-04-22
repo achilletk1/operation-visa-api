@@ -1,5 +1,5 @@
 import { averageTimeJustifyTravelData, chartDataOnlinePayment, generateConsolidateData, statusOperation } from "modules/reporting";
-import { getNotficationsQuery } from "./helper";
+import { getNotificationsQuery } from "./helper";
 import { BaseRepository } from "common/base";
 
 export class OnlinePaymentRepository extends BaseRepository {
@@ -23,7 +23,19 @@ export class OnlinePaymentRepository extends BaseRepository {
     }
 
     async getOnlinePaymentNotifications() {
-        const data = await this.findAllAggregate(getNotficationsQuery);
+        const data = await this.findAllAggregate(getNotificationsQuery);
+        return data[0]?.notifications || [];
+    }
+
+    async getOnlinePaymentWhichHaveTransactionsInPeriod(cli?: string, start?: number, end?: number) {
+        // const query = { 'user.clientCode': cli, 'transactions.0': { $exists: true } };
+        // const callback = (e) => {
+        //     const parts = e..split("/");
+        //     const timestamp = new Date(parts[1] + "/" + parts[0] + "/" + parts[2]).getTime();
+        //     (start <= timestamp) && (timestamp <= end) && (e = undefined);
+        // };
+        // return (await this.getCollection()).find(query).forEach(callback).toArray();
+        const data = await this.findAllAggregate(getNotificationsQuery);
         return data[0]?.notifications || [];
     }
 

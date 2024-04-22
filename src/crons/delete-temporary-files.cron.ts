@@ -6,7 +6,7 @@ class DeleteTemporaryFilesCron extends BaseCron {
     cronExpressionPath = 'crons.deleteTemporaryFile';  // At minute 0 past every 3rd hour
     service = TemporaryFilesController.temporaryFilesService.removeTemporaryFiles;
     startOnStagingBci = false;
-    startOnDev = false;
+    startOnDev = true;
 }
 
 export default new DeleteTemporaryFilesCron();

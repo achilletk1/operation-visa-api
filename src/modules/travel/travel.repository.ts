@@ -1,5 +1,6 @@
 import { averageTimeJustifyTravelData, chartDataTravel, generateConsolidateData, statusOperation } from "modules/reporting";
-import { getNotficationsQuery, travelsForPocessingQuery } from "./helper/travel-aggregation.helper";
+import { getNotificationsQuery, travelsForProcessingQuery } from "./helper/travel-aggregation.helper";
+import { TravelsForProcessing } from "./model";
 import { BaseRepository } from "common/base";
 import { TravelType } from "./enum";
 
@@ -24,12 +25,12 @@ export class TravelRepository extends BaseRepository {
     }
 
     async getTravelNotifications() {
-        const data = await this.findAllAggregate(getNotficationsQuery);
+        const data = await this.findAllAggregate(getNotificationsQuery);
         return data[0]?.notifications || [];
     }
 
-    async getTravelsForPocessing(filters: { date: number; cli: string; travelType?: TravelType; }): Promise<any> {
-        return (await this.findAllAggregate(travelsForPocessingQuery(filters)))[0];
+    async getTravelsForProcessing(filters: { date: number; cli: string; travelType?: TravelType; }): Promise<TravelsForProcessing> {
+        return (await this.findAllAggregate(travelsForProcessingQuery(filters)) as unknown as TravelsForProcessing[])[0];
     }
 
 }

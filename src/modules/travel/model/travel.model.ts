@@ -88,3 +88,10 @@ export class Travel {
     link?: string;
     isUntimely?: boolean;
 }
+
+export interface TravelsForProcessing {
+    _id: any;
+    cli: string;
+    start: number;
+    end: number;
+}

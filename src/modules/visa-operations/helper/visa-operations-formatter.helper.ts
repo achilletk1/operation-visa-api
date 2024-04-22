@@ -117,9 +117,9 @@ export const generateNotificationData = (data: any, type: 'SMS' | 'EMAIL', templ
 
 }
 
-export const checkTravelNumberOfMonths = (month: string, nbrefOfMonth: number, firstDate: number) => {
+export const checkTravelNumberOfMonths = (month: string, nbreOfMonth: number, firstDate: number) => {
     const nbMonths = moment(month, 'YYYYMM').diff(moment(firstDate).startOf('months'), 'months') + 1;
-    return nbMonths > nbrefOfMonth ? nbMonths : nbrefOfMonth;
+    return nbMonths > nbreOfMonth ? nbMonths : nbreOfMonth;
 }
 
 export const generateOnlinePaymentMonth = (clientCode: string, transaction: VisaTransaction, month: string): OnlinePaymentMonth => {

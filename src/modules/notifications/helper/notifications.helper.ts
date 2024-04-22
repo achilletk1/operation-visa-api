@@ -37,6 +37,6 @@ export function getStatusExpression(status: OpeVisaStatus | undefined): string {
 export function generateNotification(object: string, format: NotificationFormat, message: string, receiver: string | undefined, id?: string, attachments?: any, key?: any): Notification {
     const email = format === NotificationFormat.MAIL ? receiver : undefined;
     const tel = format === NotificationFormat.SMS ? receiver : undefined;
-    const notification: Notification = { object, format, message, email, tel, id, dates: { createdAt: new Date().valueOf() }, status: NotificationStatus.CREATED, attachments, key };
+    const notification: Notification = { object, format, message, email, tel, id, dates: { createdAt: new Date().valueOf(), sentAt: new Date().valueOf(), }, status: NotificationStatus.CREATED, attachments, key };
     return notification;
 }

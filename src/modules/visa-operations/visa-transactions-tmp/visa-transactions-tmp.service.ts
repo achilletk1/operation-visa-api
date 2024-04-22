@@ -11,8 +11,8 @@ export class VisaTransactionsTmpService extends CrudService<VisaTransactionsTmp>
         super(VisaTransactionsTmpService.visaTransactionsTmpRepository);
     }
 
-    async getFormatedVisaTransactionsTmps() {
-        try { return await VisaTransactionsTmpService.visaTransactionsTmpRepository.getFormatedVisaTransactionsTmps(); } 
+    async getFormattedVisaTransactionsTmp() {
+        try { return await VisaTransactionsTmpService.visaTransactionsTmpRepository.getFormattedVisaTransactionsTmp(); } 
         catch (error) { throw error; }
     }
 

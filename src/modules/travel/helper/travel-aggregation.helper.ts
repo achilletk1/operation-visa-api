@@ -1,6 +1,6 @@
 import { TravelType } from "../enum";
 
-export const travelsForPocessingQuery = (params: { date: number; cli: string; travelType?: TravelType; }) => {
+export const travelsForProcessingQuery = (params: { date: number; cli: string; travelType?: TravelType; }) => {
     const { date, cli, travelType } = params;
     const query = [];
 
@@ -30,7 +30,7 @@ export const travelsForPocessingQuery = (params: { date: number; cli: string; tr
                                                                         "$proofTravel.dates.start",
                                                                 },
                                                                 unit: "month",
-                                                                amount: "$proofTravel.nbrefOfMonth",
+                                                                amount: "$proofTravel.nbreOfMonth",
                                                             },
                                                         },
                                                         unit: "day",
@@ -112,7 +112,7 @@ export const travelsForPocessingQuery = (params: { date: number; cli: string; tr
     return query;
 }
 
-export const getNotficationsQuery = [
+export const getNotificationsQuery = [
     {
         $match:
         {

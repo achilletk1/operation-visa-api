@@ -1,10 +1,9 @@
+import { CrudService, QueryFilter, QueryOptions, QueryProjection } from "common/base";
 import { BankAccountManagerRepository } from "./bank-account-manager.repository";
 import { BankAccountManagerController } from './bank-account-manager.controller';
-import { formatUserFilters } from "modules/users/helper";
 import httpContext from 'express-http-context';
 import { BankAccountManager } from "./model";
 import { CbsController } from "modules/cbs";
-import { CrudService } from "common/base";
 
 export class BankAccountManagerService extends CrudService<BankAccountManager>  {
 
@@ -17,35 +16,39 @@ export class BankAccountManagerService extends CrudService<BankAccountManager>  
 
     async getAndUpdateBankAccountManager() {
         try {
-            const bankAccountManagers: Partial<BankAccountManager>[] = await CbsController.cbsService.getBankAccountManager();
-            const onlyAutomaticModeUser = bankAccountManagers.filter(bankManager => bankManager.autoMode);
-            const onlyIdOfAutomaticUserMode = onlyAutomaticModeUser.map(data => data._id);
+            const cbsBankAccountManagers = await CbsController.cbsService.getBankAccountManager();
+            if (!cbsBankAccountManagers?.length) { throw new Error('EmptyDataFoundForUpdate'); }
 
-            await BankAccountManagerController.bankAccountManagerService.deleteMany({ _id: { $in: onlyIdOfAutomaticUserMode } });
-            await BankAccountManagerController.bankAccountManagerService.create(onlyAutomaticModeUser);
+            const localBankAccountManagers = (await BankAccountManagerController.bankAccountManagerService.findAll({ filter: { manualMode: true }, projection: { CODE_GES: 1 } }))?.data
+            const gesCodeArrayOfUserWithManualMode = localBankAccountManagers?.map(accountManager => accountManager?.CODE_GES);
+
+            // filtering of managers to update
+            const bankAccountManagersToUpdate = cbsBankAccountManagers.filter(accountManager => !gesCodeArrayOfUserWithManualMode.includes(accountManager.CODE_GES));
+
+            await BankAccountManagerController.bankAccountManagerService.deleteMany({ $or: [{ manualMode: { $exists: false } }, { manualMode: false }] });
+            await BankAccountManagerController.bankAccountManagerService.create(bankAccountManagersToUpdate);
         } catch (e: any) {
             this.logger.error(`error during getAndUpdateBankAccountManager process \n ${e.stack}`);    
         }
     }
 
-    async getManagerAccounts(filters: any, projection?: any) {
+    async getManagerAccounts(filter: QueryFilter, projection?: QueryProjection) {
         try {
             const authUser = httpContext.get('user');
             if (authUser?.category < 500) { throw new Error('Forbidden'); }
 
-            const filter = formatUserFilters(filters);
-            const opts: any = { filter };
-            if (projection) { opts.projection = projection; }
+            const opts: QueryOptions = { filter };
+            (projection) && (opts.projection = projection);
             return await BankAccountManagerController.bankAccountManagerService.findAll(opts);
         } catch (error) { throw error; }
     }
     
-    async updateManagerAccount(userDatas: BankAccountManager) {
+    async updateManagerAccount(bankAccountManager: BankAccountManager) {
         try {
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { throw new Error('Forbidden'); };
-            const result = await BankAccountManagerController.bankAccountManagerService.update({ _id: userDatas?._id }, userDatas);
-            return result;
+            return await BankAccountManagerController.bankAccountManagerService.update({ _id: bankAccountManager?._id }, bankAccountManager);
         } catch (error) { throw error; }
     }
+
 }
