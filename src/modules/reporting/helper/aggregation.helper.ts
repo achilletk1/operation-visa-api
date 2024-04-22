@@ -1,9 +1,42 @@
+import { Agencies } from 'modules/visa-operations/enum';
+import { authorizations } from 'modules/auth/profile';
+import httpContext from 'express-http-context';
 import { logger } from "winston-config";
 import { get, isArray } from "lodash";
 import moment from "moment";
+import { UserCategory } from 'modules/users';
+
+const defaultQuery: any =
+    [
+        {
+            $addFields: {
+                userId: { $toObjectId: '$user._id' }
+            }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userInfos'
+            }
+        },
+        {
+            $unwind: {
+                path: '$userInfos',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $set: {
+                'user.age': '$userInfos.age',
+                'user.cbsCategory': '$userInfos.cbsCategory',
+            }
+        },
+        { $unset: ['userId', 'userInfos'] },
+    ];
 
 export const generateConsolidateData = (param: { status: any, start: number, end: number, travelType?: any }) => {
-
     const { start, end, status, travelType } = param
 
     const match: any = { '$match': {} }
@@ -20,31 +53,40 @@ export const generateConsolidateData = (param: { status: any, start: number, end
         match['$match']['travelType'] = travelType;
     }
 
-    return [{
-        $facet: {
-            nbTravel: [
-                { ...match },
-                { $count: '_' }
-            ],
-            travelStat: [
-                { ...match },
-                { '$unwind': '$transactions' },
-                {
-                    $group: {
-                        _id: null,
-                        total: { '$sum': "$transactions.amount" },
-                        count: { $sum: 1 },
+    // match authorizations datas
+    matchUserDatas(match);
+
+    const query = [
+        ...defaultQuery,
+        {
+            $facet: {
+                nbTravel: [
+                    { ...match },
+                    { $count: '_' }
+                ],
+                travelStat: [
+                    { ...match },
+                    { '$unwind': '$transactions' },
+                    {
+                        $group: {
+                            _id: null,
+                            total: { '$sum': "$transactions.amount" },
+                            count: { $sum: 1 },
+                        }
                     }
-                }
-            ]
+                ]
+            }
+        },
+        {
+            $project: {
+                total: "$nbTravel._",
+                amountTransactions: "$travelStat.total",
+                nbreTransactions: "$travelStat.count",
+            }
         }
-    }, {
-        $project: {
-            total: "$nbTravel._",
-            amountTransactions: "$travelStat.total",
-            nbreTransactions: "$travelStat.count",
-        }
-    }]
+    ];
+
+    return query;
 };
 
 export const statusOperation = (params: { filterStatus: any, start: number, end: number, travelType?: any, agencyCode: string, regionCode: string }) => {
@@ -86,23 +128,19 @@ export const statusOperation = (params: { filterStatus: any, start: number, end:
     //     return query
 
     // }
-    let query = [];
+
+    // match authorizations datas
+    matchUserDatas(match);
+    let query: any[] = [
+        ...defaultQuery,
+        { ...match },
+    ];
+
     if (agencyCode || regionCode) {
         query.push(
             {
-                $lookup: {
-                    from: "user",
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "userDetails"
-                }
-            },
-            {
-                $unwind: "$userDetails"
-            },
-            {
                 $match: {
-                    "userDetails.age.code": ((!regionCode || regionCode.split(',').length <= 0) || (regionCode && agencyCode)) ? agencyCode : { $in: regionCode.split(',') }
+                    "user.age.code": ((!regionCode || regionCode.split(',').length <= 0) || (regionCode && agencyCode)) ? agencyCode : { $in: regionCode.split(',') }
                 }
             }
         );
@@ -128,14 +166,13 @@ export const statusOperation = (params: { filterStatus: any, start: number, end:
             }
         );
     }
-    if (match && match['$match']) { query.unshift(match); }
+    // if (match && match['$match']) { query.unshift(match); }
 
     return query;
 
 };
 
 export const averageTimeJustifyTravelData = (params: { status: any, start: number, end: number, travelType?: any }) => {
-
     const { travelType, start, end } = params
 
     const match: any = { '$match': {} }
@@ -147,7 +184,11 @@ export const averageTimeJustifyTravelData = (params: { status: any, start: numbe
         match['$match']['travelType'] = travelType;
     }
 
-    return [
+    // match authorizations datas
+    matchUserDatas(match);
+
+    let query = [
+        ...defaultQuery,
         { ...match },
         {
             $project: {
@@ -165,9 +206,9 @@ export const averageTimeJustifyTravelData = (params: { status: any, start: numbe
                 _id: 0, time: '$waitingTime'
             }
         },
+    ];
 
-    ]
-
+    return query;
 };
 
 export const chartDataOnlinePayment = (param: { start: number, end: number }) => {
@@ -198,9 +239,7 @@ export const chartDataOnlinePayment = (param: { start: number, end: number }) =>
 };
 
 export const chartDataTravel = (params: { start: number, end: number, travelType?: any }) => {
-    let query = [];
-    let matchValue: any = {};
-    // let matchDate = {};
+    let match: any = { '$match': {} }
 
     const { travelType } = params
 
@@ -208,11 +247,15 @@ export const chartDataTravel = (params: { start: number, end: number, travelType
     // if (param.start && param.end) { query.push({ $match: { 'dates.created': { $gte: param.start, $lte: param.end } } }); }
 
     if (+travelType) {
-        matchValue['$match'] = {}
-        matchValue['$match'].travelType = +travelType;
+        match['$match'].travelType = +travelType;
     }
-    if (matchValue['$match']) { query.unshift(matchValue); }
-    query = [
+
+    // match authorizations datas
+    matchUserDatas(match);
+
+    const query = [
+        ...defaultQuery,
+        { ...match },
         { $unwind: '$transactions' },
         {
             $project: {
@@ -228,14 +271,17 @@ export const chartDataTravel = (params: { start: number, end: number, travelType
         { $group: { _id: { date: '$yearMonthDate' }, total: { $sum: '$amount' }, count: { $sum: 1 } } },
         { $sort: { '_id.date': 1 } },
         { $project: { _id: 0, date: '$_id.date', total: '$total', nbrTransactions: '$count' } }
-    ];
+    ]
     return query;
 };
 
 export const reportingFilterQuery = (range: any, type: number): any => {
 
+    let match: any = { '$match': {} }
+    // match authorizations datas
+    matchUserDatas(match);
 
-    const query = [];
+    const query = [...defaultQuery, { ...match }];
     const start = get(range, 'start');
     const end = get(range, 'end')
 
@@ -253,12 +299,12 @@ export const reportingFilterQuery = (range: any, type: number): any => {
 
         logger.info(`get reporting Query  Params ***** _start: ${_start}; _end: ${_end}`);
 
-        const matchObj = {
+        match = {
             $match: {
                 'dates.created': { $gte: _start, $lte: _end }
             }
         }
-        query.push(matchObj);
+        query.push(match);
 
     }
 
@@ -274,3 +320,20 @@ export const reportingFilterQuery = (range: any, type: number): any => {
 
     return query;
 };
+
+export function matchUserDatas(match: any): any {
+    const user = httpContext.get('user');
+    const authorizationsUser: string[] = httpContext.get('authorizations');
+
+    match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+
+    if (authorizationsUser.includes(
+        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
+        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
+    )) {
+        match['$match']['user.age.code'] = `${Agencies.PERSONNAL}`
+    }
+    if (user.category === UserCategory.SUPER_ADMIN) { match['$match']['user.age.code'] = null }
+}

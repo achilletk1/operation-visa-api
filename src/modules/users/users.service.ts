@@ -29,7 +29,7 @@ export class UsersService extends CrudService<User>  {
 
             const filter = formatUserFilters(filters);
             const opts: QueryOptions = { filter };
-            (projection) && (opts.projection = projection);
+            (projection) && (opts.projection = projection);     
             return await UsersController.usersService.findAll(opts);
         } catch (error) { throw error; }
     }

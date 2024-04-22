@@ -9,7 +9,7 @@ export class RequestCeilingIncreaseController {
     constructor() { RequestCeilingIncreaseController.requestCeilingIncreaseService = new RequestCeilingIncreaseService(); }
 
     async findAll(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: req.query })); }
+        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.getRequestCeilingIncrease({ filter: req.query as any })); }
         catch (error) { next(error); }
     }
 
@@ -24,7 +24,7 @@ export class RequestCeilingIncreaseController {
     }
 
     async getRequestCeillingIncrease(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.getRequestCeilingIncrease(req.query as any)); }
+        try { res.send(await RequestCeilingIncreaseController.requestCeilingIncreaseService.getRequestCeilingIncrease({ filter: req.query as any })); }
         catch (error) { next(error); }
     }
 
