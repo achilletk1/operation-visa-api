@@ -10,7 +10,7 @@
     "start:dev": "cross-env NODE_ENV=development node src/index",
     "start:staging": "cross-env NODE_ENV=staging node -r ts-node/register/transpile-only src/index",
     "start:staging-bci": "cross-env NODE_ENV=staging-bci node -r ts-node/register/transpile-only src/index",
-    "start:prod": "cross-env NODE_ENV=production node -r ts-node/register/transpile-only src/index.ts",
+    "start:prod": "cross-env NODE_ENV=production node -r ts-node/register/transpile-only src/index",
     "build": "tsc -p . && npm run copy-files",
     "copy-files": "copyfiles -u 1 src/**/*.json src/**/*.html src/**/*.xlsx dist/src/",
     "scripts": "node -r ts-node/register/transpile-only scripts/index",
