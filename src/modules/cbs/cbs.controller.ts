@@ -12,6 +12,11 @@ export class CbsController {
         catch (error) { next(error); }
     }
 
+    async getUsersDataByName(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await CbsController.cbsService.getUsersDataByName(req.params?.name)); }
+        catch (error) { next(error); }
+    }
+
     async getUserCbsDatasByNcp(req: Request, res: Response, next: NextFunction) {
         try { res.send(await CbsController.cbsService.getUserCbsDatasByNcp(req.params?.ncp, req.query?.age as any, req.query?.clc as any)); }
         catch (error) { next(error); }

@@ -19,8 +19,8 @@ export const clientsDAO = {
             const query = (scope === 'front-office')
                 ? ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli, p.ges, p.tcli,
-                        a.puti as code_profil,
-                        (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_profil,
+                        (select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(dpro) from bank.bkprocli where cli=c.cli)) code_profil,
+                        (select distinct trim(lib1) from bank.bknom where ctab='050' and cacc=(select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(d.dpro) from bank.bkprocli d where c.cli=d.cli))) libelle_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
                         (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
@@ -45,6 +45,30 @@ export const clientsDAO = {
             return result;
         } catch (error: any) {
             logger.error(`Failed to get client data by cli ${cli}`, { error, stack: error.stack, methodPath });
+            throw error;
+        }
+    },
+
+    getClientDataByName: async (name: string): Promise<CbsBankUser[]> => {
+        const methodPath = `${classPath}.getClientDataByName()`;
+        try {
+
+            logger.info(`init get client data by name: ${name}`, { methodPath });
+
+            if (isDevOrStag) { return (await helper.getMockClientData(name)) as CbsBankUser[]; }
+
+            const query =
+                `select
+                    trim(p.nomrest) nomrest, p.sext, p.age, p.cli, a.puti as code_profil,
+                    (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_profil
+                from infoc.bkcli p, evuti a
+                where p.nomrest like '%${name}%' and a.sus='N' and p.cli = a.cli`;
+
+            const result = await executeQuery(query);
+
+            return result;
+        } catch (error: any) {
+            logger.error(`Failed to get client data by name ${name}`, { error, stack: error.stack, methodPath });
             throw error;
         }
     },

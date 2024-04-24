@@ -20,7 +20,7 @@ export const inserDefaultBankUsers = async () => {
             fullName: "NDONG Christine Mecale",
             email: "christine.ndong@bicec.com",
             tel: "237699807917",
-            category: 600,
+            category: 601,
             function: "Organisateur",
             password: await bcrypt.hash('123456', config.get('saltRounds')),
             enabled: true,

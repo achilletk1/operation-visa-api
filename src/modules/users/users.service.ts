@@ -8,7 +8,6 @@ import { CbsController, CbsBankUser } from "modules";
 import { parseNumberFields } from "common/helpers";
 import httpContext from 'express-http-context';
 import { config } from "convict-config";
-import { UserCategory } from "./enum";
 import { isEmpty } from "lodash";
 import { User } from "./model";
 import { hash } from "bcrypt";
@@ -84,7 +83,7 @@ export class UsersService extends CrudService<User>  {
                 user = {
                     ...user, userGesCode: userCbs?.GES_CODE,
                     lname: userLdap.lname, fname: userLdap.fname, fullName: userLdap.fullName,
-                    userCode: userLdap.userCode, email: userLdap.email || userCbs?.EMAIL, tel: userLdap.tel || userCbs?.TEL, category: UserCategory.ADMIN,
+                    userCode: userLdap.userCode, email: userLdap.email || userCbs?.EMAIL, tel: userLdap.tel || userCbs?.TEL, category: createData.category,
                     gender: userCbs ? userCbs?.SEXT : '', lang: userCbs && userCbs?.LANG && userCbs?.LANG !== '001' ? 'en' : 'fr',
                     visaOpeCategory: createData.visaOpeCategory, otp2fa: createData.otp2fa, gesCode: userCbs?.CODE_GESTIONNAIRE,
                     age: { label: userCbs?.LIBELLE_AGENCE, code: userCbs?.AGE }, bankUserCode: userCbs?.CODE_UTILISATEUR,

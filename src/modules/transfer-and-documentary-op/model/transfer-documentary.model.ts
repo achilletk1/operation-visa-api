@@ -1,11 +1,11 @@
+import { OpeVisaStatus, VisaOperationsAttachment } from "modules/visa-operations";
 import { Supplier } from "modules/suppliers";
 import { User } from "modules/users";
-import { OpeVisaStatus, Validator, VisaOperationsAttachment } from "modules/visa-operations";
 
 export enum Operations {
-  TRANSFER = 100,
-  DOCUMENTARY = 200,
-  CLEARANCE = 300
+  TRANSFER = 'transfer',
+  DOCUMENTARY = 'documentary',
+  CLEARANCE = 'clearance',
 }
 
 export class Operation {

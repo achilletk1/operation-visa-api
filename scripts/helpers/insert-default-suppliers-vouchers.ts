@@ -16,7 +16,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'KYC (connaissance du client etablie par la banque)',
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -24,7 +24,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Plan de localisation du domicile',
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -32,7 +32,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: "Justification de domice  (facture d'eau, electricite etc)",
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -40,7 +40,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Copie de la CNI ou du passport',
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -48,7 +48,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Attestation d\'identification fiscale indiquant le numero d\'identification unique ou tout autre document en tenant lieu',
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -56,7 +56,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Declaration sur l\'honneur certifiant l\'exactitude des documents et informations transmises et engageant le donneur d\'ordre a informer l\'etablissement de credit en cas de tout changement',
       isRequired: false,
-      supplierType: 100,
+      supplierType: 'travel',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -64,7 +64,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'KYC (connaissance du client etablie par la banque)',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -72,7 +72,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Plan de localisation du siege sociale',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -80,7 +80,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: "Justification du siege social  (facture d'eau, electricite etc)",
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -88,7 +88,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Extrait du registre de commerce et du credit mobilier(RCCM) le plus recent ou tout document en tenant lieu',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -96,7 +96,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Copie de la carte nationale d\'identite ou du passport des signataires agissant pour le compte du donneur d\'ordre personne morale',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -104,7 +104,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Copie des statuts authentifies par une par une autorite habiletée', 
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -112,7 +112,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Attestation d\'identification fiscale indiquant le numero d\'identification unique ou tout autre document en tenant lieu',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -120,7 +120,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Copie du proces verbal nommant les dirigeants ou tout autre document en tenant lieu',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -128,7 +128,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Copie de la carte nationale d\'identite ou du passport des dirigeants',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -136,7 +136,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Etats financiers certifies des trois derniers exercices ou declaration statistique et fiscale (DSF) des trois derniers exercices lorsque les etats financiers certifies ne sont pas disponibles',
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     },
     {
@@ -144,7 +144,7 @@ export const inserDefaultSuppliersVouchers = async () => {
       extension: '*',
       description: 'Declaration sur l\'honneur certifiant l\'exactitude des documents et informations transmises et engageant le donneur d\'ordre a informer l\'etablissement de credit en cas de tout changement' ,
       isRequired: false,
-      supplierType: 200,
+      supplierType: 'transfer',
       dates: { created: new Date().valueOf() }
     }
     

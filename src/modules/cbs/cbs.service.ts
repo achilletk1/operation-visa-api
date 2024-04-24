@@ -36,6 +36,25 @@ export class CbsService extends BaseService {
         }
     }
 
+    async getUsersDataByName(name: string): Promise<CbsBankUser[]> {
+        (isDev) && (await timeout(500));
+
+        if (!name) { return []; }
+
+        try {
+            const clients = await clientsDAO.getClientDataByName(name);
+
+            if (isEmpty(clients) || clients?.length === 0) { throw new Error('ClientNotFound'); }
+
+            clients && (clients instanceof Array) && (clients?.forEach(e => { e = removeSpacesFromResultSet(e); }));
+
+            return clients;
+        } catch (error: any) {
+            this.logger.error(`Failed to get client data by name ${name}. \n${error.stack}`);
+            throw error;
+        }
+    }
+
     // TODO get user all informations
     async getUserCbsDatasByNcp(ncp: any, age?: string | null, clc?: string | null, scope: 'client' | 'all' | null = null): Promise<CbsClientUser[]> {
         try {

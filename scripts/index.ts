@@ -1,6 +1,5 @@
 import { inserDefaultBankAccountManager } from './helpers/insert-default-bank-acount-manager';
 import { inserDefaultLongTravelsTypes } from './helpers/insert-default-long-travels-types';
-import { inserDefaultUsersValidations } from './helpers/insert-default-user-validation';
 import { inserDefaultUsersCardsTypes } from './helpers/insert-default-cards-types';
 import { inserDefaultPropertyType } from './helpers/insert-default-proprety-type';
 import { insertDefaultTemplateSetting } from './helpers/insert-default-template';
@@ -25,7 +24,6 @@ const runScripts = async () => {
     await inserDefaultSetting();
     await insertDefaultTemplateSetting();
     await inserDefaultVouchers();
-    await inserDefaultUsersValidations();
     await inserDefaultBankUsers();
     await inserDefaultUsersCardsTypes();
     await inserDefaultBankAccountManager();

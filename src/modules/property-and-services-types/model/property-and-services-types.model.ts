@@ -13,8 +13,8 @@ export class PropertyAndServicesType {
 }
 
 export enum PropertyAndServicesTypeCategories {
-    TRAVEL = 100,
-    TRANSFER = 200,
-    DOCUMENTARY = 300,
-    CLEARANCE = 400,
+    TRANSFER = 'transfer',
+    DOCUMENTARY = 'documentary',
+    CLEARANCE = 'clearance',
+    TRAVEL = 'travel',
 }
