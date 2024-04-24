@@ -23,7 +23,7 @@ export class CbsService extends BaseService {
             if (isEmpty(clients) || clients?.length === 0) { throw new Error('ClientNotFound'); }
 
             if (clients && clients instanceof Array) {
-                client = removeSpacesFromResultSet(get(clients, `[0]`, null));
+                client = removeSpacesFromResultSet(get(clients, `[0]`, {}));
             }
 
             let accounts = await clientsDAO.getClientAccounts(code);
@@ -43,8 +43,6 @@ export class CbsService extends BaseService {
 
         try {
             const clients = await clientsDAO.getClientDataByName(name);
-
-            if (isEmpty(clients) || clients?.length === 0) { throw new Error('ClientNotFound'); }
 
             clients && (clients instanceof Array) && (clients?.forEach(e => { e = removeSpacesFromResultSet(e); }));
 
