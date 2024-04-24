@@ -10,7 +10,7 @@ import {
     LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
     DCHAuthorizationsRead, DCHAuthorizationsWrite, HeadOfPersonnelAgencyPermissionRead, HeadOfPersonnelAgencyPermissionWrite, HeadOfRegionPermissionRead, HeadOfRegionPermissionWrite, ManagementCommitteeAuthorizationsRead,
     ManagementCommitteeAuthorizationsWrite, PersonnelManagerPermissionRead, PersonnelManagerPermissionWrite, TravelsMenuAuthorizationsRead, OnlinePaymentsMenuAuthorizationsRead, OnlinePaymentsDeclarationAuthorizationsRead,
-    SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead,
+    SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead, OperationsAuthorizationsRead, SuppliersVoucherSettingMenuAuthorizationsRead, SuppliersMenuAuthorizationsRead, OperationsMenuAuthorizationsRead, SuppliersVoucherSettingAuthorizationsRead, SuppliersVoucherSettingAuthorizationsWrite, OperationsAuthorizationsWrite, SuppliersAuthorizationsRead, SuppliersAuthorizationsWrite,
 } from "../../enum";
 
 const _superAdmin = {
@@ -75,6 +75,15 @@ const _superAdmin = {
     ...HeadOfPersonnelAgencyPermissionWrite,
     ...PersonnelManagerPermissionRead,
     ...PersonnelManagerPermissionWrite,
+    ...SuppliersVoucherSettingMenuAuthorizationsRead,
+    ...SuppliersMenuAuthorizationsRead,
+    ...OperationsMenuAuthorizationsRead,
+    ...SuppliersVoucherSettingAuthorizationsRead,
+    ...SuppliersVoucherSettingAuthorizationsWrite,
+    ...OperationsAuthorizationsRead,
+    ...OperationsAuthorizationsWrite,
+    ...SuppliersAuthorizationsRead,
+    ...SuppliersAuthorizationsWrite,
 };
 
 // Object.entries(_superAdmin).forEach(([k, v]: any) => {

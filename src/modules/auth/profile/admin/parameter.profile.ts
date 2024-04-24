@@ -4,6 +4,8 @@ import {
     FormalNoticeSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsWrite, CartTypeSettingAuthorizationsRead, CartTypeSettingAuthorizationsWrite, LongTravelTypeSettingAuthorizationsRead,
     TransactionTypeSettingAuthorizationsRead, TransactionTypeSettingAuthorizationsWrite, ShareAuthorizationsRead, LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead,
     SettingsMenuAuthorizationsRead,
+    SuppliersVoucherSettingAuthorizationsRead,
+    SuppliersVoucherSettingAuthorizationsWrite,
 } from "../../enum";
 
 const _parameter = {
@@ -26,6 +28,8 @@ const _parameter = {
     ...CeilingSettingAuthorizationsWrite,
     ...TransactionTypeSettingAuthorizationsRead,
     ...TransactionTypeSettingAuthorizationsWrite,
+    ...SuppliersVoucherSettingAuthorizationsRead,
+    ...SuppliersVoucherSettingAuthorizationsWrite,
     ...ShareAuthorizationsRead
 };
 

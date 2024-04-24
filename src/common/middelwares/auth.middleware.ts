@@ -52,7 +52,7 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
         authorizations && authorizations.length && httpContext.set('authorizations', authorizations);
 
         next();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === 'TokenExpired') {
             logger.error(`\nToken expired.`, error);

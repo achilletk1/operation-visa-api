@@ -9,4 +9,12 @@ export class PropertyAndServicesType {
         updated?: number;
     };
     description?: string;
+    category?: PropertyAndServicesTypeCategories;
+}
+
+export enum PropertyAndServicesTypeCategories {
+    TRAVEL = 100,
+    TRANSFER = 200,
+    DOCUMENTARY = 300,
+    CLEARANCE = 400,
 }

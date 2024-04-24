@@ -45,6 +45,7 @@ export const inserDefaultPropertyType = async () => {
     },
     {
       label: 'Règlement frais de scolarité',
+      category: 400,
       vouchers: [
         {
           _id: '63187ac69bbd2f516303b168',
@@ -79,6 +80,7 @@ export const inserDefaultPropertyType = async () => {
     },
     {
       label: 'Règlement frais de santé',
+      category: 400,
       vouchers: [
         {
           _id: '63187bf09bbd2f516303b16c',
@@ -99,6 +101,7 @@ export const inserDefaultPropertyType = async () => {
     },
     {
       label: "Règlement frais d'hôtel",
+      category: 400,
       vouchers: [
         {
           _id: '63187ce69bbd2f516303b171',
@@ -124,11 +127,81 @@ export const inserDefaultPropertyType = async () => {
       ],
       dates: { created: new Date().valueOf() }
     },
-
+    {
+      label: "Règlement frais de scolarité",
+      category: 100,
+      vouchers: [
+        {
+          _id: '63187ce69bbd2f516303b171',
+          label: 'Facture',
+          extension: '*',
+          description: 'Facture ou ticket de caisse',
+          isRequired: true
+        },
+        {
+          _id: '63187c1a9bbd2f516303b16d',
+          label: 'Preuve de voyage futur hors CEMAC',
+          extension: '*',
+          description: "Preuve de voyage futur à l'extérieur de la CEMAC",
+          isRequired: false
+        },
+        {
+          _id: '631852ff5a430f5fac5c503c',
+          label: 'Document de transport',
+          extension: '*',
+          description: "Billet d'avion, Ticket de train, ticket de bus",
+          isRequired: false
+        }
+      ],
+      dates: { created: new Date().valueOf() }
+    },
+    {
+      label: "Règlement frais d'hôtel",
+      category: 200,
+      vouchers: [
+        {
+          _id: '63187c1a9bbd2f516303b16d',
+          label: 'Preuve de voyage futur hors CEMAC',
+          extension: '*',
+          description: "Preuve de voyage futur à l'extérieur de la CEMAC",
+          isRequired: false
+        },
+        {
+          _id: '631852ff5a430f5fac5c503c',
+          label: 'Document de transport',
+          extension: '*',
+          description: "Billet d'avion, Ticket de train, ticket de bus",
+          isRequired: false
+        }
+      ],
+      dates: { created: new Date().valueOf() }
+    },
+    {
+      label: "Règlement frais de santé",
+      category: 300,
+      vouchers: [
+        {
+          _id: '63187ce69bbd2f516303b171',
+          label: 'Facture',
+          extension: '*',
+          description: 'Facture ou ticket de caisse',
+          isRequired: true
+        },
+        {
+          _id: '63187c1a9bbd2f516303b16d',
+          label: 'Preuve de voyage futur hors CEMAC',
+          extension: '*',
+          description: "Preuve de voyage futur à l'extérieur de la CEMAC",
+          isRequired: false
+        },
+      ],
+      dates: { created: new Date().valueOf() }
+    },
 
     // Lettre circulaire N002-GR 2022
     {
       label: 'Tout type de transfert',
+      category: 400,
       vouchers: [
         {
           _id: '65e9c6c9a4a054e09764eff0',
@@ -199,6 +272,7 @@ export const inserDefaultPropertyType = async () => {
 
     {
       label: 'Achat de biens ',
+      category: 400,
       vouchers: [
         {
           _id: '65eea93ba4a054e09764effe',

@@ -1,7 +1,7 @@
 import {
     FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, OnlinePaymentsAuthorizationsWrite, CeilingIncreaseAuthorizationsWrite,
     ShortTravelAuthorizationsWrite, LongTravelAuthorizationsWrite, InstantNotificationAuthorizationsRead, InstantNotificationAuthorizationsWrite, NotificationListAuthorizationsWrite,
-    ImportationsAuthorizationsWrite, FormalNoticeAuthorizationsWrite, UsersMenuAuthorizationsRead, TravelsDeclarationAuthorizationsRead, OnlinePaymentsDeclarationAuthorizationsRead,
+    ImportationsAuthorizationsWrite, FormalNoticeAuthorizationsWrite, UsersMenuAuthorizationsRead, TravelsDeclarationAuthorizationsRead, OnlinePaymentsDeclarationAuthorizationsRead, SuppliersAuthorizationsWrite, OperationsAuthorizationsWrite,
 } from "../../enum";
 import { controller } from "../viewer";
 
@@ -21,6 +21,8 @@ const _accountManager = {
     ...InstantNotificationAuthorizationsWrite,
     ...NotificationListAuthorizationsWrite,
     ...FormalNoticeAuthorizationsWrite,
+    ...SuppliersAuthorizationsWrite,
+    ...OperationsAuthorizationsWrite,
 };
 
 export const accountManager = _accountManager;

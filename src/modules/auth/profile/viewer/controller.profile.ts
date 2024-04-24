@@ -4,6 +4,11 @@ import {
     TravelsMenuAuthorizationsRead,
     OnlinePaymentsMenuAuthorizationsRead,
     OnlinePaymentsDeclarationAuthorizationsRead,
+    SuppliersAuthorizationsRead,
+    SuppliersVoucherSettingMenuAuthorizationsRead,
+    SuppliersMenuAuthorizationsRead,
+    OperationsMenuAuthorizationsRead,
+    OperationsAuthorizationsRead,
 } from "../../enum";
 
 const _controller = {
@@ -17,6 +22,16 @@ const _controller = {
     ...ReportingAuthorizationsRead,
     ...FormalNoticeAuthorizationsRead,
     ...NotificationListAuthorizationsRead,
+    ...SuppliersAuthorizationsRead,
+    ...OperationsAuthorizationsRead,
+    ...SuppliersVoucherSettingMenuAuthorizationsRead,
+    ...SuppliersMenuAuthorizationsRead,
+    ...OperationsMenuAuthorizationsRead,
+    ...SuppliersVoucherSettingMenuAuthorizationsRead,
+    ...SuppliersMenuAuthorizationsRead,
+    ...OperationsMenuAuthorizationsRead,
+    ...OperationsAuthorizationsRead,
+    ...SuppliersAuthorizationsRead,
     ...ShareAuthorizationsRead,
 };
 

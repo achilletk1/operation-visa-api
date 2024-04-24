@@ -47,16 +47,16 @@ export const getAgenciesQuery = (params: any) => {
             { $sort: { _id: -1 } },
         ];
 
-    match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+    // match['$match']['user.age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
 
-    if(authorizationsUser.includes(
-        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
-        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
-        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
-        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
-    )){  
-        match['$match']['user.age.code'] = `${Agencies.PERSONNAL}` 
-    }
+    // if(authorizationsUser.includes(
+    //     authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
+    //     authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
+    //     authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
+    //     authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
+    // )){  
+    //     match['$match']['user.age.code'] = `${Agencies.PERSONNAL}` 
+    // }
     
     // example of ageLabel = 'BICEC BASSA';
     if (filter['user.age.label']) { match['$match']['user.age.label'] = { $regex: `${filter['user.age.label']}` }; }

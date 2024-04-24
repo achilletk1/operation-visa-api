@@ -5,8 +5,10 @@ import {
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
   validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute, transactionTypesRoute, visaRecapOperationRoute,
-  bankAccountManagerRoute
+  bankAccountManagerRoute, supplierVouchersRoute
 } from 'modules';
+import { supplierRoute } from 'modules/suppliers';
+import { transferDocumentarRoute } from 'modules/transfer-and-documentary-op';
 
 const routes = (app: Express) => {
 
@@ -26,6 +28,8 @@ const routes = (app: Express) => {
   
   app.use( "/letters", lettersRoute);
   
+  app.use( "/supplier", supplierRoute);
+
   app.use( "/vouchers", vouchersRoute);
   
   app.use( "/settings", settingsRoute);
@@ -45,12 +49,14 @@ const routes = (app: Express) => {
   app.use( "/notifications", notificationsRoute);
 
   app.use( "/online-payment", onlinePaymentRoute);
-
+  
   app.use( "/visa-operations", visaOperationsRoute);
   
   app.use( "/temporary-files", temporaryFilesRoute);
   
   app.use( "/long-travel-types", longTravelTypesRoute);
+
+  app.use( "/supplier-vouchers", supplierVouchersRoute);
   
   app.use( "/visa-transactions", visaTransactionsRoute);
   
@@ -59,6 +65,8 @@ const routes = (app: Express) => {
   app.use( "/visa-recap-operation", visaRecapOperationRoute);
   
   app.use( "/bank-account-manager", bankAccountManagerRoute);
+
+  app.use('/transfer-and-documentary', transferDocumentarRoute)
 
   app.use( "/visa-transactions-files", visaTransactionsFilesRoute);
 
