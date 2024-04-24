@@ -19,8 +19,8 @@ export const clientsDAO = {
             const query = (scope === 'front-office')
                 ? ` select
                         trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli, p.ges, p.tcli,
-                        (select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(dpro) from bank.bkprocli where cli=c.cli)) code_profil,
-                        (select distinct trim(lib1) from bank.bknom where ctab='050' and cacc=(select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(d.dpro) from bank.bkprocli d where c.cli=d.cli))) libelle_profil,
+                        (select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(dpro) from infoc.bkprocli where cli=c.cli)) code_profil,
+                        (select distinct trim(lib1) from infoc.bknom where ctab='050' and cacc=(select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(d.dpro) from infoc.bkprocli d where c.cli=d.cli))) libelle_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
                         (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
@@ -37,7 +37,7 @@ export const clientsDAO = {
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) libelle_agence,
                         (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
-                    from infoc.bkcli p, evuti a
+                    from infoc.bkcli p, infoc.evuti a
                     where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
 
             const result = await executeQuery(query);
@@ -61,7 +61,7 @@ export const clientsDAO = {
                 `select
                     trim(p.nomrest) nomrest, p.sext, p.age, p.cli, a.puti as code_profil,
                     (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_profil
-                from infoc.bkcli p, evuti a
+                from infoc.bkcli p, infoc.evuti a
                 where p.nomrest like '%${name}%' and a.sus='N' and p.cli = a.cli`;
 
             const result = await executeQuery(query);
@@ -116,8 +116,8 @@ export const clientsDAO = {
                 select
                     trim(p.nomrest) nomrest, trim(p.nom) nom, trim(p.pre) pre, p.nid, p.vid, p.sext, p.age, p.lang, p.cli, p.tcli,
                     (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
-                    (select c.num from bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
-                    (select c.email from bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
+                    (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                    (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                 from infoc.bkcli p, infoc.bkcom a
                 where p.cli = a.cli and a.cfe = 'N' and a.ife = 'N' and substr(a.cha,1,3) in ('371','372','373') and a.cha not like '37%99%' and a.ncp = '${ncp}' ${(age && clc) ? `and a.age = ${age} and a.clc = ${clc}` : ''}`;
 
@@ -234,11 +234,11 @@ export const clientsDAO = {
 
             const query = `
                 select a.ges code_ges, a.nom fullname, a.age_uti age_uti, a.email email, a.ntel tel, a.age age,
-                (select puti from evuti b where b.sus='N' and b.cge IS NOT NULL and b.cge = a.ges) code_profile
+                (select puti from infoc.evuti b where b.sus='N' and b.cge IS NOT NULL and b.cge = a.ges) code_profile
                 from infoc.bkgestionnaire a`;
             // , (select lib1 b from bknom b.ctab=994 and profile_uti=b.cacc) code_profile
             // select a.puti profil_uti, b.lib1 lib_profil_puti, a.cuti code_uti, a.lib as fullname, a.cge code_ges, a.age, a.cli
-            // from evuti a , bknom b
+            // from infoc.evuti a , bknom b
             // wherea.sus='N' and b.ctab=994 and a.puti=b.cacc and a.cge IS NOT NULL
             // order by a.puti, a.cuti ////////////////////////
             // and a.puti in ('R204', 'R206', 'R208', 'R211', 'R215', 'R217', 'R219', 'R220')
