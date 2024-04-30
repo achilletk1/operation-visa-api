@@ -52,6 +52,8 @@ export * from './transfer-stakeholder';
 
 export * from './visa-transactions-files';
 
+export * from './sensitives-notifications';
+
 export * from './request-ceiling-increase';
 
 export * from './validation-level-settings';
@@ -63,3 +65,4 @@ export * from './transfer-and-documentary-op';
 export * from './property-and-services-types';
 
 export * from './visa-recap-operation-statement';
+

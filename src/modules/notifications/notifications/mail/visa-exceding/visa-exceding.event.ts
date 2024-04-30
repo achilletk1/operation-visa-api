@@ -7,7 +7,7 @@ export class VisaExceedingEvent implements VisaExceedingMailData {
     transactions!: any;
 
     constructor(
-        data: { transactions: any, ceiling: string, amount: number },
+        data: { transactions: any, ceiling: string, amount: number, isSensitiveCustomer: boolean },
         public receiver: string = '', lang: 'fr' | 'en',
         public id?: string,
         public cc: string = '',
