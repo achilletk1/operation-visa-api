@@ -8,6 +8,24 @@ export const config = convict({
         default: 'development',
         env: 'NODE_ENV'
     },
+    importOperationPath: {
+        doc: 'import data from file operation cron',
+        format: String,
+        default: '',
+        env: 'CRON_IMPORT_OPERATION_DATA'
+    },
+    importOperationSuccessPath: {
+        doc: 'import data from file operation cron',
+        format: String,
+        default: '',
+        env: 'CRON_IMPORT_OPERATION_DATA'
+    },
+    importOperationFailPath: {
+        doc: 'import data from file operation cron',
+        format: String,
+        default: '',
+        env: 'CRON_IMPORT_OPERATION_DATA'
+    },
     ip: {
         doc: 'The IP address to bind.',
         format: String,
@@ -409,6 +427,12 @@ export const config = convict({
             format: String,
             default: '7 */1 * * *',
             env: 'CRON_REFRESH_BANK_ACCOUNT_MANAGER_DATA'
+        },
+        importOperation: {
+            doc: 'import data from file operation cron',
+            format: String,
+            default: '',
+            env: 'CRON_IMPORT_OPERATION_TIME'
         },
     },
 });

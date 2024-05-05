@@ -11,6 +11,9 @@
             "password": ""
         }
     },
+    "importOperationPath": "../../../filesrec/rec",
+    "importOperationSuccessPath": "../../../filesrec/archSuccess",
+    "importOperationFailPath": "../../../filesrec/archEchec",
     "cookieSalt": "HZt6wi7GSLD",
     "cookieTTL": 3600000,
     "oauthSalt": "4tG9!!HZt6wi",
@@ -59,7 +62,8 @@
         "unjustifiedOperation":"* * * * *",
         "quaterlyStatementReportMailsScheduler": "0 0 1 */3 *",
         "monthlyStatementReportMailsScheduler": "0 0 1 * *",
-        "refreshBankAccountManager": "05 */1 * * *"
+        "refreshBankAccountManager": "05 */1 * * *",
+        "importOperation": "* * * * *"
     },
     "gotenbergUrl": "http://143.42.97.18:7900",
     "emailTest": "achille.tachum@londo-tech.com",

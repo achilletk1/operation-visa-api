@@ -21,6 +21,7 @@ import { AuthTokenEmailEvent, AuthTokenEmailNotification } from './notifications
 import { TemplateSmsEvent, TemplateSmsNotification } from './notifications/sms/template';
 import { TokenSmsEvent, TokenSmsNotification } from './notifications/sms/token';
 import events from 'events';
+import { ImportOperationEmailNotification, ImportOperationErrorEvent } from './notifications/mail/import-operation-error';
 
 export const notificationEmmiter = new events.EventEmitter();
 
@@ -120,4 +121,8 @@ notificationEmmiter.on('token-sms', async (data: TokenSmsEvent) => {
 
 notificationEmmiter.on('template-sms', async (data: TemplateSmsEvent) => {
     await (new TemplateSmsNotification(data)).sendTempalteNotification();
+});
+
+notificationEmmiter.on('import-operation-error', async (data: ImportOperationErrorEvent) => {
+    await (new ImportOperationEmailNotification(data)).sendNotification();
 });

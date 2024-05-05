@@ -41,3 +41,5 @@ export * from './online-payment-status-changed';
 export * from './transaction-outside-not-justified';
 
 export * from './uploaded-documents-on-exceeded-folder';
+
+export * from './import-operation-error';

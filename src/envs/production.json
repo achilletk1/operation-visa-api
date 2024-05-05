@@ -20,6 +20,9 @@
         }
     },
     "cookieSalt": "3RKuQbJ73U",
+    "importOperationPath": "",
+    "importOperationSuccessPath": "",
+    "importOperationFailPath": "",
     "cookieTTL": 900000,
     "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
     "oauthTTL": 930,
