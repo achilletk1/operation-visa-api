@@ -6,11 +6,11 @@ export interface MailAttachment { name: string; content: string | Buffer; conten
 export interface Notification {
     _id?: string;
     object: string;
-    format: NotificationFormat; // 100 SMS, 200 MAIL, 300 WHATSAPPS
+    format: NotificationFormat; // 100 SMS, 200 MAIL, 300 WHATSAPP
     message: string;
     email: string | undefined;
     tel: string | undefined;
-    id: string | undefined; // online payement Id, voyage Id, travel-month Id
+    id: string | undefined; // online payment Id, voyage Id, travel-month Id
     dates: {
         createdAt: number;
         sentAt?: number;

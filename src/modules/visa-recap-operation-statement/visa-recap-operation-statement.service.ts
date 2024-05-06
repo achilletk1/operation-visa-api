@@ -40,7 +40,7 @@ export class VisaRecapOperationService extends CrudService<StatementReport> {
 
     async quarterlyReportingOperationsForBEAC(): Promise<void> {
         try {
-            const data = (await TravelController.travelService.findAll({ filter: { status: OpeVisaStatus.EXCEEDED } }))?.data ?? [];
+            const data = (await TravelController.travelService.findAll({ filter: { isUntimely: true } }))?.data ?? [];
             const exceededTravels = data.filter((elt) => { return (elt?.transactions.length > 0 && moment().diff(moment(elt?.transactions[0]?.date), 'days') > 38) });
             const base64Data = await getBEACReportZipOnBase64Format(exceededTravels, 'tmp_exceeded');
             const result = await insertStatementReport(StatementType.QUARTERLY, base64Data);

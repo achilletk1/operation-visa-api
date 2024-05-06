@@ -26,7 +26,7 @@ export class BankAccountManagerService extends CrudService<BankAccountManager>  
             const bankAccountManagersToUpdate = cbsBankAccountManagers.filter(accountManager => !gesCodeArrayOfUserWithManualMode.includes(accountManager.CODE_GES));
 
             await BankAccountManagerController.bankAccountManagerService.deleteMany({ $or: [{ manualMode: { $exists: false } }, { manualMode: false }] });
-            await BankAccountManagerController.bankAccountManagerService.create(bankAccountManagersToUpdate);
+            await BankAccountManagerController.bankAccountManagerService.createMany(bankAccountManagersToUpdate);
         } catch (e: any) {
             this.logger.error(`error during getAndUpdateBankAccountManager process \n ${e.stack}`);    
         }
@@ -47,7 +47,7 @@ export class BankAccountManagerService extends CrudService<BankAccountManager>  
         try {
             const authUser = httpContext.get('user');
             if (authUser.category < 500) { throw new Error('Forbidden'); };
-            return await BankAccountManagerController.bankAccountManagerService.update({ _id: bankAccountManager?._id }, bankAccountManager);
+            return await BankAccountManagerController.bankAccountManagerService.update({ _id: bankAccountManager?._id }, { ...bankAccountManager });
         } catch (error) { throw error; }
     }
 

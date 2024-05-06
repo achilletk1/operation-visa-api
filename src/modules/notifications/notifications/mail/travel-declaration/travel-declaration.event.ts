@@ -16,7 +16,7 @@ export class TravelDeclarationEvent implements TravelDeclarationMailData {
         this.receiver = travel?.user?.email || '';
         this.ceiling = String(travel?.ceiling) || '';
         this.created = moment(+Number(travel?.dates?.created)).format('DD/MM/YYYY HH:mm');
-        this.start = moment(+travel?.proofTravel?.dates?.start).startOf('day').format('DD/MM/YYYY');
+        this.start = moment(+Number(travel?.proofTravel?.dates?.start)).startOf('day').format('DD/MM/YYYY');
         this.end = moment(+Number(travel?.proofTravel?.dates?.end)).endOf('day').format('DD/MM/YYYY');
     }
 }

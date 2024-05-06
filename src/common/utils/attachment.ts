@@ -1,7 +1,7 @@
+import { VisaOperationsAttachment } from "modules/visa-operations";
 import { getExtensionByContentType } from "modules/export";
 import { writeFile } from "./files.service";
 import moment from "moment";
-import { VisaOperationsAttachment } from "modules/visa-operations";
 
 export function saveAttachment(ref: string, attachment: VisaOperationsAttachment, created: number | undefined = new Date().valueOf(), operationType: string, subRepertory?: string) {
     try {

@@ -1,4 +1,4 @@
-import { Collection, Document, InsertOneResult, InsertManyResult, ObjectId, UpdateResult, WithId, DeleteResult, UpdateQuery } from 'mongodb';
+import { Collection, Document, InsertOneResult, InsertManyResult, ObjectId, UpdateResult, WithId, DeleteResult, UpdateFilter } from 'mongodb';
 import { RepositoryInterface } from '../interfaces';
 import * as db from 'database/mongodb';
 import { isEmpty } from 'lodash';
@@ -35,9 +35,9 @@ export class BaseRepository implements RepositoryInterface {
     } catch (error) { throw error; }
   }
 
-  async findAllAggregate(agregation: any): Promise<Document[]> {
+  async findAllAggregate(aggregation: any): Promise<Document[]> {
     try {
-      return (await this.getCollection()).aggregate(agregation ?? []).toArray();
+      return (await this.getCollection()).aggregate(aggregation ?? []).toArray();
     } catch (error) { throw error; }
   }
 
@@ -61,9 +61,9 @@ export class BaseRepository implements RepositoryInterface {
     try {
       this.setMongoId(filter);
 
-      const updateQuery: UpdateQuery<any> = { $set: document };
+      const updateQuery: UpdateFilter<Document> = { $set: document };
       if (unsetDocument) { updateQuery.$unset = unsetDocument; }
-      return (await this.getCollection()).updateOne(filter, updateQuery);
+      return await (await this.getCollection()).updateOne(filter, updateQuery as any);
     } catch (error) { throw error; }
   }
 
@@ -71,10 +71,10 @@ export class BaseRepository implements RepositoryInterface {
     try {
       this.setMongoId(filter);
 
-      const updateFilter: UpdateQuery<any> = {};
+      const updateFilter: UpdateFilter<Document> = {};
       if (!isEmpty(setDocument)) updateFilter.$set = setDocument;
       if (!isEmpty(unsetDocument)) updateFilter.$unset = unsetDocument;
-      return (await this.getCollection()).updateMany(filter, updateFilter) as UpdateResult;
+      return await (await this.getCollection()).updateMany(filter, updateFilter as any);
     } catch (error) { throw error; }
   }
 
