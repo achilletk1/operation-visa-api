@@ -22,7 +22,7 @@ export const clientsDAO = {
                         (select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(dpro) from infoc.bkprocli where cli=c.cli)) code_profil,
                         (select distinct trim(lib1) from infoc.bknom where ctab='050' and cacc=(select c.pro from infoc.bkprocli c where c.cli = p.cli and c.dpro = (select max(d.dpro) from infoc.bkprocli d where c.cli=d.cli))) libelle_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = p.age and rownum = 1) libelle_agence,
-                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = '001' and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p
                     where p.cli = '${cli}'`
@@ -35,7 +35,7 @@ export const clientsDAO = {
                         trim(a.lib) as noms_complet,
                         (select trim(c.lib1) from infoc.bknom c where c.ctab = '994' and c.cacc = a.puti) libelle_profil,
                         (select trim(b.nom) from infoc.bkbqe b where b.etab = '10001' and b.guib = a.age and rownum = 1) libelle_agence,
-                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE p.cli = b.cli) and rownum = 1) tel,
+                        (select c.num from infoc.bktelcli c where c.cli = p.cli and c.typ = '001' and rownum = 1) tel,
                         (select c.email from infoc.bkemacli c where c.cli = p.cli and c.typ = (SELECT MAX(b.typ) FROM infoc.bkemacli b WHERE p.cli = b.cli) and rownum = 1) email
                     from infoc.bkcli p, infoc.evuti a
                     where p.cli = '${cli}' and a.sus='N' and p.cli = a.cli`;
@@ -142,7 +142,7 @@ export const clientsDAO = {
 
             const query = `
             SELECT a.cli, a.typ, a.num,c.nomrest
-            FROM infoc.bktelcli a, infoc.bkcli c WHERE a.typ = (SELECT MAX(b.typ) FROM infoc.bktelcli b WHERE a.cli = b.cli) and a.cli in (${reduced}) and a.cli = c.cli`;
+            FROM infoc.bktelcli a, infoc.bkcli c WHERE a.typ = '001' and a.cli in (${reduced}) and a.cli = c.cli`;
 
             const result = await executeQuery(query);
 
