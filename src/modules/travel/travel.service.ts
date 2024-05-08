@@ -1,4 +1,4 @@
-import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getValidationsFolder, parseNumberFields } from "common/helpers";
+import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
 import { notificationEmmiter, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
@@ -184,6 +184,8 @@ export class TravelService extends CrudService<Travel> {
 
             const currentTravel = await TravelController.travelService.findOne({ filter: { _id: travel?._id?.toString() } });
 
+            const { newVersion, oldVersion } = getDifferenceBetweenObjects(travel, currentTravel);
+
             if (isEmpty(currentTravel)) { return new Error('TravelNotFound'); }
 
             if (travel?.proofTravel && travel?.proofTravel?.isEdit) {
@@ -231,7 +233,9 @@ export class TravelService extends CrudService<Travel> {
                 _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
-                steps: steps.toString() || 'Preuve de voyage'
+                steps: steps.toString() || 'Preuve de voyage',
+                oldVersion,
+                newVersion,
             });
             travel.expenseDetailsStatus = getOnpStatementStepStatus(travel, 'expenseDetail');
             travel.expenseDetailAmount = getTotal(travel?.transactions);

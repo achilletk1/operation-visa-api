@@ -113,6 +113,8 @@ export interface Editor {
     date: number;
     fullName?: string;
     steps?: string;
+    newVersion?: any;
+    oldVersion?: any;
 }
 
 export interface ConnectionHistory {

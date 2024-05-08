@@ -1,7 +1,7 @@
 import { VisaOperationsAttachment, OpeVisaStatus, Validator } from 'modules/visa-operations';
+import { isEmpty, isEqual, isObject, isString, transform } from 'lodash';
 import { OnlinePaymentMonth } from 'modules/online-payment';
 import { TravelMonth } from 'modules/travel-month';
-import { isEmpty, isString } from 'lodash';
 import { Voucher } from 'modules/vouchers';
 import { Travel } from 'modules/travel';
 import { config } from 'convict-config';
@@ -167,18 +167,18 @@ export class HttpForbidden extends HttpError {
 }
 
 export const convertParams = (query: QueryOptions): QueryOptions => {
-  
+
   query.limit && (query.limit = +query.limit);
-  
+
   query.offset && (query.offset = +query.offset);
-  
+
   if (!query.filter) { return query; }
 
   for (const key in query.filter) {
     if ('excepts' in query.filter && query.filter.excepts.includes(key)) continue;
-    (['true'].includes(query.filter[key]))  && (query.filter[key] = true);
+    (['true'].includes(query.filter[key])) && (query.filter[key] = true);
     (query.filter[key] === 'false') && (query.filter[key] = false);
-    if (RegExp(/[a-z]/i).test(query.filter[key]) || ['user.clientCode', 'user.cbsCategory'].includes(key) ) {
+    if (RegExp(/[a-z]/i).test(query.filter[key]) || ['user.clientCode', 'user.cbsCategory'].includes(key)) {
       continue;
     }
     query.filter[key] = !isNaN(query.filter[key]) ? +query.filter[key] : query.filter[key];
@@ -318,6 +318,23 @@ export function getPartialUser(user: User): Partial<User> {
     category: user.category,
     cbsCategory: user.cbsCategory,
   };
+}
+
+export function getDifferenceBetweenObjects(object: any, base: any) {
+  function changes(object: any, base: any) {
+    return transform(object, function (result: any, value, key) {
+      if (!isEqual(value, base[key])) { result[key] = (isObject(value) && isObject(base[key])) ? changes(value, base[key]) : value; }
+    });
+  }
+  let newVersion = changes(object, base);
+  let oldVersion = changes(base, object);
+
+  if (newVersion?.proofTravel) {
+    newVersion = { ...newVersion, ...newVersion?.proofTravel }; oldVersion = { ...oldVersion, ...oldVersion?.proofTravel}
+    delete newVersion?.proofTravel; delete oldVersion?.proofTravel
+  };
+  delete newVersion?._id; delete oldVersion?._id;
+  return { newVersion, oldVersion };
 }
 
 declare type ObjectType<T> = {

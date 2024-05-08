@@ -1,5 +1,5 @@
 
-import { convertParams, extractPaginationData, generateAttachmentFromVoucher, generateValidator, getAgenciesQuery } from 'common/helpers';
+import { convertParams, extractPaginationData, generateAttachmentFromVoucher, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects } from 'common/helpers';
 import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from 'modules/visa-operations';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { ImportsController } from './imports.controller';
@@ -50,6 +50,7 @@ export class ImportsService extends CrudService<Import> {
             let oldImportation: Import = {};
 
             try { oldImportation = await ImportsController.importsService.findOne({ filter: { _id } }); } catch (error) { }
+            const { newVersion, oldVersion } = getDifferenceBetweenObjects(importation, oldImportation);
 
             // Update from imports history, Partial<importation> like { attachments } 
             if (importation?.attachments?.length && importation?.attachments instanceof Array) {
@@ -75,11 +76,15 @@ export class ImportsService extends CrudService<Import> {
                 // TODO sent final notification to inform client counter of 30 days start to apure importation folder
             }
 
-            importation.editors = [
-                ...(oldImportation?.editors ?? []),
-                { _id: authUser?._id, fullName: authUser?.fullName, date: new Date().valueOf(), steps, },
-            ];
-
+            importation.editors = importation?.editors ? importation?.editors : [];
+            importation?.editors?.push({
+                _id: authUser?._id,
+                fullName: authUser?.fullName,
+                date: new Date().valueOf(),
+                steps,
+                oldVersion,
+                newVersion,
+            });
             return await ImportsController.importsService.update({ _id }, importation);
 
             // TODO send notifications for client and bank
@@ -147,7 +152,8 @@ export class ImportsService extends CrudService<Import> {
             query = extractPaginationData(query || {});
             if (query?.filter?.start && query?.filter?.end) {
                 delete query?.filter?.start; delete query?.filter?.end;
-                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                query = {
+                    ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }
