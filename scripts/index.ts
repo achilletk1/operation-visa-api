@@ -10,23 +10,20 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { dropTestCollections } from './tests/drop-test-collections';
 import readline from 'readline';
-import { inserDefaultSuppliersVouchers } from './helpers/insert-default-suppliers-vouchers';
 
 const runScripts = async () => {
     // SCRIPTS to execute
-    await dropTestCollections();
-    await inserDefaultVisaCeilings();
-    await inserDefaultLongTravelsTypes();
-    await inserDefaultLetter();
+    // await dropTestCollections();
+    // await inserDefaultVisaCeilings();
+    // await inserDefaultLongTravelsTypes();
+    // await inserDefaultLetter();
     await inserDefaultPropertyType();
-    await inserDefaultSuppliersVouchers();
-    await inserDefaultSetting();
-    await inserDefaultSetting();
-    await insertDefaultTemplateSetting();
+    // await inserDefaultSetting();
+    // await insertDefaultTemplateSetting();
     await inserDefaultVouchers();
-    await inserDefaultBankUsers();
-    await inserDefaultUsersCardsTypes();
-    await inserDefaultBankAccountManager();
+    // await inserDefaultBankUsers();
+    // await inserDefaultUsersCardsTypes();
+    // await inserDefaultBankAccountManager();
 }
 
 (async () => {

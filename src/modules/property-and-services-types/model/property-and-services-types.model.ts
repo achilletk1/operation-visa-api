@@ -17,4 +17,6 @@ export enum PropertyAndServicesTypeCategories {
     DOCUMENTARY = 'documentary',
     CLEARANCE = 'clearance',
     TRAVEL = 'travel',
+    ORDERING_PARTY = 'ordering-party',
+    BENEFICIARY = 'beneficiary',
 }
