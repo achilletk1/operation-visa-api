@@ -130,7 +130,7 @@ export const beac_letter_14_March_2022 = [
         dates: { created: new Date().valueOf() }
     },
     {
-        label: `Bénéficiaire personne physique`,
+        label: `Bénéficiaire personne morale`,
         category: PropertyAndServicesTypeCategories.BENEFICIARY,
         vouchers: [
             {
@@ -186,7 +186,7 @@ export const beac_letter_14_March_2022 = [
         dates: { created: new Date().valueOf() }
     },
     {
-        label: `pe personne physique`,
+        label: `Bénéficiaire personne physique`,
         category: PropertyAndServicesTypeCategories.BENEFICIARY,
         vouchers: [
             {

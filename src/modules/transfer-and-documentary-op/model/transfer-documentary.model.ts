@@ -1,5 +1,5 @@
 import { OpeVisaStatus, VisaOperationsAttachment } from "modules/visa-operations";
-import { Supplier } from "modules/suppliers";
+import { TransferStakeholder } from "modules/transfer-stakeholder";
 import { User } from "modules/users";
 
 export enum Operations {
@@ -21,7 +21,7 @@ export class Operation {
   operationType?: Operations;
   object?: string;
   amount?: number;
-  Supplier?: Supplier;
+  transferStakeholder?: TransferStakeholder;
   operationReason?: string;
   documentaryType?: string;
   clearanceType?: string;

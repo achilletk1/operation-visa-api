@@ -1,14 +1,8 @@
 import {
     ImportationsAuthorizationsRead, ReportingAuthorizationsRead, NotificationListAuthorizationsRead, ShareAuthorizationsRead, FormalNoticeAuthorizationsRead,
-    TravelsDeclarationAuthorizationsRead, ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
-    TravelsMenuAuthorizationsRead,
-    OnlinePaymentsMenuAuthorizationsRead,
-    OnlinePaymentsDeclarationAuthorizationsRead,
-    SuppliersAuthorizationsRead,
-    SuppliersVoucherSettingMenuAuthorizationsRead,
-    SuppliersMenuAuthorizationsRead,
-    OperationsMenuAuthorizationsRead,
-    OperationsAuthorizationsRead,
+    ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
+    TravelsMenuAuthorizationsRead, OnlinePaymentsMenuAuthorizationsRead, TransferStakeholdersAuthorizationsRead, TransferStakeholdersMenuAuthorizationsRead,
+    OperationsMenuAuthorizationsRead, OperationsAuthorizationsRead,
 } from "../../enum";
 
 const _controller = {
@@ -22,16 +16,10 @@ const _controller = {
     ...ReportingAuthorizationsRead,
     ...FormalNoticeAuthorizationsRead,
     ...NotificationListAuthorizationsRead,
-    ...SuppliersAuthorizationsRead,
-    ...OperationsAuthorizationsRead,
-    ...SuppliersVoucherSettingMenuAuthorizationsRead,
-    ...SuppliersMenuAuthorizationsRead,
-    ...OperationsMenuAuthorizationsRead,
-    ...SuppliersVoucherSettingMenuAuthorizationsRead,
-    ...SuppliersMenuAuthorizationsRead,
+    ...TransferStakeholdersMenuAuthorizationsRead,
+    ...TransferStakeholdersAuthorizationsRead,
     ...OperationsMenuAuthorizationsRead,
     ...OperationsAuthorizationsRead,
-    ...SuppliersAuthorizationsRead,
     ...ShareAuthorizationsRead,
 };
 

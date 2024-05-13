@@ -1,12 +1,13 @@
+import { PropertyAndServicesTypeCategories } from "modules/property-and-services-types";
 import { VisaOperationsAttachment } from "modules/visa-operations";
-import { SupplierTypes } from "modules/supplier-vouchers/model";
 import { User } from "modules/users";
 
-export interface Supplier {
+export interface TransferStakeholder {
   _id?: string;
   name?: string;
   user?: User;
-  supplierType?: SupplierTypes;
+  type?: PropertyAndServicesTypeCategories;
+  category?: TransferStakeholderCategories;
   description?: string;
   attachments?: VisaOperationsAttachment[];
   isTheContactBook?: boolean;
@@ -16,4 +17,8 @@ export interface Supplier {
   }
 }
 
+export enum TransferStakeholderCategories {
+  PHYSICAL_PERSON = 100,
+  CORPORATE = 200,
+}
 

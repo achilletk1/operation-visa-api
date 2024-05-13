@@ -18,7 +18,7 @@ export * from './vouchers';
 
 export * from './settings';
 
-export * from './suppliers';
+export * from './transfer-stakeholder';
 
 export * from './reporting';
 
@@ -40,8 +40,6 @@ export * from './visa-operations';
 
 export * from './temporary-files';
 
-export * from './supplier-vouchers';
-
 export * from './transaction-types';
 
 export * from './long-travel-types';
@@ -49,6 +47,8 @@ export * from './long-travel-types';
 export * from './visa-transactions';
 
 export * from './bank-account-manager';
+
+export * from './transfer-stakeholder';
 
 export * from './visa-transactions-files';
 

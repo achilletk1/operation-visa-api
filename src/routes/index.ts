@@ -5,7 +5,7 @@ import {
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
   validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute, transactionTypesRoute, visaRecapOperationRoute,
-  bankAccountManagerRoute, supplierVouchersRoute, supplierRoute, transferDocumentarRoute
+  bankAccountManagerRoute, transferStakeholderRoute, transferDocumentarRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -26,8 +26,6 @@ const routes = (app: Express) => {
   
   app.use( "/letters", lettersRoute);
   
-  app.use( "/supplier", supplierRoute);
-
   app.use( "/vouchers", vouchersRoute);
   
   app.use( "/settings", settingsRoute);
@@ -35,17 +33,17 @@ const routes = (app: Express) => {
   app.use( "/card-type", cardTypeRoute);
   
   app.use( "/reporting", reportingRoute);
-
+  
   app.use( "/downloads", downloadsRoute);
-
+  
   app.use( "/templates", templatesRoute);
-
+  
   app.use( "/validations", validationsRoute);
-
+  
   app.use( "/travel-month", travelMonthRoute);
-
+  
   app.use( "/notifications", notificationsRoute);
-
+  
   app.use( "/online-payment", onlinePaymentRoute);
   
   app.use( "/visa-operations", visaOperationsRoute);
@@ -53,8 +51,6 @@ const routes = (app: Express) => {
   app.use( "/temporary-files", temporaryFilesRoute);
   
   app.use( "/long-travel-types", longTravelTypesRoute);
-
-  app.use( "/supplier-vouchers", supplierVouchersRoute);
   
   app.use( "/visa-transactions", visaTransactionsRoute);
   
@@ -63,6 +59,8 @@ const routes = (app: Express) => {
   app.use( "/visa-recap-operation", visaRecapOperationRoute);
   
   app.use( "/bank-account-manager", bankAccountManagerRoute);
+
+  app.use( "/transfer-stakeholder", transferStakeholderRoute);
 
   app.use('/transfer-and-documentary', transferDocumentarRoute)
 
