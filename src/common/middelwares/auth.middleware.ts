@@ -9,7 +9,6 @@ import { config } from 'convict-config';
 export const whiteList: { path: string, method?: string }[] = [
     { path: '/auth', method: 'POST' },
     { path: '/downloads', method: 'GET' },
-    { path: '/status', method: 'GET' },
     { path: '/auth/verify-credentials', method: 'POST' },
     { path: '/auth/verify-credentials/users', method: 'POST' },
     { path: '/auth/verify-otp', method: 'POST' },
@@ -24,6 +23,8 @@ export async function oauthVerification(req: Request, res: Response, next: NextF
 
     const index = whiteList.findIndex(elt => req.path.includes(elt.path) && req.method === elt.method);
     if (index !== -1) { return next(); }
+
+    if (req.path === '/status' && req.method === 'GET') { return next(); }
 
     // verify authentification for all others endpoint
     const authorization = req.headers.authorization;

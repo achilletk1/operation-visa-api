@@ -5,9 +5,11 @@ import { deleteDirectory, readFile, saveAttachment } from "common/utils";
 import { AssignTo, RequestCeilingIncrease } from "./model";
 import { SettingsController } from "modules/settings";
 import httpContext from 'express-http-context';
-import { CrudService } from "common/base";
+import { CrudService, QueryOptions } from "common/base";
 import { isEmpty } from "lodash";
 import { Status } from "./enum";
+import { convertParams, extractPaginationData, getAgenciesQuery } from "common/helpers";
+import moment from "moment";
 
 export class RequestCeilingIncreaseService extends CrudService<RequestCeilingIncrease> {
 
@@ -18,10 +20,24 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
         super(RequestCeilingIncreaseService.requestCeilingIncreaseRepository);
     }
 
-    async getRequestCeilingIncrease(filters: any) {
+    async getRequestCeilingIncrease(query: any) {
         try {
-            this.formatFilters(filters);
-            return await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll(filters);
+            const { clientCode } = query.filter; delete query?.filter?.clientCode;
+
+            query = convertParams(query || {});
+            query = extractPaginationData(query || {});
+            if (query?.filter?.start && query?.filter?.end) {
+                delete query?.filter?.start; delete query?.filter?.end;
+                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                    end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
+                } as QueryOptions;
+            }
+
+            if(clientCode) query.filter['user.clientCode'] = clientCode;
+            const data = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAllAggregate<RequestCeilingIncrease>(getAgenciesQuery(query));
+            delete query.offset; delete query.limit;
+            const total = (await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAllAggregate<RequestCeilingIncrease>(getAgenciesQuery(query))).length;
+            return { data, total };
         } catch (error) { throw error; }
     }
 
@@ -143,15 +159,6 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
 
         } catch (error) { throw error; }
-    }
-
-    private formatFilters(filters: any) {
-        const { clientCode } = filters;
-
-        if (clientCode) {
-            delete filters.clientCode;
-            filters['user.clientCode'] = clientCode;
-        }
     }
 
 }

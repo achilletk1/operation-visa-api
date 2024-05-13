@@ -2,9 +2,16 @@ import { isEmpty } from 'lodash';
 import { User } from '../model';
 import moment from "moment";
 import XLSX from 'xlsx';
+import { Agencies } from 'modules/visa-operations/enum';
+import httpContext from 'express-http-context';
+import { authorizations } from 'modules/auth/profile';
+import { UserCategory } from '../enum/user.enum';
 
 
 export function formatUserFilters(fields: any) {
+    const user = httpContext.get('user');
+    const authorizationsUser: string[] = httpContext.get('authorizations');
+
     const { start, end, provider, ncp, category, status, walletList } = fields;
     // let { offset, limit } = fields;
     // if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
@@ -42,6 +49,20 @@ export function formatUserFilters(fields: any) {
     }
 
     if (fields?.nameFilter) { } // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
+
+
+    //match authorizations datas
+    fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+
+    if(authorizationsUser.includes(
+        authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
+        authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
+        authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
+    )){  
+        fields['age.code'] = `${Agencies.PERSONNAL}` 
+    }
+    if (user.category === UserCategory.SUPER_ADMIN) { fields['age.code'] = null }
 
     if (isEmpty(fields)) fields = { enabled: true };
 

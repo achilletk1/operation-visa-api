@@ -53,7 +53,6 @@ export class ReportingService extends BaseService {
             const data = statemenType === 'TRAVEL' ? await TravelController.travelService.getAverageTimeJustifyTravelReport({ travelType, status, start, end }) :
                 await OnlinePaymentController.onlinePaymentService.getAverageTimeJustifyOnlinePaymentReport({ status, start, end });
             const dateTime = new Date(data[0]?.time);
-
             return { averageTime: `${dateTime.getDay() || 0} Jrs-${dateTime.getMinutes() || 0} min-${dateTime.getSeconds() || 0} s` };
         } catch (error) { throw error; }
     }
