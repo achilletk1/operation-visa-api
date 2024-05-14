@@ -66,14 +66,14 @@ export class UsersService extends CrudService<User>  {
     async createUser(createData: User, scope: 'back-office' | 'front-office') {
         try {
             const authUser = httpContext.get('user');
-            if (authUser && authUser.category < 500) { return new Error('Forbidden'); }
+            if (authUser && authUser.category < 500) { throw new Error('Forbidden'); }
 
             const filter: any = { clientCode: createData.clientCode, category: { $in: [100, 200] } };
             if (scope === 'back-office') { filter.userCode = createData.userCode; filter.category = { $nin: [100, 200] } }
 
             const existingUser = await UsersController.usersService.baseRepository.findOne({ filter });
 
-            if (!isEmpty(existingUser)) { return new Error('UserAllreadyExist') }
+            if (!isEmpty(existingUser)) { throw new Error('UserAlreadyExist') }
             let user: User = {};
 
             if (scope === 'back-office') {

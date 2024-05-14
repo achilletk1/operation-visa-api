@@ -12,7 +12,7 @@ export enum visaOpeCategory {
 export class User {
     _id?: string;
     userCode?: string;
-    category?: UserCategory;
+    category?: UserCategory;        // authorization profile
     cbsCategory?: '1' | '2' | '3';  // 1 = PARTICULIER; 2 = SOCIETE; 3 = ENTREPRISE INDIVIDUELLE; 
     fname?: string;
     lname?: string;

@@ -274,7 +274,7 @@ export class ExportService extends BaseService {
             const { format, query, userId, ttl } = options;
 
             if ((new Date()).getTime() >= ttl) { throw new Error('ExportLinkExpired'); }
-            if (id !== userId) { throw new Error('Forbbiden'); }
+            if (id !== userId) { throw new Error('Forbidden'); }
 
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
             if (!user) { throw new Error('UserNotFound'); }
@@ -360,7 +360,7 @@ export class ExportService extends BaseService {
             const { key, label } = data
 
             const file = await FilesController.filesService.findOne({ filter: { key } });
-            if (!file) { throw new Error('Forbbiden'); }
+            if (!file) { throw new Error('Forbidden'); }
 
             if (isDevOrStag) { await timeout(5000); }
 

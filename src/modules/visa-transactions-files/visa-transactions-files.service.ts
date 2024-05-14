@@ -26,10 +26,10 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
         try {
             let found: VisaTransactionsFile | null = null;
             const authUser = httpContext.get('user');
-            if (!authUser) { throw new Error('Forbbiden'); }
+            if (!authUser) { throw new Error('Forbidden'); }
 
             const user = await UsersController.usersService.findOne({ filter: { _id: get(authUser, '_id') } });
-            if (!user) { throw new Error('Forbbiden'); }
+            if (!user) { throw new Error('Forbidden'); }
 
             let { content, email } = data;
             const { label } = data;
@@ -94,11 +94,11 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
     async confirmTransactionFiles(id: string) {
         try {
             const authUser = httpContext.get('user');
-            if (!authUser) { throw new Error('Forbbiden'); }
+            if (!authUser) { throw new Error('Forbidden'); }
             let transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
             const { user, content, label } = transactionsFile;
             const fileName = label?.replace('.xlsx' || '.xls', '');
-            if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbbiden') }
+            if (user?._id?.toString() !== get(authUser, '_id').toString()) { throw new Error('Forbidden') }
             const visaTransactionsTmp = excelToJson(content) as VisaTransactionsTmp[];
 
             await addUserDataInVisaTransactionFile(visaTransactionsTmp);
@@ -121,7 +121,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
     async abortTransactionFiles(id: string) {
         try {
             const authUser = httpContext.get('user');
-            if (!authUser) { throw new Error('Forbbiden'); }
+            if (!authUser) { throw new Error('Forbidden'); }
 
             return await VisaTransactionsFilesController.visaTransactionsFilesService.deleteOne({ _id: id });
         } catch (error) { throw error; }
@@ -130,7 +130,7 @@ export class VisaTransactionsFilesService extends CrudService<VisaTransactionsFi
     async getTransactionFilesDataArray(id: string) {
         try {
             const authUser = httpContext.get('user');
-            if (!authUser) { throw new Error('Forbbiden'); }
+            if (!authUser) { throw new Error('Forbidden'); }
 
             const transactionsFile = await VisaTransactionsFilesController.visaTransactionsFilesService.findOne({ filter: { _id: id } });
 

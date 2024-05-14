@@ -1,11 +1,11 @@
+import { Agencies } from 'modules/visa-operations/enum';
+import { authorizations } from 'modules/auth/profile';
+import { UserCategory } from '../enum/user.enum';
+import httpContext from 'express-http-context';
 import { isEmpty } from 'lodash';
 import { User } from '../model';
 import moment from "moment";
 import XLSX from 'xlsx';
-import { Agencies } from 'modules/visa-operations/enum';
-import httpContext from 'express-http-context';
-import { authorizations } from 'modules/auth/profile';
-import { UserCategory } from '../enum/user.enum';
 
 
 export function formatUserFilters(fields: any) {
@@ -28,25 +28,6 @@ export function formatUserFilters(fields: any) {
     const range = (start && end) ? { start: moment(start).startOf('day').valueOf(), end: moment(end).endOf('day').valueOf() } :
         undefined;
     if (range) fields['dates.createdt'] = { $gte: range?.start, $lte: range?.end };
-
-    if (walletList) {
-        // revoir en combinaison de 3 (ncp, status, provider)
-
-        if (provider) { fields[`${provider}.enable`] = (!status) ? { $exists: true } : status.toLowerCase() === 'true'; }
-        if (!provider && status && !ncp) { fields.$or = [{ 'walletAirtel.enable': status.toLowerCase() === 'true' }, { 'walletMTN.enable': status.toLowerCase() === 'true' }, { 'walletGIMAC.enable': status.toLowerCase() === 'true' }] }
-
-        if (provider && ncp) { fields[`${provider}.account.ncp`] = ncp; }
-        if (!provider && !status && ncp) { fields.$or = [{ 'walletAirtel.account.ncp': ncp }, { 'walletMTN.account.ncp': ncp }, { 'walletGIMAC.account.ncp': ncp }] }
-        if (!provider && status && ncp) {
-            fields.$and = [{ '$or': [{ 'walletAirtel.enable': status.toLowerCase() === 'true' }, { 'walletMTN.enable': status.toLowerCase() === 'true' }, { 'walletGIMAC.enable': status.toLowerCase() === 'true' }] }, { '$or': [{ 'walletAirtel.account.ncp': ncp }, { 'walletMTN.account.ncp': ncp }, { 'walletGIMAC.account.ncp': ncp }] }];
-        }
-        if (!provider && !status && !ncp) { fields.$or = [{ 'walletAirtel': { $exists: true } }, { 'walletMTN.': { $exists: true } }, { 'walletGIMAC': { $exists: true } }]; }
-        fields.category = 100;
-        delete fields.walletList;
-        delete fields.provider;
-        delete fields.status;
-        delete fields.ncp;
-    }
 
     if (fields?.nameFilter) { } // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
 

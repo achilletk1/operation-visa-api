@@ -45,10 +45,28 @@ export async function ErrorHandler(err: Error | any, req: Request, res: Response
 
 function formatErrorResponseMsg(err: Error | { index: string; type: string; column: string; name: string; message: string; stack?: string; }) {
     const { message } = err; let details: any; let title: any; const errResp: any = {};
-    if (message === 'Forbbiden') { details = `Vous n'êtes pas autorisé à  effectuer cette opération`; title = 'Non autorisé'; }
+    if (message === 'Forbidden') { details = `Vous n'êtes pas autorisé à  effectuer cette opération`; title = 'Non autorisé'; }
     if (message === 'IncorrectFileName') { details = `Le nom du fichier que vous avez importé est incorrect`; title = 'Nom du fichier incorrect'; }
     if (message === 'FileAlreadyExist') { details = `Le fichier que vous avez importé existe déjà`; title = 'Fichier existant'; }
     if (message === 'FileIsEmpty') { details = `Le fichier que vous avez importé est vide`; title = 'Fichier vide'; }
+    if (message === 'UserAlreadyExist') { details = `Cet utilisdateur existe déjà, impossible de le créer à nouveau`; title = 'Utilisateur déjà existant'; }
+    if (message === 'UnauthorizedGroup') { details = `Cet utilisdateur n'appartient au groupe LDAP dédié à FLY BANKING`; title = 'Utilisateur n\'appartient au groupe dédié'; }
+    if (message === 'ClientNotFound') { details = `Aucun utilisateur trouvé dans la base possédant cette racine client`; title = 'Aucun client trouvé'; }
+    if (message === 'NoActionProvided') { details = `Aucune action spécifié dans votre requête`; title = 'Requête d\'export incomplète'; }
+    if (message === 'usersNotFound') { details = `Aucune utilisateur(s) trouvé pour les critères de filtre fourni`; title = 'Aucune utilisateur trouvé pour l\'export'; }
+    if (['UserNotFound', 'User not found'].includes(message)) { details = `Aucune utilisateur trouvé pour les critères de filtre fourni`; title = 'Aucune utilisateur trouvé'; }
+    if (message === 'disableUser') { details = `Votre compte est désactivé, veuillez contactez l'administrateur de FLY BANKING`; title = 'Compte désactivé'; }
+    if (message === 'MissingAuthData') { details = `Données d'authentification manquante dans votre demande d'authentification`; title = 'Données manquantes'; }
+    if (message === 'BadOTP') { details = `Mauvais format du code OTP`; title = 'Mauvais format du code OTP'; }
+    if (message === 'OTPNoMatch') { details = `Code OTP incorrect, veuillez renseigner le bon code OTP reçu`; title = 'Code OTP incorrect'; }
+    if (message === 'OTPExpired') { details = `Code OTP expiré, veuillez initié un nouvelle demande de code OTP`; title = 'Code OTP expiré'; }
+    if (message === 'EmailOrPasswordNotProvided') { details = `Email ou mot de passe manquant dans la demande d'authentification`; title = 'Données manquantes'; }
+    if (message === 'FailedResetPassword') { details = `Veuillez saisir le bon mot de passe courant`; title = 'Mot de passe courant incorrect'; }
+    if (message === 'PasswordsProvidedAreDifferent') { details = `Rassurez vous de saisir exactement le même mot de passe dans les deux champs`; title = 'Vérification nouveau mot de passe incorrecte'; }
+    if (message === 'Passwordalreadyused') { details = `L'ancien et le nouveau mot de passe son identique`; title = 'Le nouveau mot de passe doit être différent de l\'ancien'; }
+    if (message === 'Missing user data') { details = `Cet utilisateur ne possède ni adresse mail, ni numéro de téléphone`; title = 'Authentification double facteur impossible'; }
+    if (message === 'FailedToCreateUser') { details = `Une erreur est survenu lors de la création de l'utilisateur`; title = 'Erreur lors de la creéation du compte'; }
+
     if (message === 'IncorrectFileColumn' && 'index' in err) { details = `Le fichier que vous avez importé ne contient pas la colonne ${err.index} qui est attendue`; title = 'Colonnes incorrectes'; }
     if (message === 'IncorrectFileMonth' && 'index' in err) { details = `La champ "DATE" de la ligne ${err.index} ne correspond pas au mois du fichier`; title = 'Ligne de fichier incorrecte'; }
     if (message === 'IncorrectFileType' && 'index' in err) { details = `Le champ "NATURE" de la ligne ${err.index} (${err.type}) ne correspond pas aux valeurs attendu, veuillez le remplacer par une nature de transaction connu`; title = 'Type de transaction incorrecte'; }

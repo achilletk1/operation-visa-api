@@ -189,7 +189,7 @@ export class AuthService extends BaseService {
             if (!userId) {
                 const createData = { clientCode, enabled: true, category: UserCategory.DEFAULT };
                 const insertResult = await UsersController.usersService.createUser(createData, 'front-office');
-                if (insertResult instanceof Error) throw new Error("Une erreur est survenu lors de la création de l'utilisateur");
+                if (insertResult instanceof Error) throw new Error("FailedToCreateUser");
                 userId = insertResult._id;
             }
 
