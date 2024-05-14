@@ -12,6 +12,8 @@ export function formatUserFilters(fields: any) {
     const user = httpContext.get('user');
     const authorizationsUser: string[] = httpContext.get('authorizations');
 
+    const { SUPER_ADMIN, ADMIN, SUPPORT } = UserCategory;
+
     const { start, end, provider, ncp, category, status, walletList } = fields;
     // let { offset, limit } = fields;
     // if (![typeof offset, typeof limit].includes('number')) { offset = undefined, limit = undefined; }
@@ -21,31 +23,30 @@ export function formatUserFilters(fields: any) {
     delete fields.start;
     delete fields.end;
 
-    if (category && +category === 100499) { fields.category = { '$gte': 100, '$lte': 499 }; }
+    (category && +category === 100499) && (fields.category = { '$gte': 100, '$lte': 499 });
 
-    if (category && +category === 500699) { fields.category = { '$gte': 500, '$lte': 699 }; }
+    (category && +category === 500699) && (fields.category = { '$gte': 500, '$lte': 699 });
 
     const range = (start && end) ? { start: moment(start).startOf('day').valueOf(), end: moment(end).endOf('day').valueOf() } :
         undefined;
-    if (range) fields['dates.createdt'] = { $gte: range?.start, $lte: range?.end };
+    (range) && (fields['dates.createdt'] = { $gte: range?.start, $lte: range?.end });
 
     if (fields?.nameFilter) { } // TODO affect aggregation for filterring all previous filter, with match case on  `${doc.lname} ${doc.fname}`.toLowerCase().includes(`${fields?.nameFilter}`.toLowerCase()
 
 
     //match authorizations datas
-    fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] }
+    fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] };
 
-    if(authorizationsUser.includes(
+    (authorizationsUser.includes(
         authorizations.PERSONNEL_MANAGER_DATA_WRITE ||
         authorizations.PERSONNEL_MANAGER_DATA_VIEW ||
         authorizations.HEAD_OF_PERSONNEL_AGENCY_VIEW ||
         authorizations.HEAD_OF_PERSONNEL_AGENCY_WRITE
-    )){  
-        fields['age.code'] = `${Agencies.PERSONNAL}` 
-    }
-    if (user.category === UserCategory.SUPER_ADMIN) { fields['age.code'] = null }
+    )) && (fields['age.code'] = `${Agencies.PERSONNAL}`);
 
-    if (isEmpty(fields)) fields = { enabled: true };
+    ([SUPER_ADMIN, ADMIN, SUPPORT].includes(user.category)) && (fields['age.code'] = null);
+
+    (isEmpty(fields)) && (fields = { enabled: true });
 
     return fields;
 };
