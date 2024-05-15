@@ -324,7 +324,7 @@ export const reportingFilterQuery = (range: any, type: number): any => {
 
 export function matchUserDatas(match: any): any {
     const user = httpContext.get('user');
-    const authorizationsUser: string[] = httpContext.get('authorizations');
+    const authorizationsUser: string[] = httpContext.get('authorizations') || [];
     const { SUPER_ADMIN, ADMIN, SUPPORT, PERSONNEL_MANAGER, ACCOUNT_MANAGER, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY } = UserCategory;
 
     if ([SUPER_ADMIN, ADMIN, SUPPORT].includes(user?.category)) { return; }

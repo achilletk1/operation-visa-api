@@ -66,7 +66,7 @@ export const getAgenciesQuery = (params: any) => {
 
 export function matchUserAuthorizationsDatas(match: any): void {
     const authUser = httpContext.get('user');
-    const authorizationsUser: string[] = httpContext.get('authorizations');
+    const authorizationsUser: string[] = httpContext.get('authorizations') || [];
     const { SUPER_ADMIN, ADMIN, SUPPORT, PERSONNEL_MANAGER, ACCOUNT_MANAGER, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY } = UserCategory;
 
     if ([SUPER_ADMIN, ADMIN, SUPPORT].includes(authUser?.category)) { return; }
