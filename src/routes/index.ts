@@ -5,7 +5,7 @@ import {
   onlinePaymentRoute, visaOperationsRoute, temporaryFilesRoute, longTravelTypesRoute, visaTransactionsRoute,
   visaTransactionsFilesRoute, requestCeilingIncreaseRoute, visaTransactionsCeilingsRoute, propertyAndServicesTypesRoute,
   validationLevelSettingsRoute, cbsRoute, importsRoute, cardTypeRoute, transactionTypesRoute, visaRecapOperationRoute,
-  bankAccountManagerRoute, transferStakeholderRoute, transferDocumentarRoute
+  bankAccountManagerRoute, transferStakeholderRoute, transferDocumentarRoute, sensitivesNotificationsRoute
 } from 'modules';
 
 const routes = (app: Express) => {
@@ -63,13 +63,15 @@ const routes = (app: Express) => {
   app.use( "/transfer-stakeholder", transferStakeholderRoute);
 
   app.use('/transfer-and-documentary', transferDocumentarRoute)
-
+  
   app.use( "/visa-transactions-files", visaTransactionsFilesRoute);
-
+  
   app.use( "/request-ceiling-increase", requestCeilingIncreaseRoute);
 
+  app.use( "/sensitives-notifications", sensitivesNotificationsRoute);
+  
   app.use( "/validation-level-settings", validationLevelSettingsRoute);
-
+  
   app.use( "/visa-transactions-ceilings", visaTransactionsCeilingsRoute);
 
   app.use( "/properties-and-services-types", propertyAndServicesTypesRoute);

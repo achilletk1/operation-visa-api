@@ -10,6 +10,7 @@ import { VisaOperationsController } from "./visa-operations.controller";
 import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
 import { TemplateForm, TemplatesController } from "modules/templates";
 import { User, UserCategory, UsersController } from 'modules/users';
+import { SettingsController, settingsKeys } from "modules/settings";
 import { ExpenseCategory, OpeVisaStatus as OVS } from "./enum";
 import { Import, ImportsController } from "modules/imports";
 import { Letter, LettersController } from "modules/letters";
@@ -75,7 +76,7 @@ export class VisaOperationsService extends CrudService<any> {
                     // Travel treatment
                     const transactionsGroupedByTravel = await VisaOperationsController.visaOperationsService.travelDataGroupedByCli(cli, travel);
                     await VisaOperationsController.visaOperationsService.travelTreatment(cli, transactionsGroupedByTravel);
-                    
+
                     // Online payment treatment
                     const transactionsGroupedByOnlinePayment = await VisaOperationsController.visaOperationsService.onlinePaymentGroupedByCli(cli, onlinePayment);
                     await VisaOperationsController.visaOperationsService.onlinePaymentTreatment(cli, transactionsGroupedByOnlinePayment);
@@ -120,6 +121,9 @@ export class VisaOperationsService extends CrudService<any> {
             // TODO
             const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: 100 } }]) ?? [];
 
+            let sensitiveClients = ((await SettingsController.settingsService.findOne({ filter: { key: settingsKeys.SENSITIVE_CUSTOMER_CODES } }))?.data || '')?.replace(/\s/g, '');
+            sensitiveClients = sensitiveClients?.split(',');
+
             if (travels.length) { VisaOperationsService.queueStateRevival = QueueState.PENDING; return; }
             console.log('===============-==================================-==================================');
             console.log('===============-==============  START REVIVAL TREATMENT ================-============');
@@ -145,18 +149,22 @@ export class VisaOperationsService extends CrudService<any> {
 
                 // TODO set lang dynamically
                 const lang = 'fr';
+                const travelUser = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode } });
 
                 if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                    notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, lang, bankAccountManager?.EMAIL));
+                    (sensitiveClients.includes(travelUser?.bankUserCode))
+                        ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, true, lang, bankAccountManager?.EMAIL))
+                        : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, false, lang, bankAccountManager?.EMAIL));
                     // await Promise.all([
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
                     //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
                     // ]);
-
                     await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
                 if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                    notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, lang, bankAccountManager?.EMAIL));
+                    (sensitiveClients.includes(travelUser?.bankUserCode))
+                        ? notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, true, lang, bankAccountManager?.EMAIL))
+                        : notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, false, lang, bankAccountManager?.EMAIL));
                     // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
                     // await Promise.all([
                     //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
@@ -313,7 +321,7 @@ export class VisaOperationsService extends CrudService<any> {
         for (const month of months) {
             let onlinePayment: OnlinePaymentMonth | null = null;
             const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
-            
+
             const onlinePaymentTransactions: VisaTransaction[] = []; let travelTransactions: VisaTransaction[] = []; let travelId: string | undefined = undefined;
             for (const transaction of selectedTransactions) {
                 const travel: TravelsForProcessing = await TravelController.travelService.getTravelsForProcessing({ cli, date: moment(transaction?.date, 'DD/MM/YYYY HH:mm:ss').valueOf() });
@@ -339,7 +347,7 @@ export class VisaOperationsService extends CrudService<any> {
             const dates = element?.transactions?.map((elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
             const firstDate = moment(Math.min(...dates)).startOf('day').valueOf();
             const lastDate = await getLastDateOfTravel(firstDate, cli, true);
-            
+
             let travel!: Travel;
             const toBeUpdated: ToBeUpdated = { notifications: [] };
             if (!element?.travelId) {
@@ -355,7 +363,7 @@ export class VisaOperationsService extends CrudService<any> {
             // Insert this operation on travel, sort ascending all transactions by date, and call method to add transactions on travel
 
             const onlinePaymentTransactions = await getOnlinePaymentTransactionForTravel(cli, firstDate, lastDate);
-            element?.transactions?.push(...onlinePaymentTransactions); 
+            element?.transactions?.push(...onlinePaymentTransactions);
 
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL) {
                 await this.addTransactionsInTravel(travel, element?.transactions, toBeUpdated);
@@ -489,7 +497,7 @@ export class VisaOperationsService extends CrudService<any> {
     }
 
     // l add this method to getting public access on this method (getOrCreateUserIfItDoesNtExists) 
-    async newGetOrCreateUserIfItDoesNtExists(clientCode:string){
+    async newGetOrCreateUserIfItDoesNtExists(clientCode: string) {
         await this.getOrCreateUserIfItDoesNtExists(clientCode);
     }
 
@@ -505,14 +513,14 @@ export class VisaOperationsService extends CrudService<any> {
             await TravelMonthController.travelMonthService.updateMany({ _id: { $in: travelsMonthsIds } }, { isUntimely: true });
 
             // check and update travels deadlines
-            const longTravelsIds = travels.filter(travel => 
+            const longTravelsIds = travels.filter(travel =>
                 travel.travelType === TravelType.LONG_TERM_TRAVEL &&
                 ![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel
             ).map(e => new ObjectId(e?._id?.toString()));
             const shortTravelsIds = travels.filter(travel =>
                 travel.travelType === TravelType.SHORT_TERM_TRAVEL &&
                 ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofShortTravel) ||
-                (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel))
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel))
             ).map(e => new ObjectId(e?._id?.toString()));
 
             await TravelController.travelService.updateMany({ _id: { $in: [...longTravelsIds, ...shortTravelsIds] } }, { isUntimely: true });

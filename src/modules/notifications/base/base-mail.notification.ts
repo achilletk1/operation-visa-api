@@ -104,7 +104,11 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     if (!queueData.body || !queueData.receiver) { return null; }
 
     try {
-      if (this.keyNotification || this.saveNotification) await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, ''.concat(queueData?.receiver, queueData?.cc || ''), (this.eventData as any)?.id, queueData.attachments, this.key, this.type);
+      const isSensitiveCustomer = get(this.eventData, 'isSensitiveCustomer');
+      if (this.keyNotification || this.saveNotification) {
+        await this.insertNotification(this.subject, NotificationFormat.MAIL, queueData.body, ''.concat(queueData?.receiver, queueData?.cc || ''), (this.eventData as any)?.id, queueData.attachments, this.key, this.type, isSensitiveCustomer);
+        if (isSensitiveCustomer) { return; }
+      }
       await this.add(NotificationsType.MAIL, queueData, this.priority, this.delayUntil);
     } catch (error: any) { this.logger.error(`Error during insertion mail ${this.keyNotification || this.templateName} notification to ${get(this.eventData, 'receiver', '')} ${get(this.eventData, 'cc', '')} in queue \n${error.stack}`); }
   }

@@ -20,5 +20,6 @@ export interface Notification {
     status?: NotificationStatus; // 100 (Created), 200 (Success Sent), 300 (Unsuccess Sent), 400 (Pending Sent)
     attachments: VisaOperationsAttachment[];
     key: string;
-    name?: string; // User name
+    name?: string; // User name;
+    editors?: any[];
 };

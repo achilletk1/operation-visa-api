@@ -1,4 +1,5 @@
 import { NotificationsController } from "modules/notifications/notifications.controller";
+import { SensitivesNotificationsController } from "modules/sensitives-notifications";
 import { NotificationsType, QueuePriority } from "modules/notifications";
 import { generateNotification } from '../helper';
 import { saveAttachment } from "common/utils";
@@ -30,10 +31,11 @@ export class QueueService extends BaseRepository {
         if (typeof delayUntil == 'number') return new Date(+ new Date() + delayUntil * 1000);
     }
 
-    async insertNotification(object: string, format: NotificationFormat, message: string, receiver: string | undefined, id?: string, attachments?: any, key?: any, type?: string) {
+    async insertNotification(object: string, format: NotificationFormat, message: string, receiver: string | undefined, id?: string, attachments?: any, key?: any, type?: string, isSensitiveCustomer?: any) {
         const notification: Notification = generateNotification(object, format, message, receiver, id, attachments, key);
         try {
-            const { data } = await NotificationsController.notificationsService.create(notification);
+            const { data } = isSensitiveCustomer ? await SensitivesNotificationsController.sensitivesNotificationsService.create(notification)
+                : await NotificationsController.notificationsService.create(notification);
             if (!isEmpty(attachments)) await this.saveAttachments(attachments, notification, data, type || '')
         } catch (error) { throw error; }
     }

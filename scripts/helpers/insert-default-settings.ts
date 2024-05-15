@@ -93,6 +93,13 @@ export const inserDefaultSetting = async () => {
       created_at: new Date().valueOf(),
       updated_at: [],
       data: 30
+    },
+    {
+      key: settingsKeys.SENSITIVE_CUSTOMER_CODES,
+      label: 'Liste des codes profils des clients sensibles',
+      created_at: new Date().valueOf(),
+      updated_at: [],
+      data: '115, 117, 118, 119, 122, 123, 124, 125, 126, 127'
     }
   ]
   console.log('insert default max size file  collection');
