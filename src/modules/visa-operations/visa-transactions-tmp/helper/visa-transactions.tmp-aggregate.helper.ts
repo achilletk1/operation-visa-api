@@ -69,7 +69,7 @@ export const formattedVisaTransactionsTmp = [
             reference: "",
             statementRef: "",
             travel: "$travel",
-            match: { $concat: [ "$CLIENT", { $toString: "$MONTANT_XAF", }, "$DEVISE", "$DATE", "$HEURE", "$TYPE_TRANS", "$CARTE", "$PAYS"] },
+            match: { $concat: [{ $toString: "$CLIENT" }, { $toString: "$MONTANT_XAF", }, "$DEVISE", "$DATE", "$HEURE", "$TYPE_TRANS", "$CARTE", "$PAYS"] },
         },
     },
     {
