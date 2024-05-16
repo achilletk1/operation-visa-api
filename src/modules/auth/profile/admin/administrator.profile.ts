@@ -1,11 +1,13 @@
 import {
-    ReportingAuthorizationsRead,
+    FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, ReportingAuthorizationsRead,
 } from "../../enum";
 import { parameter, support } from ".";
 
 const _administrator = {
     ...support, 
     ...parameter,
+    ...FrontUsersAuthorizationsRead,
+    ...FrontUsersAuthorizationsWrite,
     ...ReportingAuthorizationsRead,
 };
 
