@@ -331,11 +331,12 @@ export class VisaOperationsService extends CrudService<any> {
                 travelTransactions.push(transaction);
             }
 
+            (travelTransactions.length) && transactionsGroupedByOnlinePayment.push({ transactions: travelTransactions, onlinePaymentId: undefined, travelId, month });
+
             if (onlinePaymentTransactions.length) {
                 try { onlinePayment = await OnlinePaymentController.onlinePaymentService.findOne({ filter: { 'user.clientCode': cli, currentMonth: month } }); } catch (e) { }
+                transactionsGroupedByOnlinePayment.push({ transactions: onlinePaymentTransactions, onlinePaymentId: onlinePayment?._id?.toString() || undefined, travelId: undefined, month });
             }
-
-            transactionsGroupedByOnlinePayment.push({ transactions: onlinePaymentTransactions, onlinePaymentId: onlinePayment?._id?.toString() || undefined, travelId: undefined, month });
         }
 
         return transactionsGroupedByOnlinePayment;
