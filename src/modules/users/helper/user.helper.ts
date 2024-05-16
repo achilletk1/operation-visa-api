@@ -91,7 +91,7 @@ function matchUserAuthorizationsDatas(fields: any): any {
     const authorizationsUser: string[] = httpContext.get('authorizations') || [];
     const { SUPER_ADMIN, ADMIN, SUPPORT, PERSONNEL_MANAGER, ACCOUNT_MANAGER, AGENCY_HEAD, HEAD_OF_PERSONNEL_AGENCY } = UserCategory;
 
-    if ([SUPER_ADMIN, ADMIN, SUPPORT].includes(authUser?.category)) { return; }
+    if (!authorizationsUser.length || [SUPER_ADMIN, ADMIN, SUPPORT].includes(authUser?.category)) { return; }
 
     fields['age.code'] = { $nin: [`${Agencies.PERSONNAL}`] };
 
