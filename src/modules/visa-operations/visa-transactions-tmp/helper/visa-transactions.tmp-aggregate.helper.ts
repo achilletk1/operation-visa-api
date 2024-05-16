@@ -19,7 +19,7 @@ export const formattedVisaTransactionsTmp = [
     },
     {
         $project: {
-            clientCode: { $trim: { input: "$CLIENT", }, },
+            clientCode: { $trim: { input: { $toString: "$CLIENT" }, }, },
             fullName: { $trim: { input: "$NOM_CLIENT", }, },
             manager: {
                 code: { $trim: { input: "$CODE_GESTIONNAIRE", }, },

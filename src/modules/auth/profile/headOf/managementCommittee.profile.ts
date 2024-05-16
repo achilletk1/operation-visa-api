@@ -1,6 +1,8 @@
 import {
     FrontUsersAuthorizationsRead, BackUsersAuthorizationsRead, ManagementCommitteeAuthorizationsWrite, ManagementCommitteeAuthorizationsRead,
-    UsersMenuAuthorizationsRead,
+    UsersMenuAuthorizationsRead, CartTypeSettingAuthorizationsRead, CeilingSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsRead,
+    LongTravelTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsRead, SettingsMenuAuthorizationsRead, TemplateSettingAuthorizationsRead,
+    TransactionTypeSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsRead, VouchersSettingAuthorizationsRead, 
 } from "../../enum";
 import { controller } from "../viewer";
 
@@ -9,6 +11,16 @@ const _managementCommittee = {
     ...UsersMenuAuthorizationsRead,
     ...FrontUsersAuthorizationsRead,
     ...BackUsersAuthorizationsRead,
+    ...SettingsMenuAuthorizationsRead,
+    ...VouchersSettingAuthorizationsRead,
+    ...TemplateSettingAuthorizationsRead,
+    ...FormalNoticeSettingAuthorizationsRead,
+    ...CartTypeSettingAuthorizationsRead,
+    ...LongTravelTypeSettingAuthorizationsRead,
+    ...OnlinePaymentTypeSettingAuthorizationsRead,
+    ...CeilingSettingAuthorizationsRead,
+    ...ValidationLevelSettingAuthorizationsRead,
+    ...TransactionTypeSettingAuthorizationsRead,
     ...ManagementCommitteeAuthorizationsRead,
     ...ManagementCommitteeAuthorizationsWrite,
 };
