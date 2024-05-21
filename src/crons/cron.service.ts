@@ -7,10 +7,12 @@ import QuaterlyStatementReportCron from './quaterly-statement-report.cron';
 import MonthlyStatementReportCron from './monthly-statement-report.cron';
 import TransactionsProcessingCron from './transactions-processing.cron';
 import DeleteTemporaryFilesCron from './delete-temporary-files.cron';
+import ImportOperationCron from './import-operation.cron';
 import RevivalMailCron from './revival-mail.cron';
 
 export const startCrons = () => {
     RevivalMailCron.start();
+    ImportOperationCron.start();
     TransactionsProcessingCron.start();
     DeleteTemporaryFilesCron.start();
     RemoveOnpWithoutExceedingCron.start();
@@ -18,5 +20,6 @@ export const startCrons = () => {
     MonthlyStatementReportCron.start();
     QuaterlyStatementReportCron.start();
     RefreshBankAccountManagerDataCron.start();
-    DetectOperationExceededCron.start()
+    DetectOperationExceededCron.start();
+
 }
