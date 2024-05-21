@@ -58,18 +58,22 @@ export const updateTravel = async (travel: Travel, toBeUpdated: any) => {
 
 export const sendEmailNotifications = async (notification: any) => {
     const { data, lang, receiver, id, key, clientCode } = notification.data;
-    let user: User; let bankAccountManager!: BankAccountManager;
+    let user!: User; let bankAccountManager!: BankAccountManager; let agencyHeadEmail!: string;
     try {
         user = await UsersController.usersService.findOne({ filter: { clientCode, category: UserCategory.DEFAULT } });
         bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
+        agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD , bankProfileCode: 'R204', 'age.code' : user?.age?.code } }))?.email || ''; 
     } catch (error) { }
 
+    const ccEmail = (user?.userGesCode?.substring(0, 1) === '9' || !bankAccountManager) ? agencyHeadEmail : bankAccountManager?.EMAIL;
+
+
     if (key === 'firstTransaction')
-        notificationEmmiter.emit('detect-transactions-mail', new DetectTransactionsEvent(data, receiver, lang, id, bankAccountManager?.EMAIL));
+        notificationEmmiter.emit('detect-transactions-mail', new DetectTransactionsEvent(data, receiver, lang, id, ccEmail));
     // await NotificationsController.notificationsService.sendEmailDetectTransactions(data, receiver, lang, id);
 
     if (key === 'ceilingOverrun')
-        notificationEmmiter.emit('visa-exceding-mail', new VisaExceedingEvent(data, receiver, lang, id, bankAccountManager?.EMAIL));
+        notificationEmmiter.emit('visa-exceding-mail', new VisaExceedingEvent(data, receiver, lang, id, ccEmail));
     // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
 }
 

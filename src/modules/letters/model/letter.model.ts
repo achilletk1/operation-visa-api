@@ -32,9 +32,13 @@ export interface Letter {
         },
         signature?: string;
     };
-    emailText?: {
-        fr?: string;
-        en?: string;
-    };
     period?: number;
+    emailText: {
+        fr: { email: string; obj: string; };
+        en: { email: string; obj: string; }
+    };
+    smsText: {
+        fr: { sms: string; };
+        en: { sms: string; };
+    };
 }

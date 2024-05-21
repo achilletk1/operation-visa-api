@@ -116,7 +116,7 @@ export const insertDefaultTemplateSetting = async () => {
                 email: `
                 Nous avons remarque des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites operations dans un delai maximum de 30 jours a compter du {{DATE}}. Comme le precise la circulaire BEAC N004/GR/2022.////
                 Nous vous invitons a contacter notre service clientele des que possible pour avoir plus d'informations et de details sur la procedure a suivre.////
-                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien flybanking.bicec.com //////
                 Nous vous remercions pour votre fidelite.`,
 
                 sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs lies a vos operations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref delai.// Rapprochez-vous de votre agence pour plus d'informations",
@@ -127,7 +127,7 @@ export const insertDefaultTemplateSetting = async () => {
                 email: `
                 We have noticed transactions outside CEMAC on your BICEC bank cards. You must provide us with proof of these transactions within a maximum period of 30 days from {{DATE}}. As stated in BEAC circular N004/GR/2022.////
                 We invite you to contact our customer service department as soon as possible for more information and details of the procedure to be followed.////
-                You can do this remotely by connecting to the FLY BANKING digital platform: via the link fly-banking@bicec.com //////
+                You can do this remotely by connecting to the FLY BANKING digital platform: via the link flybanking.bicec.com //////
                 Thank you for your loyalty.`,
                 sms: "Dear customer,// we note that you have still not provided us with the supporting documents relating to your transactions outside CEMAC on the {{CARTE}} card. Please send them to us, otherwise your card will be blocked as soon as possible.// Please contact your branch for more information.",
                 obj: "First reminder of outstanding supporting documents for card transactions outside the CEMAC region"
@@ -149,7 +149,7 @@ export const insertDefaultTemplateSetting = async () => {
                 Nous avons remarque des transactions hors CEMAC sur vos cartes bancaires BICEC, vous devez nous fournir les justificatifs des dites operations dans un delai maximum de 30 jours a compter du {{DATE}}. Comme le precise la circulaire BEAC N004/GR/2022.////
                 Nous vous invitons a contacter notre service clientele des que possible pour avoir plus d'informations et de details sur la procedure a suivre.////
                 Afin d'eviter que nous soyons contraint a bloquer votre carte ! ////
-                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien fly-banking@bicec.com //////
+                Vous pouvez le faire a distance en vous connectant a la plateforme digitale FLY BANKING : via le lien flybanking.bicec.com //////
                 Nous vous remercions pour votre fidelite.`,
 
                 sms: "Cher client,// nous constatons que vous n'avez toujours pas fourni les justificatifs lies a vos operations hors CEMAC sur la carte {{CARTE}}, nous vous prions de nous les transmettre sous peine de blocage de carte dans les bref delai.// Rapprochez-vous de votre agence pour plus d'informations",
@@ -161,7 +161,7 @@ export const insertDefaultTemplateSetting = async () => {
                 We have noticed transactions outside CEMAC on your BICEC bank cards. You must provide us with proof of these transactions within a maximum period of 30 days from {{DATE}}. As stated in BEAC circular N004/GR/2022.////
                 We invite you to contact our customer service department as soon as possible for further information and details of the procedure to be followed.////
                 To avoid us having to block your card! ////
-                You can do this remotely by connecting to the FLY BANKING digital platform: via the link fly-banking@bicec.com //////
+                You can do this remotely by connecting to the FLY BANKING digital platform: via the link flybanking.bicec.com //////
                 Thank you for your loyalty.`,
                 sms: "Dear customer,// we note that you have still not provided the supporting documents relating to your transactions outside CEMAC on the {{CARTE}} card. Please send them to us or your card will be blocked as soon as possible.// Please contact your branch for more information.",
                 obj: "Second reminder of pending supporting documents for card transactions outside the CEMAC region"

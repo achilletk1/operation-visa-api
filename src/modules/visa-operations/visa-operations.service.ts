@@ -140,36 +140,31 @@ export class VisaOperationsService extends CrudService<any> {
                 const currentDate = new Date().valueOf();
                 if (!travel?.user?.email) continue;
 
-                // get bank-account-manager data for notify in cc with client
-                let user: User; let bankAccountManager!: BankAccountManager;
+                // get bank-account-manager and head-of-agency-email data for notify in cc with client
+                let user!: User; let bankAccountManager!: BankAccountManager; let agencyHeadEmail!: string;
                 try {
-                    user = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode, category: UserCategory.DEFAULT } });
+                    user = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } });
                     bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
+                    agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD , bankProfileCode: 'R204', 'age.code' : user?.age?.code } }))?.email || ''; 
                 } catch (error) { }
+
+                const ccEmail = (user?.userGesCode?.substring(0, 1) === '9' || !bankAccountManager) ? agencyHeadEmail : bankAccountManager?.EMAIL;
 
                 // TODO set lang dynamically
                 const lang = 'fr';
-                const travelUser = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode } });
 
                 if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                    (sensitiveClients.includes(travelUser?.bankUserCode))
-                        ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, true, lang, bankAccountManager?.EMAIL))
-                        : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, false, lang, bankAccountManager?.EMAIL));
-                    // await Promise.all([
-                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'fr', 'Lettre de mise en demeure', get(travel, '_id').toString()),
-                    //     NotificationsController.notificationsService.sendEmailFormalNotice(get(travel, 'user.email'), letter, travel, 'en', 'Formal notice letter', get(travel, '_id').toString())
-                    // ]);
+                    (sensitiveClients.includes(user?.bankProfileCode))
+                        ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, true, lang, ccEmail))
+                        : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, false, lang, ccEmail));
+                    // TODO send formal-notice SMS 
                     await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
                 if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                    (sensitiveClients.includes(travelUser?.bankUserCode))
-                        ? notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, true, lang, bankAccountManager?.EMAIL))
-                        : notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, false, lang, bankAccountManager?.EMAIL));
-                    // TODO notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
-                    // await Promise.all([
-                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'fr', get(travel, '_id').toString()),
-                    //     NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), visaTemplate, 'en', get(travel, '_id').toString())
-                    // ]);
+                    (sensitiveClients.includes(user?.bankProfileCode))
+                        ? notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, true, lang, ccEmail))
+                        : notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, false, lang, ccEmail));
+                    // TODO send transaction outside not justified SMS,   notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
                 }
             }
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
@@ -307,20 +302,20 @@ export class VisaOperationsService extends CrudService<any> {
         return transactionsGroupedByTravel;
     }
 
-    private async onlinePaymentGroupedByCli(cli: string, onlinepaymentTransactions: VisaTransaction[]): Promise<OnlinePaymentGrouped[]> {
-        if (!onlinepaymentTransactions) { return onlinepaymentTransactions; }
+    private async onlinePaymentGroupedByCli(cli: string, allOnlinePaymentTransactions: VisaTransaction[]): Promise<OnlinePaymentGrouped[]> {
+        if (!allOnlinePaymentTransactions) { return allOnlinePaymentTransactions; }
 
         // sort transactions by date in ascending order
-        onlinepaymentTransactions = onlinepaymentTransactions.sort((a, b) => {
+        allOnlinePaymentTransactions = allOnlinePaymentTransactions.sort((a, b) => {
             return moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() < moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? -1 : moment(a.date, 'DD/MM/YYYY HH:mm:ss').valueOf() > moment(b.date, 'DD/MM/YYYY HH:mm:ss').valueOf() ? 1 : 0;
         });
-        const months = [...new Set(onlinepaymentTransactions.map((elt) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))];
+        const months = [...new Set(allOnlinePaymentTransactions.map((elt) => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM')))];
 
         const transactionsGroupedByOnlinePayment: OnlinePaymentGrouped[] = [];
 
         for (const month of months) {
             let onlinePayment: OnlinePaymentMonth | null = null;
-            const selectedTransactions = onlinepaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
+            const selectedTransactions = allOnlinePaymentTransactions.filter(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').format('YYYYMM') === month);
 
             const onlinePaymentTransactions: VisaTransaction[] = []; let travelTransactions: VisaTransaction[] = []; let travelId: string | undefined = undefined;
             for (const transaction of selectedTransactions) {
