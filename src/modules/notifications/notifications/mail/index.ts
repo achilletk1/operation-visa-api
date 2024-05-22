@@ -28,6 +28,8 @@ export * from './travel-status-changed';
 
 export * from './increase-ceiling-bank';
 
+export * from './import-operation-error';
+
 export * from './monthly-recap-statement';
 
 export * from './list-of-users-to-bloqued';
@@ -41,5 +43,3 @@ export * from './online-payment-status-changed';
 export * from './transaction-outside-not-justified';
 
 export * from './uploaded-documents-on-exceeded-folder';
-
-export * from './import-operation-error';

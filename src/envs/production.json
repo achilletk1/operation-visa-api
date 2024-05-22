@@ -20,9 +20,6 @@
         }
     },
     "cookieSalt": "3RKuQbJ73U",
-    "importOperationPath": "",
-    "importOperationSuccessPath": "",
-    "importOperationFailPath": "",
     "cookieTTL": 900000,
     "oauthSalt": "Yl!ic*dz!!QbJ7Ku3U&G",
     "oauthTTL": 930,
@@ -69,6 +66,8 @@
         "quaterlyStatementReportMailsScheduler": "0 0 1 */3 *",
         "monthlyStatementReportMailsScheduler": "0 0 1 * *"
     },
-    "emailBank": "achille.tachum@londo-tech.com"
-
+    "emailBank": "achille.tachum@londo-tech.com",
+    "importOperationPath": "/data/int_ope/rec",
+    "importOperationSuccessPath": "/data/int_ope/arc",
+    "importOperationFailPath": "/data/int_ope/fail"
 }

@@ -5,8 +5,8 @@ import { BaseCron } from "common/base";
 class ImportOperationCron extends BaseCron {
     cronExpressionPath = 'crons.importOperation';  // At 05:00 every day
     service = VisaTransactionsFilesController.visaTransactionsFilesService.importOperations;
-    startOnStagingBci = false;
-    startOnDev = true;
+    startOnStagingBci = true;
+    startOnDev = false;
 }
 
 export default new ImportOperationCron();

@@ -1,8 +1,53 @@
-import { UsersController } from "modules/users";
 import { OperationTypeLabel, VisaOperationsController } from "modules/visa-operations";
-import { OperationType } from "modules/visa-operations";
 import { VisaTransactionsTmp } from "modules/visa-operations/visa-transactions-tmp";
 import { VisaTransactionsController } from "modules/visa-transactions";
+import { UserCategory, UsersController } from "modules/users";
+import { OperationType } from "modules/visa-operations";
+import { VisaTransactionsFile } from "../model";
+import { excelToJson } from "common/helpers";
+
+export async function allVerificationTransactionFile(label: string = '', content: string = '', visaTransactionsFile?: VisaTransactionsFile): Promise<{ dataArray: VisaTransactionsTmp[]; fileName: string; }> {
+    try {
+        const fileName = label?.replace('.xlsx' || '.xls', '');
+        if (visaTransactionsFile) { throw new Error('FileAlreadyExist'); }
+        const isNameCorrect = verifyTransactionFileName(fileName);
+        if (!isNameCorrect) { throw new Error('IncorrectFileName'); }
+
+        const dataArray = excelToJson(content) as VisaTransactionsTmp[];
+
+        const fileIsNotEmpty = verifyTransactionNotEmptyFile(dataArray);
+        if (!fileIsNotEmpty) { throw new Error('FileIsEmpty'); }
+        const containsAll = verifyTransactionFile(dataArray);
+        if (containsAll) {
+            const error: any = new Error('IncorrectFileColumn');
+            error['index'] = containsAll; throw error;
+        }
+        const monthsMatch = verifyTransactionFileContent(dataArray, fileName);
+        if (monthsMatch > -1) {
+            const error: any = new Error('IncorrectFileMonth');
+            error['index'] = monthsMatch + 2; throw error;
+        }
+        const typesMatch = verifyTransactionFileTypeContent(dataArray, label);
+        if (typesMatch) {
+            const error: any = new Error('IncorrectFileType');
+            [error['index'], error['type']] = [(typesMatch?.arrayIndex || 0) + 2, typesMatch.found.TYPE_TRANS];
+            throw error;
+        }
+        const dataMatch = verifyTransactionFileDataContent([...dataArray]);
+        if (dataMatch.line) {
+            const error: any = new Error('IncorrectFileData');
+            [error['index'], error['column'], error['type']] = [dataMatch.line, dataMatch.column, dataMatch.type];
+            throw error;
+        }
+        const duplicatesIndexes = await verifyTransactionFileDuplicateData(dataArray);
+        if (!duplicatesIndexes || duplicatesIndexes.length > 0) {
+            const error: any = new Error('IncorrectFileDuplicate');
+            [error['index'], error['column']] = [duplicatesIndexes, fileCheckSumColumn];
+            throw error;
+        }
+        return { fileName, dataArray };
+    } catch (error) { throw error; }
+}
 
 export function verifyTransactionFileTypeContent(dataArray: VisaTransactionsTmp[], fileName: string) {
     let arrayIndex;
@@ -74,8 +119,8 @@ export async function verifyTransactionFileDuplicateData(dataArray: VisaTransact
 
 export async function addUserDataInVisaTransactionFile(visaTransactionsTmp: VisaTransactionsTmp[]) {
     // recovery all client code
-    let clientCodes = [...new Set(visaTransactionsTmp.map(e => e.CLIENT))];
-    let users = (await UsersController.usersService.findAll({ filter: { clientCode: { $in: clientCodes } } }))?.data;
+    let clientCodes = [...new Set(visaTransactionsTmp.map(e => (e.CLIENT || '').trim()))];
+    let users = (await UsersController.usersService.findAll({ filter: { clientCode: { $in: clientCodes }, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } }))?.data;
     const existingClientCodeUser = users.map(usr => usr.clientCode);
     // search client code who don't have user
     const clientCodeOfNotExistingUser = clientCodes.filter(el => !existingClientCodeUser.includes(el));

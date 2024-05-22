@@ -6,6 +6,7 @@ import { MonthlyRecapStatementEvent, MonthlyRecapStatementMailNotification } fro
 import { ListOfUsersToBlockedEvent, ListOfUsersToBloquedMailNotification } from './notifications/mail/list-of-users-to-bloqued';
 import { TravelStatusChangedEvent, TravelStatusChangedMailNotification } from './notifications/mail/travel-status-changed';
 import { IncreaseCeilingBankEvent, IncreaseCeilingBankMailNotification } from './notifications/mail/increase-ceiling-bank';
+import { ImportOperationEmailNotification, ImportOperationErrorEvent } from './notifications/mail/import-operation-error';
 import { CeilingCaeAssignedEvent, CeilingCaeAssignedMailNotification } from './notifications/mail/ceiling-cae-assigned';
 import { ValidationRequiredEvent, ValidationRequiredMailNotification } from './notifications/mail/validation-required';
 import { DetectTransactionsEvent, DetectTransactionsMailNotification } from './notifications/mail/detect-transactions';
@@ -21,7 +22,6 @@ import { AuthTokenEmailEvent, AuthTokenEmailNotification } from './notifications
 import { TemplateSmsEvent, TemplateSmsNotification } from './notifications/sms/template';
 import { TokenSmsEvent, TokenSmsNotification } from './notifications/sms/token';
 import events from 'events';
-import { ImportOperationEmailNotification, ImportOperationErrorEvent } from './notifications/mail/import-operation-error';
 
 export const notificationEmmiter = new events.EventEmitter();
 

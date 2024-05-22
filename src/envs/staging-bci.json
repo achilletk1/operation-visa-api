@@ -67,5 +67,8 @@
         "monthlyStatementReportMailsScheduler": "0 0 1 * *"
     },
     "emailTest": "achille.tachum@londo-tech.com",
-    "emailBank": "achille.tachum@londo-tech.com"
+    "emailBank": "achille.tachum@londo-tech.com",
+    "importOperationPath": "/data/int_ope/rec",
+    "importOperationSuccessPath": "/data/int_ope/arc",
+    "importOperationFailPath": "/data/int_ope/fail"
 }

@@ -11,9 +11,6 @@
             "password": ""
         }
     },
-    "importOperationPath": "../../../filesrec/rec",
-    "importOperationSuccessPath": "../../../filesrec/archSuccess",
-    "importOperationFailPath": "../../../filesrec/archEchec",
     "cookieSalt": "HZt6wi7GSLD",
     "cookieTTL": 3600000,
     "oauthSalt": "4tG9!!HZt6wi",
@@ -67,5 +64,8 @@
     },
     "gotenbergUrl": "http://143.42.97.18:7900",
     "emailTest": "achille.tachum@londo-tech.com",
-    "emailBank": "achille.tachum@londo-tech.com"
+    "emailBank": "achille.tachum@londo-tech.com",
+    "importOperationPath": "../../../filesrec/rec",
+    "importOperationSuccessPath": "../../../filesrec/archSuccess",
+    "importOperationFailPath": "../../../filesrec/archEchec"
 }
