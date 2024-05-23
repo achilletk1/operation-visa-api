@@ -20,5 +20,4 @@ export class TravelMonth {
     validators?: Validator[];
     editors?: Editor[];
     isUntimely?: boolean;
-
 }

@@ -353,7 +353,7 @@ export class VisaOperationsService extends CrudService<any> {
             try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch (e) { }
             if (!travel || travel instanceof Error) { continue; }
             travel.notifications = [];
-
+            
             // TODO check if it exists onlinePaymentMonth, which content transactions between period of travel
             // If it exist, you must extract this operation on this onlinePaymentMonth, save onlinePaymentMonth
             // Insert this operation on travel, sort ascending all transactions by date, and call method to add transactions on travel
