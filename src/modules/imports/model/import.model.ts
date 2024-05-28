@@ -11,6 +11,7 @@ export class Import {
   status?: OpeVisaStatus;
   subject?: string;
   desc?: string;
+  ceiling?: number;
   // tslint:disable-next-line: variable-name
   created_at?: number;
   // tslint:disable-next-line: variable-name

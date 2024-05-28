@@ -14,17 +14,17 @@ export class TemplateSmsNotification extends BaseSmsNotification<TemplateSmsEven
         try {
             let visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.notificationData.key } });
             if (!visaTemplate) { throw new Error(`Template ${this.notificationData.key} Not Found`); }
-        
+
             const templateData = replaceSmsVariables(visaTemplate[this.notificationData.lang], this.notificationData.datas, this.notificationData.lang);
-        
+
             return templateData?.sms;
-          } catch (error: any) {
+        } catch (error: any) {
             this.logger.info(`Error during sms template-sms notification generation \n${error.stack}`);
             return '';
-          }
+        }
     }
 
-    async sendTempalteNotification(): Promise<void> {
+    async sendTemplateNotification(): Promise<void> {
         this.body = await this.getNotificationBody();
         await this.sendNotification();
     }

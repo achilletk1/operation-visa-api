@@ -1,5 +1,5 @@
-import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExceedingOnTravel as verifyExceedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance, getLastDateOfTravel, sortTransactionsByDateInAscendingOrder, getOnlinePaymentTransactionForTravel } from "./helper";
-import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TemplateSmsEvent, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
+import { generateTravelByProcessing, generateNotificationData, checkTravelNumberOfMonths, generateOnlinePaymentMonth, updateTravelMonth, updateTravel, getOrCreateTravelMonth, verifyExceedingOnTravel, sendSMSNotifications, sendEmailNotifications, markExceedTransaction, getDeadlines, getStartDateOfClearance, getLastDateOfTravel, sortTransactionsByDateInAscendingOrder, getOnlinePaymentTransactionForTravel } from "./helper";
+import { FormalNoticeEvent, ListOfUsersToBlockedEvent, notificationEmmiter, TransactionOutsideNotJustifiedEvent } from 'modules/notifications';
 import { BankAccountManager, BankAccountManagerController } from "modules/bank-account-manager";
 import { Travel, TravelController, TravelType, TravelsForProcessing } from 'modules/travel';
 import { VisaTransaction, VisaTransactionsController } from "modules/visa-transactions";
@@ -8,12 +8,11 @@ import { TravelMonth, TravelMonthController } from "modules/travel-month";
 import { VisaOperationsRepository } from "./visa-operations.repository";
 import { VisaOperationsController } from "./visa-operations.controller";
 import { VisaTransactionsTmpAggregate } from "./visa-transactions-tmp";
-import { TemplateForm, TemplatesController } from "modules/templates";
 import { User, UserCategory, UsersController } from 'modules/users';
 import { SettingsController, settingsKeys } from "modules/settings";
 import { ExpenseCategory, OpeVisaStatus as OVS } from "./enum";
 import { Import, ImportsController } from "modules/imports";
-import { Letter, LettersController } from "modules/letters";
+import { TemplatesController } from "modules/templates";
 import { QueueState } from "common/helpers";
 import { CrudService } from "common/base";
 import { getTotal } from "common/utils";
@@ -264,7 +263,7 @@ export class VisaOperationsService extends CrudService<any> {
             transactionsExceeded = await VisaOperationsController.visaOperationsService.getCustomerAccountToBlocked([...travelsExceeded, ...onlinePaymentsExceeded]);
 
             if (!isEmpty(transactionsExceeded)) {
-                notificationEmmiter.emit('list-of-users-to-blocked-mail', new ListOfUsersToBlockedEvent(transactionsExceeded))
+                notificationEmmiter.emit('list-of-users-to-blocked-mail', new ListOfUsersToBlockedEvent(transactionsExceeded));
             }
         } catch (e: any) {
             this.logger.error(`detect users not justified transaction failed \n${e.stack}\n`);
@@ -428,7 +427,7 @@ export class VisaOperationsService extends CrudService<any> {
             try { travel = element?.travelId ? await TravelController.travelService.findOne({ filter: { _id: element?.travelId } }) : await TravelController.travelService.insertTravelFromSystem(travel); } catch (e) { }
             if (!travel || travel instanceof Error) { continue; }
             travel.notifications = [];
-            
+
             // TODO check if it exists onlinePaymentMonth, which content transactions between period of travel
             // If it exist, you must extract this operation on this onlinePaymentMonth, save onlinePaymentMonth
             // Insert this operation on travel, sort ascending all transactions by date, and call method to add transactions on travel
@@ -578,10 +577,11 @@ export class VisaOperationsService extends CrudService<any> {
                 deadlineProofLongTravel, deadlineStatementExpensesLongTravel, deadlineProofShortTravel,
                 deadlineStatementExpensesShortTravel, deadlineOnlinePayment, servicesDeadline, goodsDeadline,
             } = await getDeadlines();
-
+            let usersIdAbode: any[] = [];
             // check and update travel-months deadlines
             const travelsMonthsIds = travelsMonths.filter(travelMonth => travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > deadlineStatementExpensesLongTravel).map(e => new ObjectId(e?._id?.toString()));
             await TravelMonthController.travelMonthService.updateMany({ _id: { $in: travelsMonthsIds } }, { isUntimely: true });
+            // users = await TravelMonthController.travelMonthService.findAll({ filter: { _id: { $in: travelsMonthsIds } }, projection: { userId : 1} });
 
             // check and update travels deadlines
             const longTravelsIds = travels.filter(travel =>
@@ -595,11 +595,9 @@ export class VisaOperationsService extends CrudService<any> {
             ).map(e => new ObjectId(e?._id?.toString()));
 
             await TravelController.travelService.updateMany({ _id: { $in: [...longTravelsIds, ...shortTravelsIds] } }, { isUntimely: true });
-
             // check and update online-payments deadlines
             const onlinePaymentsIds = onlinePayments.filter(onlinePayment => onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > deadlineOnlinePayment).map(e => new ObjectId(e?._id?.toString()));
             await OnlinePaymentController.onlinePaymentService.updateMany({ _id: { $in: onlinePaymentsIds } }, { isUntimely: true })
-
             // check and update importations deadlines
             for (const importation of importations) {
                 const startDateOfClearance = await getStartDateOfClearance(importation);

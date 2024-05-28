@@ -66,10 +66,9 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
   private async getSendersNotificationBody(): Promise<string> {
     try {
       let visaTemplate: any
-      try { visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.keyNotification } }); } catch (e) { }
-
+      try { (this.keyNotification !== 'letters') && (visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.keyNotification } })); } catch (e) { }
       // send notice letters 
-      if (this.keyNotification === 'letters') visaTemplate = await this.getFormalNoticeLetterVisaTemplateMail();
+      (this.keyNotification === 'letters') && (visaTemplate = await this.getFormalNoticeLetterVisaTemplateMail());
       if (!visaTemplate) { throw new Error(`Template ${this.keyNotification} Not Found`); }
 
       this.templateData = replaceMailVariables(visaTemplate[this.lang], this.eventData, this.lang, visaTemplate?.signature);
@@ -94,6 +93,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
     // if (isDevOrStag) { return null; }
 
     const body = (this.keyNotification) ? await this.getSendersNotificationBody() : this.getNotificationBody();
+
     if (this.keyNotification === 'letters') { (this.eventData as any).attachments = await generateFormalNoticeLetter(this.formalNoticeLetterAttachmentBody, true); }
     const queueData: QueueData = {
       subject: this.subject,

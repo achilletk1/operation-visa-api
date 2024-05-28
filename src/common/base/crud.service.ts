@@ -2,8 +2,8 @@
 import { convertParams, extractPaginationData, extractProjectionData, extractSortingData, setResponse, rangeData, formatFilters } from '../helpers';
 import { BaseRepository } from './base.repository';
 import { ServiceInterface } from '../interfaces';
+import { errorMsg, respMsg } from 'common/utils';
 import { BaseService } from './base.service';
-import { errorMsg, respMsg } from 'common';
 import { config } from 'convict-config';
 import { Document } from 'mongodb';
 
@@ -26,7 +26,7 @@ export class CrudService<T> extends BaseService implements ServiceInterface<T>  
 
       if (!newDocument.insertedId)
         throw new Error(errorMsg.ON_CREATION);
-
+      
       return setResponse(200, respMsg.CREATED, newDocument.insertedId);
     } catch (error) { throw error; }
   }

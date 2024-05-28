@@ -5,7 +5,7 @@ import { QueuePriority } from "modules/notifications";
 export class FormalNoticeMailNotification extends BaseMailNotification<FormalNoticeEvent> {
 
     constructor(notificationData: FormalNoticeEvent) {
-        super('visa-template', notificationData, QueuePriority.HIGH, undefined, 'letters', notificationData.lang);
+        super('formal-notice-letter', notificationData, QueuePriority.HIGH, undefined, 'letters', notificationData.lang);
 
         this.key = 'letters';
         this.subject = (notificationData.lang === 'fr') ? 'Lettre de mise en demeure' : 'Formal notice letter';

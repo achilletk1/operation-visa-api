@@ -9,3 +9,17 @@ export interface MailNotificationInterface {
 
     sendNotification(): any;
 }
+
+
+export interface commonFields {
+    name?: string;
+    ceiling?: number;
+    amount?: number;
+    date?: string;
+    receiver: string;
+    civility?: string;
+    rejectReason?: string;
+    end?: string;
+    start?: string;
+    created?: string;
+}

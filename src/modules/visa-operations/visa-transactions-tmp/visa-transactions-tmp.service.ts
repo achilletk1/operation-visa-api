@@ -12,7 +12,7 @@ export class VisaTransactionsTmpService extends CrudService<VisaTransactionsTmp>
     }
 
     async getFormattedVisaTransactionsTmp() {
-        try { return await VisaTransactionsTmpService.visaTransactionsTmpRepository.getFormattedVisaTransactionsTmp(); } 
+        try { return await VisaTransactionsTmpService.visaTransactionsTmpRepository.getFormattedVisaTransactionsTmp(); }
         catch (error) { throw error; }
     }
 

@@ -8,6 +8,6 @@ export class DetectTransactionsMailNotification extends BaseMailNotification<Det
         super('visa-template', notificationData, QueuePriority.HIGH, undefined, 'firstTransaction', notificationData.lang);
 
         this.key = 'firstTransaction';
-        this.subject = ''; // If subjet are setted in template, it must be erase this subject
+        this.subject = ''; // If subject are set in template, it must be erase this subject
     }
 }

@@ -16,11 +16,11 @@ const runScripts = async () => {
     // await dropTestCollections();
     // await inserDefaultVisaCeilings();
     // await inserDefaultLongTravelsTypes();
-    // await inserDefaultLetter();
-    await inserDefaultPropertyType();
+    await inserDefaultLetter();
+    // await inserDefaultPropertyType();
     // await inserDefaultSetting();
     // await insertDefaultTemplateSetting();
-    await inserDefaultVouchers();
+    // await inserDefaultVouchers();
     // await inserDefaultBankUsers();
     // await inserDefaultUsersCardsTypes();
     // await inserDefaultBankAccountManager();

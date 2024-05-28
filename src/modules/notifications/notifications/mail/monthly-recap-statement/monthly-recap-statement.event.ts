@@ -3,7 +3,6 @@ import { SettingsController } from 'modules/settings';
 import { config } from "convict-config";
 import { logger } from 'winston-config';
 import moment from "moment";
-import { StatementReport, VisaRecapOperationsController } from 'modules/visa-recap-operation-statement';
 
 export class MonthlyRecapStatementEvent implements MonthlyRecapStatementMailData {
 
@@ -25,7 +24,7 @@ export class MonthlyRecapStatementEvent implements MonthlyRecapStatementMailData
                 name: `Recapitulatif des états du mois ${this.date}`, content: this.monthlyList[0].content
                 , contentType: this.monthlyList[0].contentType
             }] : [];
-        } catch (error: any) { logger.error(`Error during attachment generation of monthly stastement mail notification \n${error.stack}`); }
+        } catch (e: any) { logger.error(`Error during attachment generation of monthly stastement mail notification \n${e.stack}`); }
     }
 
     async getBankMail() {

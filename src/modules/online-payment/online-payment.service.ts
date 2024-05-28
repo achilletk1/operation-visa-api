@@ -1,13 +1,14 @@
+import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOnExceededFolderEvent, RejectTemplateSmsEvent, RejectOnlinePaymentEvent, DeclarationTemplateSmsEvent } from 'modules/notifications';
 import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects, getValidationsFolder } from "common/helpers";
-import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { getOnpStatementStepStatus, getOnpStatus, getTotal } from "common/utils";
+import { getAccountManagerOrAgencyHeadCcEmail } from 'common/services';
 import { OnlinePaymentRepository } from "./online-payment.repository";
 import { OnlinePaymentController } from "./online-payment.controller";
 import { UserCategory, UsersController } from "modules/users";
-import { CrudService, QueryOptions } from "common/base";
 import { OpeVisaStatus } from "modules/visa-operations";
+import { CrudService, QueryOptions } from "common/base";
 import { saveAttachmentOnlinePayment } from "./helper";
 import httpContext from 'express-http-context';
 import { OnlinePaymentMonth } from "./model";
@@ -36,14 +37,15 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             query = extractPaginationData(query || {});
             if (query?.filter?.start && query?.filter?.end) {
                 delete query?.filter?.start; delete query?.filter?.end;
-                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                query = {
+                    ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }
 
             if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
-                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
-                delete query?.filter?.platform; 
+                query.filter = { ...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform;
             }
 
             const data = await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>(getAgenciesQuery(query));
@@ -73,17 +75,18 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 // await OnlinePaymentController.onlinePaymentService.update({ _id: onlinePaymentsMonth?._id }, { status: OpeVisaStatus.EXCEDEED });
             }
         } catch (e: any) {
-            this.logger.error(`Error during excution removeOnlinePaymentsWithExceedings cron \n ${e.stack}\n`);
+            this.logger.error(`Error during execution removeOnlinePaymentsWithExceedings cron \n ${e.stack}\n`);
         }
     }
 
-    async insertOnlinePaymentStatement(userId: string, onlinepaymentMonth: OnlinePaymentMonth): Promise<any> {
+    async insertOnlinePaymentStatement(userId: string, onlinePaymentMonth: OnlinePaymentMonth): Promise<any> {
         try {
+            const authUser = httpContext.get('user');
             const user = await UsersController.usersService.findOne({ filter: { _id: userId } });
             if (!user) { throw Error('UserNotFound'); }
 
-            if (!('month' in onlinepaymentMonth) || !('year' in onlinepaymentMonth)) { throw Error('OnlinePayementDateNotFound'); }
-            const { month, year } = onlinepaymentMonth;
+            if (!('month' in onlinePaymentMonth) || !('year' in onlinePaymentMonth)) { throw Error('OnlinePayementDateNotFound'); }
+            const { month, year } = onlinePaymentMonth;
             const currentMonth = +(year + '' + month);
 
             let onlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { currentMonth, 'user._id': userId } }) as OnlinePaymentMonth;
@@ -117,12 +120,14 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             }
 
             const id = onlinePayment._id.toString();
-            onlinepaymentMonth.othersAttachements = saveAttachmentOnlinePayment(onlinepaymentMonth?.othersAttachements, onlinePayment._id, onlinePayment.dates?.created);
+            onlinePaymentMonth.othersAttachements = saveAttachmentOnlinePayment(onlinePaymentMonth?.othersAttachements, onlinePayment._id, onlinePayment.dates?.created);
 
-            onlinePayment.othersAttachements = onlinepaymentMonth.othersAttachements;
+            onlinePayment.othersAttachements = onlinePaymentMonth.othersAttachements;
             //  const updateData = { 'dates.updated': new Date().valueOf(), statements: onlinePayment.statements }
             const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id.toString() }, onlinePayment);
             notificationEmmiter.emit('online-payment-declaration-mail', new OnlinePaymentDeclarationEvent({ ...onlinePayment, _id: id }));
+            notificationEmmiter.emit('declaration-template-sms', new DeclarationTemplateSmsEvent(onlinePayment, authUser?.tel));
+
             // Promise.all([
             //     await NotificationsController.notificationsService.sendEmailOnlinePayementDeclaration({ ...onlinePayment, _id: id }, user.email)
             // ]);
@@ -132,6 +137,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
     }
 
     async insertOnlinePayment(onlinePayment: OnlinePaymentMonth): Promise<any> {
+        const authUser = httpContext.get('user');
         try {
             let user;
             try { user = await UsersController.usersService.findOne({ filter: { clientCode: get(onlinePayment, 'user.clientCode'), category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } }); } catch (e) { }
@@ -147,7 +153,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             const insertedId = (await OnlinePaymentController.onlinePaymentService.create(onlinePayment))?.data;
             onlinePayment._id = insertedId;
-
+            notificationEmmiter.emit('online-payment-declaration-mail', new OnlinePaymentDeclarationEvent(onlinePayment));
+            notificationEmmiter.emit('declaration-template-sms', new DeclarationTemplateSmsEvent(onlinePayment, authUser?.tel));
             return onlinePayment;
         } catch (error) { throw error; }
     }
@@ -220,8 +227,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                     }
                 }
             }
-
-            return await OnlinePaymentController.onlinePaymentService.update({ _id }, onlinePaymentMonth);
+            const result = await OnlinePaymentController.onlinePaymentService.update({ _id }, onlinePaymentMonth);
+            notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(onlinePaymentMonth, authUser?.tel, 'OnlinePaymentMonth'));
+            return result;
         } catch (error) { throw error; }
     }
 
@@ -237,7 +245,6 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             if (isEmpty(references)) throw new Error('MissingStatementRefs');
 
             let onlinePaymentMonth = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id: id } }) as OnlinePaymentMonth;
-
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (!onlinePaymentMonth) { throw new Error('OnlinePaymentNotFound'); }
@@ -293,12 +300,17 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth?.transactions);
             onlinePaymentMonth = { ...onlinePaymentMonth, ...toBeUpdated };
             onlinePaymentMonth.status = getOnpStatus(onlinePaymentMonth?.transactions);
-
-            return await OnlinePaymentController.onlinePaymentService.update({ _id: id }, onlinePaymentMonth);
+            const result = await OnlinePaymentController.onlinePaymentService.update({ _id: id }, onlinePaymentMonth);
+            if (status === OpeVisaStatus.REJECTED) {
+                const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(user.userGesCode, user?.age?.code);
+                notificationEmmiter.emit('reject-online-payment-mail', new RejectOnlinePaymentEvent(onlinePaymentMonth, ccEmail));
+                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(onlinePaymentMonth, authUser?.tel, 'OnlinePaymentMonth'));
+            }
+            return result;
         } catch (error) { throw error; }
     }
 
-    async getOnlinePaymentReport(params: { status: any, start: number, end: number, regionCode:string }) {
+    async getOnlinePaymentReport(params: { status: any, start: number, end: number, regionCode: string }) {
         try { return await OnlinePaymentService.onlinePaymentRepository.getOnlinePaymentReport(params); }
         catch (error) { throw error; }
     }

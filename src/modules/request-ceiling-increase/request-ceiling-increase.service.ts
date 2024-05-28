@@ -1,14 +1,16 @@
 import { CeilingAssignedEvent, CeilingCaeAssignedEvent, IncreaseCeilingBankEvent, IncreaseCeilingEvent, notificationEmmiter, RejectCeilingEvent, ValidCeilingEvent } from "modules/notifications";
 import { RequestCeilingIncreaseRepository } from "./request-ceiling-increase.repository";
 import { RequestCeilingIncreaseController } from "./request-ceiling-increase.controller";
+import { IncreaseCeilingSmsEvent, RejectTemplateSmsEvent } from "modules/notifications";
+import { convertParams, extractPaginationData, getAgenciesQuery } from "common/helpers";
 import { deleteDirectory, readFile, saveAttachment } from "common/utils";
+import { getAccountManagerOrAgencyHeadCcEmail } from "common/services";
 import { AssignTo, RequestCeilingIncrease } from "./model";
+import { CrudService, QueryOptions } from "common/base";
 import { SettingsController } from "modules/settings";
 import httpContext from 'express-http-context';
-import { CrudService, QueryOptions } from "common/base";
 import { isEmpty } from "lodash";
 import { Status } from "./enum";
-import { convertParams, extractPaginationData, getAgenciesQuery } from "common/helpers";
 import moment from "moment";
 
 export class RequestCeilingIncreaseService extends CrudService<RequestCeilingIncrease> {
@@ -28,12 +30,13 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
             query = extractPaginationData(query || {});
             if (query?.filter?.start && query?.filter?.end) {
                 delete query?.filter?.start; delete query?.filter?.end;
-                query = { ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
+                query = {
+                    ...query, start: moment(query?.filter?.start, 'DD-MM-YYYY').startOf('day').valueOf(),
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }
 
-            if(clientCode) query.filter['user.clientCode'] = clientCode;
+            if (clientCode) query.filter['user.clientCode'] = clientCode;
             const data = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAllAggregate<RequestCeilingIncrease>(getAgenciesQuery(query));
             delete query.offset; delete query.limit;
             const total = (await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAllAggregate<RequestCeilingIncrease>(getAgenciesQuery(query))).length;
@@ -43,6 +46,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
     async insertRequestCeiling(ceiling: RequestCeilingIncrease): Promise<any> {
         try {
+            const authUser = httpContext.get('user');
             const { data } = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findAll({ filter: { cardType: { ...ceiling.cardType }, status: { $nin: [Status.VALIDATED, Status.REJECTED] } } });
 
             if (data.length) throw new Error('ApplicationNotProcessed');
@@ -66,7 +70,9 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
             const bankUser = await SettingsController.settingsService.findOne({ filter: { key: 'email_bank' } });
 
             notificationEmmiter.emit('increase-ceiling-mail', new IncreaseCeilingEvent(ceiling));
+            notificationEmmiter.emit('increase-ceiling-sms', new IncreaseCeilingSmsEvent(ceiling, authUser?.tel));
             notificationEmmiter.emit('increase-ceiling-bank-mail', new IncreaseCeilingBankEvent(ceiling, bankUser?.data));
+
             // await Promise.all([
             //     NotificationsController.notificationsService.sendEmailIncreaseCeiling(ceiling),
             //     NotificationsController.notificationsService.sendEmailIncreaseCeilingBank(ceiling)
@@ -91,8 +97,8 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
             const { _id, fname, lname } = user;
             const assigner = { _id, fname, lname };
-            const assignered: AssignTo = { fname: assignedUser.fname, lname: assignedUser.lname, email: assignedUser.email, tel: assignedUser.tel };
-            const assignment = { assigner, assignered };
+            const assignTo: AssignTo = { fname: assignedUser.fname, lname: assignedUser.lname, email: assignedUser.email, tel: assignedUser.tel };
+            const assignment = { assigner, assignered: assignTo };
 
             const data = await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id: id }, {
                 assignment,
@@ -103,11 +109,11 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
             this.logger.info(`send ceiling assignment notification email`);
 
-            notificationEmmiter.emit('ceiling-assigned-mail', new CeilingAssignedEvent(ceilingReq, assignered));
-            notificationEmmiter.emit('ceiling-cae-assigned-mail', new CeilingCaeAssignedEvent(ceilingReq, assignered));
+            notificationEmmiter.emit('ceiling-assigned-mail', new CeilingAssignedEvent(ceilingReq, assignTo));
+            notificationEmmiter.emit('ceiling-cae-assigned-mail', new CeilingCaeAssignedEvent(ceilingReq, assignTo));
             // await Promise.all([
-            //     NotificationsController.notificationsService.sendEmailCeilingAssigned(ceilingReq, assignered),
-            //     NotificationsController.notificationsService.sendEmailCaeAssigned(ceilingReq, assignered)
+            //     NotificationsController.notificationsService.sendEmailCeilingAssigned(ceilingReq, assignTo),
+            //     NotificationsController.notificationsService.sendEmailCaeAssigned(ceilingReq, assignTo)
             // ]);
             return data;
         } catch (error) { throw error; }
@@ -115,10 +121,9 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
 
     async requestIncrease(_id: string, body: { validator: any, status: number }) {
         try {
-
             const authUser = httpContext.get('user');
 
-            if (![600].includes(authUser?.category)) { throw new Error('Forbidden'); }
+            // if (![600].includes(authUser?.category)) { throw new Error('Forbidden'); }
 
             const ceiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id } });
 
@@ -135,6 +140,7 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
                 await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id }, ceiling);
 
                 notificationEmmiter.emit('valid-ceiling-mail', new ValidCeilingEvent(ceiling));
+                notificationEmmiter.emit('increase-ceiling-sms', new IncreaseCeilingSmsEvent(ceiling, authUser?.tel));
                 // await Promise.all([
                 //     // NotificationsController.notificationsService.sendWelcomeSMS(user, password, user?.tel),
                 //     NotificationsController.notificationsService.sendEmailValidCeiling(ceiling)
@@ -145,12 +151,10 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
             if (ceiling?.status === 300) {
 
                 await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id }, ceiling);
-
-                notificationEmmiter.emit('reject-ceiling-mail', new RejectCeilingEvent(ceiling));
-                // await Promise.all([
-                //     // NotificationsController.notificationsService.sendWelcomeSMS(user, password, user?.tel),
-                //     NotificationsController.notificationsService.sendEmailRejectCeiling(ceiling)
-                // ]);
+                // send notifications
+                const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(undefined, undefined, { _id: ceiling?.user?._id });
+                notificationEmmiter.emit('reject-ceiling-mail', new RejectCeilingEvent(ceiling, ccEmail));
+                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(ceiling, authUser?.tel, 'RequestCeilingIncrease'));
             }
 
             // execute request in progress

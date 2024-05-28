@@ -1,4 +1,4 @@
-import { ErrorHandler, oauthVerification, responseHeaders } from "common/middelwares";
+import { ErrorHandler, oauthVerification, responseHeaders } from "common/middlewares";
 import { logger, morganOption } from "winston-config";
 import { json, urlencoded } from 'body-parser';
 import httpContext from 'express-http-context';
