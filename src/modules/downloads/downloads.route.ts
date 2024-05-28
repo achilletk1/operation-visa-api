@@ -9,4 +9,6 @@ router.get('/visa-transactions-file/xlsx/default-terminals', downloadsController
 
 router.get('/visa-transactions-file/xlsx/default-internet', downloadsController.downloadFileInternet);
 
+router.get('/pdf/regulation-notice', downloadsController.downloadFileRegulationNotice);
+
 export const downloadsRoute = router;
