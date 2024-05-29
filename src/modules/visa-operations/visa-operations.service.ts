@@ -119,7 +119,7 @@ export class VisaOperationsService extends CrudService<any> {
             if (VisaOperationsService.queueStateRevival !== QueueState.PENDING) { return; }
             VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
             // TODO
-            const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: 100 } }]) ?? [];
+            const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: TravelType.SHORT_TERM_TRAVEL } }]) ?? [];
 
             let sensitiveClients = ((await SettingsController.settingsService.findOne({ filter: { key: settingsKeys.SENSITIVE_CUSTOMER_CODES } }))?.data || '')?.replace(/\s/g, '');
             sensitiveClients = sensitiveClients?.split(',');
@@ -135,7 +135,7 @@ export class VisaOperationsService extends CrudService<any> {
             const visaTemplate = (await TemplatesController.templatesService.findAllAggregate<TemplateForm>([{ $match: { key: 'transactionOutsideNotJustified' } }]) ?? [])[0];
 
             for (const travel of travels) {
-                if (travel?.transactions?.length) continue;
+                if (!travel?.transactions?.length) continue;
                 const firstDate = Math.min(...(travel.transactions).map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
                 const currentDate = new Date().valueOf();
                 if (!travel?.user?.email) continue;
@@ -153,7 +153,7 @@ export class VisaOperationsService extends CrudService<any> {
                 // TODO set lang dynamically
                 const lang = 'fr';
 
-                if (moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
+                if (letter && moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
                     (sensitiveClients.includes(user?.bankProfileCode))
                         ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, true, lang, ccEmail))
                         : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, false, lang, ccEmail));

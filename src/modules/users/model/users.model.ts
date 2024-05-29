@@ -10,11 +10,6 @@ export enum visaOpeCategory {
     EXTERNE = 600
 }
 
-export enum userStatus {
-    EMPTY = 100,
-    JUSTIFY = 200,
-    BLOCKED = 300
-}
 export class User {
     _id?: string;
     userCode?: string;
@@ -30,7 +25,7 @@ export class User {
     age?: { label?: string; code?: string; };
     function?: string;
     enabled?: boolean;
-    status?: userStatus;   // the status of user (if is on abode or blocked);
+    isUserCardBlocked?: boolean;
     pwdReseted?: boolean;
     clientCode?: string;
     otp?: { value: string, expiresAt?: number };

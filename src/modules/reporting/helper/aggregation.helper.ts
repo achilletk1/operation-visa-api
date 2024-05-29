@@ -1,5 +1,5 @@
+import { Agencies, OpeVisaStatus as OVS } from 'modules/visa-operations';
 import { matchUserAuthorizationsDatas } from 'common/helpers';
-import { Agencies } from 'modules/visa-operations/enum';
 import { authorizations } from 'modules/auth/profile';
 import httpContext from 'express-http-context';
 import { UserCategory } from 'modules/users';
@@ -341,4 +341,214 @@ export function matchUserDatas(match: any): any {
     ([PERSONNEL_MANAGER, ACCOUNT_MANAGER].includes(user?.category)) && (match['$match']['user.userGesCode'] === `${user?.gesCode}`);
     ([HEAD_OF_PERSONNEL_AGENCY, AGENCY_HEAD].includes(user?.category)) && (match['$match']['user.age.code'] = `${user?.age?.code}`);
 
+};
+
+const groupFormalNoticeAndBlockedClientCodes = {
+    $group: {
+        _id: '',
+        formalNoticeClientCodes: {
+            $push: {
+                $cond: {
+                    if: { $lte: ['$$CURRENT.maxDaysDifference', 8] },
+                    then: "$_id",
+                    else: '$$REMOVE'
+                }
+            }
+        },
+        blockedClientCodes: {
+            $push: {
+                $cond: {
+                    if: { $gt: ['$$CURRENT.maxDaysDifference', 8] },
+                    then: "$_id",
+                    else: '$$REMOVE'
+                }
+            }
+        }
+    }
+};
+
+export function listOfUntimelyClientCodesProofTravelAggregation(filter: any = {}) {
+    return [
+        {
+            $match: {
+                isUntimely: true, 'proofTravel.status': { $nin: [OVS.JUSTIFY, OVS.CLOSED] }, ...filter
+                // $and: [
+                //     { isUntimely: true, ...filter },
+                //     {
+                //         $or: [
+                //             { 'proofTravel.status': { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } },
+                //             {
+                //                 $and: [
+                //                     { 'transactions.isExceed': true },
+                //                     { status: { $nin: [OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED] } },
+                //                 ]
+                //             }
+                //         ]
+                //     }
+                // ]
+            },
+        },
+        {
+            $project: {
+                _id: { $toString: '$_id' },
+                transactions: [{ date: { $arrayElemAt: ['$transactions.date', 0] } }],
+                travelType: 1,
+                clientCode: '$user.clientCode'
+            }
+        },
+        { // join first transactions date on travel if it exists
+            $lookup: {
+                from: 'visa_operations_travel_months',
+                localField: '_id',
+                foreignField: 'travelId',
+                let: { id: '$_id' },
+                pipeline: [
+                    { $match: { $expr: { $eq: ['$$id', '$travelId'] } } },
+                    { $sort: { month: -1 } },
+                    { $limit: 1 },
+                    { $project: { _id: 0, date: { $first: '$transactions.date' } } }
+                ],
+                as: 'joinTransactions'
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                clientCode: 1,
+                transactions: { $cond: [{ $eq: ['$travelType', 100] }, '$transactions', '$joinTransactions'] }
+            }
+        },
+        {
+            $match: { $expr: { $eq: [{ $type: { $first: '$transactions.date' } }, 'string'] } }
+        },
+        {
+            $addFields: {
+                differenceInDays: {
+                    $subtract: [
+                        {
+                            $dateDiff: {
+                                startDate: { $dateFromString: { dateString: { $arrayElemAt: ['$transactions.date', 0] }, format: '%d/%m/%Y %H:%M:%S' } },
+                                endDate: new Date(),
+                                unit: 'day'
+                            }
+                        },
+                        30
+                    ]
+                }
+            }
+        },
+        { $group: { _id: '$clientCode', maxDaysDifference: { $max: '$differenceInDays' } } },
+        { ...groupFormalNoticeAndBlockedClientCodes },
+    ];
 }
+
+export function listOfUntimelyClientCodesTransactionsAggregation(filter: any = {}, usersClientCodeOrId: string[] = [], scope: 'travel' | 'online-payment' | 'travel-month') {
+    let selectFilter: any = { 'user.clientCode': { $nin: usersClientCodeOrId } };
+    (scope === 'travel-month') && (selectFilter = { 'userId': { $nin: usersClientCodeOrId } });
+
+    return [
+        { $match: { isUntimely: true, 'transactions.isExceed': true, status: { $nin: [OVS.JUSTIFY, OVS.CLOSED] }, ...filter, ...selectFilter } },
+        {
+            $project: {
+                _id: 0,
+                clientCode: { $first: '$transactions.clientCode' },
+                daysDifferenceArray: {
+                    $map: {
+                        input: '$transactions',
+                        as: 'transaction',
+                        in: {
+                            $cond: {
+                                if: {
+                                    $and: [
+                                        { $eq: ['$$transaction.isExceed', true] },
+                                        { $eq: [{ $type: '$$transaction.date' }, 'string'] },
+                                        {
+                                            $and: [
+                                                { $ne: ['$$transaction.status', 200] },
+                                                { $ne: ['$$transaction.status', 600] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                then: {
+                                    $subtract: [
+                                        {
+                                            $dateDiff: {
+                                                startDate: { $dateFromString: { dateString: '$$transaction.date', format: '%d/%m/%Y %H:%M:%S' } },
+                                                endDate: new Date(),
+                                                unit: 'day'
+                                            }
+                                        },
+                                        30
+                                    ]
+                                }, // Calculer la différence de date si la transaction correspond aux critères
+                                else: '$$REMOVE' // Supprimer si la transaction ne correspond pas aux critères
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        { $unwind: { path: '$daysDifferenceArray' } },
+        { $group: { _id: '$clientCode', maxDaysDifference: { $max: '$daysDifferenceArray' } } },
+        { ...groupFormalNoticeAndBlockedClientCodes },
+    ];
+}
+
+export function generateImportationUntimelyAggregation() {
+    return [
+        {
+            $match: {
+                isUntimely: true, status: { $nin: [OVS.JUSTIFY, OVS.CLOSED] }, finalPayment: true
+            }
+        }
+    ];
+}
+
+const t =
+{
+    "user": {
+        "_id": "658296ce22170059383e5991",
+        "code": "70017",
+    },
+    "transactions": [
+        {
+            "_id": {
+                "$oid": "6645ffdd3f46bb7384ddc845"
+            },
+            "date": "16/05/2024 12:26:07"
+        },
+        {
+            "_id": {
+                "$oid": "6645ffdd3f46bb7384ddc847"
+            },
+            "date": "16/05/2024 21:32:42",
+            "status": 200,
+            "isExceed": true
+        },
+        {
+            "_id": {
+                "$oid": "6645ffdd3f46bb7384ddc83b"
+            },
+            "date": "17/05/2024 00:15:02",
+            "status": 200,
+            "isExceed": true
+        },
+        {
+            "_id": {
+                "$oid": "6645ffdd3f46bb7384ddc83a"
+            },
+            "date": "17/05/2024 09:20:50",
+            "status": 100,
+            "isExceed": true
+        },
+        {
+            "_id": {
+                "$oid": "6645ffdd3f46bb7384ddc848"
+            },
+            "date": "17/05/2024 09:44:03",
+            "status": 100,
+            "isExceed": true
+        },
+    ]
+};
