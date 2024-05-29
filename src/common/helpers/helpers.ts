@@ -99,8 +99,15 @@ export function parseNumberFields(fields?: any) {
       key.includes('contryCode') ||
       key.includes('vouchercode') ||
       key.includes('country.code') ||
+      key.includes('travelType') ||
+      key.includes('start') ||
+      key.includes('end') ||
+      key.includes('regionCode') ||
       key.includes('originator.ncp')
     ) {
+        if(key.includes('travelType')) {
+          fields[key] = Number(fields[key]); continue;
+        }
         fields[key] = `${fields[key]}`.trim(); continue;
     }
     fields[key] = (isString(fields[key]) && /^\d+$/.test(fields[key])) ? +fields[key] : fields[key];
