@@ -1,5 +1,5 @@
+import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects, getValidationsFolder } from "common/helpers";
 import { notificationEmmiter, OnlinePaymentDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
-import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getValidationsFolder } from "common/helpers";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { getOnpStatementStepStatus, getOnpStatus, getTotal } from "common/utils";
@@ -154,6 +154,8 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
 
             const actualOnlinePayment = await OnlinePaymentController.onlinePaymentService.baseRepository.findOne({ filter: { _id } }) as OnlinePaymentMonth;
 
+            const { newVersion, oldVersion } = getDifferenceBetweenObjects(onlinePaymentMonth, actualOnlinePayment);
+
             if (isEmpty(actualOnlinePayment)) { throw new Error('OnlinePayment'); }
 
             if (!isEmpty(onlinePaymentMonth?.transactions)) {
@@ -181,7 +183,9 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 _id: authUser?._id,
                 fullName: authUser?.fullName,
                 date: new Date().valueOf(),
-                steps: "État détaillé des dépenses"
+                steps: "État détaillé des dépenses",
+                oldVersion,
+                newVersion,
             });
             onlinePaymentMonth.expenseDetailsStatus = getOnpStatementStepStatus(onlinePaymentMonth, 'expenseDetail');
             onlinePaymentMonth.expenseDetailAmount = getTotal(onlinePaymentMonth?.transactions);
