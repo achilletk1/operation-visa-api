@@ -55,6 +55,11 @@ export class TravelService extends CrudService<Travel> {
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }
+            
+            if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
+                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform; 
+            }
 
             const data = await TravelController.travelService.findAllAggregate<Travel>(getAgenciesQuery(query));
             delete query?.offset; delete query?.limit;

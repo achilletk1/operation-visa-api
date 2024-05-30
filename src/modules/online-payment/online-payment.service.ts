@@ -41,6 +41,11 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                 } as QueryOptions;
             }
 
+            if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
+                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform; 
+            }
+
             const data = await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>(getAgenciesQuery(query));
             delete query.offset; delete query.limit;
             const total = (await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>(getAgenciesQuery(query))).length;
@@ -103,7 +108,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
                     },
                     ceiling: ceiling?.value,
                     amounts: 0,
-                    status: OpeVisaStatus.TO_VALIDATED,
+                    status: OpeVisaStatus.TO_COMPLETED,
                     currentMonth,
                     transactions: [],
                     othersAttachements: []
