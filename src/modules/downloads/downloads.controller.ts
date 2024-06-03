@@ -18,4 +18,11 @@ export class DownloadsController {
         } catch (error) { next(error); }
     }
 
+    async downloadFileRegulationNotice(req: Request, res: Response, next: NextFunction) {
+        try {
+            const file = `${__dirname}/files/Lettre_circulaire_N_004_GR_2022_01.pdf`;
+            res.download(file);
+        } catch (error) { next(error); }
+    }
+
 }
