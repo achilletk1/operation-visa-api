@@ -61,7 +61,7 @@ export class ExportService extends BaseService {
             const { path } = query;
             const data = readFile(path);
 
-            if (isDevOrStag) { await timeout(5000); }
+            if (isDevOrStag) { await timeout(500); }
 
             return { data };
         } catch (error) { throw error; }

@@ -41,4 +41,16 @@ export interface Letter {
         fr: { sms: string; };
         en: { sms: string; };
     };
+    variables?: {
+        fr?: {
+            prooftravelSubjet?: string,
+            exceedingCeilingSubjet?: string,
+            importSubjet?: string,
+        },
+        en?: { 
+            prooftravelSubjet?: string,
+            exceedingCeilingSubjet?: string,
+            importSubjet?: string,
+        }
+    }
 }

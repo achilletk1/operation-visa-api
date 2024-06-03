@@ -1,3 +1,4 @@
+import { getDeadlines } from 'modules/visa-operations/helper';
 import { OnlinePaymentMonth } from 'modules/online-payment';
 import { OpeVisaStatus } from 'modules/visa-operations';
 import { MailAttachment } from 'modules/notifications';
@@ -221,12 +222,26 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
     try {
         let data: any = { image, color, companySiteUrl, app, company, imageBase64 };
         let templateData = '';
+        const {
+            deadlineProofLongTravel, deadlineProofShortTravel,
+            deadlineStatementExpensesShortTravel, deadlineOnlinePayment,
+        } = await getDeadlines();
 
         if (type === 'travel') {
             const travel = operation as Travel;
             templateData = templateTravelDeclarationRecapPdf;
             const amount = getTransactionsAmount(travel?.transactions || []);
-            let exceeddays = moment().diff(moment(travel?.transactions[0]?.date).add(30, 'days'), 'days')
+            let exceeddays: number = 0;
+
+            if (travel.travelType === TravelType.LONG_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
+                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel, 'days'), 'days')
+            }
+            if (travel.travelType === TravelType.SHORT_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.status as OpeVisaStatus)) {
+                exceeddays = moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel, 'days'), 'days')
+            }
+            if (travel.travelType === TravelType.SHORT_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
+                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel, 'days'), 'days')
+            }
 
             data = {
                 ...data,
@@ -254,8 +269,8 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             const onlinePaymentMonth = operation as OnlinePaymentMonth;
             templateData = templateOnlinePaymentDeclarationRecapPdf;
             const amount = getTransactionsAmount(onlinePaymentMonth?.transactions || []);
-            let exceeddays = moment().diff(moment((onlinePaymentMonth?.transactions || [])[0]?.date).add(30, 'days'), 'days')
-
+            let exceeddays = 0;
+            onlinePaymentMonth?.transactions?.length && (exceeddays = moment().diff(moment(onlinePaymentMonth?.transactions[0]?.date).add(deadlineOnlinePayment, 'days'), 'days'));
             data = {
                 ...data,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),

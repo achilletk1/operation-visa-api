@@ -1,11 +1,15 @@
-import { VisaExceedingEvent, VisaExceedingMailData } from "../visa-exceding";
-import { getTotal } from 'common/utils';
 import { Travel } from "modules/travel";
+import { VisaExceedingEvent, VisaExceedingMailData } from "../visa-exceding";
+import { OnlinePaymentMonth } from "modules/online-payment";
+import { getTotal } from 'common/utils';
+import { Import } from "modules/imports";
 
 export class TransactionOutsideNotJustifiedEvent extends VisaExceedingEvent implements TransactionOutsideNotJustifiedMailData {
-
-    constructor(travel: Travel, isSensitiveCustomer: boolean, lang: 'fr' | 'en', public cc: string = '') {
-        super({ transactions: travel?.transactions, ceiling: String(travel?.ceiling), amount: getTotal(travel?.transactions) || 0, isSensitiveCustomer }, travel?.user?.email, lang, travel?._id?.toString(), cc);
+    
+    
+    constructor(operation: Travel | OnlinePaymentMonth | Import, isSensitiveCustomer: boolean, lang: 'fr' | 'en', public cc: string = '') {
+        const ceiling = 'ceiling' in operation ? String(operation.ceiling) : '0';
+        super({ transactions: operation?.transactions, ceiling, amount: getTotal(operation?.transactions as any) || 0, isSensitiveCustomer }, operation?.user?.email, lang, operation?._id?.toString(), cc);
     }
 }
 

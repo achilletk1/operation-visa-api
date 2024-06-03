@@ -69,7 +69,7 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
       try { visaTemplate = await TemplatesController.templatesService.findOne({ filter: { key: this.keyNotification } }); } catch (e) { }
 
       // send notice letters 
-      if (this.keyNotification === 'letters') visaTemplate = this.getFormalNoticeLetterVisaTemplateMail();
+      if (this.keyNotification === 'letters') visaTemplate = await this.getFormalNoticeLetterVisaTemplateMail();
       if (!visaTemplate) { throw new Error(`Template ${this.keyNotification} Not Found`); }
 
       this.templateData = replaceMailVariables(visaTemplate[this.lang], this.eventData, this.lang, visaTemplate?.signature);
@@ -81,10 +81,12 @@ export class BaseMailNotification<T> extends QueueService implements MailNotific
       return '';
     }
   }
-
+ 
   private async getFormalNoticeLetterVisaTemplateMail() {
-    const visaTemplate = await LettersController.lettersService.findOne({});
+    const visaTemplate = await LettersController.lettersService.findOne({}); 
     this.formalNoticeLetterAttachmentBody = replaceMailVariables(visaTemplate.pdf[this.lang], this.eventData, this.lang, visaTemplate?.pdf?.signature);
+    
+    (this.eventData as any)['LETTER_SUBJECT'] = (visaTemplate?.variables?.[this.lang] as any)[(this.eventData as any).type + 'Subject'];
     return visaTemplate.emailText;
   }
 

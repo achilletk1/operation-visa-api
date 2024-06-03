@@ -11,7 +11,8 @@ export const replaceMailVariables = (content: any, userData: any, lang: 'fr' | '
     obj.name = values['NOM_CLIENT'];
     obj.civility = userData?.civility;
     if (signature) obj.signature = signature;
-    return obj;
+    if (userData?.LETTER_SUBJECT) obj.LETTER_SUBJECT = userData?.LETTER_SUBJECT;
+    return obj; 
 }
 
 export const replaceSmsVariables = (content: any, userData: any, lang: 'fr' | 'en') => {
@@ -98,8 +99,8 @@ const goToTheLine = (str: string, isSms?: boolean) => {
     const reg = '//';
     str = str ?? '';
     return str.includes(reg)
-    ? isSms
-        ? str?.replace(new RegExp(reg, 'g'), '\n')
-        : new handlebars.SafeString(str.split(reg).join('<br>'))
-    : str;
+        ? isSms
+            ? str?.replace(new RegExp(reg, 'g'), '\n')
+            : new handlebars.SafeString(str.split(reg).join('<br>'))
+        : str;
 }

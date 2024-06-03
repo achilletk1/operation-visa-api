@@ -10,8 +10,8 @@ export class BaseSmsNotification<T> extends QueueService {
 
     constructor(
         public phone: string,
-        public body: string,
-        public keyNotification: string,
+        public body: string = '',
+        public keyNotification: string = '',
         public id?: string,
         public key?: string,
     ) {
