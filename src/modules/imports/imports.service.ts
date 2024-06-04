@@ -158,6 +158,11 @@ export class ImportsService extends CrudService<Import> {
                 } as QueryOptions;
             }
 
+            if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
+                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform; 
+            }
+
             const data = await ImportsController.importsService.findAllAggregate<Import>(getAgenciesQuery(query));
             delete query.offset; query.limit;
             const total = (await ImportsController.importsService.findAllAggregate<Import>(getAgenciesQuery(query))).length;

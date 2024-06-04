@@ -59,7 +59,7 @@ export const inserDefaultLetter = async () => {
             fr: {
                 email: `
                 Nous espérons que ce message vous trouve en bonne santé.////
-                Nous vous écrivons ce mail, parce-que nous avons constaté la non-production de la preuve de votre voyage à l'étranger, dans le délai de 30 jours à compter de la date du {{DATE}}, date de réalisation de votre première opération avec votre carte bancaire {{CARTE}} en {{PAYS}} durant votre voyage hors CEMAC.////
+                Nous vous écrivons ce mail, parce-que nous avons constaté la non-production de {{LETTER_SUBJECT}}, dans le délai de 30 jours à compter de la date du {{DATE}}, date de réalisation de votre première opération avec votre carte bancaire {{CARTE}} en {{PAYS}} durant votre voyage hors CEMAC.////
                 En conséquence, nous sommes dans l'obligation de vous adresser une mise en demeure. Vous trouverez cette lettre en pièce jointe à ce mail.////
                 Nous vous prions de bien vouloir nous faire parvenir les dites pièces justificatives dans un délai de 08 jours. Faute de quoi vos instruments de paiement électronique seront suspendu pour utilisation hors CEMAC.////
                 Vous pouvez le faire grâce à notre application disponible sur flybanking.bicec.com, également en vous rapprochant de l'agence BICEC la plus proche.////
@@ -71,7 +71,7 @@ export const inserDefaultLetter = async () => {
             en: {
                 email: `
                 We hope that this message finds you in good health.////
-                We are writing you this email because we have noted that you have not produced proof of your trip abroad within 30 days of {{DATE}}, the date on which you made your first transaction with your bank card {{CARTE}} in {{PAYS}} during your trip outside the CEMAC.////
+                We are writing you this email because we have noted that you have not produced {{LETTER_SUBJECT}} within 30 days of {{DATE}}, the date on which you made your first transaction with your bank card {{CARTE}} in {{PAYS}} during your trip outside the CEMAC.////
                 As a result, we are obliged to send you a formal notice. You will find this letter attached to this email.////
                 We kindly ask you to send us the said supporting documents within 08 days. Otherwise your electronic payment instruments will be suspended for use outside CEMAC.////
                 You can do it thanks to our application available on flybanking.bicec.com, also by approaching the nearest BICEC branch.////
@@ -83,13 +83,25 @@ export const inserDefaultLetter = async () => {
         },
         smsText: {
             fr: {
-                sms: "Chers Client,// Nous avons constaté la non-production de la preuve de votre voyage à l'étranger, dû à la transaction effectuée le {{DATE}} en {{PAYS}}. //En conséquence, nous sommes dans l'obligation de vous adresser une lettre mise en demeure, que vous recevrez par mail.// Vous pouvez le faire grâce à notre application disponible sur flybanking.bicec.com, également en vous rapprochant de l'agence BICEC la plus proche."
+                sms: "Chers Client,// Nous avons constaté la non-production de {{LETTER_SUBJECT}}, dû à la transaction effectuée le {{DATE}} en {{PAYS}}. //En conséquence, nous sommes dans l'obligation de vous adresser une lettre mise en demeure, que vous recevrez par mail.// Vous pouvez le faire grâce à notre application disponible sur flybanking.bicec.com, également en vous rapprochant de l'agence BICEC la plus proche."
             },
             en: {
-                sms: "Dear Customer,// We have noted the non-production of proof of your trip abroad, due to the transaction carried out on {{DATE}} in {{PAYS}}. // As a result, we are obliged to send you a letter of formal notice, which you will receive by e-mail.// You can do this using our application available at flybanking.bicec.com, or by contacting your nearest BICEC branch."
+                sms: "Dear Customer,// We have noted the non-production of {{LETTER_SUBJECT}}, due to the transaction carried out on {{DATE}} in {{PAYS}}. // As a result, we are obliged to send you a letter of formal notice, which you will receive by e-mail.// You can do this using our application available at flybanking.bicec.com, or by contacting your nearest BICEC branch."
             }
         },
-        period: 30
+        period: 30,
+        variables: {
+            fr: {
+                prooftravelSubjet: 'la preuve de votre voyage à l\'étranger',
+                exceedingCeilingSubjet: 'la preuve de depassement de plafond',
+                importSubjet: 'la preuve de votre importation', 
+            },
+            en: {
+                prooftravelSubjet: 'proof of your trip abroad',
+                exceedingCeilingSubjet: 'proof of ceiling overrun',
+                importSubjet: 'proof of importation',
+            }
+        },
     }
 
     console.log('insert default notice letter into visa_operations_letters collection');

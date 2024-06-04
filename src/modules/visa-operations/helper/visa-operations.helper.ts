@@ -62,7 +62,7 @@ export const sendEmailNotifications = async (notification: any) => {
     try {
         user = await UsersController.usersService.findOne({ filter: { clientCode, category: UserCategory.DEFAULT } });
         bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
-        agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD , bankProfileCode: 'R204', 'age.code' : user?.age?.code } }))?.email || ''; 
+        agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD, bankProfileCode: 'R204', 'age.code': user?.age?.code } }))?.email || '';
     } catch (error) { }
 
     const ccEmail = (user?.userGesCode?.substring(0, 1) === '9' || !bankAccountManager) ? agencyHeadEmail : bankAccountManager?.EMAIL;
@@ -118,18 +118,29 @@ export const getDeadlines = async () => {
             }
         });
 
-        const deadlineProofLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
-        const deadlineStatementExpensesLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH))?.data;
+        let deadlineProofLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+        deadlineProofLongTravel = getPeriodDeadLine(deadlineProofLongTravel);
 
-        const deadlineProofShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
-        const deadlineStatementExpensesShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES))?.data;
+        let deadlineStatementExpensesLongTravel = (settings.data.find(e => e.key === LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH))?.data;
+        deadlineStatementExpensesLongTravel = getPeriodDeadLine(deadlineStatementExpensesLongTravel);
 
-        const settingOnlinePayment = (settings.data.find(e => e.key === ONLINE_PAYMENT_DEADLINE_JUSTIFY))?.data;
-        const deadlineOnlinePayment = settingOnlinePayment?.dataPeriod === 'month' ? settingOnlinePayment?.value * 30 : settingOnlinePayment?.value;
+        let deadlineProofShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL))?.data;
+        deadlineProofShortTravel = getPeriodDeadLine(deadlineProofShortTravel);
 
-        const goodsDeadline = (settings.data.find(e => e.key === IMPORT_GOODS_DEADLINE_JUSTIFY))?.data;
-        const servicesDeadline = (settings.data.find(e => e.key === IMPORT_SERVICE_DEADLINE_JUSTIFY))?.data;
+        let deadlineStatementExpensesShortTravel = (settings.data.find(e => e.key === SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES))?.data;
+        deadlineStatementExpensesShortTravel = getPeriodDeadLine(deadlineStatementExpensesShortTravel);
 
+        let settingOnlinePayment = (settings.data.find(e => e.key === ONLINE_PAYMENT_DEADLINE_JUSTIFY))?.data;
+        settingOnlinePayment = getPeriodDeadLine(settingOnlinePayment);
+
+        let deadlineOnlinePayment = getPeriodDeadLine(settingOnlinePayment);
+        deadlineOnlinePayment = getPeriodDeadLine(deadlineOnlinePayment);
+
+        let goodsDeadline = (settings.data.find(e => e.key === IMPORT_GOODS_DEADLINE_JUSTIFY))?.data;
+        goodsDeadline = getPeriodDeadLine(goodsDeadline);
+
+        let servicesDeadline = (settings.data.find(e => e.key === IMPORT_SERVICE_DEADLINE_JUSTIFY))?.data;
+        servicesDeadline = getPeriodDeadLine(servicesDeadline);
         return {
             deadlineProofLongTravel, deadlineStatementExpensesLongTravel, deadlineProofShortTravel,
             deadlineStatementExpensesShortTravel, deadlineOnlinePayment, servicesDeadline, goodsDeadline,
@@ -201,3 +212,5 @@ const getImportationParentFolder = async (type: string, service: any, folder: Tr
         try { filter._id.$in.length && (folder = await service.findOne({ filter })); } catch (e) { }
     } catch (error) { throw error; }
 }
+
+const getPeriodDeadLine = (data: any): number => data?.dataPeriod === 'month' ? data?.value * 30 : data?.value

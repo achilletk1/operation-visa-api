@@ -47,52 +47,52 @@ export const inserDefaultSetting = async () => {
     },
     {
       key: settingsKeys.SHORT_TRAVEL_DEADLINE_PROOF_TRAVEL,
-      label: 'Délais de justification de la preuve de voyage pour un voyage de courte durée (en jours)',
+      label: 'Délais de justification de la preuve de voyage pour un voyage de courte durée',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 10
+      data: {value: 10, dataPeriod: 'month'}
     },
     {
       key: settingsKeys.SHORT_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES,
-      label: 'Délais de justification de l\'etat détaillé des dépenses pour un voyage de courte durée (en jours)',
+      label: 'Délais de justification de l\'etat détaillé des dépenses pour un voyage de courte durée',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 10
+      data: {value: 10, dataPeriod: 'day'}
     },
     {
       key: settingsKeys.LONG_TRAVEL_DEADLINE_PROOF_TRAVEL,
-      label: 'Délais de justification de la preuve de voyage pour un voyage de longue durée (en jours)',
+      label: 'Délais de justification de la preuve de voyage pour un voyage de longue durée',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 10
+      data: {value: 10, dataPeriod: 'day'}
     },
     {
       key: settingsKeys.LONG_TRAVEL_DEADLINE_DETAILED_STATEMENT_EXPENSES_MONTH,
-      label: 'Délais de justification de l\'état détaillé des dépenses d\'un mois en dépassement du voyage de longue durée (en jours)',
+      label: 'Délais de justification de l\'état détaillé des dépenses d\'un mois en dépassement du voyage de longue durée',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 10
+      data: {value: 10, dataPeriod: 'day'}
     },
     {
       key: settingsKeys.ONLINE_PAYMENT_DEADLINE_JUSTIFY,
       label: 'Délais de justification d\'un paiement en ligne',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: {value: 10, dataPeriod: 'days'}
+      data: {value: 10, dataPeriod: 'month'}
     },
     {
       key: settingsKeys.IMPORT_GOODS_DEADLINE_JUSTIFY,
       label: 'Délais de justification d\'une importation de biens',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 30
+      data: {value: 10, dataPeriod: 'day'}
     },
     {
       key: settingsKeys.IMPORT_SERVICE_DEADLINE_JUSTIFY,
       label: 'Délais de justification d\'une importation de services',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 30
+      data: {value: 10, dataPeriod: 'month'}
     },
     {
       key: settingsKeys.SENSITIVE_CUSTOMER_CODES,

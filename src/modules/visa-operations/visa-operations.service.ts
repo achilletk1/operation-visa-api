@@ -115,58 +115,101 @@ export class VisaOperationsService extends CrudService<any> {
     }
 
     async startRevivalMail(): Promise<void> {
+        const {
+            deadlineProofLongTravel, deadlineStatementExpensesLongTravel, deadlineProofShortTravel,
+            deadlineStatementExpensesShortTravel, deadlineOnlinePayment, servicesDeadline, goodsDeadline,
+        } = await getDeadlines();
+
         try {
             if (VisaOperationsService.queueStateRevival !== QueueState.PENDING) { return; }
             VisaOperationsService.queueStateRevival = QueueState.PROCESSING;
             // TODO
-            const travels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: TravelType.SHORT_TERM_TRAVEL } }]) ?? [];
+            const onlinePayments = await OnlinePaymentController.onlinePaymentService.findAllAggregate<OnlinePaymentMonth>([{
+                $match: { isUntimely: true, status: { $nin: [OVS.JUSTIFY, OVS.CLOSED] } }
+            }]) ?? [];
+            const importations = await ImportsController.importsService.findAllAggregate<Import>([{ $match: { status: { $nin: [OVS.JUSTIFY, OVS.CLOSED] }, finalPayment: true, isUntimely: true } }]);
+            const travelsMonths = await TravelMonthController.travelMonthService.findAllAggregate<TravelMonth>([{
+                $match: { isUntimely: true, status: { $nin: [OVS.JUSTIFY, OVS.CLOSED] } }
+            }]) ?? [];
 
-            let sensitiveClients = ((await SettingsController.settingsService.findOne({ filter: { key: settingsKeys.SENSITIVE_CUSTOMER_CODES } }))?.data || '')?.replace(/\s/g, '');
-            sensitiveClients = sensitiveClients?.split(',');
+            const longTravels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: TravelType.LONG_TERM_TRAVEL, isUntimely: true } }]) ?? [];
+            const shortTravels = await TravelController.travelService.findAllAggregate<Travel>([{ $match: { status: { $nin: [OVS.CLOSED, OVS.JUSTIFY] }, travelType: TravelType.SHORT_TERM_TRAVEL, isUntimely: true } }]) ?? [];
 
-            if (travels.length) { VisaOperationsService.queueStateRevival = QueueState.PENDING; return; }
+            if (shortTravels.length || longTravels.length || travelsMonths.length || onlinePayments.length || importations.length) { VisaOperationsService.queueStateRevival = QueueState.PENDING; return; }
             console.log('===============-==================================-==================================');
             console.log('===============-==============  START REVIVAL TREATMENT ================-============');
             console.log('===============-========================================================-============');
 
-            const letter = (await LettersController.lettersService.findAllAggregate<Letter>([{ $match: {} }]) ?? [])[0];
-            if (!letter) throw new Error('LetterNotFound');
+            //short travels
+            for (const travel of shortTravels) {
+                if (!travel?.transactions?.length || !travel?.user?.email) continue;
 
-            const visaTemplate = (await TemplatesController.templatesService.findAllAggregate<TemplateForm>([{ $match: { key: 'transactionOutsideNotJustified' } }]) ?? [])[0];
-
-            for (const travel of travels) {
-                if (!travel?.transactions?.length) continue;
-                const firstDate = Math.min(...(travel.transactions).map(elt => moment(elt?.date, 'DD/MM/YYYY HH:mm:ss').valueOf()));
-                const currentDate = new Date().valueOf();
-                if (!travel?.user?.email) continue;
-
-                // get bank-account-manager and head-of-agency-email data for notify in cc with client
-                let user!: User; let bankAccountManager!: BankAccountManager; let agencyHeadEmail!: string;
-                try {
-                    user = await UsersController.usersService.findOne({ filter: { clientCode: travel?.user?.clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } });
-                    bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
-                    agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD , bankProfileCode: 'R204', 'age.code' : user?.age?.code } }))?.email || ''; 
-                } catch (error) { }
-
-                const ccEmail = (user?.userGesCode?.substring(0, 1) === '9' || !bankAccountManager) ? agencyHeadEmail : bankAccountManager?.EMAIL;
-
-                // TODO set lang dynamically
-                const lang = 'fr';
-
-                if (letter && moment(currentDate).diff(firstDate, 'days') >= Number(letter?.period)) {
-                    (sensitiveClients.includes(user?.bankProfileCode))
-                        ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, true, lang, ccEmail))
-                        : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(travel, false, lang, ccEmail));
-                    // TODO send formal-notice SMS 
-                    await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
+                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofShortTravel) ||
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel)) {
+                    await this.sendFormalNoticeNotification(travel, 'proofTravel');
+                    // await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
-                if (visaTemplate && moment(currentDate).diff(firstDate, 'days') >= visaTemplate?.period) {
-                    (sensitiveClients.includes(user?.bankProfileCode))
-                        ? notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, true, lang, ccEmail))
-                        : notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(travel, false, lang, ccEmail));
-                    // TODO send transaction outside not justified SMS,   notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
+                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > (deadlineProofShortTravel + 8)) ||
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > (deadlineStatementExpensesShortTravel + 8))) {
+                    await this.sendBlockingCardNotification(travel);
                 }
             }
+
+            //long travels
+            for (const travel of longTravels) {
+                if (!travel?.transactions?.length || !travel?.user?.email) continue;
+
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel) {
+                    await this.sendFormalNoticeNotification(travel, 'proofTravel');
+                    // await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
+                }
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > (deadlineProofLongTravel + 8)) {
+                    await this.sendBlockingCardNotification(travel);
+                }
+            }
+
+            //long travels months
+            for (let travelMonth of travelsMonths) {
+                if (!travelMonth?.transactions?.length || !travelMonth?.userId) continue;
+                const user = await UsersController.usersService.findOne({ filter: { _id: travelMonth?.userId } })
+                const data: any = { ...travelMonth }; data.user = user
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > deadlineStatementExpensesLongTravel) {
+                    await this.sendFormalNoticeNotification(data, 'exceedingCeiling');
+                    // await TravelMonthController.travelMonthService.update({ _id: travelMonth._id.toString() }, { isUntimely: true });
+                }
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > (deadlineStatementExpensesLongTravel + 8)) {
+                    await this.sendBlockingCardNotification(data);
+                }
+            }
+
+            //online payments 
+            for (const onlinePayment of onlinePayments) {
+                if (!onlinePayment?.transactions?.length || !onlinePayment?.user?.email) continue;
+
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > deadlineOnlinePayment) {
+                    await this.sendFormalNoticeNotification(onlinePayment, 'exceedingCeiling');
+                    // await OnlinePaymentController.onlinePaymentService.update({ _id: onlinePayment._id.toString() }, { isUntimely: true });
+                }
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > (deadlineOnlinePayment + 8)) {
+                    await this.sendBlockingCardNotification(onlinePayment);
+                }
+            }
+
+            //importations 
+            for (const importation of importations) {
+                if (!importation?.transactions?.length || !importation?.user?.email) continue;
+                const startDateOfClearance = await getStartDateOfClearance(importation);
+                const deadline = importation.type?.code === ExpenseCategory.IMPORT_OF_GOODS ? goodsDeadline : servicesDeadline;
+
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance), 'days') > deadline) {
+                    await this.sendFormalNoticeNotification(importation, 'import');
+                    // await ImportsController.importsService.update({ _id: importation._id }, { isUntimely: true });
+                }
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance), 'days') > deadline) {
+                    await this.sendBlockingCardNotification(importation);
+                }
+            }
+
             VisaOperationsService.queueStateRevival = QueueState.PENDING;
             console.log('===============-==================================-==================================');
             console.log('===============-==============  END REVIVAL TREATMENT ==================-============');
@@ -178,6 +221,38 @@ export class VisaOperationsService extends CrudService<any> {
             console.log('===============-========================================================-============');
             this.logger.error(`error during revival mail cron execution \n${e.stack}\n`);
         }
+    }
+
+    async getSensitiveClient(operation: any): Promise<any> {
+        let sensitiveClients = ((await SettingsController.settingsService.findOne({ filter: { key: settingsKeys.SENSITIVE_CUSTOMER_CODES } }))?.data || '')?.replace(/\s/g, '');
+        sensitiveClients = sensitiveClients?.split(',');
+        // get bank-account-manager and head-of-agency-email data for notify in cc with client
+        let user!: User; let bankAccountManager!: BankAccountManager; let agencyHeadEmail!: string;
+        try {
+            user = await UsersController.usersService.findOne({ filter: { clientCode: operation?.user?.clientCode, category: { $in: [UserCategory.DEFAULT, UserCategory.ENTERPRISE] } } });
+            bankAccountManager = await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: user.userGesCode } });
+            agencyHeadEmail = (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD, bankProfileCode: 'R204', 'age.code': user?.age?.code } }))?.email || '';
+        } catch (error) { }
+        const ccEmail = (user?.userGesCode?.substring(0, 1) === '9' || !bankAccountManager) ? agencyHeadEmail : bankAccountManager?.EMAIL;
+        return { sensitiveClients, user, ccEmail }
+    }
+
+    async sendFormalNoticeNotification(operation: any, type: 'proofTravel' | 'exceedingCeiling' | 'import'): Promise<void> {
+        const lang = 'fr';
+        const { sensitiveClients, user, ccEmail } = await this.getSensitiveClient(operation);
+        (sensitiveClients.includes(user?.bankProfileCode))
+            ? notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(operation, true, lang, ccEmail, type))
+            : notificationEmmiter.emit('formal-notice-mail', new FormalNoticeEvent(operation, false, lang, ccEmail, type));
+        // TODO send formal-notice SMS 
+    }
+
+    async sendBlockingCardNotification(operation: any): Promise<void> {
+        const lang = 'fr';
+        const { sensitiveClients, user, ccEmail } = await this.getSensitiveClient(operation);
+        (sensitiveClients.includes(user?.bankProfileCode))
+            ? notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(operation, true, lang, ccEmail))
+            : notificationEmmiter.emit('visa-template-mail', new TransactionOutsideNotJustifiedEvent(operation, false, lang, ccEmail));
+        // TODO send transaction outside not justified SMS,   notificationEmmiter.emit('template-sms', new TemplateSmsEvent(data, phone, key, lang, id, subject));
     }
 
     async detectListOfUsersToBlocked(): Promise<void> {
