@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { isProd } from 'common/helpers';
 import { logger } from "winston-config";
 import { ValidationError } from 'joi';
+import { errorMsg } from '..';
 
 /**
  * @description Default error handler to be used with express
@@ -54,7 +55,7 @@ function formatErrorResponseMsg(err: Error | { index: string; type: string; colu
     if (message === 'ClientNotFound') { details = `Aucun utilisateur trouvé dans la base possédant cette racine client`; title = 'Aucun client trouvé'; }
     if (message === 'NoActionProvided') { details = `Aucune action spécifié dans votre requête`; title = 'Requête d\'export incomplète'; }
     if (message === 'usersNotFound') { details = `Aucune utilisateur(s) trouvé pour les critères de filtre fourni`; title = 'Aucune utilisateur trouvé pour l\'export'; }
-    if (['UserNotFound', 'User not found'].includes(message)) { details = `Aucune utilisateur trouvé pour les critères de filtre fourni`; title = 'Aucune utilisateur trouvé'; }
+    if (['UserNotFound', 'User not found'].includes(message) || message.includes('No data found {"userCode":')) { details = `Aucune utilisateur trouvé pour les critères de filtre fourni`; title = 'Aucune utilisateur trouvé'; }
     if (message === 'disableUser') { details = `Votre compte est désactivé, veuillez contactez l'administrateur de FLY BANKING`; title = 'Compte désactivé'; }
     if (message === 'MissingAuthData') { details = `Données d'authentification manquante dans votre demande d'authentification`; title = 'Données manquantes'; }
     if (message === 'BadOTP') { details = `Mauvais format du code OTP`; title = 'Mauvais format du code OTP'; }
@@ -73,6 +74,15 @@ function formatErrorResponseMsg(err: Error | { index: string; type: string; colu
     if (message === 'IncorrectFileData' && 'index' in err) { details = `Le champ "${err.column}" de la ligne ${err.index} (${err.type}) est vide, veuillez remplir ce champ s'il vous plaît`; title = 'Cellule obligatoire vide'; }
     if (message === 'IncorrectFileDuplicate' && 'index' in err) { details = { indexes: err.index, column: err.column }; title = 'Opérations déjà intégrées dans le système détecté'; }
 
+    if (message === errorMsg.BAD_ADMIN_PW) { title = 'Invalid Password'; details = 'Invalid administrator password' }
+    if (message === errorMsg.BAD_CREDENTIAL) { title = 'Bad Credentials'; details = 'The provided credentials are incorrect' }
+    if (message === errorMsg.USER_NOT_FOUND) { title = 'User Not Found', details = 'The user was not found in the LDAP server' }
+    if (message === errorMsg.BAD_PASSWORD) { title = 'Bad Password', details = 'The provided password is incorrect' }
+    if (message === errorMsg.USER_NOT_FOUND) { title = 'User Not Found', details = 'User not found in LDAP or username attribute is incorrect' }
+    if (message === errorMsg.UNAUTHORIZED_GROUP) { title = 'Unauthorized LDAP Group', details = 'This user does not belong to the LDAP group dedicated to FLY BANKING' }
+    if (message === errorMsg.NO_RIGHTS) { title = 'No Rights', details = 'The user does not have the necessary rights' }
+    if (message === errorMsg.USER_DISABLED) { title = 'User Disabled', details = 'Your account has been deactivated, please contact the FLY BANKING administrator.' }
+    if (err && err.name.includes('ldap')) { details = err.message; title = err.name?.split('+')[1]; }
 
     if (details) { errResp.details = details; }
     if (title) { errResp.title = title; }
