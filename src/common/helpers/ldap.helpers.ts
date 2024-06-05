@@ -37,6 +37,7 @@ export async function getLdapUser(userCode: any, password?: any) {
 
         } catch (error: any) {
             logger.debug(`Error during authentication : ${JSON.stringify(error)} \n stack : ${error.stack}\n`)
+            error.name = `ldap+${error.name}`;
             throw error;
         }
     }
@@ -56,6 +57,7 @@ export async function getLdapUser(userCode: any, password?: any) {
             if (!verifyGroupMember(response)) { throw new Error('UnauthorizedGroup'); }
         } catch (error: any) {
             logger.debug(`\n error : ${JSON.stringify(error)} \n stack : ${error.stack}\n message : ${error.admin}`);
+            error.name = `ldap+${error.name}`;
             throw error;
         }
     }
