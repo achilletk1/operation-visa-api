@@ -1,4 +1,4 @@
-import { BaseRepository } from "common";
+import { BaseRepository } from "common/base";
 
 export class SendersRepository extends BaseRepository {
 

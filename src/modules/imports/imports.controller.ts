@@ -7,8 +7,8 @@ export class ImportsController {
 
     constructor() { ImportsController.importsService = new ImportsService(); }
 
-    async create(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try { res.send(await ImportsController.importsService.create(req.body)); }
+    async createImportation(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await ImportsController.importsService.insertImportation(req.body)); }
         catch (error) { next(error); }
     }
 

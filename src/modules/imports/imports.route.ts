@@ -4,7 +4,7 @@ import express from 'express';
 const router = express.Router();
 export const importsController = new ImportsController();
 
-router.post('/', importsController.create);
+router.post('/', importsController.createImportation);
 
 router.get('/', importsController.findAll);
 

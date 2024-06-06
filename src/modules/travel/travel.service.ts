@@ -1,21 +1,20 @@
-import { convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects, getValidationsFolder, parseNumberFields } from "common/helpers";
-import { TravelJustifyLinkEvent } from "modules/notifications/notifications/mail/travel-justify-link/travel-justify-link.event";
-import { notificationEmmiter, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent } from 'modules/notifications';
+import { notificationEmmiter, TravelJustifyLinkEvent, TravelDeclarationEvent, UploadedDocumentsOnExceededFolderEvent, DeclarationTemplateSmsEvent, RejectTemplateSmsEvent, RejectTravelEvent } from 'modules/notifications';
+import { timeout, convertParams, extractPaginationData, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects, getValidationsFolder, parseNumberFields } from "common/helpers";
 import { VisaCeilingType, VisaTransactionsCeilingsController } from "modules/visa-transactions-ceilings";
-import { VisaTransactionsController } from "modules/visa-transactions/visa-transactions.controller";
 import { getProofTravelStatus, getTravelStatus, saveAttachmentTravel } from "./helper";
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { TravelMonth, TravelMonthController } from "modules/travel-month";
-import { OpeVisaStatus, Validator } from "modules/visa-operations";
+import { getAccountManagerOrAgencyHeadCcEmail } from "common/services";
+import { VisaTransactionsController } from "modules/visa-transactions";
 import { getOnpStatementStepStatus, getTotal } from 'common/utils';
 import { UserCategory, UsersController } from 'modules/users';
+import { OpeVisaStatus } from "modules/visa-operations";
 import { CrudService, QueryOptions } from "common/base";
 import { TravelRepository } from "./travel.repository";
 import { TravelController } from './travel.controller';
 import httpContext from 'express-http-context';
 import generateId from 'generate-unique-id';
 import { QueryFilter } from "common/types";
-import { timeout } from "common/helpers";
 import { config } from "convict-config";
 import { get, isEmpty } from "lodash";
 import { TravelType } from "./enum";
@@ -55,10 +54,10 @@ export class TravelService extends CrudService<Travel> {
                     end: moment(query?.filter?.end, 'DD-MM-YYYY').endOf('day').valueOf()
                 } as QueryOptions;
             }
-            
+
             if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
-                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
-                delete query?.filter?.platform; 
+                query.filter = { ...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform;
             }
 
             const data = await TravelController.travelService.findAllAggregate<Travel>(getAgenciesQuery(query));
@@ -93,6 +92,8 @@ export class TravelService extends CrudService<Travel> {
 
     async insertTravel(travel: Travel): Promise<any> {
         try {
+            const authUser = httpContext.get('user');
+            
             const existingTravels = await TravelController.travelService.findAll({ filter: { 'user._id': get(travel, 'user._id'), $and: [{ 'proofTravel.dates.start': { $gte: travel.proofTravel?.dates?.start } }, { 'proofTravel.dates.end': { $lte: travel.proofTravel?.dates?.end } }] } });
 
             if (!isEmpty(existingTravels?.data)) { throw new Error('TravelExistingInThisDateRange') }
@@ -104,11 +105,6 @@ export class TravelService extends CrudService<Travel> {
 
             // Set travel creation date
             travel.dates = { ...travel.dates, created: new Date().valueOf() };
-
-            //========================== A supprimer =================
-            // notificationService.sendEmailVisaExceding(travel, get(travel, 'user.email'), 1680252497051, travel.dates.created, 8000000)
-            //========================= le code en commentaire ci dessus a été ecrit pour des tests et peut etre supprimer ===
-
 
             // insert ceiling in travel
             const { data } = await VisaTransactionsCeilingsController.visaTransactionsCeilingsService.findAll({ filter: { type: { '$in': [100, 400, 300] } } });
@@ -131,8 +127,8 @@ export class TravelService extends CrudService<Travel> {
             await TravelController.travelService.update({ _id: insertedId?.data }, { proofTravel: travel.proofTravel });
             const updateTravel = await TravelController.travelService.findOne({ filter: { _id: insertedId?.data } });
 
-
             notificationEmmiter.emit('travel-declaration-mail', new TravelDeclarationEvent(updateTravel));
+            notificationEmmiter.emit('declaration-template-sms', new DeclarationTemplateSmsEvent(updateTravel, authUser?.tel));
             // await Promise.all([
             //     NotificationsController.notificationsService.sendEmailTravelDeclaration(updateTravel, get(updateTravel, 'user.email')),
             //     // NotificationsController.notificationsService.sendVisaTemplateEmail(travel, get(travel, 'user.email'), 'Déclaration de voyage', 'TravelDeclaration')
@@ -268,6 +264,8 @@ export class TravelService extends CrudService<Travel> {
                     }
                 }
             }
+            notificationEmmiter.emit('travel-declaration-mail', new TravelDeclarationEvent(currentTravel));
+            notificationEmmiter.emit('declaration-template-sms', new DeclarationTemplateSmsEvent(currentTravel, authUser?.tel));
 
             return await TravelController.travelService.update({ _id: id }, travel);
         } catch (error) { throw error; }
@@ -291,7 +289,6 @@ export class TravelService extends CrudService<Travel> {
             let travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if (!travel) { throw new Error('TravelNotFound'); }
-
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (status === REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
@@ -302,7 +299,13 @@ export class TravelService extends CrudService<Travel> {
 
             updateData = { status };
 
-            if (status === REJECTED) { updateData = { status, rejectReason }; }
+            if (status === REJECTED) {
+                updateData = { status, rejectReason };
+
+                const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(user.userGesCode, user?.age?.code);
+                notificationEmmiter.emit('reject-travel-mail', new RejectTravelEvent(travel, ccEmail));
+                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(travel, authUser?.tel, 'Travel'));
+            }
 
             if (step === 'proofTravel') {
                 let { proofTravel } = travel;
@@ -539,11 +542,12 @@ export class TravelService extends CrudService<Travel> {
     async sendLinkNotification(data: any) {
 
         try {
-            const travel = await this.baseRepository.findOne({ filter: { _id: data.id } });
+            const travel = await TravelController.travelService.findOne({ filter: { _id: data.id } });
 
             if (isEmpty(travel)) { return new Error('TravelNotFound') }
 
             if (travel) {
+                // TODO
                 notificationEmmiter.emit('travel-justify-link', new TravelJustifyLinkEvent(travel, data.link));
             }
         } catch (error) { throw error; }
@@ -551,7 +555,7 @@ export class TravelService extends CrudService<Travel> {
 
     async generateQueryLink(id: any, resetLink?: 'conserve' | 'reset') {
         try {
-            const travel: any = await this.baseRepository.findOne({ filter: { _id: id } });
+            const travel: any = await TravelController.travelService.findOne({ filter: { _id: id } });
             if (!travel) { return new Error('travelNotFound') };
             timeout(5000);
 

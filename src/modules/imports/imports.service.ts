@@ -1,7 +1,9 @@
 
 import { convertParams, extractPaginationData, generateAttachmentFromVoucher, generateValidator, getAgenciesQuery, getDifferenceBetweenObjects } from 'common/helpers';
+import { notificationEmmiter, ImportDeclarationEvent, DeclarationTemplateSmsEvent, RejectTemplateSmsEvent, RejectImportEvent } from 'modules/notifications';
 import { ExpenseCategory, OpeVisaStatus, VisaOperationsAttachment } from 'modules/visa-operations';
 import { ValidationLevelSettingsController } from "modules/validation-level-settings";
+import { getAccountManagerOrAgencyHeadCcEmail } from 'common/services';
 import { ImportsController } from './imports.controller';
 import { ImportsRepository } from './imports.repository';
 import { CrudService, QueryOptions } from "common/base";
@@ -42,6 +44,16 @@ export class ImportsService extends CrudService<Import> {
         super(ImportsService.importsRepository);
     }
 
+    async insertImportation(importation: Import): Promise<any> {
+        try {
+            const authUser = httpContext.get('user');
+            const result = await ImportsController.importsService.create(importation);
+            notificationEmmiter.emit('import-declaration-mail', new ImportDeclarationEvent(importation));
+            notificationEmmiter.emit('import-declaration-sms', new DeclarationTemplateSmsEvent(importation, authUser?.tel));
+            return result;
+        } catch (error) { throw error; }
+    }
+
     async updateImportation(_id: string, importation: Partial<Import>): Promise<any> {
         try {
             const authUser = httpContext.get('user');
@@ -76,18 +88,18 @@ export class ImportsService extends CrudService<Import> {
                 // TODO sent final notification to inform client counter of 30 days start to apure importation folder
             }
 
-            importation.editors = importation?.editors ? importation?.editors : [];
-            importation?.editors?.push({
-                _id: authUser?._id,
-                fullName: authUser?.fullName,
-                date: new Date().valueOf(),
-                steps,
-                oldVersion,
-                newVersion,
-            });
-            return await ImportsController.importsService.update({ _id }, importation);
+            importation.editors = [
+                ...(oldImportation?.editors ?? []),
+                { _id: authUser?._id, fullName: authUser?.fullName, date: new Date().valueOf(), steps, oldVersion, newVersion, },
+            ];
+            const result = await ImportsController.importsService.update({ _id }, importation);
+            const updatedImportation = await ImportsController.importsService.findOne({ filter: { _id } });
 
             // TODO send notifications for client and bank
+
+            notificationEmmiter.emit('import-declaration-mail', new ImportDeclarationEvent(updatedImportation));
+            notificationEmmiter.emit('import-declaration-sms', new DeclarationTemplateSmsEvent(updatedImportation, authUser?.tel));
+            return result;
         } catch (error) { throw error; }
     }
 
@@ -108,7 +120,6 @@ export class ImportsService extends CrudService<Import> {
             let importation!: Import;
 
             try { importation = await ImportsController.importsService.findOne({ filter: { _id: _id } }); } catch { }
-
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (!importation) { throw new Error('OnlinePaymentNotFound'); }
@@ -142,7 +153,14 @@ export class ImportsService extends CrudService<Import> {
 
             // TODO notify client when importation was apure (if importation.status  === OpeVisaStatus.JUSTIFY)
 
-            return await ImportsController.importsService.update({ _id }, importation);
+            const result = await ImportsController.importsService.update({ _id }, importation);
+
+            if (status === OpeVisaStatus.REJECTED) {
+                const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(user.userGesCode, user?.age?.code);
+                notificationEmmiter.emit('reject-import-mail', new RejectImportEvent(importation, ccEmail));
+                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(importation, authUser?.tel, 'Import'));    
+            }
+            return result;
         } catch (error) { throw error; }
     }
 

@@ -1,6 +1,6 @@
-import { Travel } from "modules/travel";
-import { VisaExceedingEvent, VisaExceedingMailData } from "../visa-exceding";
+import { VisaExceedingEvent, VisaExceedingMailData } from "../visa-exceeding";
 import { OnlinePaymentMonth } from "modules/online-payment";
+import { Travel } from "modules/travel";
 import { getTotal } from 'common/utils';
 import { Import } from "modules/imports";
 

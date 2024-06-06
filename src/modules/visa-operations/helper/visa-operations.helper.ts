@@ -1,4 +1,4 @@
-import { DetectTransactionsEvent, notificationEmmiter, TemplateSmsEvent, VisaExceedingEvent } from 'modules/notifications';
+import { DetectTransactionsEvent, notificationEmmiter, TemplateSmsEvent, VisaExceedingEvent, FirstReminderOfFormalNoticeEvent, SecondReminderOfFormalNoticeEvent } from 'modules/notifications';
 import { generateTravelMonthByProcessing, generateNotificationData } from "./visa-operations-formatter.helper";
 import { BankAccountManager, BankAccountManagerController } from 'modules/bank-account-manager';
 import { OnlinePaymentController, OnlinePaymentMonth } from "modules/online-payment";
@@ -74,6 +74,14 @@ export const sendEmailNotifications = async (notification: any) => {
 
     if (key === 'ceilingOverrun')
         notificationEmmiter.emit('visa-exceding-mail', new VisaExceedingEvent(data, receiver, lang, id, ccEmail));
+    // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
+
+    if (key === 'remindTransactionNotJustifiedAfterShortTime')
+        notificationEmmiter.emit('first-raise-mail', new FirstReminderOfFormalNoticeEvent(data, receiver, lang, id, ccEmail));
+    // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
+
+    if (key === 'remindTransactionNotJustifiedAfterLongTime')
+        notificationEmmiter.emit('second-raise-mail', new SecondReminderOfFormalNoticeEvent(data, receiver, lang, id, ccEmail));
     // await NotificationsController.notificationsService.sendEmailVisaExceding(data, receiver, lang, id);
 }
 

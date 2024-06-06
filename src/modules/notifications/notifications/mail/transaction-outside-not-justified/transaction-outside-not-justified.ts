@@ -8,6 +8,6 @@ export class TransactionOutsideNotJustifiedMailNotification extends BaseMailNoti
         super('visa-template', notificationData, QueuePriority.HIGH, undefined, 'transactionOutsideNotJustified', notificationData.lang);
 
         this.key = 'transactionOutsideNotJustified';
-        this.subject = ''; // If subjet are setted in template, it must be erase this subject
+        this.subject = ''; // If subject are set in template, it must be erase this subject
     }
 }

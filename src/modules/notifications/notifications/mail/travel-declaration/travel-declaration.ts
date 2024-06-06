@@ -7,7 +7,7 @@ export class TravelDeclarationMailNotification extends BaseMailNotification<Trav
     constructor(notificationData: TravelDeclarationEvent) {
         super('travel-declaration', notificationData, QueuePriority.HIGH, undefined, undefined, 'fr', true);
 
-        this.key = 'travelDeclaration';
+        // this.key = 'travelDeclaration';
         this.subject = `Déclaration de voyage Hors CEMAC`;
     }
 }

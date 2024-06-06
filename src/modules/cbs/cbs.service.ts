@@ -1,10 +1,10 @@
 import { CbsAccounts, CbsBankAccountManager, CbsBankUser, CbsCard, CbsClientUser, CbsProduct } from "./model";
 import { isDev, removeSpacesFromResultSet, timeout } from "common/helpers";
 import { clientsDAO, banksDAO } from "./oracle-daos";
+import { BaseService } from "common/base";
 import { config } from "convict-config";
 import { CbsBankBranch } from './model';
 import { get, isEmpty } from "lodash";
-import { BaseService } from "common";
 
 export class CbsService extends BaseService {
 
