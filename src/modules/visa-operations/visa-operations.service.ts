@@ -143,13 +143,13 @@ export class VisaOperationsService extends CrudService<any> {
             for (const travel of shortTravels) {
                 if (!travel?.transactions?.length || !travel?.user?.email) continue;
 
-                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofShortTravel) ||
-                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel)) {
+                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel), 'days') > 0) ||
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel), 'days') > 0)) {
                     await this.sendFormalNoticeNotification(travel, 'proofTravel');
                     // await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
-                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > (deadlineProofShortTravel + 8)) ||
-                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > (deadlineStatementExpensesShortTravel + 8))) {
+                if ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel), 'days') > 8) ||
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel), 'days') > 8)) {
                     await this.sendBlockingCardNotification(travel);
                 }
             }
@@ -158,11 +158,11 @@ export class VisaOperationsService extends CrudService<any> {
             for (const travel of longTravels) {
                 if (!travel?.transactions?.length || !travel?.user?.email) continue;
 
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel), 'days') > 0) {
                     await this.sendFormalNoticeNotification(travel, 'proofTravel');
                     // await TravelController.travelService.update({ _id: travel._id.toString() }, { /*'proofTravel.status': OVS.EXCEDEED, */isUntimely: true });
                 }
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > (deadlineProofLongTravel + 8)) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel), 'days') > 8) {
                     await this.sendBlockingCardNotification(travel);
                 }
             }
@@ -172,11 +172,11 @@ export class VisaOperationsService extends CrudService<any> {
                 if (!travelMonth?.transactions?.length || !travelMonth?.userId) continue;
                 const user = await UsersController.usersService.findOne({ filter: { _id: travelMonth?.userId } })
                 const data: any = { ...travelMonth }; data.user = user
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > deadlineStatementExpensesLongTravel) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date).add(deadlineStatementExpensesLongTravel), 'days') > 0) {
                     await this.sendFormalNoticeNotification(data, 'exceedingCeiling');
                     // await TravelMonthController.travelMonthService.update({ _id: travelMonth._id.toString() }, { isUntimely: true });
                 }
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > (deadlineStatementExpensesLongTravel + 8)) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(travelMonth?.status as OVS) && travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date).add(deadlineStatementExpensesLongTravel), 'days') > 8) {
                     await this.sendBlockingCardNotification(data);
                 }
             }
@@ -185,11 +185,11 @@ export class VisaOperationsService extends CrudService<any> {
             for (const onlinePayment of onlinePayments) {
                 if (!onlinePayment?.transactions?.length || !onlinePayment?.user?.email) continue;
 
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > deadlineOnlinePayment) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date).add(deadlineOnlinePayment), 'days') > 0) {
                     await this.sendFormalNoticeNotification(onlinePayment, 'exceedingCeiling');
                     // await OnlinePaymentController.onlinePaymentService.update({ _id: onlinePayment._id.toString() }, { isUntimely: true });
                 }
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > (deadlineOnlinePayment + 8)) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(onlinePayment?.status as OVS) && onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date).add(deadlineOnlinePayment), 'days') > 8) {
                     await this.sendBlockingCardNotification(onlinePayment);
                 }
             }
@@ -200,11 +200,11 @@ export class VisaOperationsService extends CrudService<any> {
                 const startDateOfClearance = await getStartDateOfClearance(importation);
                 const deadline = importation.type?.code === ExpenseCategory.IMPORT_OF_GOODS ? goodsDeadline : servicesDeadline;
 
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance), 'days') > deadline) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance).add(deadline), 'days') > 0) {
                     await this.sendFormalNoticeNotification(importation, 'import');
                     // await ImportsController.importsService.update({ _id: importation._id }, { isUntimely: true });
                 }
-                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance), 'days') > deadline) {
+                if (![OVS.JUSTIFY, OVS.CLOSED].includes(importation?.status as OVS) && moment().diff(moment(startDateOfClearance).add(deadline), 'days') > 0) {
                     await this.sendBlockingCardNotification(importation);
                 }
             }
@@ -579,30 +579,30 @@ export class VisaOperationsService extends CrudService<any> {
             } = await getDeadlines();
             let usersIdAbode: any[] = [];
             // check and update travel-months deadlines
-            const travelsMonthsIds = travelsMonths.filter(travelMonth => travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date), 'days') > deadlineStatementExpensesLongTravel).map(e => new ObjectId(e?._id?.toString()));
+            const travelsMonthsIds = travelsMonths.filter(travelMonth => travelMonth?.transactions?.length && moment().diff(moment(travelMonth?.transactions[0]?.date).add(deadlineStatementExpensesLongTravel), 'days') > 0).map(e => new ObjectId(e?._id?.toString()));
             await TravelMonthController.travelMonthService.updateMany({ _id: { $in: travelsMonthsIds } }, { isUntimely: true });
             // users = await TravelMonthController.travelMonthService.findAll({ filter: { _id: { $in: travelsMonthsIds } }, projection: { userId : 1} });
 
             // check and update travels deadlines
             const longTravelsIds = travels.filter(travel =>
                 travel.travelType === TravelType.LONG_TERM_TRAVEL &&
-                ![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofLongTravel
+                ![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel), 'days') > 0
             ).map(e => new ObjectId(e?._id?.toString()));
             const shortTravelsIds = travels.filter(travel =>
                 travel.travelType === TravelType.SHORT_TERM_TRAVEL &&
-                ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start), 'days') > deadlineProofShortTravel) ||
-                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date), 'days') > deadlineStatementExpensesShortTravel))
+                ((![OVS.JUSTIFY, OVS.CLOSED].includes(travel?.proofTravel?.status as OVS) && moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel), 'days') > 0) ||
+                    (![OVS.JUSTIFY, OVS.CLOSED].includes(travel.status as OVS) && travel?.transactions?.length && moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel), 'days') > 0))
             ).map(e => new ObjectId(e?._id?.toString()));
 
             await TravelController.travelService.updateMany({ _id: { $in: [...longTravelsIds, ...shortTravelsIds] } }, { isUntimely: true });
             // check and update online-payments deadlines
-            const onlinePaymentsIds = onlinePayments.filter(onlinePayment => onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date), 'days') > deadlineOnlinePayment).map(e => new ObjectId(e?._id?.toString()));
+            const onlinePaymentsIds = onlinePayments.filter(onlinePayment => onlinePayment?.transactions?.length && moment().diff(moment(onlinePayment?.transactions[0]?.date).add(deadlineOnlinePayment), 'days') > 0).map(e => new ObjectId(e?._id?.toString()));
             await OnlinePaymentController.onlinePaymentService.updateMany({ _id: { $in: onlinePaymentsIds } }, { isUntimely: true })
             // check and update importations deadlines
             for (const importation of importations) {
                 const startDateOfClearance = await getStartDateOfClearance(importation);
                 const deadline = importation.type?.code === ExpenseCategory.IMPORT_OF_GOODS ? goodsDeadline : servicesDeadline;
-                (moment().diff(moment(startDateOfClearance), 'days') > deadline) &&
+                (moment().diff(moment(startDateOfClearance).add(deadline), 'days') > 0) &&
                     (await ImportsController.importsService.update({ _id: importation._id }, { isUntimely: true }));
             }
 

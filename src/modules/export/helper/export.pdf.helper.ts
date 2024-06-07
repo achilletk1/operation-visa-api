@@ -234,13 +234,13 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             let exceeddays: number = 0;
 
             if (travel.travelType === TravelType.LONG_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
-                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel, 'days'), 'days')
+                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofLongTravel), 'days')
             }
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.status as OpeVisaStatus)) {
-                exceeddays = moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel, 'days'), 'days')
+                exceeddays = moment().diff(moment(travel?.transactions[0]?.date).add(deadlineStatementExpensesShortTravel), 'days')
             }
             if (travel.travelType === TravelType.SHORT_TERM_TRAVEL && ![OpeVisaStatus.JUSTIFY, OpeVisaStatus.CLOSED].includes(travel?.proofTravel?.status as OpeVisaStatus)) {
-                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel, 'days'), 'days')
+                exceeddays = moment().diff(moment(travel?.proofTravel?.dates?.start).add(deadlineProofShortTravel), 'days')
             }
 
             data = {
@@ -270,7 +270,7 @@ export const generateDeclarationFolderExportPdf = async (operation: Travel | Onl
             templateData = templateOnlinePaymentDeclarationRecapPdf;
             const amount = getTransactionsAmount(onlinePaymentMonth?.transactions || []);
             let exceeddays = 0;
-            onlinePaymentMonth?.transactions?.length && (exceeddays = moment().diff(moment(onlinePaymentMonth?.transactions[0]?.date).add(deadlineOnlinePayment, 'days'), 'days'));
+            onlinePaymentMonth?.transactions?.length && (exceeddays = moment().diff(moment(onlinePaymentMonth?.transactions[0]?.date).add(deadlineOnlinePayment), 'days'));
             data = {
                 ...data,
                 export_date: moment().format('DD/MM/YYYY HH:mm:ss'),
