@@ -2,7 +2,9 @@ import {
     FrontUsersAuthorizationsRead, BackUsersAuthorizationsRead, ManagementCommitteeAuthorizationsWrite, ManagementCommitteeAuthorizationsRead,
     UsersMenuAuthorizationsRead, CartTypeSettingAuthorizationsRead, CeilingSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsRead,
     LongTravelTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsRead, SettingsMenuAuthorizationsRead, TemplateSettingAuthorizationsRead,
-    TransactionTypeSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsRead, VouchersSettingAuthorizationsRead, 
+    TransactionTypeSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsRead, VouchersSettingAuthorizationsRead,
+    UsersInDemeureAndBlockMenuAuthorizationsRead,
+    UsersInDemeureAndToBlockAuthorizationsRead, 
 } from "../../enum";
 import { controller } from "../viewer";
 
@@ -23,6 +25,8 @@ const _managementCommittee = {
     ...TransactionTypeSettingAuthorizationsRead,
     ...ManagementCommitteeAuthorizationsRead,
     ...ManagementCommitteeAuthorizationsWrite,
+    ...UsersInDemeureAndBlockMenuAuthorizationsRead,
+    ...UsersInDemeureAndToBlockAuthorizationsRead,
 };
 
 export const managementCommittee = _managementCommittee;

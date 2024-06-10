@@ -37,6 +37,11 @@ export class UsersController {
         catch (error) { next(error); }
     }
 
+    async getUsersInDemeureAndToBlock(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try { res.send(await UsersController.usersService.getUsersInDemeureAndToBlock({filter: req.query})); }
+        catch (error) { next(error); }
+    }
+
     async verifyLdapUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try { res.send(await UsersController.usersService.verifyLdapUser(req.query)); }
         catch (error) { next(error); }

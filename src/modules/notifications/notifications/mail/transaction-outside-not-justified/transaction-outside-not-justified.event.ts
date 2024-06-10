@@ -1,8 +1,8 @@
 import { VisaExceedingEvent, VisaExceedingMailData } from "../visa-exceeding";
 import { OnlinePaymentMonth } from "modules/online-payment";
+import { Import } from "modules/imports";
 import { Travel } from "modules/travel";
 import { getTotal } from 'common/utils';
-import { Import } from "modules/imports";
 
 export class TransactionOutsideNotJustifiedEvent extends VisaExceedingEvent implements TransactionOutsideNotJustifiedMailData {
     

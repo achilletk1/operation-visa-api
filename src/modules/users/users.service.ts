@@ -1,19 +1,26 @@
+import { listOfUntimelyClientCodesProofTravelAggregation, listOfUntimelyClientCodesTransactionsAggregation } from "modules/reporting";
 import { CrudService, QueryOptions, QueryProjection } from "common/base";
 import { UsersEvent, notificationEmmiter } from "modules/notifications";
 import { formatUserFilters, generateUsersExportXlsx } from "./helper";
+import { TravelMonthController } from "modules/travel-month";
 import { getLdapUser } from "common/helpers/ldap.helpers";
 import { CbsController, CbsBankUser } from "modules/cbs";
 import { UsersRepository } from "./users.repository";
 import { UsersController } from './users.controller';
-import { parseNumberFields } from "common/helpers";
+import { convertParams, extractPaginationData, parseNumberFields } from "common/helpers";
+import { TravelController } from "modules/travel";
 import httpContext from 'express-http-context';
+import { cloneDeep, isEmpty } from "lodash";
+import { QueryFilter } from "common/types";
 import { config } from "convict-config";
-import { isEmpty } from "lodash";
 import { User } from "./model";
 import { hash } from "bcrypt";
 import moment from "moment";
+import { OnlinePaymentController } from "modules/online-payment";
 
-export class UsersService extends CrudService<User>  {
+type untimelyClientCodes = { formalNoticeClientCodes: string[]; blockedClientCodes: string[]; }
+
+export class UsersService extends CrudService<User> {
 
     static userRepository: UsersRepository;
 
@@ -29,7 +36,7 @@ export class UsersService extends CrudService<User>  {
 
             const filter = formatUserFilters(filters);
             const opts: QueryOptions = { filter };
-            (projection) && (opts.projection = projection);     
+            (projection) && (opts.projection = projection);
             return await UsersController.usersService.findAll(opts);
         } catch (error) { throw error; }
     }
@@ -210,5 +217,62 @@ export class UsersService extends CrudService<User>  {
             return {};
         } catch (error) { throw (error); }
     }
+
+
+    async getUsersInDemeureAndToBlock(query: QueryOptions) {
+        try {
+            const authUser = httpContext.get('user');
+            if (authUser?.category < 500) { throw new Error('Forbidden'); }
+
+            query = convertParams(query || {});
+            query = extractPaginationData(query || {});
+
+            const inDemeure = query?.filter?.inDemeure; delete query?.filter?.inDemeure;
+
+            const { formalNoticeClientCodes, blockedClientCodes } = await this.getUserInDemeureAndToBlock({});
+            const clientCodes = inDemeure ? formalNoticeClientCodes : blockedClientCodes;
+            query.filter = query.filter ?? {};
+            if (query?.filter?.clientCode) { query.filter['clientCode'] = { $regex: `${query.filter['clientCode']}` } }
+            else {
+                query.filter['clientCode'] = { $in: [...clientCodes] };
+            }
+            if (query?.filter?.fullName) { query.filter['fullName'] = { $regex: `${query.filter['fullName']}` }; }
+
+            const users = await UsersController.usersService.findAll({ ...query, projection: { password: 0, otp: 0 } });
+            return users
+
+        } catch (error) { throw error; }
+    }
+
+    async getUserInDemeureAndToBlock(filter: QueryFilter): Promise<untimelyClientCodes> {
+
+        let blockedClientCodes: string[] = []; const formalNoticeClientCodes: string[] = [];
+
+        // TODO add travel-month in addition of aggregation
+        const untimelyProofTravel = await TravelController.travelService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesProofTravelAggregation(filter));
+        blockedClientCodes.push(...(untimelyProofTravel[0]?.blockedClientCodes || []));
+
+        const untimelyClientCodesShortTravel = await TravelController.travelService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'travel'));
+        blockedClientCodes.push(...(untimelyClientCodesShortTravel[0]?.blockedClientCodes || []));
+
+        const untimelyClientCodesOnlinePayment = await OnlinePaymentController.onlinePaymentService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'online-payment'));
+        blockedClientCodes.push(...(untimelyClientCodesOnlinePayment[0]?.blockedClientCodes || []));
+
+        const untimelyClientCodesTravelMonth = await TravelMonthController.travelMonthService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'travel-month'));
+        blockedClientCodes.push(...(untimelyClientCodesTravelMonth[0]?.blockedClientCodes || []));
+        // const importations = await ImportsController.importsService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesImportAggregation(filter));
+
+        const allFormalNoticeClientCodes = [
+            ...(untimelyProofTravel[0]?.formalNoticeClientCodes || []), ...(untimelyClientCodesShortTravel[0]?.formalNoticeClientCodes || []),
+            ...(untimelyClientCodesOnlinePayment[0]?.formalNoticeClientCodes || []), ...(untimelyClientCodesTravelMonth[0]?.formalNoticeClientCodes || [])
+        ];
+        formalNoticeClientCodes.push(...new Set(allFormalNoticeClientCodes));
+
+        const allBlockedClientCodes = [...new Set(blockedClientCodes)];
+        blockedClientCodes = allBlockedClientCodes;
+
+        return { formalNoticeClientCodes, blockedClientCodes }
+    }
+
 
 }
