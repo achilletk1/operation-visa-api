@@ -28,6 +28,8 @@ router.get('/visa-operations/all', usersController.getUserByOperations);
 
 router.get('/labels', usersController.getUsersLabels);
 
+router.get('/in-demeure', usersController.getUsersInDemeureAndToBlock);
+
 router.get('/:id', usersController.findOneById);
 
 export const usersRoute = router;

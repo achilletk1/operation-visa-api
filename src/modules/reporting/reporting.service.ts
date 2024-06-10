@@ -8,34 +8,17 @@ import { CbsController } from 'modules/cbs';
 import { BaseService } from "common/base";
 import { cloneDeep } from "lodash";
 import moment from "moment";
-
-type untimelyClientCodes = { formalNoticeClientCodes: string[]; blockedClientCodes: string[]; }
+import { UsersController } from "modules/users";
 
 export class ReportingService extends BaseService {
 
     constructor() { super() }
 
     async getConsolidateData(fields: { [key: string]: string }) {
-        const blockedClientCodes: string[] = []; const formalNoticeClientCodes: string[] = [];
         // fields = parseNumberFields(fields);
         const filter = this.generateFilter(fields);
 
-        // TODO add travel-month in addition of aggregation
-        const untimelyProofTravel = await TravelController.travelService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesProofTravelAggregation(filter));
-        blockedClientCodes.push(...(untimelyProofTravel[0]?.blockedClientCodes || []));
-        const untimelyClientCodesShortTravel = await TravelController.travelService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'travel'));
-        blockedClientCodes.push(...(untimelyClientCodesShortTravel[0]?.blockedClientCodes || []));
-        const untimelyClientCodesOnlinePayment = await TravelController.travelService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'online-payment'));
-        blockedClientCodes.push(...(untimelyClientCodesOnlinePayment[0]?.blockedClientCodes || []));
-        const untimelyClientCodesTravelMonth = await TravelMonthController.travelMonthService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesTransactionsAggregation(filter, blockedClientCodes, 'travel-month'));
-        blockedClientCodes.push(...(untimelyClientCodesTravelMonth[0]?.blockedClientCodes || []));
-        // const importations = await ImportsController.importsService.findAllAggregate<untimelyClientCodes>(listOfUntimelyClientCodesImportAggregation(filter));
-        formalNoticeClientCodes.push(
-            ...new Set(...(untimelyProofTravel[0]?.blockedClientCodes || []), ...(untimelyClientCodesShortTravel[0]?.blockedClientCodes || []),
-            ...(untimelyClientCodesOnlinePayment[0]?.blockedClientCodes || []), ...(untimelyClientCodesTravelMonth[0]?.blockedClientCodes || []))
-        );
-        blockedClientCodes.push(...new Set(...cloneDeep(blockedClientCodes)));
-
+        const { formalNoticeClientCodes, blockedClientCodes } = await UsersController.usersService.getUserInDemeureAndToBlock(filter);
 
         try {
             const { statemenType: statementType, travelType, status, start, end, regionCode } = fields;
