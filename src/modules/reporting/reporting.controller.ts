@@ -28,7 +28,7 @@ export class ReportingController  {
     }
 
     async getAgencies(req: Request, res: Response, next: NextFunction) {
-        try { res.send(await ReportingController.reportingService.getAgencies({ filter: req.query })); }
+        try { res.send(await ReportingController.reportingService.getAgencies({ filter: req.query as any })); }
         catch (error) { next(error); }
     }
 
