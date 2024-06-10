@@ -13,7 +13,7 @@ import { getTotal } from "common/utils";
 import { logger } from "winston-config";
 import { get, isEmpty } from "lodash";
 import { ObjectId } from 'mongodb';
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 
 export const verifyExceedingOnTravel = (data: Travel | TravelMonth | OnlinePaymentMonth, ceiling: number, travel?: Travel) => {
     const totalAmount = getTotal(data?.transactions || []);
@@ -139,10 +139,10 @@ export const getDeadlines = async () => {
         deadlineStatementExpensesShortTravel = getPeriodDeadLine(deadlineStatementExpensesShortTravel);
 
         let settingOnlinePayment = (settings.data.find(e => e.key === ONLINE_PAYMENT_DEADLINE_JUSTIFY))?.data;
-        settingOnlinePayment = getPeriodDeadLine(settingOnlinePayment);
+        // settingOnlinePayment = getPeriodDeadLine(settingOnlinePayment);
 
         let deadlineOnlinePayment = getPeriodDeadLine(settingOnlinePayment);
-        deadlineOnlinePayment = getPeriodDeadLine(deadlineOnlinePayment);
+        // deadlineOnlinePayment = getPeriodDeadLine(deadlineOnlinePayment);
 
         let goodsDeadline = (settings.data.find(e => e.key === IMPORT_GOODS_DEADLINE_JUSTIFY))?.data;
         goodsDeadline = getPeriodDeadLine(goodsDeadline);
@@ -221,4 +221,5 @@ const getImportationParentFolder = async (type: string, service: any, folder: Tr
     } catch (error) { throw error; }
 }
 
-const getPeriodDeadLine = (data: any): number => data?.dataPeriod === 'month' ? data?.value * 30 : data?.value
+// const getPeriodDeadLine = (data: any): number => data?.dataPeriod === 'month' ? data?.value * 30 : data?.value
+const getPeriodDeadLine = (data: any): Duration => data?.dataPeriod === 'month' ? moment.duration(data?.value, 'months') : moment.duration(data?.value, 'days')
