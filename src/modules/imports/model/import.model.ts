@@ -17,6 +17,7 @@ export class Import {
   // tslint:disable-next-line: variable-name
   updated_at?: number;
   editors?: Editor[];
+  initiator?: Partial<User>;
   finalPayment?: boolean | Event;
   validators?: Validator[];
   isUntimely?: boolean;

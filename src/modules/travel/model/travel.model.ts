@@ -83,6 +83,7 @@ export class Travel {
     transactions!: VisaTransaction[];
     validators?: Validator[];
     editors?: Editor[];
+    initiator?: Partial<User>;
     validationLevel?: number;
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
     link?: string;
