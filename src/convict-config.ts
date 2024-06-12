@@ -25,6 +25,7 @@ export const config = convict({
         doc: 'Application host.',
         format: '*',
         default: 'localhost',
+        env: 'NODE_HOST'
     },
     db: {
         host: {
