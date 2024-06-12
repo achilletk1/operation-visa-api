@@ -35,7 +35,8 @@ export class RequestCeilingIncrease {
         assignered?: AssignTo;
     };
     validity?: Validity;
-    validator?: RequestCeilingValidator;
+    validators?: RequestCeilingValidator[];
+    rejectReason?: string;
     status?: Status;
     desc!: string;
     signature: any;

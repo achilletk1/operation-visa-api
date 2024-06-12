@@ -2,7 +2,8 @@ export enum Status {
     INITIATED = 100,
     VALIDATED = 200,
     REJECTED = 300,
-    ASSIGNED = 400
+    ASSIGNED = 400,
+    INPROGRESS = 500, 
 }
 
 export enum statusRequestCeiling {
