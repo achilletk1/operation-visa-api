@@ -1,6 +1,7 @@
 import { generateVisaTransactionExportXlsx, generateCeillingExportXlsx, generateOnlineOperationsExportXlsx, generateOnlinePaymentExportXlsx, generateTravelsExportXlsx, generateExpenseDetailsExportXlsx } from "./helper/export.xlsx.helper";
 import { getExtensionByContentType, generateNotificationExportPdf, getContentTypeByExtension, generateDeclarationFolderExportPdf } from "./helper/export.pdf.helper";
 import { generateOperationZippedFolder, getFileNamesTree } from "./helper/export.zip.helper";
+import { VisaRecapOperationsController } from "modules/visa-recap-operation-statement";
 import { isDevOrStag, parseNumberFields, timeout } from "common/helpers";
 import { FilesController } from 'modules/visa-transactions-files/files';
 import { OnlinePaymentController } from "modules/online-payment";
@@ -8,6 +9,7 @@ import { NotificationsController } from "modules/notifications";
 import { TravelController } from 'modules/travel';
 import { camelCase, get, isEmpty } from "lodash";
 import { UsersController } from "modules/users";
+import httpContext from 'express-http-context';
 import { BaseService } from "common/base";
 import { readFile } from "common/utils";
 import { config } from "convict-config";
@@ -397,6 +399,21 @@ export class ExportService extends BaseService {
 
             return { contentType: `${format}`, fileContent: buffer, fileName };
         } catch (error) { throw error; }
+    }
+
+    async generateExportBeacReportData(id: string) {
+        try {
+            const authUser = httpContext.get('user');
+            if (authUser?.category < 500) { throw new Error('Forbidden'); }
+
+            const data = await VisaRecapOperationsController.visaRecapOperationsService.findOne({ filter: { _id: id } });
+            if (!data) { throw new Error('DataNotFound'); }
+            if (isDevOrStag) { await timeout(5000); }
+
+            const buffer = data?.base64Data;
+            const fileName = `export_${new Date().getTime()}-beac-report.zip`
+            return { content: buffer, fileName, contentType: 'application/zip, application/octet-stream' };
+        } catch (error) { throw error }
     }
 
     async generateDeclarationFolderExportLinks(type: string, _id: string) {

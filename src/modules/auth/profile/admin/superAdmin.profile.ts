@@ -11,8 +11,7 @@ import {
     DCHAuthorizationsRead, DCHAuthorizationsWrite, HeadOfPersonnelAgencyPermissionRead, HeadOfPersonnelAgencyPermissionWrite, HeadOfRegionPermissionRead, HeadOfRegionPermissionWrite, ManagementCommitteeAuthorizationsRead,
     ManagementCommitteeAuthorizationsWrite, PersonnelManagerPermissionRead, PersonnelManagerPermissionWrite, TravelsMenuAuthorizationsRead, OnlinePaymentsMenuAuthorizationsRead, OnlinePaymentsDeclarationAuthorizationsRead,
     SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead, OperationsAuthorizationsRead, OperationsMenuAuthorizationsRead, OperationsAuthorizationsWrite, TransferStakeholdersMenuAuthorizationsRead, TransferStakeholdersAuthorizationsRead,
-    TransferStakeholdersAuthorizationsWrite, SensitiveNotificationListMenuAuthorizationsRead, SensitiveNotificationListAuthorizationsWrite, SensitiveNotificationListAuthorizationsRead,
-    UsersInDemeureAndBlockMenuAuthorizationsRead,
+    TransferStakeholdersAuthorizationsWrite, SensitiveNotificationListMenuAuthorizationsRead, SensitiveNotificationListAuthorizationsWrite, SensitiveNotificationListAuthorizationsRead, ReportingBeacAuthorizationsRead, UsersInDemeureAndBlockMenuAuthorizationsRead,
     UsersInDemeureAndToBlockAuthorizationsRead,
 } from "../../enum";
 
@@ -38,6 +37,7 @@ const _superAdmin = {
     ...ImportationsAuthorizationsRead,
     ...ImportationsAuthorizationsWrite,
     ...ReportingAuthorizationsRead,
+    ...ReportingBeacAuthorizationsRead,
     ...InstantNotificationAuthorizationsRead,
     ...InstantNotificationAuthorizationsWrite,
     ...NotificationListAuthorizationsRead,

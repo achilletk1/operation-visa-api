@@ -37,6 +37,11 @@ export class ExportController {
         } catch (error) { next(error); }
     }
 
+    async generateExportBeacReportData(req: Request, res: Response, next: NextFunction) {
+        try { res.send(await ExportController.exportService.generateExportBeacReportData(req.params.id as any)); }
+        catch (error) { next(error); }
+    }
+
     async generateOnlinePaymentExportLinks(req: Request, res: Response, next: NextFunction) {
         try { res.send(await ExportController.exportService.generateOnlinePaymentExportLinks(req.query as any)); }
         catch (error) { next(error); }
