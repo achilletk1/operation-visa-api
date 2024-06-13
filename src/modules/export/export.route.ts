@@ -15,6 +15,8 @@ router.post('/attachment/', exportController.generateExportAttachmentLinks);
 
 router.get('/attachment/:code', exportController.generateExportVisaAttachmentData);
 
+router.get('/visa-recap-operation/:id', exportController.generateExportBeacReportData);
+
 router.get('/online-payment/', exportController.generateOnlinePaymentExportLinks);
 
 router.get('/online-payment/:code', exportController.generateOnlinePaymentExporData);

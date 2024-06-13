@@ -1,6 +1,6 @@
 import {
     ImportationsAuthorizationsRead, ReportingAuthorizationsRead, NotificationListAuthorizationsRead, ShareAuthorizationsRead, FormalNoticeAuthorizationsRead,
-    ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead,
+    ShortTravelAuthorizationsRead, LongTravelAuthorizationsRead, OnlinePaymentsAuthorizationsRead, CeilingIncreaseAuthorizationsRead, ReportingBeacAuthorizationsRead,
     TravelsMenuAuthorizationsRead, OnlinePaymentsMenuAuthorizationsRead, TransferStakeholdersMenuAuthorizationsRead, TransferStakeholdersAuthorizationsRead,
     OperationsMenuAuthorizationsRead, OperationsAuthorizationsRead, SensitiveNotificationListAuthorizationsRead, SensitiveNotificationListMenuAuthorizationsRead,
 } from "../../enum";
@@ -14,6 +14,7 @@ const _controller = {
     ...CeilingIncreaseAuthorizationsRead,
     ...ImportationsAuthorizationsRead,
     ...ReportingAuthorizationsRead,
+    ...ReportingBeacAuthorizationsRead,
     ...FormalNoticeAuthorizationsRead,
     ...NotificationListAuthorizationsRead,
     ...TransferStakeholdersMenuAuthorizationsRead,

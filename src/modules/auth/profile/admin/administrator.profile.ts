@@ -1,5 +1,5 @@
 import {
-    FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, ReportingAuthorizationsRead,
+    FrontUsersAuthorizationsRead, FrontUsersAuthorizationsWrite, ReportingAuthorizationsRead,ReportingBeacAuthorizationsRead,
 } from "../../enum";
 import { parameter, support } from ".";
 
@@ -9,6 +9,7 @@ const _administrator = {
     ...FrontUsersAuthorizationsRead,
     ...FrontUsersAuthorizationsWrite,
     ...ReportingAuthorizationsRead,
+    ...ReportingBeacAuthorizationsRead,
 };
 
 export const administrator = _administrator;
