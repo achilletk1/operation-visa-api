@@ -122,12 +122,12 @@ export class ImportsService extends CrudService<Import> {
             try { importation = await ImportsController.importsService.findOne({ filter: { _id: _id } }); } catch { }
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
-            if (!importation) { throw new Error('OnlinePaymentNotFound'); }
+            if (!importation) { throw new Error('ImportationNotFound'); }
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            let updateData: any = {};
+            let updateData: any = { status };
 
             if (status === OpeVisaStatus.REJECTED) { updateData = { status, rejectReason }; }
 
@@ -158,7 +158,7 @@ export class ImportsService extends CrudService<Import> {
             if (status === OpeVisaStatus.REJECTED) {
                 const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(user.userGesCode, user?.age?.code);
                 notificationEmmiter.emit('reject-import-mail', new RejectImportEvent(importation, ccEmail));
-                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(importation, authUser?.tel, 'Import'));    
+                notificationEmmiter.emit('reject-template-sms', new RejectTemplateSmsEvent(importation, authUser?.tel, 'Import'));
             }
             return result;
         } catch (error) { throw error; }
@@ -177,8 +177,8 @@ export class ImportsService extends CrudService<Import> {
             }
 
             if (query?.filter?.platform && ('backoffice').includes(query?.filter?.platform)) {
-                query.filter = {...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
-                delete query?.filter?.platform; 
+                query.filter = { ...query?.filter, status: { $in: [OpeVisaStatus.TO_COMPLETED, OpeVisaStatus.TO_VALIDATED, OpeVisaStatus.VALIDATION_CHAIN] } };
+                delete query?.filter?.platform;
             }
 
             const data = await ImportsController.importsService.findAllAggregate<Import>(getAgenciesQuery(query));
