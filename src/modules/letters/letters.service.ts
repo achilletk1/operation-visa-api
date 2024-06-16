@@ -25,17 +25,13 @@ export class LettersService extends CrudService<Letter> {
     async generateExportView(letter: Letter) {
         try {
 
-            if (!letter) { return new Error('LetterNotFound') }
+            if (!letter) { throw new Error('LetterNotFound'); }
             const pdfDataEn = replaceVariables(letter?.pdf?.en, {}, false, true);
             const pdfDataFr = replaceVariables(letter?.pdf?.fr, {}, false, true);
 
-            const pdfStringEn: any = await generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature });
+            const pdfStringEn = (await generateFormalNoticeLetter({ ...pdfDataEn, signature: letter?.pdf?.signature })) as string;
 
-            if (pdfStringEn instanceof Error) { return pdfStringEn; }
-
-            const pdfStringFr: any = await generateFormalNoticeLetter({ ...pdfDataFr, signature: letter?.pdf?.signature });
-
-            if (pdfStringFr instanceof Error) { return pdfStringFr; }
+            const pdfStringFr = (await generateFormalNoticeLetter({ ...pdfDataFr, signature: letter?.pdf?.signature })) as string;
 
             return { en: pdfStringEn, fr: pdfStringFr };
         } catch (error) { throw error; }
