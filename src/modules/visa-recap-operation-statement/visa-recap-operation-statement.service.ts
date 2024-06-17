@@ -5,7 +5,7 @@ import { VisaRecapOperationRepository } from "./visa-recap-operation-statement.r
 import { QuarterlyRecapStatementEvent, notificationEmmiter } from "modules/notifications";
 import { VisaTransactionsController } from "modules/visa-transactions";
 import { OpeVisaStatus } from "modules/visa-operations";
-import { TravelController } from "modules/travel";
+import { TravelController, TravelType } from "modules/travel";
 import { StatementReport } from "./model";
 import { CrudService } from "common/base";
 import { errorMsg } from "common/utils";
@@ -13,6 +13,7 @@ import { config } from "convict-config";
 import { StatementType } from "./enum";
 import crypt from 'url-crypt';
 import moment from "moment";
+import { getDeadlines } from "modules/visa-operations/helper";
 
 const { cryptObj, decryptObj } = crypt(config.get('exportSalt'));
 
@@ -40,8 +41,12 @@ export class VisaRecapOperationService extends CrudService<StatementReport> {
 
     async quarterlyReportingOperationsForBEAC(): Promise<void> {
         try {
+            const {deadlineProofLongTravel, deadlineProofShortTravel} = await getDeadlines();
             const data = (await TravelController.travelService.findAll({ filter: { isUntimely: true } }))?.data ?? [];
-            const exceededTravels = data.filter((elt) => { return (elt?.transactions.length > 0 && moment().diff(moment(elt?.transactions[0]?.date), 'days') > 38) });
+            const exceededTravels = data.filter((elt) => {
+                if (elt?.travelType === TravelType.SHORT_TERM_TRAVEL) return (elt?.transactions.length > 0 && moment().diff(moment(elt?.transactions[0]?.date).add(deadlineProofShortTravel), 'days') > 8);
+                return (elt?.transactions.length > 0 && moment().diff(moment(elt?.transactions[0]?.date).add(deadlineProofLongTravel), 'days') > 8)
+            });
             const base64Data = await getBEACReportZipOnBase64Format(exceededTravels, 'tmp_exceeded');
             const result = await insertStatementReport(StatementType.QUARTERLY, base64Data);
             const excelData = getBEACReportExcelFormat(exceededTravels);
