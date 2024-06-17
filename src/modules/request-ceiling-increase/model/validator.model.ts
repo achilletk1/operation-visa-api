@@ -4,4 +4,5 @@ export interface RequestCeilingValidator {
     // date?: number;
     isValidated?: boolean;
     rejectReason?: string;
+    level: number;
 }

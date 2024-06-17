@@ -3,6 +3,7 @@ import { RequestCeilingIncreaseRepository } from "./request-ceiling-increase.rep
 import { RequestCeilingIncreaseController } from "./request-ceiling-increase.controller";
 import { IncreaseCeilingSmsEvent, RejectTemplateSmsEvent } from "modules/notifications";
 import { convertParams, extractPaginationData, getAgenciesQuery } from "common/helpers";
+import { ValidationLevelSettingsController } from "modules/validation-level-settings";
 import { deleteDirectory, readFile, saveAttachment } from "common/utils";
 import { getAccountManagerOrAgencyHeadCcEmail } from "common/services";
 import { AssignTo, RequestCeilingIncrease } from "./model";
@@ -119,26 +120,29 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
         } catch (error) { throw error; }
     }
 
-    async requestIncrease(_id: string, body: { validator: any, status: number }) {
+    async requestIncrease(_id: string, body: { validators: any, status: number }) {
         try {
             const authUser = httpContext.get('user');
+            const { INPROGRESS, REJECTED, VALIDATED } = Status;
+            const validator = body?.validators[0];
 
             // if (![600].includes(authUser?.category)) { throw new Error('Forbidden'); }
 
-            const ceiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id } });
-
+            let ceiling = await RequestCeilingIncreaseController.requestCeilingIncreaseService.findOne({ filter: { _id } });
             if (!ceiling) { throw new Error('CeilingNotFound'); }
 
-            if ([200, 300].includes(Number(ceiling?.status))) { throw new Error('AllReadyValidate'); }
+            if ([VALIDATED, REJECTED].includes(Number(ceiling?.status))) { throw new Error('AllReadyValidate'); }
+            if (body?.status === REJECTED && (!validator?.rejectReason || validator?.rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
+            const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
 
-            ceiling.validator = body.validator;
+            ceiling.validators = ceiling.validators ?? [];
+            ceiling.validators.push(...body.validators);
             ceiling.status = body.status;
 
+            if (!validator.fullRights && validator.level !== +maxValidationLevelRequired && body?.status !== REJECTED) ceiling.status = INPROGRESS;
+
             // execute request confirmation process
-            if (ceiling?.status === 200) {
-
-                await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id }, ceiling);
-
+            if (ceiling?.status === VALIDATED) {
                 notificationEmmiter.emit('valid-ceiling-mail', new ValidCeilingEvent(ceiling));
                 notificationEmmiter.emit('increase-ceiling-sms', new IncreaseCeilingSmsEvent(ceiling, authUser?.tel));
                 // await Promise.all([
@@ -148,9 +152,9 @@ export class RequestCeilingIncreaseService extends CrudService<RequestCeilingInc
             }
 
             // execute request reject process
-            if (ceiling?.status === 300) {
+            if (ceiling?.status === REJECTED) {
+                ceiling = { ...ceiling, rejectReason: validator?.rejectReason };
 
-                await RequestCeilingIncreaseController.requestCeilingIncreaseService.update({ _id }, ceiling);
                 // send notifications
                 const ccEmail = await getAccountManagerOrAgencyHeadCcEmail(undefined, undefined, { _id: ceiling?.user?._id });
                 notificationEmmiter.emit('reject-ceiling-mail', new RejectCeilingEvent(ceiling, ccEmail));
