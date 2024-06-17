@@ -5,6 +5,8 @@ import {
     TransferStakeholdersAuthorizationsWrite, OperationsAuthorizationsWrite, TravelsAuthorizationsWrite, SensitiveNotificationListAuthorizationsWrite,
     UsersInDemeureAndBlockMenuAuthorizationsRead,
     UsersInDemeureAndToBlockAuthorizationsRead,
+    ValidationLevelSettingAuthorizationsRead,
+    SettingsMenuAuthorizationsRead,
 } from "../../enum";
 import { controller } from "../viewer";
 
@@ -30,6 +32,8 @@ const _accountManager = {
     ...SensitiveNotificationListAuthorizationsWrite,
     ...UsersInDemeureAndBlockMenuAuthorizationsRead,
     ...UsersInDemeureAndToBlockAuthorizationsRead,
+    ...ValidationLevelSettingAuthorizationsRead,
+    ...SettingsMenuAuthorizationsRead
 };
 
 export const accountManager = _accountManager;
