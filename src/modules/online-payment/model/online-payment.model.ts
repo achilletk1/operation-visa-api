@@ -26,6 +26,7 @@ export class OnlinePaymentMonth {
     validationLevel?: number;
     validators?: Validator[];
     editors?: any[];
+    initiator?: Partial<User>;
     rejectReason?: string;
     notifications?: { data: any, type: 'SMS' | 'EMAIL', template: string }[];
     isUntimely?: boolean;

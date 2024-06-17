@@ -248,6 +248,7 @@ export class OnlinePaymentService extends CrudService<OnlinePaymentMonth> {
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (!onlinePaymentMonth) { throw new Error('OnlinePaymentNotFound'); }
+            if (onlinePaymentMonth?.initiator?._id === authUser?._id) { throw new Error('UnauthorizedUser') }
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});

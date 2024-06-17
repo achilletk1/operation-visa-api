@@ -127,6 +127,8 @@ export class ValidationsService extends CrudService<UserValidator> {
                     : null;
             if (!data) { throw new Error('DataNotFound'); }
 
+            if (data?.initiator?._id === authUser?._id) { throw new Error('UnauthorizedUser') }
+
             const userValidator: UserValidator = await ValidationsController.validationsService.findOne({ filter: { userId } });
             level = data?.validationLevel ? data?.validationLevel + 1 : 1;
             if (!userValidator || !userValidator?.enabled || userValidator?.level !== level) { throw new Error('ValidationForbidden') }

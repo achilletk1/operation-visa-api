@@ -123,6 +123,7 @@ export class ImportsService extends CrudService<Import> {
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (!importation) { throw new Error('ImportationNotFound'); }
+            if (importation?.initiator?._id === authUser?._id) { throw new Error('UnauthorizedUser') }
             if (status === OpeVisaStatus.REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
 
             const maxValidationLevelRequired = await ValidationLevelSettingsController.levelValidateService.count({});
@@ -187,4 +188,5 @@ export class ImportsService extends CrudService<Import> {
             return { data, total };
         } catch (error) { throw error; }
     }
+
 }

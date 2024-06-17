@@ -289,6 +289,9 @@ export class TravelService extends CrudService<Travel> {
             let travel = await TravelController.travelService.findOne({ filter: { _id } });
 
             if (!travel) { throw new Error('TravelNotFound'); }
+
+            if (travel?.initiator?._id === authUser?._id) { throw new Error('UnauthorizedUser') }
+
             const user = await UsersController.usersService.findOne({ filter: { _id: validator._id } });
 
             if (status === REJECTED && (!rejectReason || rejectReason === '')) { throw new Error('CannotRejectWithoutReason') }
