@@ -10,13 +10,15 @@ import { inserDefaultVouchers } from './helpers/insert-default-vouchers';
 import { inserDefaultSetting } from './helpers/insert-default-settings';
 import { dropTestCollections } from './tests/drop-test-collections';
 import readline from 'readline';
+import { inserDefaultLevelValidation } from './helpers/insert-default-level-validation';
 
 const runScripts = async () => {
     // SCRIPTS to execute
     // await dropTestCollections();
     // await inserDefaultVisaCeilings();
     // await inserDefaultLongTravelsTypes();
-    await inserDefaultLetter();
+    // await inserDefaultLetter();
+    await inserDefaultLevelValidation();
     // await inserDefaultPropertyType();
     // await inserDefaultSetting();
     // await insertDefaultTemplateSetting();
