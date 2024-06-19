@@ -1,17 +1,15 @@
-import { getRandomString, isDevOrStag, isStagingBci, isProd, timeout } from "common/helpers";
+import { getRandomString, isDevOrStag, isStagingBci, isProd, timeout, getLdapUser, isDev } from "common/helpers";
 import { create, getAuthorizationsByProfile, getUserProfile, refresh } from "./helper";
 import { AuthTokenEmailEvent, notificationEmmiter, TokenSmsEvent } from "modules";
 import { User, UserCategory, UsersController } from "modules/users";
-import { SettingsController } from 'modules/settings';
+import { SettingsController, settingsKeys } from 'modules/settings';
 import { CbsClientUser } from "modules/cbs/model";
 import { get, isEmpty, isString } from "lodash";
 import httpContext from 'express-http-context';
-import { getLdapUser } from "common/helpers";
 import { CbsController } from "modules/cbs";
 import { BaseService } from "common/base";
 import { errorMsg } from "common/utils";
 import { config } from "convict-config";
-import { isDev } from 'common/helpers';
 import bcrypt from 'bcrypt';
 import moment from "moment";
 
@@ -44,7 +42,7 @@ export class AuthService extends BaseService {
 
             if (idapUser) {
 
-                const setting = await SettingsController.settingsService.findOne({ filter: { key: 'otp_status' } });
+                const setting = await SettingsController.settingsService.findOne({ filter: { key: settingsKeys.OTP_STATUS } });
 
                 // check if 2FA is disable Globally
                 if (!setting.data) { return this.generateAuthToken(user); }
@@ -159,10 +157,9 @@ export class AuthService extends BaseService {
             }
 
             if (clients.length > 1) {
-                const accounts = []
-                for (let client of clients) {
+                const transformClientToAccount = (client: User | CbsClientUser) => {
                     const account = client.accounts?.find(account => account.NCP === ncp);
-                    accounts.push({
+                    return {
                         email: (client as CbsClientUser).EMAIL ?? (client as User).email,
                         phone: (client as CbsClientUser).TEL ?? (client as User).tel?.replace(/[+]/g, ''),
                         _id: (client as User)._id ?? '',
@@ -171,16 +168,17 @@ export class AuthService extends BaseService {
                             label: account?.LIB_AGE,
                             code: account?.AGE
                         }
-                    })
-                }
-                return accounts
+                    };
+                };
+
+                return clients.map(transformClientToAccount);
             }
         } catch (error) { throw error; }
     }
 
-    async sendClientOtp(datas: any) {
+    async sendClientOtp(data: any) {
         try {
-            let { userId, clientCode, otpChannel, value } = datas;
+            let { userId, clientCode, otpChannel, value } = data;
             if (isDev) { await timeout(1000); }
 
             const otp = {
@@ -255,9 +253,9 @@ export class AuthService extends BaseService {
 
     private generateAuthToken(user: User) {
         try {
-            const fullName = user?.fullName || `${user.lname || ''} ${user.fname || ''}`
+            const fullName = user?.fullName ?? `${user.lname ?? ''} ${user.fname ?? ''}`
             const { email, gender, fname, lname, tel, category, clientCode, userCode, _id, gesCode, bankProfileCode, age } = user;
-            const tokenData = { _id: _id?.toString() || '', email, userCode, gender, fname, lname, tel, category, clientCode, fullName, gesCode, bankProfileCode, age };
+            const tokenData = { _id: _id?.toString() ?? '', email, userCode, gender, fname, lname, tel, category, clientCode, fullName, gesCode, bankProfileCode, age };
 
             const oauth = create(tokenData);
             delete user.password;

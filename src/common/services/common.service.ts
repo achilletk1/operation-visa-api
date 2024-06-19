@@ -10,7 +10,7 @@ export async function getAccountManagerOrAgencyHeadCcEmail(userGesCode?: string,
         ageCode ??= user?.age?.code;
         ccEmail = (userGesCode?.substring(0, 1) === '9')
             ? (await BankAccountManagerController.bankAccountManagerService.findOne({ filter: { CODE_GES: userGesCode } }))?.EMAIL || ''
-            : (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD, bankProfileCode: 'R204', 'age.code': ageCode } }))?.email || '';
+            : (await UsersController.usersService.findOne({ filter: { category: UserCategory.AGENCY_HEAD, bankProfileCode: 'R204', 'age.code': ageCode } }))?.email ?? '';
     } catch (error) { }
     return ccEmail;
 }

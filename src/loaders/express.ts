@@ -1,5 +1,6 @@
 import { ErrorHandler, oauthVerification, responseHeaders } from "common/middlewares";
 import { logger, morganOption } from "winston-config";
+import { startDatabase } from "database/mongodb";
 import { json, urlencoded } from 'body-parser';
 import httpContext from 'express-http-context';
 import { config } from 'convict-config';
@@ -56,8 +57,10 @@ export class ExpressLoader {
         const main = express().use(config.get('basePath') || '', app);
 
         // Start application
-        this.server = main.listen(config.get('port'), config.get('host'), () => {
-            logger.info(`${config.get('host')} server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
+        startDatabase().then(async () => {
+            this.server = main.listen(config.get('port'), config.get('host'), () => {
+                logger.info(`${config.get('host')} server started. Listening on port ${config.get('port')} in "${config.get('env')}" mode`);
+            });
         });
         // Start Cron Jobs
 

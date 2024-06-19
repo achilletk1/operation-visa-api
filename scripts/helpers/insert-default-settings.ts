@@ -19,10 +19,10 @@ export const inserDefaultSetting = async () => {
     },
     {
       key: settingsKeys.TTL_VALUE,
-      label: 'Parametrage du TTL',
+      label: 'Parametrage du TTL en minute pour les tokens',
       created_at: new Date().valueOf(),
       updated_at: [],
-      data: 40
+      data: 15
     },
     {
       key: settingsKeys.OTP_STATUS,

@@ -1,9 +1,10 @@
 import { SettingsRepository } from "./settings.repository";
 import { SettingsController } from './settings.controller';
+import { Setting, settingsKeys } from "./model";
 import httpContext from 'express-http-context';
 import { CrudService } from "common/base";
+import { cache } from "common/services";
 import { User } from "modules/users";
-import { Setting } from "./model";
 import { isEmpty } from "lodash";
 
 export class SettingsService extends CrudService<Setting> {
@@ -13,6 +14,7 @@ export class SettingsService extends CrudService<Setting> {
     constructor() {
         SettingsService.settingsRepository = new SettingsRepository();
         super(SettingsService.settingsRepository);
+        this.setAuthTTL();
     }
 
     async updateSettingByIdOrKey(_id: string, setting: Partial<Setting>, byKey: boolean = false) {
@@ -26,6 +28,7 @@ export class SettingsService extends CrudService<Setting> {
             currSetting.updated_at.unshift({ user: { _id: authUser?._id, fullName: authUser.fullName }, date: new Date().valueOf() });
 
             if (currSetting.updated_at.length >= 10) { currSetting.updated_at.pop(); }
+            byKey && (_id === settingsKeys.TTL_VALUE) && (httpContext.set(settingsKeys.TTL_VALUE, currSetting));
 
             return await SettingsController.settingsService.update(opts, { data: setting.data, updated_at: currSetting.updated_at });
         } catch (error) { throw error; }
@@ -39,6 +42,11 @@ export class SettingsService extends CrudService<Setting> {
             filter.created_at = { $exists: true };
             return await SettingsController.settingsService.findAll({ filter });
         } catch (error) { throw error; }
+    }
+
+    private async setAuthTTL() {
+        const settingTTL = (await this.findOne({ filter: { key: settingsKeys.TTL_VALUE } }))?.data;
+        cache.set(settingsKeys.TTL_VALUE, settingTTL);
     }
 
 }

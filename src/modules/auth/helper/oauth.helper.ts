@@ -1,10 +1,12 @@
+import { settingsKeys } from 'modules/settings/model';
 import { TokenPayload, OauthToken } from '../model';
+import cache from 'common/services/cache.service';
 import { config } from 'convict-config';
 import  jwt from 'jsonwebtoken';
 
 export function create(payload: TokenPayload): OauthToken {
     const issued = getCurrDateSeconds();
-    const ttl = issued + +config.get('oauthTTL');
+    const ttl = issued + (+(cache.get(settingsKeys.TTL_VALUE) as number) * 60);
     const options = { expiresIn: `${ttl}` }
 
     // tslint:disable-next-line: variable-name
@@ -23,8 +25,8 @@ export function refresh(token: string) {
     delete payload.nbf;
 
     const issued = getCurrDateSeconds();
-    const ttl = issued + config.get('oauthTTL');
-    const options = { expiresIn: `900000` };
+    const ttl = issued + (+(cache.get(settingsKeys.TTL_VALUE) as number) * 60);
+    const options = { expiresIn: `${ttl}` };
 
     return jwt.sign({ payload }, `${config.get('oauthSalt')}`, options);
 };

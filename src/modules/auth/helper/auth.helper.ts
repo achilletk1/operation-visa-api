@@ -16,29 +16,48 @@ const {
 } = UserCategory;
 
 export const getUserProfile = (user: User): Profile | null => {
-    if (isEmpty(user)) return null;    
+    if (isEmpty(user)) return null;
     user.category = user?.category ?? CONTROLLER;
-    if (user?.category === SUPER_ADMIN) return 'superAdmin';
-    if (user?.category >= ADMIN && user?.category < SUPER_ADMIN) return 'administrator';
-    if (user?.category === PARAMETER) return 'parameter';
-    if (user?.category === SUPPORT) return 'support';
-    if (user?.category === MANAGEMENT_COMMITTEE) return 'managementCommittee';
-    if (user?.category === HEAD_OF_REGION) return 'headOfRegion';
-    if (user?.category === SCRC_DEPARTMENT_HEAD) return 'scrcDepartmentHead';
-    if (user?.category === HEAD_OF_PERSONNEL_AGENCY) return 'headOfPersonnelAgency';
-    if (user?.category === AGENCY_HEAD) return 'agencyHead';
-    if (user?.category === SCRC_STUDY_MANAGEMENT) return 'scrcStudyManager';
-    if (user?.category === PERSONNEL_MANAGER) return 'personnelManager';
-    if (user?.category === ACCOUNT_MANAGER) return 'accountManager';
-    if (user?.category === AUDITOR) return 'auditor';
-    if (user?.category === CONTROLLER) return 'controller';
-    if (user?.category === ENTERPRISE) return 'enterprise';
-    if (user?.category === DEFAULT) return 'default';
 
-    return null;
+    if (user?.category >= ADMIN && user?.category < SUPER_ADMIN) return 'administrator';
+
+    switch (user?.category) {
+        case SUPER_ADMIN:
+            return 'superAdmin';
+        case PARAMETER:
+            return 'parameter';
+        case SUPPORT:
+            return 'support';
+        case MANAGEMENT_COMMITTEE:
+            return 'managementCommittee';
+        case HEAD_OF_REGION:
+            return 'headOfRegion';
+        case SCRC_DEPARTMENT_HEAD:
+            return 'scrcDepartmentHead';
+        case HEAD_OF_PERSONNEL_AGENCY:
+            return 'headOfPersonnelAgency';
+        case AGENCY_HEAD:
+            return 'agencyHead';
+        case SCRC_STUDY_MANAGEMENT:
+            return 'scrcStudyManager';
+        case PERSONNEL_MANAGER:
+            return 'personnelManager';
+        case ACCOUNT_MANAGER:
+            return 'accountManager';
+        case AUDITOR:
+            return 'auditor';
+        case CONTROLLER:
+            return 'controller';
+        case ENTERPRISE:
+            return 'enterprise';
+        case DEFAULT:
+            return 'default';
+        default:
+            return null;
+    }
 }
 
-export const getAuthorizationsByProfile = (profile: Profile): any => {
+export const getAuthorizationsByProfile = (profile: Profile): string[] => {
     const _authorizations = {
         superAdmin: getArrayKey(superAdmin),
         administrator: getArrayKey(administrator),
