@@ -45,8 +45,8 @@ export class SettingsService extends CrudService<Setting> {
     }
 
     private async setAuthTTL() {
-        const settingTTL = (await this.findOne({ filter: { key: settingsKeys.TTL_VALUE } }))?.data;
-        cache.set(settingsKeys.TTL_VALUE, settingTTL);
+        const settingTTL = (await this.baseRepository.findOne({ filter: { key: settingsKeys.TTL_VALUE } })) as unknown as Setting;
+        cache.set(settingsKeys.TTL_VALUE, settingTTL?.data);
     }
 
 }
