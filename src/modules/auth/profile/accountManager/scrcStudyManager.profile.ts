@@ -4,12 +4,14 @@ import {
     FormalNoticeSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsWrite, CartTypeSettingAuthorizationsRead, CartTypeSettingAuthorizationsWrite, LongTravelTypeSettingAuthorizationsRead,
     LongTravelTypeSettingAuthorizationsWrite, OnlinePaymentTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsWrite, CeilingSettingAuthorizationsRead, CeilingSettingAuthorizationsWrite,
     SettingsMenuAuthorizationsRead,
+    PersonnelManagerPermissionRead,
 } from "../../enum";
 import { accountManager } from ".";
 
 const _scrcStudyManager = {
     ...accountManager,
     ...BackUsersAuthorizationsRead,
+    ...PersonnelManagerPermissionRead,
     ...SettingsMenuAuthorizationsRead,
     ...FileImportAuthorizationsRead,
     ...FileImportAuthorizationsWrite,

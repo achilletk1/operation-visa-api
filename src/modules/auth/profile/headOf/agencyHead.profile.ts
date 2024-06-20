@@ -1,6 +1,6 @@
 import {
     BackUsersAuthorizationsRead, CartTypeSettingAuthorizationsRead, CeilingSettingAuthorizationsRead, FormalNoticeSettingAuthorizationsRead,
-    LongTravelTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsRead, SettingsMenuAuthorizationsRead, TemplateSettingAuthorizationsRead,
+    LongTravelTypeSettingAuthorizationsRead, OnlinePaymentTypeSettingAuthorizationsRead, PersonnelManagerPermissionRead, SettingsMenuAuthorizationsRead, TemplateSettingAuthorizationsRead,
     TransactionTypeSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsRead, VouchersSettingAuthorizationsRead, 
 } from "../../enum";
 import { accountManager } from "../accountManager";
@@ -8,6 +8,7 @@ import { accountManager } from "../accountManager";
 const _agencyHead = {
     ...accountManager,
     ...BackUsersAuthorizationsRead,
+    ...PersonnelManagerPermissionRead,
     ...SettingsMenuAuthorizationsRead,
     ...VouchersSettingAuthorizationsRead,
     ...TemplateSettingAuthorizationsRead,

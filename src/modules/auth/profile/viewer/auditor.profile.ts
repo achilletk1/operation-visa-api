@@ -4,6 +4,7 @@ import {
     SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead,
     UsersInDemeureAndBlockMenuAuthorizationsRead,
     UsersInDemeureAndToBlockAuthorizationsRead,
+    PersonnelManagerPermissionRead,
 } from "../../enum";
 import { controller } from ".";
 
@@ -11,6 +12,7 @@ const _auditor = {
     ...controller,
     ...UsersMenuAuthorizationsRead,
     ...BackUsersAuthorizationsRead,
+    ...PersonnelManagerPermissionRead,
     ...SettingsMenuAuthorizationsRead,
     ...GeneralsSettingAuthorizationsRead,
     ...FileImportAuthorizationsRead,
