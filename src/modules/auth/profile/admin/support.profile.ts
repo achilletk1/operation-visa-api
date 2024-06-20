@@ -1,12 +1,13 @@
 import {
     ValidationLevelSettingAuthorizationsRead, ValidationLevelSettingAuthorizationsWrite, ShareAuthorizationsRead,
     BackUsersAuthorizationsRead, BackUsersAuthorizationsWrite, GeneralsSettingAuthorizationsWrite, GeneralsSettingAuthorizationsRead,
-    SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead,
+    SettingsMenuAuthorizationsRead, UsersMenuAuthorizationsRead, PersonnelManagerPermissionRead,
 } from "../../enum";
 
 const _support = {
     ...UsersMenuAuthorizationsRead,
     ...BackUsersAuthorizationsRead,
+    ...PersonnelManagerPermissionRead,
     ...BackUsersAuthorizationsWrite,
     ...SettingsMenuAuthorizationsRead,
     ...GeneralsSettingAuthorizationsRead,
