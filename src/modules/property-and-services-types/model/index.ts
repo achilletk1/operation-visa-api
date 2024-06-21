@@ -1,1 +1,0 @@
-export * from './property-and-services-types.model'; 

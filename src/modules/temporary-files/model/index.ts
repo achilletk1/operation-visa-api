@@ -1,1 +1,0 @@
-export * from './temporay-file.model';
