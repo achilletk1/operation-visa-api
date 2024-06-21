@@ -1,0 +1,119 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Role {
+  createdAt    DateTime      @default(now())
+  description  String?
+  id           String        @id @default(cuid())
+  nom          String?
+  updatedAt    DateTime      @updatedAt
+  utilisateurs Utilisateur[]
+}
+
+model Utilisateur {
+  createdAt            DateTime              @default(now())
+  email                String?
+  id                   String                @id @default(cuid())
+  moisPaiementEnLignes MoisPaiementEnLigne[]
+  motDePasse           String?
+  nom                  String?
+  operations           Operation[]
+  prenom               String?
+  role                 Role?                 @relation(fields: [roleId], references: [id])
+  roleId               String?
+  updatedAt            DateTime              @updatedAt
+  voyages              Voyage[]
+}
+
+model Categorie {
+  createdAt     DateTime      @default(now())
+  description   String?
+  id            String        @id @default(cuid())
+  nom           String?
+  operations    Operation[]
+  pieceJointes  PieceJointe[]
+  piecesJointes String?
+  updatedAt     DateTime      @updatedAt
+}
+
+model Operation {
+  categorie             Categorie?              @relation(fields: [categorieId], references: [id])
+  categorieId           String?
+  createdAt             DateTime                @default(now())
+  date                  DateTime?
+  id                    String                  @id @default(cuid())
+  moisPaiementEnLigne   MoisPaiementEnLigne?    @relation(fields: [moisPaiementEnLigneId], references: [id])
+  moisPaiementEnLigneId String?
+  montant               Float?
+  typeField             EnumOperationTypeField?
+  updatedAt             DateTime                @updatedAt
+  utilisateur           Utilisateur?            @relation(fields: [utilisateurId], references: [id])
+  utilisateurId         String?
+  voyage                Voyage?                 @relation(fields: [voyageId], references: [id])
+  voyageId              String?
+}
+
+model TypePieceJointe {
+  createdAt      DateTime      @default(now())
+  estObligatoire Boolean?
+  id             String        @id @default(cuid())
+  nom            String?
+  pieceJointes   PieceJointe[]
+  updatedAt      DateTime      @updatedAt
+}
+
+model PieceJointe {
+  categorie         Categorie?       @relation(fields: [categorieId], references: [id])
+  categorieId       String?
+  createdAt         DateTime         @default(now())
+  id                String           @id @default(cuid())
+  nomFichier        String?
+  typePieceJointe   TypePieceJointe? @relation(fields: [typePieceJointeId], references: [id])
+  typePieceJointeId String?
+  updatedAt         DateTime         @updatedAt
+  url               String?
+}
+
+model User {
+  createdAt DateTime @default(now())
+  email     String?  @unique
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model MoisPaiementEnLigne {
+  createdAt     DateTime     @default(now())
+  id            String       @id @default(cuid())
+  mois          DateTime?
+  montantTotal  Float?
+  operations    Operation[]
+  updatedAt     DateTime     @updatedAt
+  utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
+  utilisateurId String?
+}
+
+model Voyage {
+  createdAt     DateTime     @default(now())
+  dateDepart    DateTime?
+  dateRetour    DateTime?
+  id            String       @id @default(cuid())
+  operations    Operation[]
+  updatedAt     DateTime     @updatedAt
+  utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
+  utilisateurId String?
+}
+
+enum EnumOperationTypeField {
+  Option1
+}
