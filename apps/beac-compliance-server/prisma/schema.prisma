@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DB_URL")
 }
 
@@ -10,7 +10,7 @@ generator client {
 model Role {
   createdAt    DateTime      @default(now())
   description  String?
-  id           String        @id @default(cuid())
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
   nom          String?
   updatedAt    DateTime      @updatedAt
   utilisateurs Utilisateur[]
@@ -19,14 +19,14 @@ model Role {
 model Utilisateur {
   createdAt            DateTime              @default(now())
   email                String?
-  id                   String                @id @default(cuid())
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
   moisPaiementEnLignes MoisPaiementEnLigne[]
   motDePasse           String?
   nom                  String?
   operations           Operation[]
   prenom               String?
   role                 Role?                 @relation(fields: [roleId], references: [id])
-  roleId               String?
+  roleId               String?               @db.ObjectId
   updatedAt            DateTime              @updatedAt
   voyages              Voyage[]
 }
@@ -34,7 +34,7 @@ model Utilisateur {
 model Categorie {
   createdAt     DateTime      @default(now())
   description   String?
-  id            String        @id @default(cuid())
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
   nom           String?
   operations    Operation[]
   pieceJointes  PieceJointe[]
@@ -44,25 +44,25 @@ model Categorie {
 
 model Operation {
   categorie             Categorie?              @relation(fields: [categorieId], references: [id])
-  categorieId           String?
+  categorieId           String?                 @db.ObjectId
   createdAt             DateTime                @default(now())
   date                  DateTime?
-  id                    String                  @id @default(cuid())
+  id                    String                  @id @default(auto()) @map("_id") @db.ObjectId
   moisPaiementEnLigne   MoisPaiementEnLigne?    @relation(fields: [moisPaiementEnLigneId], references: [id])
-  moisPaiementEnLigneId String?
+  moisPaiementEnLigneId String?                 @db.ObjectId
   montant               Float?
   typeField             EnumOperationTypeField?
   updatedAt             DateTime                @updatedAt
   utilisateur           Utilisateur?            @relation(fields: [utilisateurId], references: [id])
-  utilisateurId         String?
+  utilisateurId         String?                 @db.ObjectId
   voyage                Voyage?                 @relation(fields: [voyageId], references: [id])
-  voyageId              String?
+  voyageId              String?                 @db.ObjectId
 }
 
 model TypePieceJointe {
   createdAt      DateTime      @default(now())
   estObligatoire Boolean?
-  id             String        @id @default(cuid())
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
   nom            String?
   pieceJointes   PieceJointe[]
   updatedAt      DateTime      @updatedAt
@@ -70,12 +70,12 @@ model TypePieceJointe {
 
 model PieceJointe {
   categorie         Categorie?       @relation(fields: [categorieId], references: [id])
-  categorieId       String?
+  categorieId       String?          @db.ObjectId
   createdAt         DateTime         @default(now())
-  id                String           @id @default(cuid())
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
   nomFichier        String?
   typePieceJointe   TypePieceJointe? @relation(fields: [typePieceJointeId], references: [id])
-  typePieceJointeId String?
+  typePieceJointeId String?          @db.ObjectId
   updatedAt         DateTime         @updatedAt
   url               String?
 }
@@ -84,7 +84,7 @@ model User {
   createdAt DateTime @default(now())
   email     String?  @unique
   firstName String?
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   lastName  String?
   password  String
   roles     Json
@@ -94,24 +94,24 @@ model User {
 
 model MoisPaiementEnLigne {
   createdAt     DateTime     @default(now())
-  id            String       @id @default(cuid())
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
   mois          DateTime?
   montantTotal  Float?
   operations    Operation[]
   updatedAt     DateTime     @updatedAt
   utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
-  utilisateurId String?
+  utilisateurId String?      @db.ObjectId
 }
 
 model Voyage {
   createdAt     DateTime     @default(now())
   dateDepart    DateTime?
   dateRetour    DateTime?
-  id            String       @id @default(cuid())
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
   operations    Operation[]
   updatedAt     DateTime     @updatedAt
   utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
-  utilisateurId String?
+  utilisateurId String?      @db.ObjectId
 }
 
 enum EnumOperationTypeField {
