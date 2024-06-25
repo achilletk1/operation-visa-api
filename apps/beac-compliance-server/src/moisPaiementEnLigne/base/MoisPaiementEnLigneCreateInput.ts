@@ -11,7 +11,14 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsOptional, IsNumber, ValidateNested } from "class-validator";
+import {
+  IsDate,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+  ValidateNested,
+} from "class-validator";
 import { Type } from "class-transformer";
 import { OperationCreateNestedManyWithoutMoisPaiementEnLignesInput } from "./OperationCreateNestedManyWithoutMoisPaiementEnLignesInput";
 import { UtilisateurWhereUniqueInput } from "../../utilisateur/base/UtilisateurWhereUniqueInput";
@@ -34,6 +41,8 @@ class MoisPaiementEnLigneCreateInput {
     type: Number,
   })
   @IsNumber()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,

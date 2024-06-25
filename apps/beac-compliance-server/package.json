@@ -11,12 +11,14 @@
     "db:migrate-save": "prisma migrate dev",
     "db:migrate-up": "prisma migrate deploy",
     "db:clean": "prisma migrate reset",
-    "db:init": "run-s \"db:migrate-save -- --name 'initial version'\" db:migrate-up seed",
+    "db:init": "run-s seed",
     "prisma:generate": "prisma generate",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
     "package:container": "docker build .",
     "compose:up": "docker-compose up -d",
-    "compose:down": "docker-compose down --volumes"
+    "compose:down": "docker-compose down --volumes",
+    "prisma:pull": "prisma db pull",
+    "prisma:push": " prisma db push"
   },
   "dependencies": {
     "@apollo/server": "^4.9.4",
@@ -69,6 +71,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "moduleNameMapper": {
+      "@app/custom-validators": "<rootDir>/src/validators"
+    },
     "modulePathIgnorePatterns": ["<rootDir>/dist/"]
   }
 }

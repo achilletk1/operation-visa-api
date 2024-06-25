@@ -15,6 +15,7 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
 } from "class-validator";
 import { PieceJointeCreateNestedManyWithoutTypePieceJointesInput } from "./PieceJointeCreateNestedManyWithoutTypePieceJointesInput";
@@ -38,6 +39,7 @@ class TypePieceJointeCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
