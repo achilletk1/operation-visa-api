@@ -16,6 +16,8 @@ import {
   IsString,
   IsOptional,
   IsNumber,
+  Min,
+  Max,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
@@ -56,6 +58,8 @@ class MoisPaiementEnLigne {
     type: Number,
   })
   @IsNumber()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,

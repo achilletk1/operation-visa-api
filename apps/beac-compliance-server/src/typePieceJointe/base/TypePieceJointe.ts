@@ -16,6 +16,7 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
@@ -55,6 +56,7 @@ class TypePieceJointe {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,

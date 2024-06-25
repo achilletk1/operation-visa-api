@@ -11,7 +11,12 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, ValidateNested } from "class-validator";
+import {
+  IsString,
+  IsOptional,
+  ValidateNested,
+  MaxLength,
+} from "class-validator";
 import { MoisPaiementEnLigneCreateNestedManyWithoutUtilisateursInput } from "./MoisPaiementEnLigneCreateNestedManyWithoutUtilisateursInput";
 import { Type } from "class-transformer";
 import { OperationCreateNestedManyWithoutUtilisateursInput } from "./OperationCreateNestedManyWithoutUtilisateursInput";
@@ -48,6 +53,7 @@ class UtilisateurCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -59,6 +65,7 @@ class UtilisateurCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -82,6 +89,7 @@ class UtilisateurCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,

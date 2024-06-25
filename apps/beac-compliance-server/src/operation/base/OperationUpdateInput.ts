@@ -17,6 +17,8 @@ import {
   IsOptional,
   IsDate,
   IsNumber,
+  Min,
+  Max,
   IsEnum,
 } from "class-validator";
 import { Type } from "class-transformer";
@@ -67,6 +69,8 @@ class OperationUpdateInput {
     type: Number,
   })
   @IsNumber()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,

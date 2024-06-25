@@ -8,6 +8,7 @@ import { PieceJointeModule } from "./pieceJointe/pieceJointe.module";
 import { UserModule } from "./user/user.module";
 import { MoisPaiementEnLigneModule } from "./moisPaiementEnLigne/moisPaiementEnLigne.module";
 import { VoyageModule } from "./voyage/voyage.module";
+import { DocumentationModule } from "./Documentation/documentation.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { SecretsManagerModule } from "./providers/secrets/secretsManager.module";
@@ -34,6 +35,7 @@ import { AuthModule } from "./auth/auth.module";
     UserModule,
     MoisPaiementEnLigneModule,
     VoyageModule,
+    DocumentationModule,
     HealthModule,
     PrismaModule,
     SecretsManagerModule,

@@ -15,6 +15,7 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
 } from "class-validator";
 import { PieceJointeUpdateManyWithoutTypePieceJointesInput } from "./PieceJointeUpdateManyWithoutTypePieceJointesInput";
@@ -38,6 +39,7 @@ class TypePieceJointeUpdateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
